@@ -1086,7 +1086,7 @@ class Ui_MainWindow(object):
         self.menuHelp.setTitle(_translate("MainWindow", "Help"))
         self.label_6.setText(_translate("MainWindow", "Total Jobs:"))
         self.label_7.setText(_translate("MainWindow", "Setup:"))
-        self.label_11.setText(_translate("MainWindow", "Solution Founded:"))
+        self.label_11.setText(_translate("MainWindow", "Solution Found:"))
         self.label_10.setText(_translate("MainWindow", "Runtime:"))
         self.label_23.setText(_translate("MainWindow", "Cost saving over 1º Solution:"))
         self.label_22.setText(_translate("MainWindow", "Iterations:"))
