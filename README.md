@@ -15,11 +15,11 @@ This Metaheuristic was developed using [Anaconda](https://www.continuum.io/downl
 
 The versions used were:
 
-Python 3.6.2
-matplotlib v2.1.0
-numpy v1.13.3
-pandas v0.21.0
-PyQt5 v5.9.1
+* Python 3.6.2
+* matplotlib v2.1.0
+* numpy v1.13.3
+* pandas v0.21.0
+* PyQt5 v5.9.1
 
 
 ## Instalation
