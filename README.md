@@ -30,7 +30,7 @@ Download and install Python v3.6 or above at [www.python.org.](www.python.org)
 
 If you are using [Anaconda](https://www.anaconda.com/download/) then you can install all required Python packages by running the following commands in a shell:
 
-    conda create --name tf python=3
+    conda create --name ig python=3
     pip install -r requirements.txt
     
 You can run the program by entering:
