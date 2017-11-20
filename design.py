@@ -979,8 +979,8 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "Metaheuristic Iterated Greed for Manufacturing Schedule Problem"))
-        self.groupBox_2.setTitle(_translate("MainWindow", "Histograms -  Axis Y = Jobs     "))
-        self.groupBox_8.setTitle(_translate("MainWindow", "Gap Benchmarks"))
+        self.groupBox_2.setTitle(_translate("MainWindow", "Histograms   "))
+        self.groupBox_8.setTitle(_translate("MainWindow", "Gap Results based on Thevenin\'s Benchmark"))
         self.textBrowser.setHtml(_translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
