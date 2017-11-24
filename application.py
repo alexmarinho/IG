@@ -65,7 +65,7 @@ def change_graphic_instance():
     ax.set_title('Start Min')
     ax.hist(db.j_pandas['START_MIN'])
     ax = figure_instance.add_subplot(322)
-    
+
     ax.set_title('Due Time')
     ax.hist(db.j_pandas['DUE_TIME'])
     ax = figure_instance.add_subplot(323)
@@ -73,15 +73,15 @@ def change_graphic_instance():
     ax.set_title('Processing Time')
     ax.hist(db.j_pandas['PROCESSING_TIME'])
     ax = figure_instance.add_subplot(324)
-    
+
     ax.set_title('Unperformed Cost')
     ax.hist(db.j_pandas['UNPERFORMED_COST'])
     ax = figure_instance.add_subplot(325)
-    
+
     ax.set_title('Mode Cost')
     ax.hist(db.j_pandas['MODE_COST'])
     ax = figure_instance.add_subplot(326)
-    
+
     ax.set_title('Tardiness Variable Cost')
     ax.hist(db.j_pandas['TARDINESS_VARIABLE_COST'])
 
@@ -292,6 +292,11 @@ def open_home(self):
     if not QtGui.QDesktopServices.openUrl(url):
         QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
 
+def open_wiki(self):
+    url = QtCore.QUrl('https://github.com/alexmarinho/IG/wiki')
+    if not QtGui.QDesktopServices.openUrl(url):
+        QtGui.QMessageBox.warning(self, 'Open Url', 'Could not open url')
+
 
 def open_feedback(self):
     url = QtCore.QUrl('https://github.com/alexmarinho/IG/issues')
@@ -351,6 +356,7 @@ if __name__ == "__main__":
     ui.radioButton_triangular.clicked.connect(triangular_clicked)
     ui.tableView_performance.doubleClicked.connect(performance_click)
     ui.actionIG_Project.triggered.connect(open_home)
+    ui.actionIG_Wiki.triggered.connect(open_wiki)
     ui.actionBugs_Feedback.triggered.connect(open_feedback)
     ui.actionAbout.triggered.connect(about)
     # lambda works to call function directly w/out creating separate function

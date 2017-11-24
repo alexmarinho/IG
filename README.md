@@ -15,7 +15,7 @@ The versions used were:
 * pandas v0.21.0
 * PyQt5 v5.9.1
 
-## Instalation
+## Installation
 
 Download and install Python v3.6 or above at [www.python.org.](www.python.org)
 

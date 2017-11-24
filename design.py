@@ -951,8 +951,11 @@ class Ui_MainWindow(object):
         self.actionIG_Project.setObjectName("actionIG_Project")
         self.actionBugs_Feedback = QtWidgets.QAction(MainWindow)
         self.actionBugs_Feedback.setObjectName("actionBugs_Feedback")
+        self.actionIG_Wiki = QtWidgets.QAction(MainWindow)
+        self.actionIG_Wiki.setObjectName("actionIG_Wiki")
         self.menuFile.addAction(self.actionExit)
         self.menuHelp.addAction(self.actionIG_Project)
+        self.menuHelp.addAction(self.actionIG_Wiki)
         self.menuHelp.addAction(self.actionBugs_Feedback)
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionAbout)
@@ -960,7 +963,7 @@ class Ui_MainWindow(object):
         self.menubar.addAction(self.menuHelp.menuAction())
 
         self.retranslateUi(MainWindow)
-        self.tabWidget_master.setCurrentIndex(0)
+        self.tabWidget_master.setCurrentIndex(2)
         self.tabWidget_instance.setCurrentIndex(0)
         self.tabWidget_results.setCurrentIndex(0)
         self.tabWidget_algorithm.setCurrentIndex(0)
@@ -1069,11 +1072,6 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"https://www.researchgate.net/publication/281228499_Towards_an_industrial_Manufacturing_Scheduling_Problem_and_Test_Bed\"><span style=\" font-size:8pt; text-decoration: underline; color:#0000ff;\">About MascLib instances (2004)</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"http://www.sciencedirect.com/science/article/pii/S0377221706008277\"><span style=\" font-size:8pt; text-decoration: underline; color:#0000ff;\">First Iterated Greedy algorithm proposed by Ruiz and Stützle (2005)</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"https://link.springer.com/article/10.1007/s10951-014-0395-8\"><span style=\" font-size:8pt; text-decoration: underline; color:#0000ff;\">Benchmark for MascLib  Thevenin, Zufferey, Widmer (2015)</span></a></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-weight:600;\">Free knowledge for ALL!</span></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><a href=\"http://sci-hub.io\"><span style=\" font-size:8pt; text-decoration: underline; color:#0000ff;\">Sci-hub</span></a></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.tabWidget_algorithm.setTabText(self.tabWidget_algorithm.indexOf(self.tab_a_executions), _translate("MainWindow", "Description"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Iterated Greedy"))
@@ -1120,7 +1118,8 @@ class Ui_MainWindow(object):
         self.actionExit.setText(_translate("MainWindow", "Exit"))
         self.actionAbout.setText(_translate("MainWindow", "About..."))
         self.actionIG_Project.setText(_translate("MainWindow", "IG Project"))
-        self.actionBugs_Feedback.setText(_translate("MainWindow", "Bugs & Feedback"))
+        self.actionBugs_Feedback.setText(_translate("MainWindow", "Bugs and Feedback"))
+        self.actionIG_Wiki.setText(_translate("MainWindow", "IG Wiki"))
 
 
 if __name__ == "__main__":
