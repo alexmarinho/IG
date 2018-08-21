@@ -42,7 +42,6 @@ def load_regex(csv):
     db.parameters['_total_families'] = int(len(matrix) ** 0.5)
     db.parameters['_end_max'] = int(mode[0][10])
 
-
     # Create Jobs Objects
     for instances in range(db.parameters['_total_jobs']):
         db.j.append(db.Jobs(int(activity[instances][2]),        # Setup Family
