@@ -4,7 +4,6 @@ import collections
 import pandas as pd
 from PyQt5 import QtCore
 
-
 def init():
     """Function to initialize all variables"""
 
