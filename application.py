@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from design import Ui_MainWindow
 from PyQt5 import QtWidgets, QtGui, QtCore
 from os import path
