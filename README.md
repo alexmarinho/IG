@@ -2,7 +2,6 @@
 
 All details of how the algorithm works are explained in the [wiki.](https://github.com/alexmarinho/IG/wiki)
 
-
 ### Requirements
 
 This Metaheuristic was developed using [Anaconda](https://www.continuum.io/downloads) but it should also work with other Python installations as long as you have NumPy, Pandas, MatPlotLib and PyQt5 installed.
