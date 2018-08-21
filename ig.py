@@ -9,7 +9,6 @@ import pandas as pd
 from functools import wraps
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 def timer(f):
     """Decorator to count the executions and runtime of the functions"""
     @wraps(f)  # Used to allow the app access the __doc__ of decorated functions
