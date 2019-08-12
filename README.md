@@ -29,5 +29,5 @@ You can run the program by entering:
 
 ## IG Excel Version
 
-The same algorithm was developed using Visual Basic in Microsoft Excel 32 bits, with superior performance.
+The same algorithm was developed using Visual Basic in Windows Microsoft Excel, with superior performance.
 To run it, just execute the file /IG EXCEL/IG.xlsm and enable the macros.
