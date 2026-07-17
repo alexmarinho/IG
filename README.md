@@ -2,6 +2,12 @@
 
 All details of how the algorithm works are explained in the [wiki.](https://github.com/alexmarinho/IG/wiki)
 
+## Live demo
+
+**▶ <https://alexmarinho.github.io/IG/>** — the algorithm running live in your browser: an animated playground (including the original MaScLib benchmark instances), a real-time race against the other heuristics from the 2015 comparison, and an explorer of the thesis results. A single self-contained page, no install needed.
+
+> This repository is preserved as hand-written in 2015–2017; the demo page above is its only modern addition.
+
 ### Requirements
 
 This Metaheuristic was developed using [Anaconda](https://www.continuum.io/downloads) but it should also work with other Python installations as long as you have NumPy, Pandas, MatPlotLib and PyQt5 installed.
