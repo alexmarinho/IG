@@ -393,15 +393,19 @@ footer code{font-family:var(--mono);color:var(--maple)}
   nav.anchor-nav a[href="#demo-race"], nav.anchor-nav a[href="#demo-lab"],
   nav.anchor-nav a[href="#tools"], nav.anchor-nav a[href="#stack"] { display: none !important; }
   .site-head .badge { display: none; }
-  /* Embedded in the page's STORY tab — hide the standalone header/nav, blend in */
-  .site-head { display: none !important; }
-  main { padding-top: 4px; padding-bottom: 8px; }
   /* Hero intro block */
   .ig-hero { max-width: 1120px; margin: 0 auto; padding: 40px 20px 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
   .ig-hero h2 { font: 600 clamp(30px, 3.4vw, 46px)/1.08 var(--serif); letter-spacing: .2px; max-width: 20ch; margin-bottom: 16px; }
   .ig-hero h2 em { font-style: normal; color: var(--terra); }
   .ig-hero .bridge { max-width: 60ch; font: italic 400 clamp(17px,1.6vw,21px)/1.5 var(--serif); color: var(--ink); margin-bottom: 6px; }
+  /* Collapsible "exact numbers" — keeps the opening intuitive, not technical */
+  .data-fold { margin: 4px 0 16px; }
+  .data-fold > summary { cursor: pointer; font: 600 12px/1 var(--sans); letter-spacing: .04em; color: var(--terra); padding: 7px 0; list-style: none; display: inline-block; }
+  .data-fold > summary::-webkit-details-marker { display: none; }
+  .data-fold > summary::before { content: "▸\00a0"; color: var(--ink-soft); }
+  .data-fold[open] > summary::before { content: "▾\00a0"; }
+  .data-fold table { margin-top: 8px; }
 </style>
 </head>
 <body>
@@ -418,11 +422,11 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <nav class="anchor-nav" aria-label="Sections">
     <ul id="navList">
       <li><a href="#concepts">The 9 concepts</a></li>
-      <li><a href="#demo-order">1 · Order &amp; cost</a></li>
-      <li><a href="#demo-factorial">2 · Factorial explosion</a></li>
-      <li><a href="#demo-ig">3 · The IG loop</a></li>
-      <li><a href="#demo-race">4 · Algorithm race</a></li>
-      <li><a href="#demo-lab">5 · Technique lab</a></li>
+      <li><a href="#" class="active">Story</a></li>
+      <li><a href="#">Compare</a></li>
+      <li><a href="#">Run</a></li>
+      <li><a href="#">Method</a></li>
+      <li><a href="#">Future</a></li>
       <li><a href="#tools">Tool matrix</a></li>
       <li><a href="#stack">Recommended stack</a></li>
     </ul>
@@ -450,18 +454,20 @@ footer code{font-family:var(--mono);color:var(--maple)}
      2 · Live demo 1 — Order changes time. Time changes cost.
      ============================================================ -->
 <section class="section" id="demo-order">
-  <p class="kicker"><span class="fig">Fig. 01 / order</span></p>
-  <h2 class="section-title"><span class="no">§2</span>Live demo 1 — “Order changes time. Time changes cost.”</h2>
-  <p class="lede">The same five jobs in two different orders, scored exactly. Every change of sequence
-  re-draws the timelines: <b>hatched</b> is the machine waiting for a release date, <b>orange</b> is a
-  sequence-dependent setup, <b>red</b> is weighted tardiness past a due date. Then let the machine
-  answer the obvious question: how good are these two orders, out of all 120?</p>
+  <p class="kicker"><span class="fig">See it for yourself</span></p>
+  <h2 class="section-title">The same five jobs, two orders — and two very different bills.</h2>
+  <p class="lede">Send five jobs through one machine in one order, then another. The machine prices each
+  order exactly — the waiting, the changeovers between families and the penalty for finishing late all
+  fold into a single number. <b>Shuffle either order and watch the total move.</b></p>
 
-  <table class="data" aria-label="Demo dataset">
-    <caption>Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)</caption>
-    <thead><tr><th>Job</th><th>Family</th><th>Release r</th><th>Processing p</th><th>Due d</th><th>Weight w</th></tr></thead>
-    <tbody id="d1data"></tbody>
-  </table>
+  <details class="data-fold">
+    <summary>The exact numbers behind these jobs</summary>
+    <table class="data" aria-label="Demo dataset">
+      <caption>Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)</caption>
+      <thead><tr><th>Job</th><th>Family</th><th>Release r</th><th>Processing p</th><th>Due d</th><th>Weight w</th></tr></thead>
+      <tbody id="d1data"></tbody>
+    </table>
+  </details>
 
   <figure class="demo" id="d1figure">
     <figcaption class="fig-cap">
@@ -517,12 +523,12 @@ footer code{font-family:var(--mono);color:var(--maple)}
      3 · Live demo 2 — Factorial explosion
      ============================================================ -->
 <section class="section" id="demo-factorial">
-  <p class="kicker"><span class="fig">Fig. 02 / explosion</span></p>
-  <h2 class="section-title"><span class="no">§3</span>Live demo 2 — Factorial explosion</h2>
-  <p class="lede">Why not just try every order? Drag <b>n</b>. Complete orders grow as <b>n!</b>;
-  counting every ordered subset with the rest rejected multiplies that by roughly <b>e</b>
-  (Σ<sub>k</sub> n!/(n−k)! ≈ ⌊e·n!⌋). Even at one <i>billion</i> evaluated plans per second,
-  enumeration dies long before the 28-job instance.</p>
+  <p class="kicker"><span class="fig">The catch</span></p>
+  <h2 class="section-title">So why not just try every order?</h2>
+  <p class="lede">Because there are too many. Drag the number of jobs and watch the count of possible
+  orders run away from you: even at a <i>billion</i> plans checked every second, trying them all
+  outlasts the age of the universe long before you reach a real 28-job problem. That is why you have
+  to guess — and guess well.</p>
 
   <figure class="demo">
     <figcaption class="fig-cap">
