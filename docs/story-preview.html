@@ -696,6 +696,30 @@ footer code{font-family:var(--mono);color:var(--maple)}
   </figure>
 </section>
 
+<section class="section" id="demo-benchmark">
+  <p class="kicker"><span class="fig">From one race to the whole benchmark</span></p>
+  <h2 class="section-title">The race builds intuition. The recorded benchmark is the proof.</h2>
+  <p class="lede">The race above runs on a single seeded instance, live in your browser. The real test is the
+  standard <b>MaScLib</b> benchmark — 44 instances from the 2015 study, each with a published best-known cost.
+  Scored against every one of them, the modern engine holds up:</p>
+
+  <div class="fact-grid">
+    <div class="fact hot"><div class="lbl">Best-known values matched or beaten</div><div class="val">39 <small>/ 44 instances</small></div></div>
+    <div class="fact"><div class="lbl">Improved below the 2015 record</div><div class="val">2 <small>new best-knowns</small></div></div>
+    <div class="fact"><div class="lbl">Independent correctness checks</div><div class="val">3 <small>verification layers</small></div></div>
+  </div>
+
+  <p class="lede" style="margin-top:16px">Every candidate is priced two ways that must agree to the last unit —
+  an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python one —
+  and the search must reproduce the 2015 best-known values before any result counts. The five remaining gaps are
+  within 0.34%, save one at 2.44%.</p>
+
+  <nav class="m-links" aria-label="Evidence" style="margin-top:14px">
+    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Full results &amp; validation</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 study (PDF)</a>
+  </nav>
+</section>
+
 <section class="movement" id="m-run">
   <div class="movement-head">
     <p class="m-kick">Run · your turn</p>
