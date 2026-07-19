@@ -414,6 +414,12 @@ footer code{font-family:var(--mono);color:var(--maple)}
   .m-links a:hover { background: var(--terra); border-color: var(--terra); color: #fdf8ef; }
   .m-studio { max-width: 1120px; margin: 10px auto 0; padding: 0 20px 44px; }
   .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 1px solid var(--rule); border-radius: 12px; background: #f6f1e8; }
+  /* On phones the Studio is a full app — reclaim the page's side gutters so it
+     isn't squeezed into a narrow column, and give it a touch more height. */
+  @media (max-width: 760px) {
+    .m-studio { margin-left: -20px; margin-right: -20px; padding: 0 8px 30px; }
+    .studio-frame { height: 86vh; min-height: 560px; border-radius: 9px; }
+  }
   /* Hero intro block */
   .ig-hero { max-width: 1120px; margin: 0 auto; padding: 40px 20px 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
@@ -445,7 +451,6 @@ footer code{font-family:var(--mono);color:var(--maple)}
       <li><a href="#m-story" class="active">Story</a></li>
       <li><a href="#m-compare">Compare</a></li>
       <li><a href="#m-run">Run</a></li>
-      <li><a href="#m-method">Method</a></li>
       <li><a href="#m-future">Future</a></li>
     </ul>
   </nav>
@@ -727,21 +732,6 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <p class="m-lede">The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.</p>
   </div>
   <div class="m-studio"><iframe class="studio-frame" src="studio-app.html" title="Interactive Iterated Greedy Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe></div>
-</section>
-
-<section class="movement" id="m-method">
-  <div class="movement-head">
-    <p class="m-kick">Method · how it works</p>
-    <h2 class="m-title">The whole algorithm, in a few lines.</h2>
-    <p class="m-lede">Iterated Greedy is small on purpose: build a plan once, then repeat a destroy-and-rebuild step, keeping the result only when it improves.</p>
-  </div>
-  <div class="m-placeholder"><pre class="m-code">best = construct(instance)          <span class="cmt"># greedy: cheapest-insertion</span>
-while budget remains:
-    candidate = copy(best)
-    remove d random jobs             <span class="cmt"># destroy</span>
-    reinsert each at its cheapest spot
-    if cost(candidate) &lt; cost(best):
-        best = candidate             <span class="cmt"># keep only if it improves</span></pre></div>
 </section>
 
 <section class="movement" id="m-future">
