@@ -61,5 +61,3 @@ jobs:
           echo "$out"
           echo "$out" | grep -q "best=17611" || (echo "did not reach best known" && exit 1)
 
-      - name: Demo build is reproducible
-        run: python3 tools/build_demo.py

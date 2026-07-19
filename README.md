@@ -173,7 +173,6 @@ npm --prefix studio test
 npm --prefix studio run check
 npm --prefix studio run build
 node --test google-sheets/tests/*.test.mjs
-python3 tools/build_demo.py
 ```
 
 Deterministic seeds and equal iteration budgets are used where results are compared. Wall-clock throughput is reported only as environment-specific context.
