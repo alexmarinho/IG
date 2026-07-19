@@ -795,6 +795,15 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <div class="banner" id="raceBanner" role="status"></div>
     <p class="status-line" id="d4status" aria-live="polite"></p>
   </figure>
+
+  <figure class="demo" id="spaceFigure">
+    <figcaption class="fig-cap">
+      <span><span class="fig-no">Fig. 05</span> <span class="fig-name">A sample of the solution space</span></span>
+      <span>higher is cheaper — branches group related orders</span>
+    </figcaption>
+    <canvas class="chart" id="cvSpace" aria-label="Solution-space tree"></canvas>
+    <p class="status-line" id="spaceNote">About 400 schedules are sampled and arranged as a tree: branches group related orders, height means lower cost, and the gold leaf is the best sample. Each arrow is one method's best-so-far — run the race and watch them climb. This samples the space; it does not enumerate it or identify the true optimum.</p>
+  </figure>
 </section>
 
 <section class="section" id="demo-benchmark">
@@ -1200,13 +1209,14 @@ function allIds(n){ var a = []; for(var i = 0; i < n; i++) a.push(i); return a; 
 
 /* --- 1 · Random sampling: random order, ~15% independent rejections --- */
 function makeRandomSampler(inst, rng){
-  var evals = 0, best = Infinity, hist = [];
+  var evals = 0, best = Infinity, hist = [], bestSeq = null;
   return { name:'Random sampling', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    bestSeq:function(){ return bestSeq; },
     nextEval:function(){
       var perm = shuffleRng(rng, allIds(inst.n));
       var seq = perm.filter(function(){ return rng() > 0.15; });
       var c = evaluate(inst, seq).total; evals++;
-      if(c < best){ best = c; hist.push([evals, best]); }
+      if(c < best){ best = c; bestSeq = seq.slice(); hist.push([evals, best]); }
       return true;
     }};
 }
@@ -1214,8 +1224,9 @@ function makeRandomSampler(inst, rng){
 /* --- 2 · Greedy construction only: real trial evaluations, then stops --- */
 function makeGreedyOnly(inst){
   var order = inst.jobs.slice().sort(function(a, b){ return a.due - b.due || a.id - b.id; }).map(function(j){ return j.id; });
-  var seq = [], evals = 0, best = Infinity, hist = [], curJob = 0, pos = 0, base = 0, bCost = Infinity, bPos = -1;
+  var seq = [], evals = 0, best = Infinity, hist = [], curJob = 0, pos = 0, base = 0, bCost = Infinity, bPos = -1, bestSeq = null;
   return { name:'Greedy construction only', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    bestSeq:function(){ return bestSeq; },
     nextEval:function(){
       if(curJob >= order.length) return false;
       var id = order[curJob];
@@ -1226,7 +1237,7 @@ function makeGreedyOnly(inst){
       if(pos > seq.length){
         if(bCost <= base) seq.splice(bPos, 0, id);
         var tot = evaluate(inst, seq).total;
-        if(tot < best){ best = tot; hist.push([evals, best]); }
+        if(tot < best){ best = tot; bestSeq = seq.slice(); hist.push([evals, best]); }
         curJob++; pos = 0;
       }
       return true;
@@ -1247,14 +1258,15 @@ function makeSteepest(inst){
   for(i = 0; i < g.order.length; i++) evals += (i + 1); // …Σ insertion trials = 78
 
   var best = evaluate(inst, seq).total, hist = [[evals, best]];
-  var nbrs = null, bi = -1, bj = -1, bCost = Infinity, curCost = best;
+  var nbrs = null, bi = -1, bj = -1, bCost = Infinity, curCost = best, bestSeq = seq.slice();
   return { name:'Steepest descent (pairwise swap)', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    bestSeq:function(){ return bestSeq; },
     nextEval:function(){
       if(!nbrs){ nbrs = swapPairs(seq.length); bi = -1; bj = -1; bCost = curCost; }
       if(nbrs.length === 0){
         if(bi >= 0){
           var t = seq[bi]; seq[bi] = seq[bj]; seq[bj] = t; curCost = bCost; nbrs = null;
-          if(bCost < best){ best = bCost; hist.push([evals, best]); }
+          if(bCost < best){ best = bCost; bestSeq = seq.slice(); hist.push([evals, best]); }
           return true;
         }
         return false; // local optimum — line goes flat
@@ -1271,9 +1283,10 @@ function makeSteepest(inst){
 function makeIGStrategy(inst, rng, useSwap){
   var seq = constructJobs(inst).seq.slice();
   var evals = 78, best = evaluate(inst, seq).total, hist = [[evals, best]];
-  var phase = 'destroy', victims = [], rest = [], plIdx = 0, curId = -1, pos = 0, base = 0, bCost = Infinity, bPos = -1, swapList = null, swapBase = 0;
+  var phase = 'destroy', victims = [], rest = [], plIdx = 0, curId = -1, pos = 0, base = 0, bCost = Infinity, bPos = -1, swapList = null, swapBase = 0, bestSeq = seq.slice();
   return { name: useSwap ? 'IG + swap-with-rejected' : 'Iterated Greedy',
     evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    bestSeq:function(){ return bestSeq; },
     nextEval:function(){
       for(;;){
         if(phase === 'destroy'){
@@ -1310,7 +1323,7 @@ function makeIGStrategy(inst, rng, useSwap){
         }
         /* decide — strict improvement acceptance */
         var cc = evaluate(inst, rest).total; evals++;
-        if(cc < best){ seq = rest.slice(); best = cc; hist.push([evals, best]); }
+        if(cc < best){ seq = rest.slice(); best = cc; bestSeq = seq.slice(); hist.push([evals, best]); }
         phase = 'destroy';
         return true;
       }
@@ -1319,22 +1332,23 @@ function makeIGStrategy(inst, rng, useSwap){
 
 /* --- 6 · Random-restart steepest descent over all-scheduled permutations --- */
 function makeRandomRestart(inst, rng){
-  var seq = null, evals = 0, best = Infinity, hist = [];
+  var seq = null, evals = 0, best = Infinity, hist = [], bestSeq = null;
   var nbrs = null, bi = -1, bj = -1, bCost = Infinity, curCost = Infinity;
   return { name:'Random-restart descent', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    bestSeq:function(){ return bestSeq; },
     nextEval:function(){
       for(;;){
         if(!seq){
           seq = shuffleRng(rng, allIds(inst.n));
           curCost = evaluate(inst, seq).total; evals++; nbrs = null;
-          if(curCost < best){ best = curCost; hist.push([evals, best]); }
+          if(curCost < best){ best = curCost; bestSeq = seq.slice(); hist.push([evals, best]); }
           return true;
         }
         if(!nbrs){ nbrs = swapPairs(seq.length); bi = -1; bj = -1; bCost = curCost; }
         if(nbrs.length === 0){
           if(bi >= 0){
             var t = seq[bi]; seq[bi] = seq[bj]; seq[bj] = t; curCost = bCost; nbrs = null;
-            if(bCost < best){ best = bCost; hist.push([evals, best]); }
+            if(bCost < best){ best = bCost; bestSeq = seq.slice(); hist.push([evals, best]); }
             return true;
           }
           seq = null; // restart from a fresh permutation
@@ -2372,6 +2386,157 @@ function onWinResize(fn){
   var BUDGET = 3000, RATE = 360; // evaluations per second per strategy
   var COLORS = ['#8a8072', '#c9a148', '#7d94b0', '#b0562f', '#ad7644', '#7a8b6f'];
 
+  /* ---------- solution-space tree ----------
+     Recovered from the 2015 page and re-wired to this engine. A leaf is a complete
+     order priced by evaluate(); a branch is one seed order plus small perturbations
+     of it, so neighbouring leaves really are related schedules. Height = cheaper. */
+  var FS = '-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
+  var spCv = $('#cvSpace');
+  var space = { leaves:[], clusters:[], yLo:0, yHi:1, bestLeaf:null, pre:null, dirty:true, w:0, h:300 };
+
+  function solFeatures(sq){
+    var v = new Float32Array(inst.n), L = Math.max(1, sq.length);
+    for(var k = 0; k < sq.length; k++) v[sq[k]] = k / L;
+    return v;
+  }
+  function vDist(a, b){ var d = 0; for(var i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]); return d; }
+
+  function buildSpace(rng){
+    var SEEDS = 24, KIDS = 16;                    /* ~384 sampled orders */
+    space.leaves = []; space.clusters = [];
+    var put = function(sq, cl, ci){
+      var leaf = { vec:solFeatures(sq), cost:evaluate(inst, sq).total, cluster:ci, x:0, y:0, order:sq.slice() };
+      space.leaves.push(leaf); cl.leaves.push(leaf);
+    };
+    for(var c = 0; c < SEEDS; c++){
+      var seed = shuffleRng(rng, allIds(inst.n)), cluster = { id:c, leaves:[], cx:0 };
+      put(seed, cluster, c);
+      for(var k = 1; k < KIDS; k++){
+        var kid = seed.slice(), nd = 2 + Math.floor(rng() * 4);
+        for(var q = 0; q < nd; q++){
+          var i1 = Math.floor(rng() * kid.length), i2 = Math.floor(rng() * kid.length);
+          var t = kid[i1]; kid[i1] = kid[i2]; kid[i2] = t;
+        }
+        put(kid, cluster, c);
+      }
+      space.clusters.push(cluster);
+    }
+    /* order branches by similarity: project each centroid between the two farthest */
+    var cent = space.clusters.map(function(cl){
+      var m = new Float32Array(inst.n);
+      cl.leaves.forEach(function(lf){ for(var i = 0; i < m.length; i++) m[i] += lf.vec[i] / cl.leaves.length; });
+      return m;
+    });
+    var A = 0, B = 1, maxd = -1, i, j;
+    for(i = 0; i < cent.length; i++) for(j = i + 1; j < cent.length; j++){
+      var dd = vDist(cent[i], cent[j]); if(dd > maxd){ maxd = dd; A = i; B = j; }
+    }
+    space.clusters.forEach(function(cl, k){
+      var da = vDist(cent[k], cent[A]), db = vDist(cent[k], cent[B]);
+      cl.t = da / Math.max(1e-6, da + db);
+    });
+    space.clusters.slice().sort(function(a, b){ return a.t - b.t; })
+      .forEach(function(cl, rank){ cl.rank = rank; });
+    var lo = Infinity, hi = 0;
+    space.leaves.forEach(function(lf){ if(lf.cost < lo) lo = lf.cost; if(lf.cost > hi) hi = lf.cost; });
+    space.yLo = lo; space.yHi = hi;
+    space.bestLeaf = space.leaves.reduce(function(b, l){ return l.cost < b.cost ? l : b; }, space.leaves[0]);
+    space.dirty = true;
+  }
+
+  var CROWN = 30;
+  function spaceY(cost, H){
+    var t = (cost - space.yLo) / Math.max(1, space.yHi - space.yLo);
+    return CROWN + 10 + Math.max(0, Math.min(1.02, t)) * (H - CROWN - 50);
+  }
+  function layoutSpace(W, H){
+    var pad = 24, span = W - pad * 2, n = space.clusters.length;
+    space.clusters.forEach(function(cl){
+      cl.cx = pad + (cl.rank + 0.5) / n * span;
+      var jig = mulberry32(cl.id * 977 + IG_SEED);
+      cl.leaves.forEach(function(lf){
+        lf.x = cl.cx + (jig() - 0.5) * (span / n) * 1.3;
+        lf.y = spaceY(lf.cost, H);
+      });
+    });
+  }
+  function prerenderSpace(W, H){
+    var cv2 = document.createElement('canvas'), dpr = devicePixelRatio || 1;
+    cv2.width = W * dpr; cv2.height = H * dpr;
+    var g = cv2.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var grad = g.createLinearGradient(0, 0, 0, CROWN + 14);
+    grad.addColorStop(0, 'rgba(201,161,72,.22)'); grad.addColorStop(1, 'rgba(201,161,72,0)');
+    g.fillStyle = grad; g.fillRect(0, 0, W, CROWN + 14);
+    g.font = '600 10px ' + FS; g.textBaseline = 'middle'; g.fillStyle = '#9a8f7a';
+    g.fillText(window.__t ? window.__t('above the canopy') : 'above the canopy', 10, 11);
+    var bx = W / 2, by = H - 6, ty = H - 38;
+    g.strokeStyle = '#c8bca4'; g.lineCap = 'round'; g.lineWidth = 5;
+    g.beginPath(); g.moveTo(bx, by); g.lineTo(bx, ty); g.stroke();
+    space.clusters.forEach(function(cl){
+      var my = 0; cl.leaves.forEach(function(lf){ my += lf.y / cl.leaves.length; });
+      g.strokeStyle = '#c8bca4'; g.lineWidth = 1.8;
+      g.beginPath(); g.moveTo(bx, ty); g.quadraticCurveTo(cl.cx, H - 26, cl.cx, my + 18); g.stroke();
+      g.lineWidth = 0.85; g.globalAlpha = 0.55;
+      cl.leaves.forEach(function(lf){
+        g.beginPath(); g.moveTo(cl.cx, my + 18);
+        g.quadraticCurveTo((cl.cx + lf.x) / 2, (my + lf.y) / 2 + 6, lf.x, lf.y); g.stroke();
+      });
+      g.globalAlpha = 0.5; g.fillStyle = '#8a8072';
+      cl.leaves.forEach(function(lf){ g.beginPath(); g.arc(lf.x, lf.y, 2, 0, 7); g.fill(); });
+      g.globalAlpha = 1;
+    });
+    var bl = space.bestLeaf;
+    if(bl){
+      g.fillStyle = '#c9a148'; g.beginPath(); g.arc(bl.x, bl.y, 4.2, 0, 7); g.fill();
+      g.strokeStyle = '#2a2620'; g.lineWidth = 1.2;
+      g.beginPath(); g.arc(bl.x, bl.y, 6.6, 0, 7); g.stroke();
+      g.fillStyle = '#6a6255'; g.font = '600 10px ' + FS;
+      g.fillText((window.__t ? window.__t('best sampled leaf') : 'best sampled leaf') + ' Σ ' + Math.round(bl.cost),
+                 Math.min(bl.x + 10, W - 160), bl.y);
+    }
+    return cv2;
+  }
+  function nearestLeaf(vec){
+    var best = null, bd = Infinity;
+    space.leaves.forEach(function(lf){ var d = vDist(vec, lf.vec); if(d < bd){ bd = d; best = lf; } });
+    return best;
+  }
+  function sizeSpace(){
+    if(!spCv || !spCv.parentElement) return;
+    var dpr = devicePixelRatio || 1, w = Math.max(260, spCv.parentElement.clientWidth - 24);
+    space.w = w; spCv.width = w * dpr; spCv.height = space.h * dpr;
+    spCv.style.width = w + 'px'; spCv.style.height = space.h + 'px';
+    spCv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    space.dirty = true;
+  }
+  function drawSpace(){
+    if(!spCv || !space.leaves.length || !space.w) return;
+    var W = space.w, H = space.h, g = spCv.getContext('2d');
+    if(space.dirty || !space.pre){ layoutSpace(W, H); space.pre = prerenderSpace(W, H); space.dirty = false; }
+    g.clearRect(0, 0, W, H);
+    g.drawImage(space.pre, 0, 0, W, H);
+    var gb = Infinity;
+    race.strats.forEach(function(st){ var b = st.s.best(); if(isFinite(b) && b < gb) gb = b; });
+    if(isFinite(gb)){
+      var y = spaceY(gb, H);
+      g.strokeStyle = '#c9a148'; g.setLineDash([4, 4]); g.lineWidth = 1;
+      g.beginPath(); g.moveTo(8, y); g.lineTo(W - 8, y); g.stroke(); g.setLineDash([]);
+      g.fillStyle = '#2a2620'; g.font = '600 10px ' + FS; g.textBaseline = 'bottom';
+      g.fillText((window.__t ? window.__t('race best') : 'race best') + ' Σ ' + Math.round(gb), Math.max(8, W - 120), y - 3);
+    }
+    g.textBaseline = 'middle';
+    race.strats.forEach(function(st, i){
+      var sq = st.s.bestSeq && st.s.bestSeq(), b = st.s.best();
+      if(!sq || !isFinite(b)) return;
+      var lf = nearestLeaf(solFeatures(sq));
+      var mx = (lf ? lf.x : W / 2) + (i - 2.5) * 4, my = spaceY(b, H);
+      g.fillStyle = st.color;
+      g.beginPath(); g.moveTo(mx, my - 6); g.lineTo(mx - 4.2, my + 3); g.lineTo(mx + 4.2, my + 3);
+      g.closePath(); g.fill();
+      g.strokeStyle = '#fdfaf3'; g.lineWidth = 0.9; g.stroke();
+    });
+  }
+
   function buildStrategies(){
     return [
       { s:makeRandomSampler(inst, mulberry32((IG_SEED ^ 0x11) >>> 0)), color:COLORS[0] },
@@ -2448,6 +2613,7 @@ function onWinResize(fn){
       ctx.fillStyle = st.color;
       ctx.beginPath(); ctx.arc(X(st.s.evals()), Y(last[1]), 2.6, 0, 6.2832); ctx.fill();
     });
+    drawSpace();
   }
 
   function buildLegend(){
@@ -2564,7 +2730,9 @@ function onWinResize(fn){
     }
     if(active) drawRace();
   });
-  onWinResize(function(){ drawRace(); });
+  onWinResize(function(){ sizeSpace(); drawRace(); });
+  sizeSpace();
+  buildSpace(mulberry32((IG_SEED ^ 0xA11CE) >>> 0));
   resetRace();
 })();
 
@@ -2847,7 +3015,7 @@ function onWinResize(fn){
       'uma hora e o Iterated Greedy escrito em Excel VBA, sobre 44 inst\u00e2ncias MaScLib com cinco ' +
       'execu\u00e7\u00f5es cada. Escolha um m\u00e9todo para ver como ele busca \u2014 o diagrama \u00e9 esquem\u00e1tico, nada ' +
       '\u00e9 reexecutado aqui \u2014 e quanto ele pontuou.',
-    "#demo-benchmark .lede:first-of-type":
+    "#demo-benchmark .lede":
       'A corrida acima roda sobre um único problema com seed fixa, ao vivo no seu navegador. O teste ' +
       'de verdade é o benchmark padrão <b>MaScLib</b> — 44 problemas do estudo de 2015, cada um com um ' +
       'melhor-conhecido publicado. Avaliado contra todos eles, o motor moderno se sustenta:'
@@ -3076,6 +3244,9 @@ function onWinResize(fn){
     "Engineering ledger": "Registro de engenharia",
     "Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.": "Benchmarks, verificações exatas, comandos reproduzíveis, resultados mistos e o limite atual de cada implementação.",
     "Read results": "Ler resultados",
+    "A sample of the solution space": "Uma amostra do espa\u00e7o de solu\u00e7\u00f5es",
+    "higher is cheaper \u2014 branches group related orders": "mais alto \u00e9 mais barato \u2014 os galhos agrupam ordens parecidas",
+    "About 400 schedules are sampled and arranged as a tree: branches group related orders, height means lower cost, and the gold leaf is the best sample. Each arrow is one method's best-so-far \u2014 run the race and watch them climb. This samples the space; it does not enumerate it or identify the true optimum.": "Cerca de 400 programa\u00e7\u00f5es s\u00e3o amostradas e organizadas como uma \u00e1rvore: os galhos agrupam ordens parecidas, a altura representa menor custo e a folha dourada \u00e9 a melhor amostra. Cada seta \u00e9 o melhor-at\u00e9-agora de um m\u00e9todo \u2014 rode a corrida e veja-as subir. Isto amostra o espa\u00e7o; n\u00e3o o enumera nem identifica o \u00f3timo verdadeiro.",
     "Meet the methods": "Conheça os métodos",
     "Eight ways to search — and how each one actually scored.": "Oito formas de buscar — e quanto cada uma realmente pontuou.",
     "Relative error against the recorded best known (%)": "Erro relativo em relação ao melhor conhecido registrado (%)",
@@ -3132,7 +3303,10 @@ function onWinResize(fn){
     "With setups \u2014 14 STC instances": "Com setups \u2014 14 inst\u00e2ncias STC",
     "No setups (NCOS)": "Sem setups (NCOS)",
     "With setups (STC)": "Com setups (STC)",
-    "jobs": "tarefas"
+    "jobs": "tarefas",
+    "above the canopy": "acima da copa \u2014 melhor que toda amostra",
+    "best sampled leaf": "melhor folha amostrada",
+    "race best": "melhor da corrida"
   };
   window.__t = function (k) { return (window.__lang === "pt" && DYN_PT[k]) || k; };
   try { window.__lang = localStorage.getItem("ig-lang") === "pt" ? "pt" : "en"; }
