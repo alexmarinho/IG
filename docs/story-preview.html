@@ -150,7 +150,10 @@ button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
 .chip.ghost{opacity:.55;border-style:dashed}
 
 /* ---------- demo 1 rails + gantt ---------- */
-.rail-block{margin-top:14px}
+.rail-block{margin-top:11px}
+.rail-best{border-left:3px solid var(--sage);padding:10px 12px 4px;background:rgba(122,139,111,.07);border-radius:8px}
+.rail-best .rail-title .tag{color:var(--sage)}
+.rail-rank{margin-left:auto;font:700 12px/1 var(--mono);color:var(--sage)}
 .rail-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
 .rail-title{font:700 13px/1 var(--sans);letter-spacing:.04em}
 .rail-title .tag{font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-left:6px}
@@ -195,9 +198,13 @@ table.data .famcell{font-weight:700;text-align:center}
 .fact .val{font:600 24px/1.15 var(--serif);color:var(--ink);word-break:break-word}
 .fact .val small{font-size:14px;color:var(--ink-soft)}
 .fact.hot .val{color:var(--terra)}
-.slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:6px 0 4px}
-input[type=range]{accent-color:var(--terra);width:min(340px,100%);height:28px;cursor:pointer}
-.slider-val{font:700 15px/1 var(--mono);color:var(--terra);min-width:64px}
+.slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 6px;padding:13px 16px;background:var(--f4-bg);border:1px solid var(--brass);border-radius:9px}
+.slider-prompt{display:flex;align-items:center;gap:7px;font:700 12.5px/1.2 var(--sans);letter-spacing:.02em;color:var(--terra);text-transform:none;white-space:nowrap}
+.slider-prompt .hand{font-size:15px;animation:nudge 1.6s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
+@media (prefers-reduced-motion:reduce){.slider-prompt .hand{animation:none}}
+input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cursor:pointer;flex:1 1 200px}
+.slider-val{font:800 20px/1 var(--mono);color:var(--terra);min-width:78px;text-align:right}
 .bar-zone{margin:16px 0 4px}
 .bar-legend{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-soft);margin-bottom:4px}
 .bar-track{
@@ -215,12 +222,12 @@ input[type=range]{accent-color:var(--terra);width:min(340px,100%);height:28px;cu
 .bar-ticks{position:absolute;inset:0;pointer-events:none}
 .bar-ticks i{position:absolute;top:0;bottom:0;width:1px;background:#e0d4bd}
 .bar-ticks b{position:absolute;top:2px;font:600 8.5px/1 var(--sans);color:var(--ink-soft);transform:translateX(3px)}
-.mult-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:12px;color:var(--ink-soft)}
+.mult-row{display:flex;flex-wrap:wrap;gap:2px 9px;align-items:baseline;margin-top:12px;font-size:12px;color:var(--ink-soft)}
+.mult-row>span:first-child{font-style:italic}
 .mult-chip{
-  font:700 11px/1 var(--mono);background:var(--card);border:1px solid var(--rule);
-  border-radius:6px;padding:5px 8px;color:var(--maple);
+  font:700 12.5px/1 var(--mono);color:var(--maple);background:none;border:0;padding:0;
 }
-.mult-chip.last{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
+.mult-chip.last{color:var(--terra);font-weight:800;background:none;border:0}
 
 /* ---------- demo 3 : the IG loop ---------- */
 .ig-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;margin-top:6px}
@@ -510,6 +517,20 @@ footer code{font-family:var(--mono);color:var(--maple)}
       </div>
     </div>
 
+    <div class="rail-block rail-best" id="railBlockC" hidden>
+      <div class="rail-head">
+        <span class="rail-title">Best order <span class="tag">found by checking all 120</span></span>
+        <span class="rail-rank" id="railCrank"></span>
+      </div>
+      <div class="chips-row" id="railC" aria-label="Best order"></div>
+      <div class="gantt-wrap"><svg class="gantt" id="ganttC" role="img" aria-label="Gantt timeline for the best order"></svg></div>
+      <div class="readouts" id="readC">
+        <span class="readout">setup cost <b id="roCsetup">–</b></span>
+        <span class="readout">tardiness cost <b id="roCtard">–</b></span>
+        <span class="readout total">total <b id="roCtotal">–</b></span>
+      </div>
+    </div>
+
     <div class="controls">
       <button class="btn primary" id="eval120" type="button">Evaluate all 120 orders</button>
       <span class="ctl-label">sweeps every permutation, exactly</span>
@@ -536,7 +557,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
       <span>bars are log₁₀ scale — each added job multiplies the count</span>
     </figcaption>
     <div class="slider-row">
-      <label class="ctl-label" for="nSlider">jobs n</label>
+      <label class="slider-prompt" for="nSlider"><span class="hand">⇢</span> Drag the slider — change the number of jobs</label>
       <input type="range" id="nSlider" min="3" max="30" step="1" value="28">
       <span class="slider-val" id="nVal">n = 28</span>
     </div>
@@ -1280,7 +1301,7 @@ var CONCEPTS = [
   var orderA = [0, 1, 2, 3, 4];      // the intuitive order (job id order)
   var orderB = [1, 4, 3, 0, 2];      // the family-grouped order
   var rng = mulberry32(0x5eed1);     // deterministic shuffle sequence
-  var U = 13, PADL = 6, BARY = 8, BARH = 24; // px per time unit & geometry
+  var U = 13, PADL = 6, BARY = 6, BARH = 20; // px per time unit & geometry
 
   /* --- fixed dataset table --- */
   var tbody = $('#d1data');
@@ -1303,7 +1324,7 @@ var CONCEPTS = [
   function renderGantt(svg, order, animate){
     var ev = evaluate(DEMO1, order);
     var horizon = ev.timeline.length ? ev.timeline[ev.timeline.length - 1].end * 1.04 + 1 : 10;
-    var W = Math.ceil(horizon * U + PADL * 2), H = 96;
+    var W = Math.ceil(horizon * U + PADL * 2), H = 82;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.textContent = '';
     /* per-svg hatch pattern for idle waits */
@@ -1388,11 +1409,11 @@ var CONCEPTS = [
     updateRail(orderB, $('#ganttB'), 'B', animate);
   }
   $('#shuffleA').addEventListener('click', function(){
-    shuffleRng(rng, orderA); refresh(true);
+    shuffleRng(rng, orderA); updateRail(orderA, $('#ganttA'), 'A', true);
     setStatus('Rail A shuffled to ' + orderA.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
   });
   $('#shuffleB').addEventListener('click', function(){
-    shuffleRng(rng, orderB); refresh(true);
+    shuffleRng(rng, orderB); updateRail(orderB, $('#ganttB'), 'B', true);
     setStatus('Rail B shuffled to ' + orderB.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
   });
   function setStatus(html){ $('#d1status').innerHTML = html; }
@@ -1404,7 +1425,7 @@ var CONCEPTS = [
     sweeping = true;
     var btn = $('#eval120'); btn.disabled = true;
     var perms = permutations([0, 1, 2, 3, 4]);
-    var totals = new Array(perms.length), i = 0, best = Infinity, worst = -Infinity;
+    var totals = new Array(perms.length), i = 0, best = Infinity, worst = -Infinity, bestPerm = null;
     var prog = $('#evalProg');
     setStatus('Sweeping… <b>0</b>/120 orders evaluated.');
     function costOf(s){ var e = evaluate(DEMO1, s); return e.setup + e.tard; }
@@ -1413,7 +1434,7 @@ var CONCEPTS = [
       while(i < perms.length && n < (REDUCED ? 120 : 5)){ // ~24 frames at 1×
         var c = costOf(perms[i]);
         totals[i] = c;
-        if(c < best) best = c;
+        if(c < best){ best = c; bestPerm = perms[i].slice(); }
         if(c > worst) worst = c;
         i++; n++;
       }
@@ -1424,7 +1445,12 @@ var CONCEPTS = [
       var cA = costOf(orderA), cB = costOf(orderB);
       var rA = 1 + totals.filter(function(c){ return c < cA; }).length;
       var rB = 1 + totals.filter(function(c){ return c < cB; }).length;
-      setStatus('All <b>120</b> orders evaluated exactly. Best Σ <b>' + best + '</b>, worst Σ <b>' + worst + '</b>. ' +
+      if(bestPerm){
+        $('#railBlockC').hidden = false;
+        updateRail(bestPerm, $('#ganttC'), 'C', true);
+        $('#railCrank').textContent = 'Σ ' + best + ' · rank 1 / 120';
+      }
+      setStatus('All <b>120</b> orders evaluated exactly. The <b>best possible order</b> costs Σ <b>' + best + '</b> — shown below. ' +
         'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>. Same jobs — only the order changed.');
       btn.disabled = false; sweeping = false;
       setTimeout(function(){ prog.style.width = '0%'; }, 900);
@@ -1457,7 +1483,7 @@ var CONCEPTS = [
   });
   /* analogies, computed live */
   var analogies = { 5:'faster than one screen refresh', 10:'one frame on a 240 Hz monitor',
-    12:'a blink — and demo 3 already uses 12 jobs', 20:'a human lifetime', 28:'≈ 700× the age of the universe' };
+    12:'a blink — already too many to enumerate', 20:'a human lifetime', 28:'≈ 700× the age of the universe' };
   var abody = $('#analogyBody');
   [5, 10, 12, 20, 28].forEach(function(n){
     var f = factorial(n), tr = el('tr');
