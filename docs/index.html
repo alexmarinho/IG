@@ -48,6 +48,51 @@ h1.brand em{font-style:normal;color:var(--terra)}
   color:var(--ink-soft);border:1px solid var(--rule);border-radius:999px;
   padding:5px 10px;background:var(--card);white-space:nowrap;
 }
+
+/* ---- Arena: per-method explainer + recorded 2015 benchmark ---- */
+#m-arena{
+  --page:var(--card); --ink-2:var(--ink-soft); --muted:#8a8377; --baseline:#c3c2b7;
+  --grid:var(--rule); --ring:rgba(42,38,32,.12); --line:var(--steel);
+  --fam-a:var(--steel); --fam-b:var(--sage); --fam-c:var(--brass); --fam-d:var(--maple);
+  --late:var(--red); --good:var(--sage); --serious:var(--terra);
+}
+#m-arena .arena-grid{display:grid;grid-template-columns:225px minmax(0,1fr);gap:18px;margin-top:6px}
+@media(max-width:780px){#m-arena .arena-grid{grid-template-columns:1fr}}
+#m-arena .algo-list{display:flex;flex-direction:column;gap:6px}
+#m-arena .algo-btn{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 11px;
+  border:1px solid var(--rule);border-radius:8px;background:var(--card);color:var(--ink);
+  font:600 13px var(--sans);cursor:pointer;text-align:left;width:100%;transition:border-color .15s,background .15s}
+#m-arena .algo-btn small{display:block;color:var(--muted);font-weight:500;font-size:10.5px}
+#m-arena .algo-btn .err{font-variant-numeric:tabular-nums;color:var(--ink-soft);font-weight:700;font-size:12px;white-space:nowrap}
+#m-arena .algo-btn:hover{border-color:var(--terra)}
+#m-arena .algo-btn[aria-pressed="true"]{background:var(--terra);color:#fdf8ef;border-color:var(--terra)}
+#m-arena .algo-btn[aria-pressed="true"] small,#m-arena .algo-btn[aria-pressed="true"] .err{color:#fdf8ef;opacity:.8}
+#m-arena .algo-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+#m-arena .algo-head h3{margin:0;font:600 17px/1.25 var(--serif)}
+#m-arena .chip{font:600 10.5px var(--sans);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);
+  border:1px solid var(--rule);border-radius:999px;padding:3px 9px}
+#m-arena .chip.dim{color:var(--muted);text-transform:none;letter-spacing:.01em}
+#m-arena #cvMini{background:var(--card);border:1px solid var(--rule);border-radius:8px;display:block;width:100%}
+#m-arena .algo-desc{margin:12px 0 0;font-size:13.5px;line-height:1.55;color:var(--ink-soft);max-width:72ch}
+#m-arena .algo-desc strong{color:var(--ink)}
+#m-arena .algo-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:2px 14px;
+  border-top:1px solid var(--rule);margin-top:14px;padding-top:10px}
+#m-arena .tile{padding:6px 0}
+#m-arena .tile .t-label{font-size:11.5px;color:var(--muted);margin:0}
+#m-arena .tile .t-value{font:650 19px/1.2 var(--serif);margin:2px 0 0;font-variant-numeric:tabular-nums}
+#m-arena .tile .t-value small{font-size:12px;color:var(--ink-soft);font-weight:500}
+#m-arena .algo-note{margin:12px 0 0;font-size:12.5px;color:var(--ink-soft);border-left:3px solid var(--brass);padding-left:10px;line-height:1.5}
+#m-arena .arena-score{margin-top:26px}
+#m-arena .ar-h{font:600 clamp(17px,1.8vw,20px)/1.25 var(--serif);margin-bottom:10px}
+#m-arena .res-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+#m-arena .ar-field{font-size:12px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px}
+#m-arena #cvRes{display:block;width:100%}
+#m-arena .res-note{margin:10px 0 0;font-size:12.5px;color:var(--ink-soft);line-height:1.55;max-width:88ch}
+#m-arena .res-note .beat{color:var(--sage);font-weight:700}
+#m-arena .arena-cite{margin:16px 0 2px;padding-top:13px;border-top:1px solid var(--rule);
+  color:var(--muted);font:600 11.5px/1.6 var(--mono)}
+.ar-tip{position:fixed;z-index:60;display:none;max-width:280px;padding:8px 10px;border-radius:8px;
+  background:#2a2620;color:#f6f1e8;font:500 12px/1.45 var(--sans);box-shadow:0 6px 20px rgba(0,0,0,.22);pointer-events:none}
 .head-utils{display:flex;align-items:center;gap:12px;margin-left:auto}
 .lang-toggle{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden}
 .lang-toggle button{font:600 10.5px/1 var(--sans);letter-spacing:.08em;padding:5px 11px;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s}
@@ -775,6 +820,47 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 study (PDF)</a>
   </nav>
 </section>
+
+<section class="section" id="m-arena">
+  <p class="kicker"><span class="fig">Meet the methods</span></p>
+  <h2 class="section-title">Eight ways to search — and how each one actually scored.</h2>
+  <p class="lede">The race above is six strategies running live in your browser. This is the recorded
+  <b>2015 benchmark</b>: six published C++ heuristics, a one-hour MILP reference and the Iterated Greedy
+  written in Excel VBA, across 44 MaScLib instances with five runs each. Pick a method to see how it
+  searches — the diagram is schematic, nothing is re-run here — and what it scored.</p>
+
+  <div class="arena-grid">
+    <nav class="algo-list" id="algoList" aria-label="Choose an algorithm"></nav>
+    <div class="algo-detail">
+      <header class="algo-head">
+        <h3 id="algoName"></h3>
+        <span class="chip" id="algoFamily"></span>
+        <span class="chip dim" id="algoStack"></span>
+      </header>
+      <canvas role="img" id="cvMini" height="150" aria-label="Schematic animation of the algorithm"></canvas>
+      <p class="algo-desc" id="algoDesc"></p>
+      <div class="algo-stats" id="algoStats"></div>
+      <p class="algo-note" id="algoNote"></p>
+    </div>
+  </div>
+
+  <div class="arena-score">
+    <h3 class="ar-h">Relative error against the recorded best known (%)</h3>
+    <div class="res-controls">
+      <span class="seg" role="group" aria-label="View mode">
+        <button id="btnOverview" aria-pressed="true">Overview</button>
+        <button id="btnPerInst" aria-pressed="false">By instance</button>
+      </span>
+      <span class="ar-field" id="instPicker" hidden>instance
+        <select id="selInst" aria-label="Choose an instance"></select>
+      </span>
+    </div>
+    <canvas id="cvRes" height="640" role="img" aria-label="2015 scoreboard: relative error per algorithm"></canvas>
+    <p class="res-note" id="resNote"></p>
+  </div>
+  <p class="arena-cite">Tables 4.1–4.2 · Marinho, A. S. — UFSCar, 2015 · <code>benchmark.json</code> · Thevenin, Zufferey &amp; Widmer (2015)</p>
+</section>
+<div class="ar-tip" id="tip" role="tooltip"></div>
 
 <section class="movement" id="m-run">
   <div class="movement-head">
@@ -3024,9 +3110,24 @@ function onWinResize(fn){
     });
   }
 
+  /* Hooks the ported 2015-benchmark arena reads: window.__lang, window.__t and a
+     `langchange` event. Set the language up front so the arena renders correctly
+     on its very first paint, before this module's DOMContentLoaded boot runs. */
+  var DYN_PT = {
+    "No setups \u2014 30 NCOS instances": "Sem setups \u2014 30 inst\u00e2ncias NCOS",
+    "With setups \u2014 14 STC instances": "Com setups \u2014 14 inst\u00e2ncias STC",
+    "No setups (NCOS)": "Sem setups (NCOS)",
+    "With setups (STC)": "Com setups (STC)",
+    "jobs": "tarefas"
+  };
+  window.__t = function (k) { return (window.__lang === "pt" && DYN_PT[k]) || k; };
+  try { window.__lang = localStorage.getItem("ig-lang") === "pt" ? "pt" : "en"; }
+  catch (e) { window.__lang = "en"; }
+
   var current = "en";
   function apply(lang) {
     current = lang;
+    window.__lang = lang === "pt" ? "pt" : "en";
     document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
     applyHtml(lang);
     walk(lang);
@@ -3043,6 +3144,8 @@ function onWinResize(fn){
       b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang);
     });
     try { localStorage.setItem("ig-lang", lang); } catch (e) {}
+    /* let the arena (and anything else listening) re-render in the new language */
+    try { dispatchEvent(new CustomEvent("langchange")); } catch (e) {}
   }
 
   /* re-translate dynamic labels produced by the demos, without recursion */
@@ -3076,6 +3179,518 @@ function onWinResize(fn){
   else boot();
 })();
 
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const nf = { format: (n) => new Intl.NumberFormat(window.__lang === 'pt' ? 'pt-BR' : 'en-US', { maximumFractionDigits: 2 }).format(n) };
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const cssVar = n => getComputedStyle($('m-arena') || document.documentElement).getPropertyValue(n).trim();
+  const famC = () => ['--fam-a', '--fam-b', '--fam-c', '--fam-d'].map(cssVar);
+
+  /* Tables 4.1/4.2 of the 2015 study (repo benchmark.json): [MILP, Greedy, Descent, Tabu, TabuDiv, AMA_Mem, AMA_SP, IG] = [mean, min, max] relative error %, 5 runs */
+  const ARENA = {"NCOS_01":{"n":8,"best":800,"vals":[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_01a":{"n":8,"best":800,"vals":[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_02":{"n":10,"best":2570,"vals":[[0,0,0],[12.8,12.8,12.8],[12.8,12.8,12.8],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_02a":{"n":10,"best":1210,"vals":[[0,0,0],[0.8,0.8,0.8],[0.8,0.8,0.8],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_03":{"n":10,"best":6460,"vals":[[0,0,0],[11.1,11.1,11.1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_03a":{"n":10,"best":1690,"vals":[[0,0,0],[3,3,3],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_04":{"n":10,"best":1011,"vals":[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_04a":{"n":10,"best":1008,"vals":[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_05":{"n":15,"best":1500,"vals":[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_05a":{"n":15,"best":1500,"vals":[[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_11":{"n":20,"best":2022,"vals":[[0,0,0],[6.1,6.1,6.1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_11a":{"n":20,"best":2006,"vals":[[0.95,0.95,0.95],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_12":{"n":24,"best":6844,"vals":[[2.73,2.73,2.73],[10,10,10],[10,10,10],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_12a":{"n":24,"best":4270,"vals":[[1.17,1.17,1.17],[11.1,11.1,11.1],[11.1,11.1,11.1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_13":{"n":24,"best":3912,"vals":[[4.81,4.81,4.81],[18.6,18.6,18.6],[18.6,18.6,18.6],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_13a":{"n":24,"best":3441,"vals":[[17.58,17.58,17.58],[9.6,9.6,9.6],[9.6,9.6,9.6],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_14":{"n":25,"best":6990,"vals":[[51.65,51.65,51.65],[1.7,1.7,1.7],[1.7,1.7,1.7],[0.3,0,1.7],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_14a":{"n":25,"best":3195,"vals":[[15.81,15.81,15.81],[1.1,1.1,1.1],[0.6,0,0.9],[0.1,0,0.6],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_15":{"n":30,"best":3052,"vals":[[0.33,0.33,0.33],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_15a":{"n":30,"best":3035,"vals":[[0.56,0.56,0.56],[0.5,0.5,0.5],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_31":{"n":75,"best":9510,"vals":[[156.68,156.68,156.68],[0,0,0],[0,0,0],[0.3,0,1.7],[0.4,0,1.1],[4.9,4.4,5.5],[1.1,0.7,1.9],[-0.1,-0.5,0]]},"NCOS_31a":{"n":75,"best":8715,"vals":[[95.75,95.75,95.75],[4.5,4.4,4.8],[4.7,4.4,4.8],[0.4,0.3,0.6],[0.7,0.5,0.9],[0.2,0,0.3],[0.9,0.7,1.1],[0.1,0,0.3]]},"NCOS_32":{"n":75,"best":17310,"vals":[[313.06,313.06,313.06],[4.2,4.2,4.2],[4.2,4.2,4.2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"NCOS_32a":{"n":75,"best":14720,"vals":[[281.86,281.86,281.86],[1.4,1.4,1.4],[1.4,1.4,1.4],[0.2,0,0.4],[0.3,0,0.3],[0.3,0.3,0.3],[0.2,0,0.3],[0,0,0]]},"NCOS_41":{"n":90,"best":13484,"vals":[[273.75,273.75,273.75],[22.2,22,22.7],[22.1,20.9,23.5],[0.2,0,0.4],[0.2,0,0.3],[0.1,0.1,0.2],[0.1,0,0.2],[0.3,0.1,0.3]]},"NCOS_41a":{"n":90,"best":10539,"vals":[[44.23,44.23,44.23],[8.2,8,8.4],[10.3,9.5,10.7],[0.1,0.1,0.2],[0.1,0,0.2],[0.1,0,0.1],[0,0,0.1],[0.3,0.1,0.5]]},"NCOS_51":{"n":200,"best":36170,"vals":[null,[5.8,5.8,5.8],[4.1,4.1,4.1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0.1]]},"NCOS_51a":{"n":200,"best":36170,"vals":[null,[6.1,6.1,6.1],[4.1,4.1,4.1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0.036,0,0.09]]},"NCOS_61":{"n":500,"best":1269365,"vals":[null,[0.2,0.2,0.2],[0.2,0.2,0.2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0.01,0.01,0.01]]},"NCOS_61a":{"n":500,"best":1485232,"vals":[null,[0.1,0.1,0.1],[0.1,0.1,0.1],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0.01,0.01,0.02]]},"STC_NCOS_01":{"n":8,"best":700,"vals":[[0,0,0],[5.7,5.7,5.7],[5.7,5.7,5.7],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"STC_NCOS_01a":{"n":8,"best":610,"vals":[[0,0,0],[1.6,1.6,1.6],[1.6,1.6,1.6],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"STC_NCOS_15":{"n":30,"best":17611,"vals":[[16.03,16.03,16.03],[0.2,0.2,0.2],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]},"STC_NCOS_15a":{"n":30,"best":5584,"vals":[[0.38,0.38,0.38],[0.1,0.1,0.1],[0,0,0],[0,0,0],[0,0,0],[1.5,0.2,5.1],[0,0,0],[0,0,0]]},"STC_NCOS_31":{"n":75,"best":6615,"vals":[[88.13,88.13,88.13],[15.3,15.1,15.4],[3.8,3.8,3.8],[4.5,3.8,7.6],[4.5,3.8,7.6],[3,0,3.8],[4.8,3.8,7.6],[0,0,0]]},"STC_NCOS_31a":{"n":75,"best":7590,"vals":[[216.6,216.6,216.6],[25.8,25.6,26],[3.3,3.3,3.3],[4.7,3.3,6.6],[3.3,3.3,3.3],[1.8,0,3.3],[6.6,4.2,8.9],[0,0,0]]},"STC_NCOS_32":{"n":75,"best":24068,"vals":[[70.57,70.57,70.57],[4.7,4.7,4.7],[2.8,2.2,3],[0.3,0,0.8],[0.9,0.3,1.9],[1.6,1.3,1.9],[1.3,0.2,1.9],[0,-0.1,0]]},"STC_NCOS_32a":{"n":75,"best":16798,"vals":[[174.81,174.81,174.81],[3.9,3.9,3.9],[0,0,0],[0.5,0,0.7],[0,0,0],[1.2,0.8,2.1],[0.4,0.2,0.8],[0,0,0]]},"STC_NCOS_41":{"n":90,"best":43201,"vals":[[324.99,324.99,324.99],[12.8,12.8,12.9],[3.4,3.4,3.4],[3.4,3.4,3.4],[1.8,0,3.4],[2.2,0.2,3.5],[0.1,0.1,0.1],[1.3,0,3.3]]},"STC_NCOS_41a":{"n":90,"best":18579,"vals":[[37.39,37.39,37.39],[7.1,7,7.1],[2.8,2.8,2.8],[2.9,2.8,3.4],[0.1,0,0.4],[2.7,2.4,3],[0.1,0.1,0.1],[2.1,0.038,4.2]]},"STC_NCOS_51":{"n":200,"best":139675,"vals":[null,[74.7,74.7,74.7],[74.7,74.7,74.7],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[21.2,0,45]]},"STC_NCOS_51a":{"n":200,"best":148230,"vals":[null,[67.2,67.2,67.2],[67.2,67.2,67.2],[42.3,42.3,42.3],[5.9,2,21.3],[0,0,0],[0.8,0,2],[21.5,6.6,43.7]]},"STC_NCOS_61":{"n":500,"best":1495045,"vals":[null,[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0.1],[0,0,0]]},"STC_NCOS_61a":{"n":500,"best":1814605,"vals":[null,[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0],[0,0,0]]}};
+
+  const ALGOS = [
+    { id: 'ig', col: 7, name: 'Iterated Greedy', short: 'IG', full: 'Iterated greedy with dynamic deadline', family: 'iterated greedy', stack: 'Excel VBA · i7 2.3 GHz',
+      desc: 'The featured algorithm: <strong>destroy</strong> d random jobs, <strong>reinsert</strong> every pending job at its best position (NEH-style) and try <strong>swaps</strong> between scheduled and rejected, keeping whatever lowers cost. Its key innovation is the <strong>dynamic deadline d̄ⱼ</strong>: a job is rejected the instant setup + processing + lateness exceed its rejection cost — and since setup depends on position, the deadline moves with the sequence (the break-even in the playground above).',
+      note: 'Best average on the 30 NCOS (0.02%) · found the best known in 38/44 instances · beat the literature’s best on NCOS_31 and STC_NCOS_32 · weak spot: 200-job STC (~21%).' },
+    { id: 'pl', col: 0, name: 'MILP', full: 'Mixed-Integer Linear Programming', family: 'exact method', stack: 'CPLEX · 1 h per instance',
+      desc: 'The exact mathematical model of the problem, given 1 hour of CPU per instance. When it finishes, it <strong>guarantees the optimum</strong> — but combinatorial explosion knocks it down early: from 75 jobs the errors exceed 80%, and on 200+ job instances it returns nothing at all.',
+      note: 'The optimality reference on small instances; 8 of 44 returned no result. The role CP-SAT would play better today.' },
+    { id: 'greedy', col: 1, name: 'Greedy', full: 'Constructive heuristic', family: 'constructive', stack: 'C++ · i7 2.93 GHz',
+      desc: 'The constructive of Thevenin et al.: walks the rejected jobs in random order and inserts each one <strong>at the cheapest position</strong> in the sequence; displaced jobs that break a constraint fall back to rejection. Fast and simple — the starting point of every other algorithm in this arena.',
+      note: 'Alone it stays far from optimal (4.6% / 15.6%). It seeds everything else: Descent, Tabu and the AMAs start from it.' },
+    { id: 'descent', col: 2, name: 'Descent', full: 'Local search (hill descent)', family: 'local search', stack: 'C++ · i7 2.93 GHz',
+      desc: 'Pure local search from the Greedy solution: explores the <strong>entire neighborhood</strong> — remove, add, reposition and swap jobs — accepting only improving moves. It converges fast… and stops at the first <strong>local minimum</strong>, with no way out.',
+      note: 'Improves on Greedy but inherits the flaw: when no neighbor is better, the search is over.' },
+    { id: 'tabu', col: 3, name: 'Tabu', full: 'Tabu search', family: 'tabu search', stack: 'C++ · i7 2.93 GHz',
+      desc: 'Descent with memory: recent moves enter a <strong>tabu list</strong> and stay forbidden for a few iterations. That forces the algorithm to accept worse moves and <strong>escape local minima</strong>. The standout of the 2015 paper — solves up to 500-job instances in seconds.',
+      note: 'The IG’s direct rival: 0.05% average on NCOS and sub-second times (in C++).' },
+    { id: 'tabudiv', col: 4, name: 'TabuDiv', full: 'Tabu search + diversification', family: 'tabu search', stack: 'C++ · i7 2.93 GHz',
+      desc: 'Tabu with a scheduled shake-up: every 500 iterations, <strong>the 30% “oldest” jobs</strong> in the sequence are forcibly rejected, shoving the search into fresh regions of the solution space. Also carries special handling for instances with many identical jobs.',
+      note: 'Best of the six on setup instances (1.2% average) — diversification pays exactly where the problem gets hard.' },
+    { id: 'ama', col: 5, name: 'AMAᴹᵉᵐ', full: 'Adaptive memetic algorithm', family: 'evolutionary', stack: 'C++ · i7 2.93 GHz',
+      desc: 'Evolutionary: keeps a <strong>population</strong> of solutions, selects the best as parents, breeds children by <strong>recombination</strong> and <strong>mutation</strong>, then intensifies each child with tabu search. Recombining two good sequences inherits good blocks from both — diversification born from genetics, not chance.',
+      note: 'Robust on the big setup instances (1.0% average), at the cost of far more machinery than the IG.' },
+    { id: 'amasp', col: 6, name: 'AMAˢᵖ', full: 'Memetic, alternative recombination', family: 'evolutionary', stack: 'C++ · i7 2.93 GHz',
+      desc: 'Identical to AMAᴹᵉᵐ except for the parents’ <strong>recombination procedure</strong>. In practice the two memetics tie: 0.08% vs 0.19% on NCOS and ~1% on STC.',
+      note: 'The evolutionary pair shows crossover design matters less than the population + tabu skeleton.' },
+  ];
+
+  // derived statistics
+  const ALGOS_PT = {
+    ig: { full: 'Iterated greedy com prazo dinâmico', family: 'iterated greedy',
+      desc: 'O algoritmo em destaque: <strong>destruir</strong> d tarefas aleatórias, <strong>reinserir</strong> cada tarefa pendente na sua melhor posição (estilo NEH) e tentar <strong>trocas</strong> entre agendadas e rejeitadas, mantendo o que reduz custo. Sua inovação central é o <strong>prazo dinâmico d̄ⱼ</strong>: a tarefa é rejeitada no instante em que setup + processamento + atraso superam seu custo de rejeição — e como o setup depende da posição, o prazo se move com a sequência (o ponto de equilíbrio no playground acima).',
+      note: 'Melhor média nas 30 NCOS (0,02%) · achou o melhor conhecido em 38/44 instâncias · superou o melhor da literatura em NCOS_31 e STC_NCOS_32 · ponto fraco: STC de 200 tarefas (~21%).' },
+    pl: { full: 'Programação Linear Inteira Mista', family: 'método exato',
+      desc: 'O modelo matemático exato do problema, com 1 hora de CPU por instância. Quando termina, <strong>garante o ótimo</strong> — mas a explosão combinatória o derruba cedo: a partir de 75 tarefas os erros passam de 80%, e em instâncias de 200+ tarefas não retorna nada.',
+      note: 'A referência de otimalidade nas instâncias pequenas; 8 de 44 sem resultado. O papel que o CP-SAT faria melhor hoje.' },
+    greedy: { full: 'Heurística construtiva', family: 'construtivo',
+      desc: 'O construtivo de Thevenin et al.: percorre as tarefas rejeitadas em ordem aleatória e insere cada uma <strong>na posição mais barata</strong> da sequência; tarefas deslocadas que quebram restrição voltam à rejeição. Rápido e simples — o ponto de partida de todos os outros algoritmos da arena.',
+      note: 'Sozinho fica longe do ótimo (4,6% / 15,6%). Semeia todo o resto: Descent, Tabu e os AMAs partem dele.' },
+    descent: { full: 'Busca local (descida)', family: 'busca local',
+      desc: 'Busca local pura a partir da solução Greedy: explora a <strong>vizinhança inteira</strong> — remover, adicionar, reposicionar e trocar tarefas — aceitando só movimentos que melhoram. Converge rápido… e para no primeiro <strong>mínimo local</strong>, sem saída.',
+      note: 'Melhora o Greedy mas herda a falha: sem vizinho melhor, a busca acabou.' },
+    tabu: { full: 'Busca tabu', family: 'busca tabu',
+      desc: 'Descent com memória: movimentos recentes entram numa <strong>lista tabu</strong> e ficam proibidos por algumas iterações. Isso força aceitar movimentos piores e <strong>escapar de mínimos locais</strong>. O destaque do paper de 2015 — resolve instâncias de até 500 tarefas em segundos.',
+      note: 'O rival direto do IG: 0,05% de média nas NCOS e tempos sub-segundo (em C++).' },
+    tabudiv: { full: 'Busca tabu + diversificação', family: 'busca tabu',
+      desc: 'Tabu com chacoalhada programada: a cada 500 iterações, <strong>as 30% de tarefas mais “antigas”</strong> da sequência são rejeitadas à força, empurrando a busca para regiões novas do espaço. Também trata instâncias com muitas tarefas idênticas.',
+      note: 'Melhor dos seis nas instâncias com setup (1,2% de média) — a diversificação paga exatamente onde o problema endurece.' },
+    ama: { full: 'Algoritmo memético adaptativo', family: 'evolutivo',
+      desc: 'Evolutivo: mantém uma <strong>população</strong> de soluções, seleciona as melhores como pais, gera filhos por <strong>recombinação</strong> e <strong>mutação</strong>, e intensifica cada filho com busca tabu. Recombinar duas boas sequências herda bons blocos de ambas — diversificação nascida da genética, não do acaso.',
+      note: 'Robusto nas grandes instâncias com setup (1,0% de média), ao custo de muito mais maquinário que o IG.' },
+    amasp: { full: 'Memético, recombinação alternativa', family: 'evolutivo',
+      desc: 'Idêntico ao AMAᴹᵉᵐ exceto pelo <strong>procedimento de recombinação</strong> dos pais. Na prática os dois meméticos empatam: 0,08% vs 0,19% nas NCOS e ~1% nas STC.',
+      note: 'O par evolutivo mostra que o desenho do crossover importa menos que o esqueleto população + tabu.' },
+  };
+  const names = Object.keys(ARENA);
+  ALGOS.forEach((a, i) => {
+    const g = { ncos: [], stc: [] };
+    let opt = 0, solved = 0;
+    for (const nm of names) {
+      const v = ARENA[nm].vals[a.col];
+      if (!v) continue;
+      solved++;
+      (nm.startsWith('STC') ? g.stc : g.ncos).push(v[0]);
+      if (v[1] <= 0) opt++;
+    }
+    const mean = xs => xs.reduce((s, x) => s + x, 0) / xs.length;
+    a.mNcos = mean(g.ncos); a.mStc = mean(g.stc); a.opt = opt; a.solved = solved;
+  });
+
+  /* ---------- selector + detail ---------- */
+  const arenaText = (en, pt) => window.__lang === 'pt' ? pt : en;
+  let sel = 'ig';
+  const list = $('algoList');
+  function buildAlgoList() {
+    list.innerHTML = '';
+    ALGOS.forEach(a => {
+      const fam = window.__lang === 'pt' && ALGOS_PT[a.id] ? ALGOS_PT[a.id].family : a.family;
+      const b = document.createElement('button');
+      b.className = 'algo-btn';
+      b.innerHTML = `<span>${a.name}<small>${fam}</small></span><span class="err" title="${arenaText('mean relative error on the 30 no-setup (NCOS) instances', 'erro relativo médio nas 30 instâncias sem setup (NCOS)')}">${nf.format(a.mNcos)}% <small>${arenaText('err', 'erro')}</small></span>`;
+      b.addEventListener('click', () => { sel = a.id; renderDetail(); });
+      b.dataset.id = a.id;
+      list.appendChild(b);
+    });
+  }
+  buildAlgoList();
+  addEventListener('langchange', () => { buildAlgoList(); renderDetail(); drawRes(); renderNote(); });
+
+  function renderDetail() {
+    const a = ALGOS.find(x => x.id === sel);
+    list.querySelectorAll('.algo-btn').forEach(b => b.setAttribute('aria-pressed', b.dataset.id === sel ? 'true' : 'false'));
+    const pt = window.__lang === 'pt' ? ALGOS_PT[a.id] : null;
+    const full = pt ? pt.full : a.full;
+    $('algoName').textContent = full === a.name ? a.name : `${a.name} — ${full}`;
+    $('algoFamily').textContent = pt ? pt.family : a.family;
+    $('algoStack').textContent = a.stack;
+    $('algoDesc').innerHTML = pt ? pt.desc : a.desc;
+    $('algoNote').textContent = pt ? pt.note : a.note;
+    $('algoStats').innerHTML = window.__lang === 'pt' ? `
+      <div class="tile"><p class="t-label">Média, sem setup (30 NCOS)</p><p class="t-value">${nf.format(a.mNcos)}%</p></div>
+      <div class="tile"><p class="t-label">Média, com setups (14 STC)</p><p class="t-value">${nf.format(a.mStc)}%</p></div>
+      <div class="tile"><p class="t-label">Achou o melhor conhecido</p><p class="t-value">${a.opt}<small> /${a.solved} instâncias</small></p></div>` : `
+      <div class="tile"><p class="t-label">Mean, no-setup (30 NCOS)</p><p class="t-value">${nf.format(a.mNcos)}%</p></div>
+      <div class="tile"><p class="t-label">Mean, with setups (14 STC)</p><p class="t-value">${nf.format(a.mStc)}%</p></div>
+      <div class="tile"><p class="t-label">Found the best known</p><p class="t-value">${a.opt}<small> /${a.solved} instances</small></p></div>`;
+    animT0 = performance.now();
+  }
+
+  /* ---------- mini-stage: schematic animations ---------- */
+  const mini = { c: $('cvMini'), w: 0, h: 150 };
+  const ease = x => x <= 0 ? 0 : x >= 1 ? 1 : (1 - Math.cos(Math.PI * x)) / 2;
+  const seg = (p, a, b) => ease((p - a) / (b - a));
+  const BW = 34, BH = 26, GAP = 6;
+
+  function rrect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + r, r);
+    ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+    ctx.arcTo(x, y + h, x, y + h - r, r); ctx.arcTo(x, y, x + r, y, r);
+    ctx.closePath();
+  }
+  function blockM(ctx, x, y, color, o = {}) {
+    const w = o.w || BW, h = o.h || BH;
+    ctx.save();
+    ctx.globalAlpha = o.a == null ? 1 : o.a;
+    if (o.dash) { ctx.setLineDash([4, 3]); ctx.strokeStyle = cssVar('--muted'); ctx.lineWidth = 1.2; rrect(ctx, x, y, w, h, 4); ctx.stroke(); }
+    else { ctx.fillStyle = color; rrect(ctx, x, y, w, h, 4); ctx.fill(); }
+    ctx.restore();
+  }
+  function pill(ctx, x, y, text, color) {
+    ctx.save();
+    ctx.font = '600 10.5px system-ui, sans-serif';
+    const w = ctx.measureText(text).width + 14;
+    ctx.fillStyle = color || cssVar('--ink');
+    rrect(ctx, x, y, w, 18, 9); ctx.fill();
+    ctx.fillStyle = cssVar('--page');
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, x + 7, y + 10);
+    ctx.restore();
+    return w;
+  }
+  const slotX = (i, x0) => x0 + i * (BW + GAP);
+
+  const ANIM = {
+    pl(ctx, W, H, p) {
+      const F = famC(), ink = cssVar('--ink'), muted = cssVar('--muted');
+      // matriz x_jk preenchendo
+      const gx = 20, gy = 26, cs = 13;
+      ctx.font = '10px ui-monospace, monospace'; ctx.textBaseline = 'middle';
+      let k = 0;
+      const total = 8 * 6, fill = Math.floor(seg(p, 0, 0.75) * total);
+      for (let r = 0; r < 6; r++) for (let c = 0; c < 8; c++, k++) {
+        ctx.globalAlpha = k < fill ? 0.9 : 0.18;
+        ctx.strokeStyle = muted; ctx.strokeRect(gx + c * cs, gy + r * cs, cs - 2, cs - 2);
+        if (k < fill) { ctx.fillStyle = ink; ctx.fillText((k * 7) % 3 === 0 ? '1' : '0', gx + c * cs + 3, gy + r * cs + 6); }
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = muted; ctx.font = '10.5px system-ui'; ctx.fillText(arenaText('variables xⱼₖ, zⱼ', 'variáveis xⱼₖ, zⱼ'), gx, 118);
+      // gauge LB/UB convergindo
+      const nx = W - 150, nw = 120, ny = 70;
+      ctx.strokeStyle = cssVar('--baseline'); ctx.beginPath(); ctx.moveTo(nx, ny); ctx.lineTo(nx + nw, ny); ctx.stroke();
+      const q = seg(p, 0.05, 0.8);
+      const lb = nx + q * nw * 0.46, ub = nx + nw - q * nw * 0.46;
+      ctx.fillStyle = F[0]; ctx.beginPath(); ctx.arc(lb, ny, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = cssVar('--late'); ctx.beginPath(); ctx.arc(ub, ny, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = muted; ctx.fillText('LB', lb - 6, ny + 16); ctx.fillText('UB', ub - 6, ny - 12);
+      if (p > 0.82) pill(ctx, nx + 18, ny + 24, p > 0.94 ? arenaText('large n: no result', 'n grande: sem resultado') : arenaText('optimum proved ✓', 'ótimo provado ✓'), p > 0.94 ? cssVar('--late') : cssVar('--good'));
+      pill(ctx, W - 60, 12, '1 h', muted);
+    },
+    greedy(ctx, W, H, p) {
+      const F = famC(), x0 = 24, y = 56;
+      const stages = [[0, 2], [0, 1, 2], [0, 1, 2, 3], [0, 1, 0, 2, 3]]; // cores por etapa
+      const ins = [{ pos: 1, c: 1 }, { pos: 3, c: 3 }, { pos: 2, c: 0 }];
+      const k = Math.min(2, Math.floor(p * 3)), q = ease(p * 3 - k);
+      const cur = stages[k], nxt = stages[k + 1], mv = ins[k];
+      cur.forEach((c, i) => {
+        const shift = (i >= mv.pos ? q : 0) * (BW + GAP);
+        blockM(ctx, slotX(i, x0) + shift, y, F[c]);
+      });
+      // source tray
+      for (let j = k + 1; j < 3; j++) blockM(ctx, W - 60, 20 + (j - k - 1) * 34, F[ins[j].c], { a: 0.5, dash: true });
+      // voo
+      const sx = W - 60, sy = 20, tx = slotX(mv.pos, x0), ty = y;
+      blockM(ctx, sx + (tx - sx) * q, sy + (ty - sy) * q - Math.sin(q * Math.PI) * 22, F[mv.c], { a: 0.6 + 0.4 * q });
+      ctx.fillStyle = cssVar('--muted'); ctx.font = '10.5px system-ui';
+      ctx.fillText(arenaText('inserts each rejected job at the cheapest position', 'insere cada rejeitada na posição de menor custo'), x0, 118);
+    },
+    _descentBase(ctx, W, H, p, tabu) {
+      const F = famC(), x0 = 24, y = 56, seq = [0, 1, 2, 1, 3, 0];
+      const mvA = seg(p, 0.15, 0.4), mvB = seg(p, 0.5, 0.75);
+      seq.forEach((c, i) => {
+        let x = slotX(i, x0);
+        if (i === 3) x -= mvA * 2 * (BW + GAP);     // block 3 moves to position 1
+        else if (i >= 1 && i < 3) x += mvA * (BW + GAP);
+        if (i === 5) x -= mvB * (BW + GAP);          // block 5 moves to position 4
+        else if (i === 4) x += mvB * (BW + GAP);
+        const hot = (i === 3 && p < 0.45) || (i === 5 && p >= 0.45 && p < 0.8);
+        blockM(ctx, x, y + (hot ? -4 : 0), F[c], { a: hot ? 1 : 0.85 });
+      });
+      if (tabu) {
+        // tabu chips with expiry
+        ctx.font = '600 10px system-ui'; ctx.textBaseline = 'middle';
+        const chips = [];
+        if (p > 0.4) chips.push(arenaText('pos 3 ✕', 'posição 3 ✕'));
+        if (p > 0.75) chips.push(arenaText('pos 5 ✕', 'posição 5 ✕'));
+        let cx = 24;
+        ctx.fillStyle = cssVar('--late');
+        for (const t of chips) { const w = pill(ctx, cx, 100, t, cssVar('--late')); cx += w + 6; }
+        ctx.fillStyle = cssVar('--muted'); ctx.font = '10.5px system-ui';
+        ctx.fillText(arenaText('tabu list: going back is banned for k iterations → accepts worse moves and escapes', 'tabu: voltar é bloqueado por k iterações → aceita pioras e escapa'), 24, 132);
+        if (p > 0.85) pill(ctx, W - 130, 20, arenaText('escaped ✓', 'escapou ✓'), cssVar('--good'));
+      } else {
+        ctx.fillStyle = cssVar('--muted'); ctx.font = '10.5px system-ui';
+        ctx.fillText(arenaText('improving moves only: remove, add, reposition, swap', 'só melhorias: remover, adicionar, reposicionar, trocar'), 24, 118);
+        if (p > 0.82) {
+          const sh = Math.sin(p * 90) * 2 * (1 - seg(p, 0.82, 1));
+          pill(ctx, W - 150 + sh, 20, arenaText('local minimum — stuck', 'mínimo local — preso'), cssVar('--serious'));
+        }
+      }
+    },
+    descent(ctx, W, H, p) { ANIM._descentBase(ctx, W, H, p, false); },
+    tabu(ctx, W, H, p) { ANIM._descentBase(ctx, W, H, p, true); },
+    tabudiv(ctx, W, H, p) {
+      const F = famC(), x0 = 24, y = 56, n = 8;
+      const purge = p > 0.62;
+      const q = seg(p, 0.62, 0.85);
+      for (let i = 0; i < n; i++) {
+        const old = i < 3; // 30% mais antigas
+        let yy = y, a = 0.85;
+        if (purge && old) { yy = y - q * 70; a = 0.85 * (1 - q); }
+        let xx = slotX(i, x0);
+        if (purge && !old) xx -= q * 3 * (BW + GAP);
+        blockM(ctx, xx, yy, F[(i * 5 + 1) % 4], { a });
+        if (old && !purge) { ctx.fillStyle = cssVar('--muted'); ctx.beginPath(); ctx.arc(xx + BW / 2, y + BH + 7, 2, 0, 7); ctx.fill(); }
+      }
+      // iteration counter
+      const bw = 110, bx = 24, by = 108;
+      ctx.strokeStyle = cssVar('--baseline'); ctx.strokeRect(bx, by, bw, 8);
+      ctx.fillStyle = cssVar('--fam-a') && famC()[0];
+      ctx.fillRect(bx, by, bw * Math.min(1, p / 0.62), 8);
+      ctx.fillStyle = cssVar('--muted'); ctx.font = '10.5px system-ui'; ctx.textBaseline = 'middle';
+      ctx.fillText(arenaText('every 500 iterations: reject the 30% oldest', 'a cada 500 iterações: rejeita as 30% mais antigas'), bx + bw + 10, by + 4);
+      if (purge) pill(ctx, W - 140, 20, arenaText('diversification!', 'diversificação!'), cssVar('--serious'));
+    },
+    _amaBase(ctx, W, H, p, twoCuts) {
+      const F = famC(), x0 = 24;
+      const pa = [0, 1, 2, 3, 0, 1], pb = [2, 0, 3, 1, 2, 3];
+      const cut1 = 2, cut2 = twoCuts ? 4 : 6;
+      pa.forEach((c, i) => blockM(ctx, slotX(i, x0), 16, F[c], { a: 0.45, h: 20 }));
+      pb.forEach((c, i) => blockM(ctx, slotX(i, x0), 106, F[c], { a: 0.45, h: 20 }));
+      ctx.fillStyle = cssVar('--muted'); ctx.font = '10px system-ui'; ctx.textBaseline = 'middle';
+      ctx.fillText(arenaText('parent A', 'pai A'), slotX(6, x0) + 6, 26); ctx.fillText(arenaText('parent B', 'pai B'), slotX(6, x0) + 6, 116);
+      // linhas de corte
+      ctx.strokeStyle = cssVar('--baseline'); ctx.setLineDash([3, 3]);
+      for (const cpos of twoCuts ? [cut1, cut2] : [cut1]) {
+        const cx = slotX(cpos, x0) - GAP / 2;
+        ctx.beginPath(); ctx.moveTo(cx, 12); ctx.lineTo(cx, 132); ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      // filho montando
+      const born = Math.floor(seg(p, 0.05, 0.7) * 6);
+      for (let i = 0; i < born; i++) {
+        const fromB = twoCuts ? (i >= cut1 && i < cut2) : i >= cut1;
+        const c = fromB ? pb[i] : pa[i];
+        const srcY = fromB ? 106 : 16;
+        const q = i === born - 1 ? ease((seg(p, 0.05, 0.7) * 6) % 1) : 1;
+        blockM(ctx, slotX(i, x0), srcY + (62 - srcY) * q, F[c], { h: 22 });
+      }
+      if (p > 0.75 && p < 0.9) { // mutation
+        ctx.save(); ctx.shadowColor = F[3]; ctx.shadowBlur = 12;
+        blockM(ctx, slotX(4, x0), 62, F[(pb[4] + 2) % 4], { h: 22 }); ctx.restore();
+        pill(ctx, slotX(4, x0) - 6, 88, arenaText('mutation', 'mutação'), cssVar('--ink'));
+      }
+      if (p > 0.9) pill(ctx, W - 190, 62, arenaText('child → population (+ tabu)', 'filho → população (+ tabu)'), cssVar('--good'));
+    },
+    ama(ctx, W, H, p) { ANIM._amaBase(ctx, W, H, p, false); },
+    amasp(ctx, W, H, p) { ANIM._amaBase(ctx, W, H, p, true); },
+    ig(ctx, W, H, p) {
+      const F = famC(), x0 = 24, y = 48, seq = [0, 2, 1, 3, 2, 0];
+      const out = [1, 4]; // destroyed
+      const pd = seg(p, 0.05, 0.3), pr1 = seg(p, 0.4, 0.6), pr2 = seg(p, 0.65, 0.85);
+      seq.forEach((c, i) => {
+        const k = out.indexOf(i);
+        if (k < 0) {
+          let xx = slotX(i, x0);
+          if (i > out[0]) xx -= pd * (BW + GAP) * (i > out[1] ? 2 : 1) * 0; // keeps gaps visible
+          blockM(ctx, xx, y, F[c], { a: 0.9 });
+        } else {
+          const pr = k === 0 ? pr1 : pr2;
+          const tx = slotX(k === 0 ? 2 : 4, x0) + BW / 2 - 2, ty = y; // returns at a better position
+          const sx = slotX(i, x0), sy = y, my = 112;
+          let xx, yy;
+          if (pr === 0) { xx = sx + (slotX(k * 2, 24) + 40 - sx) * pd; yy = sy + (my - sy) * pd; }
+          else { const bx = slotX(k * 2, 24) + 40; xx = bx + (tx - bx) * pr; yy = my + (ty - my) * pr - Math.sin(pr * Math.PI) * 18; }
+          blockM(ctx, xx, yy, F[c], { a: 0.9, dash: pr === 0 && pd === 1 });
+        }
+      });
+      ctx.fillStyle = cssVar('--muted'); ctx.font = '10.5px system-ui'; ctx.textBaseline = 'middle';
+      ctx.fillText(arenaText('destroy d → reinsert at best position → keep if better', 'destruir d → reinserir na melhor posição → manter se melhorar'), 24, 144);
+      if (p >= 0.3 && p < 0.4) pill(ctx, W - 120, 20, arenaText('destroyed 2', '2 removidas'), cssVar('--serious'));
+      if (p >= 0.85) pill(ctx, W - 150, 20, arenaText('dynamic d̄ⱼ · accepted ✓', 'd̄ⱼ dinâmico · aceita ✓'), cssVar('--good'));
+    },
+  };
+
+  let animT0 = performance.now();
+  function drawMini(t) {
+    const ctx = mini.c.getContext('2d');
+    ctx.clearRect(0, 0, mini.w, mini.h);
+    const dur = 6000;
+    const STILL = { greedy: 0.95, descent: 0.9, tabu: 0.9, tabudiv: 0.82, ama: 0.9, amasp: 0.9, ig: 0.9, pl: 0.9 };
+    const p = RM ? (STILL[sel] != null ? STILL[sel] : 0.9) : ((t - animT0) % dur) / dur;
+    const s = Math.min(1, mini.w / 560); // 560px virtual stage on narrow screens
+    ctx.save();
+    ctx.translate(0, (mini.h - mini.h * s) / 2);
+    ctx.scale(s, s);
+    (ANIM[sel] || ANIM.ig)(ctx, mini.w / s, mini.h, p, t);
+    ctx.restore();
+  }
+
+  /* ---------- results chart ---------- */
+  const res = { c: $('cvRes'), w: 0, h: 640, mode: 'overview', inst: 'NCOS_31', rows: [] };
+  const S = v => Math.sign(v) * Math.sqrt(Math.abs(v)); // signed √ scale
+
+  function fmtCell(v) {
+    if (!v) return arenaText('no result', 'sem resultado');
+    return v[1] === v[2] ? `${nf.format(v[0])}` : `${nf.format(v[0])} (${nf.format(v[1])}–${nf.format(v[2])})`;
+  }
+
+  function drawRes() {
+    const ctx = res.c.getContext('2d');
+    const W = res.w, H = res.h;
+    ctx.clearRect(0, 0, W, H);
+    res.rows = [];
+    const ink = cssVar('--ink'), muted = cssVar('--muted'), grid = cssVar('--grid'),
+          blue = cssVar('--line'), good = cssVar('--good'), base = cssVar('--baseline');
+    const rowH = 34, top = 34, labW = 108;
+    ctx.textBaseline = 'middle';
+
+    if (res.mode === 'overview') {
+      const panels = [
+        { title: __t('No setups — 30 NCOS instances'), key: 'mNcos' },
+        { title: __t('With setups — 14 STC instances'), key: 'mStc' },
+      ];
+      const maxS = S(Math.max(...ALGOS.flatMap(a => [a.mNcos, a.mStc])));
+      const panelH = 8 * rowH + 46;
+      panels.forEach((pan, pi) => {
+        const py = pi * panelH;
+        ctx.fillStyle = muted; ctx.font = '600 11px system-ui';
+        ctx.fillText(pan.title.toUpperCase(), 12, py + 14);
+        const barMax = Math.max(60, W - labW - 80);
+        ALGOS.forEach((a, i) => {
+          const y = py + 34 + i * rowH, v = a[pan.key];
+          ctx.fillStyle = a.id === sel ? ink : muted; ctx.font = (a.id === 'ig' ? '700' : '500') + ' 12px system-ui';
+          ctx.fillText(a.short || a.name, 12, y + 12);
+          const bw = Math.max(1.5, S(v) / maxS * barMax);
+          ctx.fillStyle = a.id === 'ig' ? blue : base;
+          rrect(ctx, labW, y + 3, bw, 18, 3); ctx.fill();
+          ctx.fillStyle = ink; ctx.font = '600 11.5px system-ui';
+          ctx.fillText(nf.format(v) + '%', labW + bw + 7, y + 12);
+          res.rows.push({ x: 0, y, w: W, h: rowH, id: a.id, tip: `<b>${a.name}</b> — ${pan.title}<br>${arenaText('mean error', 'erro médio')} ${nf.format(v)}% · ${arenaText('found the best known in', 'achou o melhor conhecido em')} ${a.opt}/${a.solved}` });
+        });
+      });
+    } else {
+      const d = ARENA[res.inst];
+      const allV = d.vals.filter(Boolean);
+      const lo = Math.min(0, ...allV.map(v => v[1])), hi = Math.max(0.5, ...allV.map(v => v[2]));
+      const x0 = labW + 30, barMax = W - x0 - 110;
+      const X = v => x0 + (S(v) - S(lo)) / (S(hi) - S(lo)) * barMax;
+      // zero axis
+      ctx.strokeStyle = grid; ctx.beginPath(); ctx.moveTo(X(0), top - 12); ctx.lineTo(X(0), top + 8 * rowH); ctx.stroke();
+      ctx.fillStyle = muted; ctx.font = '10.5px system-ui'; ctx.fillText('0%', X(0) - 8, top - 20);
+      ALGOS.forEach((a, i) => {
+        const y = top + i * rowH, v = ARENA[res.inst].vals[a.col];
+        ctx.fillStyle = a.id === sel ? ink : muted; ctx.font = (a.id === 'ig' ? '700' : '500') + ' 12px system-ui';
+        ctx.fillText(a.name, 12, y + 12);
+        if (!v) {
+          ctx.setLineDash([4, 3]); ctx.strokeStyle = muted;
+          rrect(ctx, X(0) + 2, y + 3, 90, 18, 3); ctx.stroke(); ctx.setLineDash([]);
+          ctx.fillStyle = muted; ctx.font = '11px system-ui'; ctx.fillText(arenaText('no result within 1 h', 'sem resultado em 1 h'), X(0) + 10, y + 12);
+          res.rows.push({ x: 0, y, w: W, h: rowH, id: a.id, tip: `<b>${a.name}</b> — ${arenaText('returned no solution within 1 h', 'não retornou solução em 1 h')}` });
+          return;
+        }
+        const neg = v[0] < 0;
+        const bx = Math.min(X(0), X(v[0])), bw2 = Math.max(1.5, Math.abs(X(v[0]) - X(0)));
+        ctx.fillStyle = neg ? good : (a.id === 'ig' ? blue : base);
+        rrect(ctx, bx, y + 3, bw2, 18, 3); ctx.fill();
+        // min–max whisker
+        if (v[1] !== v[2]) {
+          ctx.strokeStyle = ink; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(X(v[1]), y + 12); ctx.lineTo(X(v[2]), y + 12); ctx.stroke();
+          for (const e of [v[1], v[2]]) { ctx.beginPath(); ctx.moveTo(X(e), y + 7); ctx.lineTo(X(e), y + 17); ctx.stroke(); }
+        }
+        ctx.fillStyle = ink; ctx.font = '600 11.5px system-ui';
+        ctx.fillText(fmtCell(v) + '%', Math.max(X(v[2]), X(v[0])) + 8, y + 12);
+        res.rows.push({ x: 0, y, w: W, h: rowH, id: a.id, tip: `<b>${a.name}</b> — ${res.inst}<br>${arenaText('error', 'erro')} ${fmtCell(v)}%${v[1] < 0 ? `<br><b>${arenaText('beat the best known', 'superou o melhor conhecido')}</b>` : ''}` });
+      });
+    }
+  }
+
+  function renderNote() {
+    if (res.mode === 'overview') {
+      $('resNote').innerHTML = window.__lang === 'pt'
+        ? 'Barras em escala √ (para o MILP caber no quadro); os números são os erros exatos — média de 5 execuções por instância. No <strong>conjunto NCOS (sem setups)</strong> o IG teve a melhor média de toda a arena (0,02%). No <strong>conjunto STC (com setups)</strong> fica em 3,3%, atrás do TabuDiv e dos meméticos (~1%) — quase todo por conta de STC_NCOS_51/51a (200 tarefas). <span class="beat">Em NCOS_31 e STC_NCOS_32 o IG achou soluções melhores que o ótimo então conhecido.</span> MILP: média das 36 instâncias em que retornou algo.'
+        : 'Bars on a √ scale (so the MILP fits the frame); the numbers are the exact errors — mean of 5 runs per instance. On the <strong>NCOS set (no setups)</strong> the IG posted the best average of the entire arena (0.02%). On the <strong>STC set (with setups)</strong> it scores 3.3%, behind TabuDiv and the memetics (~1%) — almost entirely due to STC_NCOS_51/51a (200 jobs). <span class="beat">On NCOS_31 and STC_NCOS_32 the IG found solutions better than the then-known optimum.</span> MILP: mean over the 36 instances where it returned anything.';
+    } else {
+      const d = ARENA[res.inst];
+      const igv = d.vals[7];
+      const beat = igv && igv[1] < 0;
+      $('resNote').innerHTML = (window.__lang === 'pt'
+        ? `<strong>${res.inst}</strong> — ${d.n} tarefas · melhor conhecido ${nf.format(d.best)} · barra = média, bigode = mín–máx de 5 execuções.`
+        : `<strong>${res.inst}</strong> — ${d.n} jobs · best known ${nf.format(d.best)} · bar = mean, whisker = min–max of 5 runs.`) +
+        (beat ? (window.__lang === 'pt' ? ' <span class="beat">Nesta instância o IG superou o melhor resultado conhecido da literatura.</span>' : ' <span class="beat">On this instance the IG beat the literature’s best-known result.</span>') : '');
+    }
+  }
+
+  /* ---------- controles ---------- */
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { drawRes(); renderNote(); });
+  $('btnOverview').addEventListener('click', () => setMode('overview'));
+  $('btnPerInst').addEventListener('click', () => setMode('inst'));
+  function setMode(m) {
+    res.mode = m;
+    res.h = m === 'overview' ? 640 : 340;
+    $('btnOverview').setAttribute('aria-pressed', m === 'overview');
+    $('btnPerInst').setAttribute('aria-pressed', m === 'inst');
+    $('instPicker').hidden = m !== 'inst';
+    sizeCv(res.c, res.c.parentElement, res.h, res);
+    drawRes(); renderNote();
+  }
+  const selInst = $('selInst');
+  ['NCOS', 'STC'].forEach(g => {
+    const og = document.createElement('optgroup');
+    og.dataset.setupGroup = g;
+    og.label = __t(g === 'NCOS' ? 'No setups (NCOS)' : 'With setups (STC)');
+    names.filter(nm => (g === 'STC') === nm.startsWith('STC')).forEach(nm => {
+      const o = document.createElement('option'); o.value = nm; o.dataset.jobs = ARENA[nm].n; o.textContent = `${nm} · ${ARENA[nm].n} ${__t('jobs')}`;
+      og.appendChild(o);
+    });
+    selInst.appendChild(og);
+  });
+  selInst.value = res.inst;
+  function localizeArenaInstances() {
+    selInst.querySelectorAll('optgroup').forEach(og => {
+      og.label = __t(og.dataset.setupGroup === 'NCOS' ? 'No setups (NCOS)' : 'With setups (STC)');
+      og.querySelectorAll('option').forEach(o => { o.textContent = `${o.value} · ${o.dataset.jobs} ${__t('jobs')}`; });
+    });
+  }
+  addEventListener('langchange', localizeArenaInstances);
+  selInst.addEventListener('change', () => { res.inst = selInst.value; drawRes(); renderNote(); });
+
+  // tooltips on chart rows
+  const tip = $('tip');
+  res.c.addEventListener('mousemove', e => {
+    const r = res.c.getBoundingClientRect();
+    const my = e.clientY - r.top;
+    const hit = res.rows.find(h => my >= h.y && my <= h.y + h.h);
+    if (!hit) { tip.style.display = 'none'; return; }
+    tip.innerHTML = hit.tip; tip.style.display = 'block';
+    tip.style.left = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 10) + 'px';
+    tip.style.top = (e.clientY + 16) + 'px';
+  });
+  res.c.addEventListener('mouseleave', () => { tip.style.display = 'none'; res.c.style.cursor = 'default'; });
+  res.c.addEventListener('click', e => {
+    const r = res.c.getBoundingClientRect();
+    const my = e.clientY - r.top;
+    const hit = res.rows.find(h => my >= h.y && my <= h.y + h.h);
+    if (hit && hit.id) { sel = hit.id; renderDetail(); drawRes(); }
+  });
+
+  /* ---------- sizing + loop ---------- */
+  function sizeCv(cv, holder, cssH, store) {
+    const dpr = devicePixelRatio || 1;
+    const w = Math.max(300, holder.clientWidth - 36);
+    cv.width = w * dpr; cv.height = cssH * dpr;
+    cv.style.width = w + 'px'; cv.style.height = cssH + 'px';
+    cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    store.w = w;
+  }
+  function resizeArena() {
+    sizeCv(mini.c, mini.c.parentElement, mini.h, mini);
+    sizeCv(res.c, res.c.parentElement, res.h, res);
+    drawRes();
+  }
+  addEventListener('resize', resizeArena);
+
+  function loop(t) { var c = $('m-arena');
+    if (c && mini.w && c.getBoundingClientRect().bottom > -200 && c.getBoundingClientRect().top < innerHeight + 200) drawMini(t);
+    requestAnimationFrame(loop); }
+
+  resizeArena();
+  renderDetail();
+  drawRes(); renderNote();
+  requestAnimationFrame(loop);
+  window.__arenaSelect = id => {
+    const map = { ama: 'ama', amasp: 'amasp' };
+    const target = ALGOS.some(a => a.id === id) ? id : (map[id] || 'ig');
+    sel = target; renderDetail();
+  };
+})();
 </script>
 </body>
 </html>
