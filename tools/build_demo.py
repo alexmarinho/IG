@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
-"""Gera docs/index.html a partir de docs/src/ig-ao-vivo.html, injetando os blobs:
+"""Gera docs/fichario.html (a página-fichário LEGADA) a partir de docs/src/ig-ao-vivo.html.
+NÃO gera mais docs/index.html — o index agora é o notebook de scroll único (homepage live).
+Injeta os blobs:
 wasm do engine (compile antes com:
   RUSTFLAGS="-C panic=abort" cargo build --release --target wasm32-unknown-unknown --no-default-features)
 + as 44 instâncias MaScLib gzipadas + melhores conhecidos do benchmark.json."""
@@ -96,7 +98,10 @@ html, n = re.subn(
 assert n == 1, "marcadores do payload do Studio não encontrados"
 html_path.write_text(html)
 
-docs = root / "docs/index.html"
+# NOTE: docs/index.html is now the single-scroll notebook (the live homepage),
+# NOT this fichário build. This script outputs the legacy fichário page to a
+# separate file so a stray run can never clobber the deployed notebook.
+docs = root / "docs/fichario.html"
 docs.write_text(
     '<!doctype html>\n<html lang="en" data-theme="light">\n'
     "<style>html,body{margin:0;padding:0}</style>\n" + html + "\n</html>\n"

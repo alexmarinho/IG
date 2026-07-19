@@ -48,6 +48,14 @@ h1.brand em{font-style:normal;color:var(--terra)}
   color:var(--ink-soft);border:1px solid var(--rule);border-radius:999px;
   padding:5px 10px;background:var(--card);white-space:nowrap;
 }
+.head-utils{display:flex;align-items:center;gap:12px;margin-left:auto}
+.lang-toggle{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden}
+.lang-toggle button{font:600 10.5px/1 var(--sans);letter-spacing:.08em;padding:5px 11px;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s}
+.lang-toggle button.on{background:var(--terra);color:#fdf8ef}
+.lang-toggle button:not(.on):hover{color:var(--terra)}
+.gh-link{font:600 11px/1 var(--sans);letter-spacing:.04em;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+.gh-link:hover{color:var(--terra)}
+@media(max-width:560px){.head-utils{margin-left:0;width:100%;margin-top:6px;justify-content:flex-start}}
 .subtitle{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
 .subtitle code{font-family:var(--mono);font-size:11.5px;color:var(--maple)}
 nav.anchor-nav{max-width:1120px;margin:0 auto;padding:0 20px}
@@ -443,6 +451,13 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <div class="site-head-inner">
     <div class="brand-row">
       <h1 class="brand"><em>Iterated Greedy</em> — single-machine scheduling</h1>
+      <div class="head-utils">
+        <span class="lang-toggle" role="group" aria-label="Language / Idioma">
+          <button type="button" data-lang="en" class="on" aria-pressed="true">EN</button>
+          <button type="button" data-lang="pt" aria-pressed="false">PT</button>
+        </span>
+        <a class="gh-link" href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
+      </div>
     </div>
     <p class="subtitle">An interactive explanation — the same jobs, a better order, and how a small algorithm finds it.</p>
   </div>
@@ -2633,6 +2648,278 @@ function onWinResize(fn){
   window.addEventListener('resize', postH);
   setTimeout(postH, 400); setTimeout(postH, 1200);
 })();
+</script>
+
+<script>
+/* ============================================================
+   i18n — EN / PT-BR toggle for the notebook.
+   Strategy: a bidirectional text-node walker keyed on normalized
+   text (handles static prose + discrete dynamic labels, and survives
+   demo re-renders via a MutationObserver), plus innerHTML overrides
+   for the few sentences that carry mid-phrase <em>/<b>/<i> emphasis.
+   Live numeric telemetry (status/log lines with interpolated values)
+   is intentionally left in English for this pass.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  /* --- 1. innerHTML overrides: elements with mid-sentence emphasis --- */
+  var HTML_PT = {
+    "#m-story h2": 'A ordem muda o tempo. <em>O tempo muda o custo.</em>',
+    "#demo-order .lede":
+      'Passe cinco jobs por uma máquina em uma ordem, depois em outra. A máquina precifica cada ' +
+      'ordem exatamente — a espera, as trocas entre famílias e a multa por terminar atrasado se ' +
+      'somam em um único número. <b>Embaralhe qualquer uma das ordens e veja o total mudar.</b>',
+    "#demo-factorial .lede":
+      'Porque são ordens demais. Arraste o número de jobs e veja a contagem de ordens possíveis ' +
+      'disparar: mesmo checando <i>um bilhão</i> de planos por segundo, testá-las todas dura mais ' +
+      'que a idade do universo muito antes de você chegar a um problema real de 28 jobs. É por isso ' +
+      'que você precisa chutar — e chutar bem.',
+    "#demo-ig .lede":
+      'Um motor Iterated Greedy real rodando nesta página sobre um problema fixo de 12 jobs e 4 famílias ' +
+      '(<b>mulberry32, seed 0xce29767d</b>). Nada é pré-gravado: cada posição de inserção é reavaliada ' +
+      'contra o objetivo completo enquanto você assiste. Observe os cinco tempos — <b>construir</b> pela ' +
+      'melhor inserção, <b>destruir</b> três jobs, <b>medir cada inserção</b> no trilho de teste, ' +
+      '<b>rejeitar no empate</b> quando nenhuma posição vence o custo de rejeição, <b>aceitar ou reverter</b>.',
+    "#m-compare .m-title": 'A adivinhação realmente <em>compensa?</em>',
+    "#demo-race .lede":
+      'Seis estratégias de busca sobre o mesmo problema com seed fixa, cada uma com exatamente ' +
+      '<b>3.000 avaliações de plano completo</b>. Uma disputa justa precisa de uma moeda comum: não o ' +
+      'tempo de relógio, mas as avaliações do objetivo. As linhas correm da esquerda para a direita ' +
+      'conforme o orçamento é consumido.',
+    "#demo-benchmark .lede:first-of-type":
+      'A corrida acima roda sobre um único problema com seed fixa, ao vivo no seu navegador. O teste ' +
+      'de verdade é o benchmark padrão <b>MaScLib</b> — 44 problemas do estudo de 2015, cada um com um ' +
+      'melhor-conhecido publicado. Avaliado contra todos eles, o motor moderno se sustenta:'
+  };
+
+  /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
+  var EN2PT = {
+    /* header + nav */
+    "Story": "História",
+    "Compare": "Comparar",
+    "Run": "Executar",
+    "Future": "Futuro",
+    "— single-machine scheduling": "— sequenciamento em máquina única",
+    "An interactive explanation — the same jobs, a better order, and how a small algorithm finds it.":
+      "Uma explicação interativa — os mesmos jobs, uma ordem melhor, e como um algoritmo simples a encontra.",
+    /* story hero */
+    "Story · why order matters": "História · por que a ordem importa",
+    "A best order does exist — but there are more of them than you could ever check. So the game isn't to try them all; it's to guess well and improve fast.":
+      "Existe uma ordem ótima — mas há mais ordens possíveis do que você conseguiria testar. Então o jogo não é testar todas; é chutar bem e melhorar rápido.",
+    /* demo 1 */
+    "See it for yourself": "Veja por si mesmo",
+    "The same five jobs, two orders — and two very different bills.":
+      "Os mesmos cinco jobs, duas ordens — e duas contas bem diferentes.",
+    "The exact numbers behind these jobs": "Os números exatos por trás desses jobs",
+    "Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)":
+      "Conjunto fixo — uma máquina, setup de 3 de tempo / 6 de custo entre famílias diferentes (0 dentro da mesma família)",
+    "Family": "Família",
+    "Release r": "Liberação r",
+    "Processing p": "Processamento p",
+    "Due d": "Prazo d",
+    "Weight w": "Peso w",
+    "Two rails, two orders": "Dois trilhos, duas ordens",
+    "processing cost (Σp = 25) is identical for every order — omitted from totals":
+      "o custo de processamento (Σp = 25) é idêntico para toda ordem — omitido dos totais",
+    "idle wait for a release date": "espera ociosa por uma data de liberação",
+    "setup between families": "setup entre famílias",
+    "processing (family colour)": "processamento (cor da família)",
+    "weighted tardiness": "atraso ponderado",
+    "due date": "prazo",
+    "Rail A": "Trilho A",
+    "the intuitive order": "a ordem intuitiva",
+    "Shuffle A": "Embaralhar A",
+    "Rail B": "Trilho B",
+    "the family-grouped order": "a ordem agrupada por família",
+    "Shuffle B": "Embaralhar B",
+    "Best order": "Melhor ordem",
+    "found by checking all 120": "encontrada testando todas as 120",
+    "setup cost": "custo de setup",
+    "tardiness cost": "custo de atraso",
+    "Evaluate all 120 orders": "Avaliar todas as 120 ordens",
+    "sweeps every permutation, exactly": "varre todas as permutações, exatamente",
+    /* demo 2 */
+    "The catch": "A pegadinha",
+    "So why not just try every order?": "Então por que não testar todas as ordens?",
+    "Enumeration budget vs n": "Orçamento de enumeração vs n",
+    "bars are log₁₀ scale — each added job multiplies the count":
+      "as barras estão em escala log₁₀ — cada job a mais multiplica a contagem",
+    "Drag the slider — change the number of jobs": "Arraste o controle — mude o número de jobs",
+    "Complete orders — n!": "Ordens completas — n!",
+    "Candidate plans incl. rejection — Σ n!/(n−k)!": "Planos candidatos incl. rejeição — Σ n!/(n−k)!",
+    "Time to enumerate orders at 10⁹ plans/sec": "Tempo para enumerar as ordens a 10⁹ planos/s",
+    "orders n! · log₁₀ scale": "ordens n! · escala log₁₀",
+    "each job multiplies:": "cada job multiplica:",
+    "What the numbers mean — computed live, not hardcoded":
+      "O que os números significam — calculado ao vivo, não fixado no código",
+    "orders n!": "ordens n!",
+    "enumerate at 10⁹/s": "enumerar a 10⁹/s",
+    "analogy": "analogia",
+    /* demo 3 */
+    "The method": "O método",
+    "So you guess — then destroy, rebuild, and keep what's better.":
+      "Então você chuta — depois destrói, reconstrói e fica com o que for melhor.",
+    "One central clock drives every beat — Play / Pause / Step / Speed all scale the same timeline":
+      "Um relógio central rege cada tempo — Play / Pause / Passo / Velocidade escalam a mesma linha do tempo",
+    "Step": "Passo",
+    "speed": "velocidade",
+    "Restart": "Reiniciar",
+    "Protected plan": "Plano protegido",
+    "the reference — never touched mid-iteration": "a referência — nunca alterada no meio da iteração",
+    "Outside — rejected jobs": "Fora — jobs rejeitados",
+    "penalty per job instead of scheduling it": "multa por job em vez de sequenciá-lo",
+    "Outside": "Fora",
+    "none — every job is scheduled": "nenhum — todo job foi sequenciado",
+    "Working copy": "Cópia de trabalho",
+    "the candidate being built": "a candidata sendo construída",
+    "Pending tray": "Bandeja pendente",
+    "jobs waiting to be re-inserted": "jobs esperando para serem reinseridos",
+    "Idle — press Play or Step.": "Ocioso — aperte Play ou Passo.",
+    "Objective sheet": "Planilha do objetivo",
+    "setup&proc + delay + outside = total": "setup&proc + atraso + fora = total",
+    "delay": "atraso",
+    "outside": "fora",
+    "convergence — incumbent line + every evaluated candidate (filled = accepted)":
+      "convergência — linha da titular + toda candidata avaliada (preenchida = aceita)",
+    /* discrete demo-3 phase words (best-effort; sentences with numbers stay EN) */
+    "Constructing": "Construindo",
+    "Destroying": "Destruindo",
+    "Accepting": "Aceitando",
+    "Converged": "Convergiu",
+    /* compare + benchmark */
+    "Compare · does it work?": "Comparar · será que funciona?",
+    "Six strategies, one budget": "Seis estratégias, um orçamento",
+    "The race, under an equal evaluation budget.": "A corrida, sob um orçamento igual de avaliações.",
+    "Cost vs evaluations consumed — lower is better": "Custo vs avaliações consumidas — menor é melhor",
+    "Run race": "Rodar corrida",
+    "Reset": "Zerar",
+    "budget 3,000 evals each": "orçamento de 3.000 avaliações cada",
+    "Random sampling": "Amostragem aleatória",
+    "Greedy construction only": "Só construção gulosa",
+    "Steepest descent (pairwise swap)": "Descida mais íngreme (troca de pares)",
+    "IG + swap-with-rejected": "IG + troca com rejeitados",
+    "Random-restart descent": "Descida com reinício aleatório",
+    "From one race to the whole benchmark": "De uma corrida ao benchmark inteiro",
+    "The race builds intuition. The recorded benchmark is the proof.":
+      "A corrida cria a intuição. O benchmark registrado é a prova.",
+    "Best-known values matched or beaten": "Melhores-conhecidos igualados ou superados",
+    "Improved below the 2015 record": "Melhorados abaixo do recorde de 2015",
+    "Independent correctness checks": "Verificações independentes de correção",
+    "Every candidate is priced two ways that must agree to the last unit — an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python one — and the search must reproduce the 2015 best-known values before any result counts. The five remaining gaps are within 0.34%, save one at 2.44%.":
+      "Toda candidata é precificada de duas formas que precisam concordar até a última unidade — um avaliador incremental contra um oráculo do zero, e o motor Rust contra um Python independente — e a busca precisa reproduzir os melhores-conhecidos de 2015 antes de qualquer resultado contar. As cinco lacunas restantes ficam dentro de 0,34%, exceto uma de 2,44%.",
+    "Full results & validation": "Resultados completos & validação",
+    "2015 study (PDF)": "Estudo de 2015 (PDF)",
+    /* run */
+    "Run · your turn": "Executar · sua vez",
+    "Run the real engine, on real problems.": "Rode o motor de verdade, em problemas reais.",
+    "The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.":
+      "O mesmo motor validado, no seu navegador — escolha um cenário e um problema, escolha uma seed ou várias, e veja a busca acontecer. Sem instalação.",
+    /* future */
+    "Future · where it goes": "Futuro · para onde vai",
+    "A tested baseline — and what comes next.": "Uma base testada — e o que vem a seguir.",
+    "This is a reproducible baseline against the 2015 study; the next steps extend the search and the model, one validated change at a time.":
+      "Esta é uma base reproduzível contra o estudo de 2015; os próximos passos estendem a busca e o modelo, uma mudança validada por vez.",
+    "Source on GitHub": "Código no GitHub",
+    "Results & validation": "Resultados & validação",
+    "2015 thesis (PDF)": "Monografia de 2015 (PDF)",
+    "How to cite": "Como citar",
+    /* footer */
+    "Iterated Greedy — an interactive explanation · single self-contained HTML file, zero external requests · demos seeded with":
+      "Iterated Greedy — uma explicação interativa · um único arquivo HTML autocontido, zero requisições externas · demos com seed",
+    "for reproducibility ·": "para reprodutibilidade ·"
+  };
+
+  /* build the reverse map (PT -> EN) so toggling works both ways */
+  var PT2EN = {};
+  Object.keys(EN2PT).forEach(function (k) { PT2EN[EN2PT[k]] = k; });
+
+  var norm = function (s) { return s.replace(/\s+/g, " ").trim(); };
+  var keepWs = function (t, v) {
+    var lead = (t.match(/^\s*/) || [""])[0], trail = (t.match(/\s*$/) || [""])[0];
+    return lead + v + trail;
+  };
+
+  var walking = false;
+  function walk(lang) {
+    var map = lang === "pt" ? EN2PT : PT2EN;
+    walking = true;
+    var it = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT, null);
+    var node, hits = [];
+    while ((node = it.nextNode())) {
+      var t = node.nodeValue;
+      if (!t || !t.trim()) continue;
+      var key = norm(t);
+      var val = map[key];
+      if (val !== undefined) hits.push([node, keepWs(t, val)]);
+    }
+    hits.forEach(function (h) { h[0].nodeValue = h[1]; });
+    walking = false;
+  }
+
+  /* innerHTML overrides — snapshot EN on first run, then swap */
+  var EN_HTML = {};
+  function applyHtml(lang) {
+    Object.keys(HTML_PT).forEach(function (sel) {
+      var el = document.querySelector(sel);
+      if (!el) return;
+      if (EN_HTML[sel] === undefined) EN_HTML[sel] = el.innerHTML;
+      el.innerHTML = lang === "pt" ? HTML_PT[sel] : EN_HTML[sel];
+    });
+  }
+
+  var current = "en";
+  function apply(lang) {
+    current = lang;
+    document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+    applyHtml(lang);
+    walk(lang);
+    /* studio iframe follows the page language (reload with ?lang) */
+    var frame = document.querySelector(".studio-frame");
+    if (frame) {
+      var base = frame.getAttribute("src").split("?")[0];
+      var want = base + (lang === "pt" ? "?lang=pt-BR" : "");
+      if (frame.getAttribute("src") !== want) frame.setAttribute("src", want);
+    }
+    /* toggle button state */
+    document.querySelectorAll(".lang-toggle [data-lang]").forEach(function (b) {
+      b.classList.toggle("on", b.getAttribute("data-lang") === lang);
+      b.setAttribute("aria-pressed", b.getAttribute("data-lang") === lang);
+    });
+    try { localStorage.setItem("ig-lang", lang); } catch (e) {}
+  }
+
+  /* re-translate dynamic labels produced by the demos, without recursion */
+  var obs = new MutationObserver(function () {
+    if (walking || current !== "pt") return;
+    walking = true;
+    var it = document.createNodeIterator(document.body, NodeFilter.SHOW_TEXT, null);
+    var node, hits = [];
+    while ((node = it.nextNode())) {
+      var t = node.nodeValue;
+      if (!t || !t.trim()) continue;
+      var v = EN2PT[norm(t)];
+      if (v !== undefined && v !== norm(t)) hits.push([node, keepWs(t, v)]);
+    }
+    walking = false;
+    hits.forEach(function (h) { h[0].nodeValue = h[1]; });
+  });
+
+  function boot() {
+    var saved;
+    try { saved = localStorage.getItem("ig-lang"); } catch (e) {}
+    var start = saved === "pt" ? "pt" : "en";
+    document.querySelectorAll(".lang-toggle [data-lang]").forEach(function (b) {
+      b.addEventListener("click", function () { apply(b.getAttribute("data-lang")); });
+    });
+    if (start === "pt") apply("pt"); else apply("en");
+    obs.observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+
 </script>
 </body>
 </html>
