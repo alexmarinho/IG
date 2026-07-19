@@ -1369,6 +1369,19 @@ var CONCEPTS = [
     tbody.appendChild(tr);
   });
 
+  /* one fixed time scale shared by every rail, so the orders are directly
+     comparable and a shorter (better) order visibly ends earlier. Using the
+     largest makespan over all 120 orders means no bar is ever clipped. */
+  var FIXED_HZ = (function(){
+    var mx = 0;
+    permutations([0, 1, 2, 3, 4]).forEach(function(p){
+      var e = evaluate(DEMO1, p);
+      var end = e.timeline.length ? e.timeline[e.timeline.length - 1].end : 0;
+      if(end > mx) mx = end;
+    });
+    return mx * 1.03 + 1;
+  })();
+
   function renderChips(row, order){
     row.textContent = '';
     order.forEach(function(id){ row.appendChild(chipEl(DEMO1.jobs[id])); });
@@ -1377,7 +1390,7 @@ var CONCEPTS = [
   /* --- one SVG Gantt per rail; segments grow from 0, staggered --- */
   function renderGantt(svg, order, animate){
     var ev = evaluate(DEMO1, order);
-    var horizon = ev.timeline.length ? ev.timeline[ev.timeline.length - 1].end * 1.04 + 1 : 10;
+    var horizon = FIXED_HZ;
     var W = Math.ceil(horizon * U + PADL * 2), H = 82;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.textContent = '';
