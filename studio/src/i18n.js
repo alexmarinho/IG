@@ -12,7 +12,7 @@ const COPY = {
       close: "Close", inspectInstance: "View instance variables",
     },
     controls: {
-      scenario: "Scenario", runMode: "Execution mode", oneRun: "One seed", compare: "Multiple seeds",
+      scenario: "Scenario", scenarioPrev: "Previous scenario", scenarioNext: "Next scenario", runMode: "Execution mode", oneRun: "One seed", compare: "Multiple seeds",
       budget: "Iteration budget", perSeed: "per seed", seed: "Seed", runs: "Runs",
       destruction: "Jobs removed per iteration (d)", acceptance: "Iteration base", current: "Current candidate",
       best: "Lowest-cost schedule found", exchange: "Pairwise exchange", language: "Language",
@@ -115,7 +115,7 @@ const COPY = {
       close: "Fechar", inspectInstance: "Ver variáveis da instância",
     },
     controls: {
-      scenario: "Cenário", runMode: "Modo de execução", oneRun: "Uma seed", compare: "Múltiplas seeds",
+      scenario: "Cenário", scenarioPrev: "Cenário anterior", scenarioNext: "Próximo cenário", runMode: "Modo de execução", oneRun: "Uma seed", compare: "Múltiplas seeds",
       budget: "Orçamento de iterações", perSeed: "por seed", seed: "Seed", runs: "Execuções",
       destruction: "Jobs removidos por iteração (d)", acceptance: "Base da iteração", current: "Candidata atual",
       best: "Programação de menor custo encontrada", exchange: "Troca entre pares", language: "Idioma",

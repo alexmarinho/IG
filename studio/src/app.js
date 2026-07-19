@@ -675,16 +675,20 @@ class IGStudioApp {
     ];
     return `<section class="problem-brief">
       <header><span class="eyebrow">${escapeHtml(scenario.name)}</span><h2>${escapeHtml(this.t("overview.problemTitle"))}</h2><p>${escapeHtml(this.t("overview.problemSub"))}</p></header>
-      <div class="scenario-chooser" role="group" aria-label="${escapeHtml(this.t("controls.scenario"))}">
-        ${SCENARIO_CATALOG.map(({ id }) => {
-          const name = getLocalizedScenario(id, this.state.locale).name;
-          return `<button class="scenario-tab" data-scenario="${id}" aria-pressed="${id === this.state.scenarioId}" title="${escapeHtml(name)}">${escapeHtml(name)}</button>`;
-        }).join("")}
+      <div class="scenario-carousel" role="group" aria-label="${escapeHtml(this.t("controls.scenario"))}">
+        <figure class="scenario-figure${this._scenarioSwitched ? " is-switching" : ""}" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
+          <img src="${escapeHtml(this.scenarioVisualUrl(scenario))}" alt="${escapeHtml(scenario.visualAlt)}" loading="lazy" decoding="async">
+          <button class="carousel-arrow prev" data-scenario-step="-1" aria-label="${escapeHtml(this.t("controls.scenarioPrev"))}">&lsaquo;</button>
+          <button class="carousel-arrow next" data-scenario-step="1" aria-label="${escapeHtml(this.t("controls.scenarioNext"))}">&rsaquo;</button>
+          <figcaption class="carousel-caption"><strong>${escapeHtml(scenario.name)}</strong><span>${escapeHtml(scenario.visualCaption)}</span></figcaption>
+        </figure>
+        <div class="carousel-dots">
+          ${SCENARIO_CATALOG.map(({ id }) => {
+            const name = getLocalizedScenario(id, this.state.locale).name;
+            return `<button class="carousel-dot" data-scenario="${id}" aria-pressed="${id === this.state.scenarioId}" aria-label="${escapeHtml(name)}" title="${escapeHtml(name)}"><span>${escapeHtml(name)}</span></button>`;
+          }).join("")}
+        </div>
       </div>
-      <figure class="scenario-figure${this._scenarioSwitched ? " is-switching" : ""}" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
-        <img src="${escapeHtml(this.scenarioVisualUrl(scenario))}" alt="${escapeHtml(scenario.visualAlt)}" loading="lazy" decoding="async">
-        <figcaption>${escapeHtml(scenario.visualCaption)}</figcaption>
-      </figure>
       <div class="problem-layout"><dl class="problem-facts">${facts.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
       <div class="problem-story"><strong>${escapeHtml(instanceLabel)}</strong><p>${escapeHtml(instanceNote)}</p><p>${escapeHtml(scenario.objective.summary)}</p><h3>${escapeHtml(this.t("scenario.decisions"))}</h3><ol>${scenario.decisions.map((decision) => `<li>${escapeHtml(decision)}</li>`).join("")}</ol><button class="text-button" data-page="instance">${escapeHtml(this.t("actions.inspectInstance"))} →</button></div></div>
     </section>`;
@@ -832,6 +836,17 @@ class IGStudioApp {
       this.state.scenarioId = scenarioId;
       this._scenarioSwitched = true;
       const scenario = getLocalizedScenario(scenarioId, this.state.locale);
+      await this.selectInstance(scenario.recommendedDefaultInstance);
+    }));
+    this.container.querySelectorAll("[data-scenario-step]").forEach((button) => button.addEventListener("click", async () => {
+      const ids = SCENARIO_CATALOG.map((entry) => entry.id);
+      const current = ids.indexOf(this.state.scenarioId);
+      const step = Number(button.dataset.scenarioStep) || 0;
+      const nextId = ids[(current + step + ids.length) % ids.length];
+      if (nextId === this.state.scenarioId) return;
+      this.state.scenarioId = nextId;
+      this._scenarioSwitched = true;
+      const scenario = getLocalizedScenario(nextId, this.state.locale);
       await this.selectInstance(scenario.recommendedDefaultInstance);
     }));
     this.container.querySelectorAll("[data-mode]").forEach((button) => button.addEventListener("click", () => {
