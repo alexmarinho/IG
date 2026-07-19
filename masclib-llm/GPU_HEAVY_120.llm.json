@@ -1,0 +1,1247 @@
+{
+ "instance": "GPU_HEAVY_120",
+ "source": "masclib-gpu/GPU_HEAVY_120.csv",
+ "reading": {
+  "machine": "one GPU",
+  "time_unit": "seconds",
+  "money_unit": "credits (1 credit \u2248 $0.0001)",
+  "setup": "model load/swap (time and/or GPU-credit cost \u2014 some instances price the swap without stalling the queue)",
+  "rejection": "route the request to a cloud API and pay its price",
+  "note": "numbers are identical to the source instance \u2014 only the semantics layer is new, so published best-known objective values remain valid"
+ },
+ "requests": 120,
+ "models": {
+  "0": {
+   "model": "qwen-7b",
+   "size_class": "S",
+   "load_seconds": 10,
+   "swap_cost_credits": 5.0
+  },
+  "1": {
+   "model": "llama-8b",
+   "size_class": "S",
+   "load_seconds": 11,
+   "swap_cost_credits": 5.5
+  },
+  "2": {
+   "model": "mistral-24b",
+   "size_class": "M",
+   "load_seconds": 24,
+   "swap_cost_credits": 12.0
+  },
+  "3": {
+   "model": "qwen-32b",
+   "size_class": "M",
+   "load_seconds": 32,
+   "swap_cost_credits": 16.0
+  },
+  "4": {
+   "model": "sdxl-image",
+   "size_class": "S",
+   "load_seconds": 17,
+   "swap_cost_credits": 8.5
+  }
+ },
+ "jobs": [
+  {
+   "id": 0,
+   "model": "mistral-24b",
+   "arrival_s": 14,
+   "inference_s": 24,
+   "slo_deadline_s": 39,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 323.0
+  },
+  {
+   "id": 1,
+   "model": "sdxl-image",
+   "arrival_s": 50,
+   "inference_s": 3,
+   "slo_deadline_s": 170,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 67.0
+  },
+  {
+   "id": 2,
+   "model": "sdxl-image",
+   "arrival_s": 62,
+   "inference_s": 6,
+   "slo_deadline_s": 87,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 87.0
+  },
+  {
+   "id": 3,
+   "model": "llama-8b",
+   "arrival_s": 79,
+   "inference_s": 4,
+   "slo_deadline_s": 199,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 33.0
+  },
+  {
+   "id": 4,
+   "model": "qwen-32b",
+   "arrival_s": 94,
+   "inference_s": 17,
+   "slo_deadline_s": 214,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 400.0
+  },
+  {
+   "id": 5,
+   "model": "mistral-24b",
+   "arrival_s": 108,
+   "inference_s": 10,
+   "slo_deadline_s": 133,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 414.0
+  },
+  {
+   "id": 6,
+   "model": "qwen-7b",
+   "arrival_s": 113,
+   "inference_s": 8,
+   "slo_deadline_s": 233,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 37.0
+  },
+  {
+   "id": 7,
+   "model": "qwen-7b",
+   "arrival_s": 119,
+   "inference_s": 4,
+   "slo_deadline_s": 144,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 61.0
+  },
+  {
+   "id": 8,
+   "model": "llama-8b",
+   "arrival_s": 125,
+   "inference_s": 3,
+   "slo_deadline_s": 150,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 32.0
+  },
+  {
+   "id": 9,
+   "model": "qwen-32b",
+   "arrival_s": 159,
+   "inference_s": 19,
+   "slo_deadline_s": 184,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 182.0
+  },
+  {
+   "id": 10,
+   "model": "llama-8b",
+   "arrival_s": 162,
+   "inference_s": 2,
+   "slo_deadline_s": 187,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 42.0
+  },
+  {
+   "id": 11,
+   "model": "mistral-24b",
+   "arrival_s": 165,
+   "inference_s": 17,
+   "slo_deadline_s": 285,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 240.0
+  },
+  {
+   "id": 12,
+   "model": "qwen-32b",
+   "arrival_s": 178,
+   "inference_s": 14,
+   "slo_deadline_s": 203,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 275.0
+  },
+  {
+   "id": 13,
+   "model": "qwen-32b",
+   "arrival_s": 186,
+   "inference_s": 10,
+   "slo_deadline_s": 1086,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 144.0
+  },
+  {
+   "id": 14,
+   "model": "llama-8b",
+   "arrival_s": 199,
+   "inference_s": 4,
+   "slo_deadline_s": 1099,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 72.0
+  },
+  {
+   "id": 15,
+   "model": "llama-8b",
+   "arrival_s": 202,
+   "inference_s": 6,
+   "slo_deadline_s": 227,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 35.0
+  },
+  {
+   "id": 16,
+   "model": "mistral-24b",
+   "arrival_s": 217,
+   "inference_s": 17,
+   "slo_deadline_s": 242,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 282.0
+  },
+  {
+   "id": 17,
+   "model": "sdxl-image",
+   "arrival_s": 222,
+   "inference_s": 9,
+   "slo_deadline_s": 342,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 31.0
+  },
+  {
+   "id": 18,
+   "model": "qwen-32b",
+   "arrival_s": 230,
+   "inference_s": 14,
+   "slo_deadline_s": 255,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 192.0
+  },
+  {
+   "id": 19,
+   "model": "mistral-24b",
+   "arrival_s": 251,
+   "inference_s": 14,
+   "slo_deadline_s": 371,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 353.0
+  },
+  {
+   "id": 20,
+   "model": "qwen-32b",
+   "arrival_s": 306,
+   "inference_s": 17,
+   "slo_deadline_s": 426,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 399.0
+  },
+  {
+   "id": 21,
+   "model": "qwen-32b",
+   "arrival_s": 340,
+   "inference_s": 20,
+   "slo_deadline_s": 460,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 378.0
+  },
+  {
+   "id": 22,
+   "model": "mistral-24b",
+   "arrival_s": 356,
+   "inference_s": 13,
+   "slo_deadline_s": 381,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 216.0
+  },
+  {
+   "id": 23,
+   "model": "mistral-24b",
+   "arrival_s": 371,
+   "inference_s": 12,
+   "slo_deadline_s": 396,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 406.0
+  },
+  {
+   "id": 24,
+   "model": "sdxl-image",
+   "arrival_s": 372,
+   "inference_s": 7,
+   "slo_deadline_s": 492,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 90.0
+  },
+  {
+   "id": 25,
+   "model": "qwen-7b",
+   "arrival_s": 391,
+   "inference_s": 9,
+   "slo_deadline_s": 416,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 26,
+   "model": "qwen-7b",
+   "arrival_s": 418,
+   "inference_s": 2,
+   "slo_deadline_s": 443,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 77.0
+  },
+  {
+   "id": 27,
+   "model": "qwen-7b",
+   "arrival_s": 444,
+   "inference_s": 3,
+   "slo_deadline_s": 469,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 78.0
+  },
+  {
+   "id": 28,
+   "model": "sdxl-image",
+   "arrival_s": 466,
+   "inference_s": 9,
+   "slo_deadline_s": 586,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 80.0
+  },
+  {
+   "id": 29,
+   "model": "qwen-7b",
+   "arrival_s": 467,
+   "inference_s": 8,
+   "slo_deadline_s": 587,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 30,
+   "model": "llama-8b",
+   "arrival_s": 469,
+   "inference_s": 4,
+   "slo_deadline_s": 589,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 57.0
+  },
+  {
+   "id": 31,
+   "model": "qwen-7b",
+   "arrival_s": 473,
+   "inference_s": 3,
+   "slo_deadline_s": 498,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 36.0
+  },
+  {
+   "id": 32,
+   "model": "qwen-7b",
+   "arrival_s": 482,
+   "inference_s": 8,
+   "slo_deadline_s": 602,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 58.0
+  },
+  {
+   "id": 33,
+   "model": "qwen-7b",
+   "arrival_s": 498,
+   "inference_s": 2,
+   "slo_deadline_s": 523,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 34,
+   "model": "qwen-7b",
+   "arrival_s": 506,
+   "inference_s": 4,
+   "slo_deadline_s": 626,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 31.0
+  },
+  {
+   "id": 35,
+   "model": "llama-8b",
+   "arrival_s": 516,
+   "inference_s": 4,
+   "slo_deadline_s": 636,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 43.0
+  },
+  {
+   "id": 36,
+   "model": "qwen-7b",
+   "arrival_s": 516,
+   "inference_s": 9,
+   "slo_deadline_s": 541,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 37.0
+  },
+  {
+   "id": 37,
+   "model": "mistral-24b",
+   "arrival_s": 575,
+   "inference_s": 27,
+   "slo_deadline_s": 600,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 367.0
+  },
+  {
+   "id": 38,
+   "model": "qwen-7b",
+   "arrival_s": 575,
+   "inference_s": 8,
+   "slo_deadline_s": 695,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 77.0
+  },
+  {
+   "id": 39,
+   "model": "sdxl-image",
+   "arrival_s": 583,
+   "inference_s": 3,
+   "slo_deadline_s": 703,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 41.0
+  },
+  {
+   "id": 40,
+   "model": "sdxl-image",
+   "arrival_s": 587,
+   "inference_s": 5,
+   "slo_deadline_s": 707,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 47.0
+  },
+  {
+   "id": 41,
+   "model": "sdxl-image",
+   "arrival_s": 609,
+   "inference_s": 6,
+   "slo_deadline_s": 634,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 70.0
+  },
+  {
+   "id": 42,
+   "model": "qwen-32b",
+   "arrival_s": 658,
+   "inference_s": 17,
+   "slo_deadline_s": 683,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 168.0
+  },
+  {
+   "id": 43,
+   "model": "qwen-7b",
+   "arrival_s": 683,
+   "inference_s": 4,
+   "slo_deadline_s": 708,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 40.0
+  },
+  {
+   "id": 44,
+   "model": "llama-8b",
+   "arrival_s": 691,
+   "inference_s": 3,
+   "slo_deadline_s": 716,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 75.0
+  },
+  {
+   "id": 45,
+   "model": "qwen-7b",
+   "arrival_s": 692,
+   "inference_s": 6,
+   "slo_deadline_s": 1592,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 46,
+   "model": "qwen-7b",
+   "arrival_s": 706,
+   "inference_s": 8,
+   "slo_deadline_s": 1606,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 84.0
+  },
+  {
+   "id": 47,
+   "model": "llama-8b",
+   "arrival_s": 719,
+   "inference_s": 6,
+   "slo_deadline_s": 839,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 90.0
+  },
+  {
+   "id": 48,
+   "model": "llama-8b",
+   "arrival_s": 730,
+   "inference_s": 4,
+   "slo_deadline_s": 850,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 63.0
+  },
+  {
+   "id": 49,
+   "model": "llama-8b",
+   "arrival_s": 735,
+   "inference_s": 8,
+   "slo_deadline_s": 760,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 45.0
+  },
+  {
+   "id": 50,
+   "model": "sdxl-image",
+   "arrival_s": 741,
+   "inference_s": 4,
+   "slo_deadline_s": 861,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 86.0
+  },
+  {
+   "id": 51,
+   "model": "qwen-32b",
+   "arrival_s": 776,
+   "inference_s": 12,
+   "slo_deadline_s": 896,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 370.0
+  },
+  {
+   "id": 52,
+   "model": "mistral-24b",
+   "arrival_s": 780,
+   "inference_s": 25,
+   "slo_deadline_s": 1680,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 238.0
+  },
+  {
+   "id": 53,
+   "model": "qwen-7b",
+   "arrival_s": 782,
+   "inference_s": 4,
+   "slo_deadline_s": 902,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 47.0
+  },
+  {
+   "id": 54,
+   "model": "mistral-24b",
+   "arrival_s": 811,
+   "inference_s": 20,
+   "slo_deadline_s": 931,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 232.0
+  },
+  {
+   "id": 55,
+   "model": "llama-8b",
+   "arrival_s": 828,
+   "inference_s": 4,
+   "slo_deadline_s": 853,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 77.0
+  },
+  {
+   "id": 56,
+   "model": "qwen-7b",
+   "arrival_s": 867,
+   "inference_s": 7,
+   "slo_deadline_s": 892,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 55.0
+  },
+  {
+   "id": 57,
+   "model": "sdxl-image",
+   "arrival_s": 873,
+   "inference_s": 5,
+   "slo_deadline_s": 993,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 51.0
+  },
+  {
+   "id": 58,
+   "model": "qwen-7b",
+   "arrival_s": 878,
+   "inference_s": 2,
+   "slo_deadline_s": 903,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 63.0
+  },
+  {
+   "id": 59,
+   "model": "mistral-24b",
+   "arrival_s": 900,
+   "inference_s": 13,
+   "slo_deadline_s": 1800,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 162.0
+  },
+  {
+   "id": 60,
+   "model": "llama-8b",
+   "arrival_s": 909,
+   "inference_s": 3,
+   "slo_deadline_s": 1809,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 73.0
+  },
+  {
+   "id": 61,
+   "model": "qwen-7b",
+   "arrival_s": 911,
+   "inference_s": 8,
+   "slo_deadline_s": 936,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 48.0
+  },
+  {
+   "id": 62,
+   "model": "llama-8b",
+   "arrival_s": 917,
+   "inference_s": 6,
+   "slo_deadline_s": 942,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 66.0
+  },
+  {
+   "id": 63,
+   "model": "llama-8b",
+   "arrival_s": 918,
+   "inference_s": 6,
+   "slo_deadline_s": 943,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 82.0
+  },
+  {
+   "id": 64,
+   "model": "mistral-24b",
+   "arrival_s": 962,
+   "inference_s": 16,
+   "slo_deadline_s": 987,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 315.0
+  },
+  {
+   "id": 65,
+   "model": "qwen-7b",
+   "arrival_s": 967,
+   "inference_s": 6,
+   "slo_deadline_s": 992,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 68.0
+  },
+  {
+   "id": 66,
+   "model": "qwen-7b",
+   "arrival_s": 991,
+   "inference_s": 6,
+   "slo_deadline_s": 1016,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 67,
+   "model": "sdxl-image",
+   "arrival_s": 1012,
+   "inference_s": 4,
+   "slo_deadline_s": 1132,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 51.0
+  },
+  {
+   "id": 68,
+   "model": "qwen-7b",
+   "arrival_s": 1059,
+   "inference_s": 7,
+   "slo_deadline_s": 1084,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 64.0
+  },
+  {
+   "id": 69,
+   "model": "sdxl-image",
+   "arrival_s": 1081,
+   "inference_s": 7,
+   "slo_deadline_s": 1201,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 54.0
+  },
+  {
+   "id": 70,
+   "model": "mistral-24b",
+   "arrival_s": 1098,
+   "inference_s": 20,
+   "slo_deadline_s": 1218,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 349.0
+  },
+  {
+   "id": 71,
+   "model": "mistral-24b",
+   "arrival_s": 1143,
+   "inference_s": 26,
+   "slo_deadline_s": 1263,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 246.0
+  },
+  {
+   "id": 72,
+   "model": "llama-8b",
+   "arrival_s": 1170,
+   "inference_s": 8,
+   "slo_deadline_s": 2070,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 84.0
+  },
+  {
+   "id": 73,
+   "model": "mistral-24b",
+   "arrival_s": 1210,
+   "inference_s": 18,
+   "slo_deadline_s": 1235,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 319.0
+  },
+  {
+   "id": 74,
+   "model": "llama-8b",
+   "arrival_s": 1247,
+   "inference_s": 3,
+   "slo_deadline_s": 1367,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 75,
+   "model": "qwen-7b",
+   "arrival_s": 1250,
+   "inference_s": 3,
+   "slo_deadline_s": 1370,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 80.0
+  },
+  {
+   "id": 76,
+   "model": "qwen-32b",
+   "arrival_s": 1255,
+   "inference_s": 9,
+   "slo_deadline_s": 1280,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 293.0
+  },
+  {
+   "id": 77,
+   "model": "llama-8b",
+   "arrival_s": 1278,
+   "inference_s": 7,
+   "slo_deadline_s": 1303,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 53.0
+  },
+  {
+   "id": 78,
+   "model": "qwen-7b",
+   "arrival_s": 1291,
+   "inference_s": 3,
+   "slo_deadline_s": 1316,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 69.0
+  },
+  {
+   "id": 79,
+   "model": "qwen-7b",
+   "arrival_s": 1294,
+   "inference_s": 9,
+   "slo_deadline_s": 1414,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 55.0
+  },
+  {
+   "id": 80,
+   "model": "mistral-24b",
+   "arrival_s": 1319,
+   "inference_s": 24,
+   "slo_deadline_s": 1439,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 312.0
+  },
+  {
+   "id": 81,
+   "model": "llama-8b",
+   "arrival_s": 1321,
+   "inference_s": 5,
+   "slo_deadline_s": 1346,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 52.0
+  },
+  {
+   "id": 82,
+   "model": "qwen-7b",
+   "arrival_s": 1357,
+   "inference_s": 3,
+   "slo_deadline_s": 1382,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 40.0
+  },
+  {
+   "id": 83,
+   "model": "sdxl-image",
+   "arrival_s": 1357,
+   "inference_s": 6,
+   "slo_deadline_s": 1382,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 62.0
+  },
+  {
+   "id": 84,
+   "model": "llama-8b",
+   "arrival_s": 1360,
+   "inference_s": 9,
+   "slo_deadline_s": 2260,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 54.0
+  },
+  {
+   "id": 85,
+   "model": "llama-8b",
+   "arrival_s": 1386,
+   "inference_s": 3,
+   "slo_deadline_s": 1411,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 79.0
+  },
+  {
+   "id": 86,
+   "model": "mistral-24b",
+   "arrival_s": 1410,
+   "inference_s": 28,
+   "slo_deadline_s": 1435,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 337.0
+  },
+  {
+   "id": 87,
+   "model": "sdxl-image",
+   "arrival_s": 1439,
+   "inference_s": 8,
+   "slo_deadline_s": 2339,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 88,
+   "model": "mistral-24b",
+   "arrival_s": 1446,
+   "inference_s": 10,
+   "slo_deadline_s": 1471,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 244.0
+  },
+  {
+   "id": 89,
+   "model": "qwen-7b",
+   "arrival_s": 1450,
+   "inference_s": 7,
+   "slo_deadline_s": 1475,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 33.0
+  },
+  {
+   "id": 90,
+   "model": "sdxl-image",
+   "arrival_s": 1477,
+   "inference_s": 4,
+   "slo_deadline_s": 1597,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 35.0
+  },
+  {
+   "id": 91,
+   "model": "qwen-7b",
+   "arrival_s": 1481,
+   "inference_s": 6,
+   "slo_deadline_s": 1601,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 79.0
+  },
+  {
+   "id": 92,
+   "model": "qwen-32b",
+   "arrival_s": 1499,
+   "inference_s": 25,
+   "slo_deadline_s": 1619,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 203.0
+  },
+  {
+   "id": 93,
+   "model": "sdxl-image",
+   "arrival_s": 1501,
+   "inference_s": 8,
+   "slo_deadline_s": 1621,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 87.0
+  },
+  {
+   "id": 94,
+   "model": "llama-8b",
+   "arrival_s": 1529,
+   "inference_s": 3,
+   "slo_deadline_s": 1554,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 95,
+   "model": "qwen-7b",
+   "arrival_s": 1565,
+   "inference_s": 2,
+   "slo_deadline_s": 1590,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 96,
+   "model": "qwen-32b",
+   "arrival_s": 1600,
+   "inference_s": 9,
+   "slo_deadline_s": 1625,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 357.0
+  },
+  {
+   "id": 97,
+   "model": "llama-8b",
+   "arrival_s": 1609,
+   "inference_s": 9,
+   "slo_deadline_s": 1634,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 59.0
+  },
+  {
+   "id": 98,
+   "model": "mistral-24b",
+   "arrival_s": 1645,
+   "inference_s": 26,
+   "slo_deadline_s": 1670,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 297.0
+  },
+  {
+   "id": 99,
+   "model": "qwen-7b",
+   "arrival_s": 1708,
+   "inference_s": 5,
+   "slo_deadline_s": 2608,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 40.0
+  },
+  {
+   "id": 100,
+   "model": "qwen-32b",
+   "arrival_s": 1733,
+   "inference_s": 13,
+   "slo_deadline_s": 2633,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 359.0
+  },
+  {
+   "id": 101,
+   "model": "sdxl-image",
+   "arrival_s": 1735,
+   "inference_s": 8,
+   "slo_deadline_s": 1855,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 32.0
+  },
+  {
+   "id": 102,
+   "model": "mistral-24b",
+   "arrival_s": 1761,
+   "inference_s": 23,
+   "slo_deadline_s": 1786,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 274.0
+  },
+  {
+   "id": 103,
+   "model": "mistral-24b",
+   "arrival_s": 1788,
+   "inference_s": 11,
+   "slo_deadline_s": 1813,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 267.0
+  },
+  {
+   "id": 104,
+   "model": "sdxl-image",
+   "arrival_s": 1798,
+   "inference_s": 9,
+   "slo_deadline_s": 1823,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 67.0
+  },
+  {
+   "id": 105,
+   "model": "sdxl-image",
+   "arrival_s": 1800,
+   "inference_s": 6,
+   "slo_deadline_s": 2700,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 106,
+   "model": "qwen-7b",
+   "arrival_s": 1845,
+   "inference_s": 2,
+   "slo_deadline_s": 1965,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 58.0
+  },
+  {
+   "id": 107,
+   "model": "llama-8b",
+   "arrival_s": 1870,
+   "inference_s": 5,
+   "slo_deadline_s": 1990,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 52.0
+  },
+  {
+   "id": 108,
+   "model": "llama-8b",
+   "arrival_s": 1881,
+   "inference_s": 7,
+   "slo_deadline_s": 1906,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 58.0
+  },
+  {
+   "id": 109,
+   "model": "mistral-24b",
+   "arrival_s": 1896,
+   "inference_s": 26,
+   "slo_deadline_s": 1921,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 409.0
+  },
+  {
+   "id": 110,
+   "model": "llama-8b",
+   "arrival_s": 1916,
+   "inference_s": 6,
+   "slo_deadline_s": 1941,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 69.0
+  },
+  {
+   "id": 111,
+   "model": "sdxl-image",
+   "arrival_s": 1916,
+   "inference_s": 5,
+   "slo_deadline_s": 1941,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 35.0
+  },
+  {
+   "id": 112,
+   "model": "qwen-7b",
+   "arrival_s": 1923,
+   "inference_s": 8,
+   "slo_deadline_s": 1948,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 85.0
+  },
+  {
+   "id": 113,
+   "model": "llama-8b",
+   "arrival_s": 1928,
+   "inference_s": 9,
+   "slo_deadline_s": 2828,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 86.0
+  },
+  {
+   "id": 114,
+   "model": "qwen-7b",
+   "arrival_s": 1930,
+   "inference_s": 7,
+   "slo_deadline_s": 1955,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 6.0,
+   "cloud_price_credits": 36.0
+  },
+  {
+   "id": 115,
+   "model": "llama-8b",
+   "arrival_s": 1932,
+   "inference_s": 4,
+   "slo_deadline_s": 2052,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 89.0
+  },
+  {
+   "id": 116,
+   "model": "qwen-32b",
+   "arrival_s": 1935,
+   "inference_s": 20,
+   "slo_deadline_s": 2835,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 418.0
+  },
+  {
+   "id": 117,
+   "model": "qwen-7b",
+   "arrival_s": 1976,
+   "inference_s": 7,
+   "slo_deadline_s": 2096,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 53.0
+  },
+  {
+   "id": 118,
+   "model": "qwen-32b",
+   "arrival_s": 1976,
+   "inference_s": 21,
+   "slo_deadline_s": 2096,
+   "slo_class": "standard",
+   "late_penalty_credits_per_s": 1.5,
+   "cloud_price_credits": 352.0
+  },
+  {
+   "id": 119,
+   "model": "qwen-7b",
+   "arrival_s": 1998,
+   "inference_s": 9,
+   "slo_deadline_s": 2898,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 0.2,
+   "cloud_price_credits": 51.0
+  }
+ ]
+}

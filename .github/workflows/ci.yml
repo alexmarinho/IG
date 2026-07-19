@@ -1,0 +1,65 @@
+name: ci
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Rust tests (property + golden + best-known regression)
+        working-directory: engine
+        run: cargo test --release
+
+      - name: WASM build stays green
+        working-directory: engine
+        run: |
+          rustup target add wasm32-unknown-unknown
+          RUSTFLAGS="-C panic=abort" cargo build --release --target wasm32-unknown-unknown --no-default-features
+
+      - name: Python golden tests
+        run: python3 python/test_ig_scheduler.py
+
+      - name: Heuristic factory smoke tests
+        run: python3 factory/test_factory.py
+
+      - name: Studio tests and standalone build
+        run: |
+          npm --prefix studio test
+          npm --prefix studio run check
+          npm --prefix studio run build
+
+      - name: Spreadsheet engine and interface contracts
+        run: |
+          node --test google-sheets/tests/*.test.mjs
+          python3 google-sheets/scripts/normalize-workbook.py --check google-sheets/dist/ig-scheduling-lab.xlsx
+
+      - name: Python package smoke (pip install + ig-solve reaches best known)
+        run: |
+          python3 -m venv /tmp/ig-venv
+          /tmp/ig-venv/bin/pip install --quiet .
+          out=$(/tmp/ig-venv/bin/ig-solve masclib/NCOS_01.csv --seconds 5 --target 800)
+          echo "$out"
+          echo "$out" | grep -q "best=800 " || (echo "did not reach best known" && exit 1)
+
+      - name: Benchmark spot-check (engine finds 2015 best-knowns)
+        working-directory: engine
+        run: |
+          out=$(cargo run --release --quiet -- solve ../masclib/STC_NCOS_15.csv --seconds 20 --target 17611)
+          echo "$out"
+          echo "$out" | grep -q "best=17611" || (echo "did not reach best known" && exit 1)
+
+      - name: Demo build is reproducible
+        run: python3 tools/build_demo.py
