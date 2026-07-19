@@ -43,6 +43,8 @@ flowchart TD
     B -- yes --> Z(["return best (Π, Ω)"])
 ```
 
+![The three operators on a concrete sequence: destroy lifts d jobs back into the rejected set; rebuild prices every feasible slot for each pending job and keeps the cheapest, or leaves the job out when rejection is cheaper; swap trades a scheduled job for a rejected one when the total drops.](assets/operators.svg)
+
 The destruction size *d* is the exploration dial: typical settings are *d*=2 for most instances and *d*=50 for the 500-job ones (many identical jobs). The acceptance choice matters too: walking from the *current* solution diversifies; restarting from *best* intensifies.
 
 ## The dynamic deadline d̄ⱼ

@@ -62,11 +62,11 @@ The workbook uses an industrial editorial system instead of a generic dashboard
 template. Every visible page has one analytical purpose and the same measures
 remain traceable to the normalized technical tabs.
 
-![Start and guided reading order](assets/start.png)
+![Start and guided reading order](assets/start.webp)
 
-![Decision dashboard](assets/dashboard.png)
+![Decision dashboard](assets/dashboard.webp)
 
-![Equal-budget experiment analysis](assets/experiments.png)
+![Equal-budget experiment analysis](assets/experiments.webp)
 
 The control-room sidebar adds the interactive layer: real indeterminate work
 feedback while the engine runs, completed-run progress for experiments, and an
@@ -143,7 +143,7 @@ one batched write to normalized workbook tables
 There are no external runtime services, credentials, uploads or generated
 problem instances in this edition.
 
-![Engineering and audit trail](assets/engineering.png)
+![Engineering and audit trail](assets/engineering.webp)
 
 ## Repository layout
 

@@ -97,10 +97,14 @@ Under one uniform protocol of 45 seconds × 3 seeds per instance, the Rust engin
 
 Two values improve the recorded 2015 references:
 
-| Instance | 2015 reference | Modern result |
-|---|---:|---:|
-| `NCOS_31` | 9,510 | **9,420** |
-| `STC_NCOS_32` | 24,068 | **24,054** |
+| Instance | 2015 reference | Best found | Under |
+|---|---:|---:|---|
+| `NCOS_31` | 9,510 | **9,420** | dedicated 10 s runs, reached by 6/6 seeds |
+| `STC_NCOS_32` | 24,068 | **24,054** | the uniform 45 s × 3-seed protocol |
+
+Numbers move with the budget, so the protocol is quoted with each: under the *uniform*
+45 s × 3-seed run `NCOS_31` lands at 9,490, and the in-browser WebAssembly build reaches
+9,460. [`RESULTS.md`](RESULTS.md) is the canonical scorecard and reports all three.
 
 These are best-known references rather than general proofs of optimality. The complete protocols, per-instance table, negative results and implementation limits are documented in [`RESULTS.md`](RESULTS.md).
 

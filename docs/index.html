@@ -533,7 +533,6 @@ footer code{font-family:var(--mono);color:var(--maple)}
 </style>
 <style id="ig-story-proto">
   /* Single-scroll notebook: drop the explorer-only meta sections; keep the four demos */
-  #concepts, #demo-lab, #tools, #stack { display: none !important; }
   .site-head .badge { display: none; }
   /* Movements flow one after another in a single scroll */
   section.movement { padding: 0; scroll-margin-top: 104px; border-top: 1px solid var(--rule); }
@@ -612,14 +611,6 @@ footer code{font-family:var(--mono);color:var(--maple)}
 <!-- ============================================================
      1 · The 9 concepts to animate
      ============================================================ -->
-<section class="section" id="concepts">
-  <p class="kicker"><span class="fig">Inventory</span></p>
-  <h2 class="section-title"><span class="no">§1</span>The nine concepts the story must teach</h2>
-  <p class="lede">Everything on the story page serves one of these nine ideas. For each: how the
-  current page already presents it, and the best-in-class technique this mockup recommends for comparison — each demonstrated live further down.</p>
-  <div class="cards-grid" id="conceptGrid"><!-- cards injected by JS from data — keeps copy in one place --></div>
-</section>
-
 <!-- ============================================================
      2 · Live demo 1 — Order changes time. Time changes cost.
      ============================================================ -->
@@ -996,115 +987,12 @@ footer code{font-family:var(--mono);color:var(--maple)}
 <!-- ============================================================
      6 · Live demo 5 — Technique lab: same animation, three renderers
      ============================================================ -->
-<section class="section" id="demo-lab">
-  <p class="kicker"><span class="fig">Fig. 05 / renderers</span></p>
-  <h2 class="section-title"><span class="no">§6</span>Technique lab — same animation, three renderers</h2>
-  <p class="lede">The demo-1 Gantt, implemented three times with three different technologies —
-  genuinely separate implementations, shuffled in sync, so the code styles can be compared line by line.
-  Open the source and compare <code>labDom.render</code>, <code>labSvg.render</code>, <code>labCanvas.render</code>.</p>
-
-  <div class="controls">
-    <button class="btn primary" id="labShuffle" type="button">Shuffle all three</button>
-    <span class="ctl-label">one order, three renderers</span>
-  </div>
-  <div class="lab-chip-row" id="labChips" aria-label="Current order"></div>
-
-  <div class="lab-grid">
-    <div class="lab-panel">
-      <h4>(a) DOM + CSS transitions</h4>
-      <p class="impl">&lt;div&gt; segments · animate style.left / style.width via CSS transition</p>
-      <div class="lab-stage" id="labDom" aria-label="DOM renderer"></div>
-      <div class="note-card"><b>Strengths:</b> accessible by default, easiest layout &amp; text, FLIP-friendly, trivially inspectable.
-      <b>Limits:</b> comfortable to ~hundreds of nodes; animating layout properties (left/width) costs style recalc — fine for 5 segments, wrong for 5,000.</div>
-    </div>
-    <div class="lab-panel">
-      <h4>(b) SVG + JS attribute animation</h4>
-      <p class="impl">&lt;rect&gt; nodes · rAF tween writes x / width attributes</p>
-      <div class="lab-stage" id="labSvgWrap"><svg class="gantt" id="labSvg" style="min-width:0" role="img" aria-label="SVG renderer"></svg></div>
-      <div class="note-card"><b>Strengths:</b> crisp at any zoom, still a DOM (inspectable, styleable), the natural fit for diagrams &amp; timelines.
-      <b>Limits:</b> heavier per node than canvas; no layout engine — you compute every x yourself.</div>
-    </div>
-    <div class="lab-panel">
-      <h4>(c) Canvas 2D redraw loop</h4>
-      <p class="impl">single &lt;canvas&gt; · full redraw every frame</p>
-      <div class="lab-stage" id="labCanvasWrap"><canvas id="labCanvas" style="width:100%;height:96px;display:block" role="img" aria-label="Canvas renderer"></canvas></div>
-      <div class="note-card"><b>Strengths:</b> fastest for thousands of marks, zero DOM overhead, pixel-exact.
-      <b>Limits:</b> manual hit-testing, no accessibility tree, redraw-everything mindset; text &amp; DPI are your problem.</div>
-    </div>
-  </div>
-  <p class="status-line" id="d5status" aria-live="polite"></p>
-</section>
-
 <!-- ============================================================
      7 · Tool matrix
      ============================================================ -->
-<section class="section" id="tools">
-  <p class="kicker"><span class="fig">Survey</span></p>
-  <h2 class="section-title"><span class="no">§7</span>Tool matrix — what exists, what it is best at</h2>
-  <p class="lede">The strongest existing tools for this kind of animated explanation, verified July 2026.
-  <span class="star" style="color:var(--brass);font-weight:700">★</span> marks a category top pick.</p>
-  <div class="matrix-wrap">
-    <table class="matrix">
-      <thead><tr><th>Tool</th><th>Type</th><th>Output</th><th>License / cost</th><th>Best at</th><th>Fit for these concepts</th></tr></thead>
-      <tbody id="matrixBody"><!-- rows injected from data --></tbody>
-    </table>
-  </div>
-  <p class="matrix-legend"><span class="star">★</span> GSAP — live step-by-step choreography in a vanilla single-file page ·
-  <span class="star">★</span> Manim CE — rendered narrative math video ·
-  <span class="star">★</span> Remotion — polished social/marketing clips ·
-  <span class="star">★</span> Observable Framework — data-centric explorable articles ·
-  <span class="star">★</span> Rive — designer-authored interactive mascots wired to live state.</p>
-  <p class="footnote">Caution flags: <b>Idyll</b> is effectively dead (last release 2022); <b>distill.pub</b> is on indefinite hiatus since 2021 — a design lineage, not a tool;
-  <b>Scrollama</b> is stable but minimal — the modern scrollytelling default is GSAP ScrollTrigger (+ Lenis); <b>Popmotion</b> is dormant, superseded by Motion;
-  <b>Spline</b> (commercial 3D, free tier watermarked, from $12/seat/mo) suits landing pages, not precise 2D algorithm pedagogy.</p>
-  <p class="footnote">Tool versions verified against public registries (npm, PyPI, official release notes), July 2026.</p>
-</section>
-
 <!-- ============================================================
      8 · Recommended stack
      ============================================================ -->
-<section class="section" id="stack">
-  <p class="kicker"><span class="fig">Verdict</span></p>
-  <h2 class="section-title"><span class="no">§8</span>Recommended stack — three concrete paths</h2>
-  <div class="stack-grid">
-    <div class="stack-card">
-      <p class="use">Path 1 — your case</p>
-      <h3>Interactive explorable single-file page</h3>
-      <p><b>Vanilla JS + WAAPI/FLIP</b>, exactly as this mockup: one central clock, FLIP chip choreography, a
-      live trial track. Add <b>GSAP 3.15 + Flip/ScrollTrigger</b> as a drop-in accelerator and <b>D3</b> for the
-      factorial counters and convergence charts. MIT-pure alternative: <b>Anime.js v4</b>.</p>
-      <ul>
-        <li>Why: zero build step preserved — the page stays one file; FLIP is precisely what “remove / re-insert a job” needs.</li>
-        <li>Tradeoffs: hand-rolled timing demands discipline (single clock, seeded RNG); GSAP is free incl. commercial but “Standard No-Charge”, not MIT.</li>
-      </ul>
-      <p class="effort"><b>Migration effort:</b> days. Keep your engine and DOM; port one beat at a time — this page is the proof of feasibility.</p>
-    </div>
-    <div class="stack-card">
-      <p class="use">Path 2 — long-form</p>
-      <h3>Rendered narrative video</h3>
-      <p><b>Manim CE 0.20</b> for math fidelity (Python, 3Blue1Brown-grade exposition), or <b>Motion Canvas 3.17</b>
-      if you want to stay in TypeScript with generator-function storyboards and a visual editor.</p>
-      <ul>
-        <li>Why: frame-perfect control, voiceover sync, YouTube-native; LLM-assisted Manim authoring is now a mainstream workflow.</li>
-        <li>Tradeoffs: loses interactivity — a second artifact to maintain; Motion Canvas public development has been quiet since late 2024.</li>
-      </ul>
-      <p class="effort"><b>Migration effort:</b> 1–2 weeks. The storyboard mirrors the beats in Fig. 03; your seeded instance and objective port directly.</p>
-    </div>
-    <div class="stack-card">
-      <p class="use">Path 3 — distribution</p>
-      <h3>Clips &amp; polish</h3>
-      <p><b>Remotion 4</b> for social/marketing cuts (free for individuals &amp; orgs ≤ 3 people; renders locally, on Lambda, or
-      in-browser via WebCodecs), <b>Rive</b> for interactive mascots/operators with Data Binding wired to live algorithm
-      state, <b>dotLottie</b> for exported micro-animations.</p>
-      <ul>
-        <li>Why: distribution formats reward polish; Rive state machines make a reactive “operator” character cheap.</li>
-        <li>Tradeoffs: three extra toolchains — keep them out of the core explainer; Remotion’s license turns paid above 3 employees.</li>
-      </ul>
-      <p class="effort"><b>Migration effort:</b> incremental — nothing until you need distribution; clips reuse the same beats and palette.</p>
-    </div>
-  </div>
-  <div class="rule"></div>
-</section>
 </main>
 
 <footer>
