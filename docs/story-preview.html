@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Explaining Iterated Greedy — Animation Approaches Explorer</title>
+<title>Iterated Greedy — an interactive explanation</title>
 <meta name="description" content="A live, self-contained mockup to explore and compare animation techniques for explaining the Iterated Greedy scheduling algorithm.">
 <link rel="icon" href="data:,"><!-- suppress favicon request: zero external requests, zero 404 console noise -->
 <style>
@@ -711,13 +711,13 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <h2 class="m-title">The whole algorithm, in a few lines.</h2>
     <p class="m-lede">Iterated Greedy is small on purpose: build a plan once, then repeat a destroy-and-rebuild step, keeping the result only when it improves.</p>
   </div>
-  <div class="m-placeholder"><pre class="m-code">best = construct(instance)          <span class="cmt"># greedy: insert each job at its cheapest spot</span>
+  <div class="m-placeholder"><pre class="m-code">best = construct(instance)          <span class="cmt"># greedy: cheapest-insertion</span>
 while budget remains:
     candidate = copy(best)
-    remove d random jobs from candidate
-    reinsert each at its cheapest spot   <span class="cmt"># leave a job out when that costs less</span>
+    remove d random jobs             <span class="cmt"># destroy</span>
+    reinsert each at its cheapest spot
     if cost(candidate) &lt; cost(best):
-        best = candidate                 <span class="cmt"># keep it only when it improves</span></pre></div>
+        best = candidate             <span class="cmt"># keep only if it improves</span></pre></div>
 </section>
 
 <section class="movement" id="m-future">
@@ -849,8 +849,8 @@ while budget remains:
 </main>
 
 <footer>
-  <p>Explaining Iterated Greedy — Animation Approaches Explorer · single self-contained HTML file ·
-  zero external requests · seeded with <code>mulberry32(0xce29767d)</code> · companion mockup to <code>alexmarinho.github.io/IG</code></p>
+  <p>Iterated Greedy — an interactive explanation · single self-contained HTML file, zero external requests ·
+  demos seeded with <code>mulberry32(0xce29767d)</code> for reproducibility · <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">github.com/alexmarinho/IG</a></p>
 </footer>
 
 <!-- ============================================================
