@@ -79,3 +79,31 @@ cargo run --release -- validate ../masclib ../benchmark.json --seconds 45 --runs
 ```
 
 Expected: 37+/44 matched-or-beat, with independent rediscovery of two best-known-solution improvements over the 2015 literature (`NCOS_31`, `STC_NCOS_32`). See the main [README](../README.md#the-modern-engine-engine-rust) for the semantics notes recovered while porting (fractional weights, mode cost, the `benchmark.json` typo).
+
+## Sources and lineage
+
+Three published anchors sit under this work. They were previously recorded only in
+the project wiki, which has been retired — so they live here now.
+
+- **The metaheuristic** — Ruiz, R. & Stützle, T. (2007). *A simple and effective
+  iterated greedy algorithm for the permutation flowshop scheduling problem.*
+  European Journal of Operational Research.
+  [doi:10.1016/j.ejor.2005.12.009](https://doi.org/10.1016/j.ejor.2005.12.009).
+  The destruction/construction skeleton this project extends.
+- **The problem and the comparison set** — Thevenin, S., Zufferey, N. & Widmer, M.
+  (2015). *Metaheuristics for a scheduling problem with rejection and tardiness
+  penalties.* Journal of Scheduling.
+  [doi:10.1007/s10951-014-0395-8](https://doi.org/10.1007/s10951-014-0395-8).
+  Source of the six published heuristics and the MILP reference reported in the
+  [live comparison](https://alexmarinho.github.io/IG/).
+- **The instance library** — Nuijten, W., Bousonville, T., Focacci, F., Godard, D.
+  & Le Pape, C. (2003). *Towards an industrial manufacturing scheduling problem and
+  test bed* —
+  [MaScLib](https://www.researchgate.net/publication/281228499_Towards_an_industrial_Manufacturing_Scheduling_Problem_and_Test_Bed).
+  The 44 instances under [`masclib/`](../masclib/).
+- **Background** — Pinedo, M. *Scheduling: Theory, Algorithms, and Systems.*
+  Springer. On why single-machine models earn their keep.
+
+The 2015 monograph this repository grew out of is
+[`docs/monografia-2015.pdf`](monografia-2015.pdf); see [`CITATION.cff`](../CITATION.cff)
+for how to cite the software itself.

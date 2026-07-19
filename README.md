@@ -1,10 +1,47 @@
 # Iterated Greedy Scheduling
 
 [![CI](https://github.com/alexmarinho/IG/actions/workflows/ci.yml/badge.svg)](https://github.com/alexmarinho/IG/actions/workflows/ci.yml)
+[![Live explanation](https://img.shields.io/badge/live-interactive%20explanation-b0562f)](https://alexmarinho.github.io/IG/)
 
-A modern, reproducible implementation of Iterated Greedy for single-machine scheduling with job rejection, tardiness penalties, release dates and sequence-dependent setup time and cost. The original 2015–2017 implementation is preserved under [`legacy/`](legacy/); the repository root now contains the validated engines, experiments and documentation.
+[![Order changes time. Time changes cost. 39 of 44 best-known values matched or beaten.](docs/assets/og-card.png)](https://alexmarinho.github.io/IG/)
 
-**[Open the bilingual interactive explanation and experiment](https://alexmarinho.github.io/IG/)** — no installation required.
+A validated **Iterated Greedy** solver for single-machine scheduling with job rejection,
+tardiness penalties, release dates and sequence-dependent setup time and cost — the
+*order acceptance and scheduling* family, `1 | rⱼ, sᵢⱼ | Σ wⱼTⱼ + rejection`.
+
+Across the 44 MaScLib benchmark instances it **matches or beats the published
+best-known value on 39**, and improves two of them. The Rust core evaluates roughly
+**20M candidate schedules per second per core**, and compiles to WebAssembly — so the
+same engine that produced those numbers is the one running in your browser.
+
+**[▶ Open the interactive explanation](https://alexmarinho.github.io/IG/)** — bilingual,
+no installation. Or solve something in two lines:
+
+```bash
+git clone https://github.com/alexmarinho/IG && cd IG
+python3 python/ig_scheduler.py solve masclib/NCOS_01.csv --seconds 3
+```
+
+```text
+NCOS_01: n=8 best=800 iters=119177 evals=3218727 (1073k evals/s) t=3.00s
+  performed 2 / rejected 6
+```
+
+`best=800` is the published best-known value for that instance. Six of the eight jobs
+are *rejected* on purpose — turning them away costs less than the setup, processing and
+lateness of running them. That trade-off is the whole problem.
+
+### Which surface do you want?
+
+| To… | Go to |
+|---|---|
+| understand the idea, interactively | **[the live explanation](https://alexmarinho.github.io/IG/)** |
+| read the model and the method | [`docs/algorithm.md`](docs/algorithm.md) |
+| check whether it actually works | [`RESULTS.md`](RESULTS.md) |
+| install and run it yourself | [Run it](#run-it) |
+| know when *not* to use it | [Scope and limitations](#scope-and-limitations) |
+
+The original 2015–2017 implementation is preserved under [`legacy/`](legacy/).
 
 ## The scheduling problem
 
@@ -175,7 +212,10 @@ npm --prefix studio run build
 node --test google-sheets/tests/*.test.mjs
 ```
 
-Deterministic seeds and equal iteration budgets are used where results are compared. Wall-clock throughput is reported only as environment-specific context.
+Deterministic seeds and equal iteration budgets are used wherever results are compared, so the
+quality numbers above do not depend on the machine that produced them. Throughput figures
+(~20M evaluations/s/core in Rust, ~1M/s in the Python reference) *are* hardware-specific and are
+quoted as measured context, not as a benchmark claim.
 
 ## Scope and limitations
 
@@ -183,6 +223,13 @@ Deterministic seeds and equal iteration budgets are used where results are compa
 - Kitchen, surgery and GPU scenarios are deterministic mappings for explanation and experiment; they are not operational, clinical or service-level recommendations.
 - The GPU fleet is a correctness and diversity prototype and is currently slower than the optimized CPU engine for single-instance search.
 - The first evolved destroy operators did not improve held-out results over uniform random destruction. That negative result is retained as the baseline for future work.
+
+**When not to use this.** Reach for something else if your shop has parallel or
+heterogeneous machines, if jobs have multi-operation routings, or if you need a
+real-time dispatcher reacting to live events — this solves one machine, offline. For
+small instances where you need a *proven* optimum rather than a very good schedule, use
+an exact solver (CP-SAT or MILP); the 2015 study's one-hour MILP reference is reported
+alongside the heuristics in the [live comparison](https://alexmarinho.github.io/IG/).
 
 ## Historical implementation
 
