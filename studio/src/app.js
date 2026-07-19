@@ -483,7 +483,7 @@ class IGStudioApp {
   }
 
   renderTopbar() {
-    const pages = ["overview", "schedule", "instance", "method"];
+    const pages = ["overview", "schedule"];
     return `<header class="topbar">
       <a class="brand" href="#overview" data-page="overview" aria-label="Iterated Greedy">
         <span class="brand-mark">${icons.logo}</span><span>Iterated Greedy</span>
@@ -690,7 +690,7 @@ class IGStudioApp {
         </div>
       </div>
       <div class="problem-layout"><dl class="problem-facts">${facts.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
-      <div class="problem-story"><strong>${escapeHtml(instanceLabel)}</strong><p>${escapeHtml(instanceNote)}</p><p>${escapeHtml(scenario.objective.summary)}</p><h3>${escapeHtml(this.t("scenario.decisions"))}</h3><ol>${scenario.decisions.map((decision) => `<li>${escapeHtml(decision)}</li>`).join("")}</ol><button class="text-button" data-page="instance">${escapeHtml(this.t("actions.inspectInstance"))} →</button></div></div>
+      <div class="problem-story"><strong>${escapeHtml(instanceLabel)}</strong><p>${escapeHtml(instanceNote)}</p><p>${escapeHtml(scenario.objective.summary)}</p><h3>${escapeHtml(this.t("scenario.decisions"))}</h3><ol>${scenario.decisions.map((decision) => `<li>${escapeHtml(decision)}</li>`).join("")}</ol><button class="text-button" data-page="instance">${escapeHtml(this.t("actions.inspectInstance"))} →</button><button class="text-button" data-page="method">${escapeHtml(this.t("method.title"))} →</button></div></div>
     </section>`;
   }
 
@@ -814,7 +814,7 @@ class IGStudioApp {
   }
 
   renderBottomNav() {
-    const items = [["overview", icons.chart], ["schedule", icons.calendar], ["instance", icons.data], ["method", icons.flask]];
+    const items = [["overview", icons.chart], ["schedule", icons.calendar]];
     return `<nav class="mobile-bottom-nav" aria-label="${escapeHtml(this.t("a11y.primary"))}">${items.map(([page, icon]) => `<button data-page="${page}" ${this.state.page === page ? 'aria-current="page"' : ""}>${icon}<span>${escapeHtml(this.t(`nav.${page}`))}</span></button>`).join("")}</nav>`;
   }
 

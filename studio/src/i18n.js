@@ -2,7 +2,7 @@ export const UI_LOCALES = Object.freeze(["en", "pt-BR"]);
 
 const COPY = {
   en: {
-    nav: { overview: "Execution", schedule: "Schedule", instance: "Instance", method: "Method" },
+    nav: { overview: "Prepare", schedule: "Results", instance: "Instance", method: "Method" },
     links: { python: "Python", notebook: "Colab", sheets: "Google Sheets", workbook: "Workbook (.xlsx)", original: "Original project", results: "Results" },
     actions: {
       run: "Run algorithm", runSeeds: "Run {count} seeds", pause: "Pause", resume: "Resume",
@@ -105,7 +105,7 @@ const COPY = {
     misc: { jobs: "jobs", families: "families", noReference: "not published", yes: "Yes", no: "No", timeUnits: "time units", fixedCatalogNote: "A fixed bundled instance; no data is generated or uploaded.", sequenceSetups: "sequence-dependent setups", noSequenceSetups: "no sequence-dependent setups" },
   },
   "pt-BR": {
-    nav: { overview: "Execução", schedule: "Programação", instance: "Instância", method: "Método" },
+    nav: { overview: "Preparar", schedule: "Resultados", instance: "Instância", method: "Método" },
     links: { python: "Python", notebook: "Colab", sheets: "Google Sheets", workbook: "Planilha (.xlsx)", original: "Projeto original", results: "Resultados" },
     actions: {
       run: "Executar algoritmo", runSeeds: "Executar {count} seeds", pause: "Pausar", resume: "Continuar",
