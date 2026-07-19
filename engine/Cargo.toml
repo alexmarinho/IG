@@ -22,5 +22,6 @@ rayon = { version = "1", optional = true }
 serde_json = { version = "1", optional = true }
 
 [profile.release]
+opt-level = 3       # cargo's release default, made explicit
 lto = true
 codegen-units = 1

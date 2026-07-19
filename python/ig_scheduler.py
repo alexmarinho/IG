@@ -229,8 +229,10 @@ class State:
         for jid in self.order:
             j = jobs[jid]
             stime = setup_t[state][j.fam]
-            f = max(t, j.rel - stime) + stime + j.p
-            total += setup_c[state][j.fam] + j.mode + max(0, f - j.due) * j.w
+            rel_s = j.rel - stime
+            f = (t if t > rel_s else rel_s) + stime + j.p
+            td = f - j.due
+            total += setup_c[state][j.fam] + j.mode + (td * j.w if td > 0 else 0)
             fin.append(f)
             cum.append(total)
             t, state = f, j.fam
@@ -242,58 +244,88 @@ class State:
             return 0, self.inst.init_state
         return self.fin[pos - 1], self.inst.jobs[self.order[pos - 1]].fam
 
-    def try_insert(self, jid: int, pos: int) -> int | None:
-        """Total cost after inserting `jid` at `pos`, or None if infeasible."""
+    def try_insert(self, jid: int, pos: int, cutoff: int | None = None) -> int | None:
+        """Total cost after inserting `jid` at `pos`, or None if infeasible.
+
+        `cutoff` enables exact lower-bound pruning. Every cost that enters the
+        objective is non-negative, so the partial cost accumulated over the jobs
+        walked so far (``prefix + rejection deltas + new``) can only grow as the
+        walk continues and is therefore a valid lower bound on the final
+        candidate cost. Once that running bound reaches `cutoff` the candidate can
+        never be selected (selection is strict ``<``), so we stop the walk and
+        return the bound. Pass `cutoff` only on non-negative-cost instances;
+        without it the result is byte-for-byte the old behaviour. A candidate that
+        *can* win never trips the bound, so its returned cost is always exact.
+        """
         inst = self.inst
         jobs, setup_t, setup_c = inst.jobs, inst.setup_t, inst.setup_c
         order, fin, cum = self.order, self.fin, self.cum
         j = jobs[jid]
         t, state = self._before(pos)
         stime = setup_t[state][j.fam]
-        f = max(t, j.rel - stime) + stime + j.p
+        rel_s = j.rel - stime
+        f = (t if t > rel_s else rel_s) + stime + j.p
         if f > j.end_max:
             return None
-        new = setup_c[state][j.fam] + j.mode + max(0, f - j.due) * j.w
+        td = f - j.due
+        new = setup_c[state][j.fam] + j.mode + (td * j.w if td > 0 else 0)
         t, state = f, j.fam
         prefix = cum[pos - 1] if pos else 0
+        tail = prefix + self.rej_cost - j.rej
+        budget = None if cutoff is None else cutoff - tail  # bail once new >= budget
         for i in range(pos, len(order)):
             k = jobs[order[i]]
             stime = setup_t[state][k.fam]
-            f = max(t, k.rel - stime) + stime + k.p
+            rel_s = k.rel - stime
+            f = (t if t > rel_s else rel_s) + stime + k.p
             if f > k.end_max:
                 return None
-            new += setup_c[state][k.fam] + k.mode + max(0, f - k.due) * k.w
+            td = f - k.due
+            new += setup_c[state][k.fam] + k.mode + (td * k.w if td > 0 else 0)
+            if budget is not None and new >= budget:  # tail+new >= cutoff: can't win
+                return tail + new
             t, state = f, k.fam
             if i > pos and f == fin[i]:  # absorbed by an idle gap
-                return prefix + new + (self.perf_cost - cum[i]) + self.rej_cost - j.rej
-        return prefix + new + self.rej_cost - j.rej
+                return tail + new + (self.perf_cost - cum[i])
+        return tail + new
 
-    def try_replace(self, jid: int, pos: int) -> int | None:
-        """Total cost after swapping rejected `jid` with the job at `pos`."""
+    def try_replace(self, jid: int, pos: int, cutoff: int | None = None) -> int | None:
+        """Total cost after swapping rejected `jid` with the job at `pos`.
+
+        `cutoff` enables the same exact lower-bound pruning as `try_insert`
+        (see its docstring); pass it only on non-negative-cost instances.
+        """
         inst = self.inst
         jobs, setup_t, setup_c = inst.jobs, inst.setup_t, inst.setup_c
         order, fin, cum = self.order, self.fin, self.cum
         out, j = jobs[order[pos]], jobs[jid]
         t, state = self._before(pos)
         stime = setup_t[state][j.fam]
-        f = max(t, j.rel - stime) + stime + j.p
+        rel_s = j.rel - stime
+        f = (t if t > rel_s else rel_s) + stime + j.p
         if f > j.end_max:
             return None
-        new = setup_c[state][j.fam] + j.mode + max(0, f - j.due) * j.w
+        td = f - j.due
+        new = setup_c[state][j.fam] + j.mode + (td * j.w if td > 0 else 0)
         t, state = f, j.fam
         prefix = cum[pos - 1] if pos else 0
+        tail = prefix + self.rej_cost - j.rej + out.rej
+        budget = None if cutoff is None else cutoff - tail  # bail once new >= budget
         for i in range(pos + 1, len(order)):
             k = jobs[order[i]]
             stime = setup_t[state][k.fam]
-            f = max(t, k.rel - stime) + stime + k.p
+            rel_s = k.rel - stime
+            f = (t if t > rel_s else rel_s) + stime + k.p
             if f > k.end_max:
                 return None
-            new += setup_c[state][k.fam] + k.mode + max(0, f - k.due) * k.w
+            td = f - k.due
+            new += setup_c[state][k.fam] + k.mode + (td * k.w if td > 0 else 0)
+            if budget is not None and new >= budget:  # tail+new >= cutoff: can't win
+                return tail + new
             t, state = f, k.fam
             if i > pos + 1 and f == fin[i]:  # absorbed by an idle gap
-                return (prefix + new + (self.perf_cost - cum[i])
-                        + self.rej_cost - j.rej + out.rej)
-        return prefix + new + self.rej_cost - j.rej + out.rej
+                return tail + new + (self.perf_cost - cum[i])
+        return tail + new
 
     def insert(self, jid: int, pos: int) -> None:
         """Insert rejected job `jid` at `pos` and rebuild the caches."""
@@ -347,37 +379,54 @@ class Result:
     log: list[tuple[int, float]] = field(default_factory=list)  # (iteration, cost)
 
 
-def _construct(s: State, rng: random.Random) -> int:
+def _construct(s: State, rng: random.Random, prune: bool = False) -> int:
     """Greedy rebuild: insert each pending job at its cheapest feasible position,
-    only when that beats staying rejected. Returns candidate evaluations done."""
+    only when that beats staying rejected. Returns candidate evaluations done.
+
+    When `prune` is set (a non-negative-cost instance) two exact prunings fire:
+    the inner lower-bound bail inside `try_insert`, and an outer position break —
+    once the fixed prefix cost ``cum[pos-1]`` reaches the best candidate found so
+    far, no later position can win (``cum`` is non-decreasing). Skipped positions
+    are credited to `evals` so the reported count is identical to the full scan.
+    """
     evals = 0
     pend = s.rejected()
     rng.shuffle(pend)
     for jid in pend:
         best_pos, best_cost = -1, s.total()
-        for pos in range(len(s.order) + 1):
+        cutoff = best_cost if prune else None
+        npos = len(s.order) + 1
+        cum = s.cum
+        for pos in range(npos):
+            if cutoff is not None and pos and cum[pos - 1] >= best_cost:
+                evals += npos - pos  # no later position can beat best_cost
+                break
             evals += 1
-            c = s.try_insert(jid, pos)
+            c = s.try_insert(jid, pos, cutoff)
             if c is not None and c < best_cost:
                 best_pos, best_cost = pos, c
+                cutoff = best_cost
         if best_pos >= 0:
             s.insert(jid, best_pos)
     return evals
 
 
-def _permute(s: State, rng: random.Random) -> int:
+def _permute(s: State, rng: random.Random, prune: bool = False) -> int:
     """Swap pass: try exchanging each rejected job with each scheduled one,
-    keeping the cheapest improving swap. Returns candidate evaluations done."""
+    keeping the cheapest improving swap. Returns candidate evaluations done.
+    With `prune`, `try_replace` bails early via the same exact lower bound."""
     evals = 0
     pend = s.rejected()
     rng.shuffle(pend)
     for jid in pend:
         best_pos, best_cost = -1, s.total()
+        cutoff = best_cost if prune else None
         for pos in range(len(s.order)):
             evals += 1
-            c = s.try_replace(jid, pos)
+            c = s.try_replace(jid, pos, cutoff)
             if c is not None and c < best_cost:
                 best_pos, best_cost = pos, c
+                cutoff = best_cost
         if best_pos >= 0:
             s.replace(jid, best_pos)
     return evals
@@ -408,11 +457,20 @@ def solve(inst: Instance, *, seconds: float = 5.0, d: int = 2,
     t0 = time.perf_counter()
     target_deci = None if target is None else round(target * 10)
 
+    # Exact cutoff pruning is valid only when every cost that enters the
+    # objective is non-negative (setup, mode, tardiness weight, rejection): then
+    # the partial candidate cost accumulated so far can only grow, so it is a
+    # valid lower bound and a candidate that already reaches the incumbent can be
+    # abandoned. All shipped MaScLib instances qualify; anything else falls back
+    # to the byte-identical unpruned search (kill-max still applies).
+    prune = (all(c >= 0 for row in inst.setup_c for c in row)
+             and all(j.mode >= 0 and j.w >= 0 and j.rej >= 0 for j in inst.jobs))
+
     cur = State(inst)
     cur.rebuild()
-    evals = _construct(cur, rng)
+    evals = _construct(cur, rng, prune)
     if permute:
-        evals += _permute(cur, rng)
+        evals += _permute(cur, rng, prune)
     best = State(inst)
     best.clone_from(cur)
     iters = 0
@@ -429,9 +487,9 @@ def solve(inst: Instance, *, seconds: float = 5.0, d: int = 2,
             cur.remove_random(d, rng)
         else:
             cur.remove_jobs(destroy_fn(cur, d, rng))
-        evals += _construct(cur, rng)
+        evals += _construct(cur, rng, prune)
         if permute:
-            evals += _permute(cur, rng)
+            evals += _permute(cur, rng, prune)
         if cur.total() < best.total():
             best.clone_from(cur)
             log.append((iters, best.total() / 10))

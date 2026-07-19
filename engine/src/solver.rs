@@ -44,7 +44,6 @@ fn job_cost(inst: &Instance, state: usize, fam: usize, mode_cost: i64, f: i64, d
 }
 
 /// Evaluated state of one solution: sequence + rejected set + cached times/costs.
-#[derive(Clone)]
 pub struct State {
     pub order: Vec<u32>,
     pub in_seq: Vec<bool>,
@@ -52,6 +51,33 @@ pub struct State {
     cum: Vec<i64>,   // cumulative performed cost up to position (inclusive)
     pub perf_cost: i64,
     pub rej_cost: i64,
+}
+
+// Manual Clone so `clone_from` reuses the destination's Vec capacity instead of
+// allocating fresh ones every accepted move / every Accept::Best iteration. The
+// derived `clone_from` falls back to `*self = other.clone()`, which reuses
+// nothing; overriding it per field is where the allocation win actually comes
+// from. Contents are identical to a plain clone.
+impl Clone for State {
+    fn clone(&self) -> Self {
+        State {
+            order: self.order.clone(),
+            in_seq: self.in_seq.clone(),
+            fin: self.fin.clone(),
+            cum: self.cum.clone(),
+            perf_cost: self.perf_cost,
+            rej_cost: self.rej_cost,
+        }
+    }
+
+    fn clone_from(&mut self, other: &Self) {
+        self.order.clone_from(&other.order);
+        self.in_seq.clone_from(&other.in_seq);
+        self.fin.clone_from(&other.fin);
+        self.cum.clone_from(&other.cum);
+        self.perf_cost = other.perf_cost;
+        self.rej_cost = other.rej_cost;
+    }
 }
 
 impl State {
@@ -112,6 +138,17 @@ impl State {
     /// Cost of inserting job `jid` at position `pos`, or None if infeasible.
     /// Incremental: O(k) where k = downstream jobs until the shift is absorbed.
     pub fn try_insert(&self, inst: &Instance, jid: u32, pos: usize) -> Option<i64> {
+        self.try_insert_within(inst, jid, pos, i64::MAX)
+    }
+
+    /// Like `try_insert`, but abandons the candidate as soon as the partial cost
+    /// accumulated over the jobs walked so far reaches `cutoff`. Every objective
+    /// term is non-negative, so that partial cost only grows and is a valid lower
+    /// bound on the final candidate cost — a candidate that already reaches the
+    /// incumbent can never be selected (selection is strict `<`). With
+    /// `cutoff == i64::MAX` this is byte-for-byte `try_insert`; a candidate that
+    /// can still win never trips the bound, so its returned cost is exact.
+    pub fn try_insert_within(&self, inst: &Instance, jid: u32, pos: usize, cutoff: i64) -> Option<i64> {
         let j = &inst.jobs[jid as usize];
         let (mut t, mut state) = self.state_before(inst, pos);
         let st = inst.setup_t(state, j.fam);
@@ -124,6 +161,8 @@ impl State {
         t = f;
         state = j.fam;
         let prefix = if pos == 0 { 0 } else { self.cum[pos - 1] };
+        let base = prefix + self.rej_cost - j.rej;
+        let budget = cutoff - base; // bail once new_cost >= budget
         for i in pos..self.order.len() {
             let k = &inst.jobs[self.order[i] as usize];
             let st = inst.setup_t(state, k.fam);
@@ -133,19 +172,28 @@ impl State {
                 return None;
             }
             new_cost += job_cost(inst, state, k.fam, k.mode_cost, f, k.due, k.w);
+            if new_cost >= budget {
+                // base + new_cost >= cutoff: candidate can no longer win
+                return Some(base + new_cost);
+            }
             t = f;
             state = k.fam;
             // absorbed: same finish and same setup pairs from here on
             if i > pos && f == self.fin[i] {
-                let tail = self.perf_cost - self.cum[i];
-                return Some(prefix + new_cost + tail + self.rej_cost - j.rej);
+                return Some(base + new_cost + (self.perf_cost - self.cum[i]));
             }
         }
-        Some(prefix + new_cost + self.rej_cost - j.rej)
+        Some(base + new_cost)
     }
 
     /// Cost of replacing the job at `pos` by rejected job `jid` (swap Π×Ω), or None.
     pub fn try_replace(&self, inst: &Instance, jid: u32, pos: usize) -> Option<i64> {
+        self.try_replace_within(inst, jid, pos, i64::MAX)
+    }
+
+    /// Like `try_replace`, with the same exact partial-cost cutoff as
+    /// `try_insert_within` (see it). `cutoff == i64::MAX` reproduces `try_replace`.
+    pub fn try_replace_within(&self, inst: &Instance, jid: u32, pos: usize, cutoff: i64) -> Option<i64> {
         let out = &inst.jobs[self.order[pos] as usize];
         let j = &inst.jobs[jid as usize];
         let (mut t, mut state) = self.state_before(inst, pos);
@@ -159,6 +207,8 @@ impl State {
         t = f;
         state = j.fam;
         let prefix = if pos == 0 { 0 } else { self.cum[pos - 1] };
+        let base = prefix + self.rej_cost - j.rej + out.rej;
+        let budget = cutoff - base; // bail once new_cost >= budget
         for i in (pos + 1)..self.order.len() {
             let k = &inst.jobs[self.order[i] as usize];
             let st = inst.setup_t(state, k.fam);
@@ -168,14 +218,16 @@ impl State {
                 return None;
             }
             new_cost += job_cost(inst, state, k.fam, k.mode_cost, f, k.due, k.w);
+            if new_cost >= budget {
+                return Some(base + new_cost);
+            }
             t = f;
             state = k.fam;
             if i > pos + 1 && f == self.fin[i] {
-                let tail = self.perf_cost - self.cum[i];
-                return Some(prefix + new_cost + tail + self.rej_cost - j.rej + out.rej);
+                return Some(base + new_cost + (self.perf_cost - self.cum[i]));
             }
         }
-        Some(prefix + new_cost + self.rej_cost - j.rej + out.rej)
+        Some(base + new_cost)
     }
 
     pub fn insert(&mut self, inst: &Instance, jid: u32, pos: usize) {
@@ -207,14 +259,30 @@ impl State {
     }
 
     /// Best feasible insertion position for `jid` (must improve on staying rejected).
-    pub fn best_insertion(&self, inst: &Instance, jid: u32, evals: &mut u64) -> Option<(usize, i64)> {
+    /// With `prune`, tightens a running cutoff and skips positions that provably
+    /// cannot win — an outer break on the monotone prefix cost plus the inner
+    /// partial-cost bound in `try_insert_within`. Skipped positions are credited
+    /// to `evals` so the count matches the exhaustive scan exactly.
+    pub fn best_insertion(&self, inst: &Instance, jid: u32, evals: &mut u64, prune: bool) -> Option<(usize, i64)> {
         let cur = self.total();
         let mut best: Option<(usize, i64)> = None;
-        for p in 0..=self.order.len() {
+        let mut cutoff = cur;
+        let n = self.order.len();
+        for p in 0..=n {
+            if prune && p > 0 && self.cum[p - 1] >= cutoff {
+                *evals += (n + 1 - p) as u64; // no later position can beat cutoff
+                break;
+            }
             *evals += 1;
-            if let Some(c) = self.try_insert(inst, jid, p) {
+            let c = if prune {
+                self.try_insert_within(inst, jid, p, cutoff)
+            } else {
+                self.try_insert(inst, jid, p)
+            };
+            if let Some(c) = c {
                 if c < cur && best.map_or(true, |(_, bc)| c < bc) {
                     best = Some((p, c));
+                    cutoff = c;
                 }
             }
         }
@@ -254,27 +322,34 @@ pub struct Outcome {
     pub elapsed: f64,
 }
 
-fn construct(inst: &Instance, s: &mut State, rng: &mut Rng, evals: &mut u64) {
+fn construct(inst: &Instance, s: &mut State, rng: &mut Rng, evals: &mut u64, prune: bool) {
     let mut pend: Vec<u32> = s.rejected();
     rng.shuffle(&mut pend);
     for jid in pend {
-        if let Some((p, _)) = s.best_insertion(inst, jid, evals) {
+        if let Some((p, _)) = s.best_insertion(inst, jid, evals, prune) {
             s.insert(inst, jid, p);
         }
     }
 }
 
-fn permute(inst: &Instance, s: &mut State, rng: &mut Rng, evals: &mut u64) {
+fn permute(inst: &Instance, s: &mut State, rng: &mut Rng, evals: &mut u64, prune: bool) {
     let mut pend: Vec<u32> = s.rejected();
     rng.shuffle(&mut pend);
     for jid in pend {
         let cur = s.total();
         let mut best: Option<(usize, i64)> = None;
+        let mut cutoff = cur;
         for p in 0..s.order.len() {
             *evals += 1;
-            if let Some(c) = s.try_replace(inst, jid, p) {
+            let c = if prune {
+                s.try_replace_within(inst, jid, p, cutoff)
+            } else {
+                s.try_replace(inst, jid, p)
+            };
+            if let Some(c) = c {
                 if c < cur && best.map_or(true, |(_, bc)| c < bc) {
                     best = Some((p, c));
+                    cutoff = c;
                 }
             }
         }
@@ -297,6 +372,8 @@ pub struct Run {
     stall: u64,
     pub accept: Accept,
     pub permute: bool,
+    /// exact cutoff pruning is enabled (all objective costs are non-negative)
+    prune: bool,
 }
 
 impl Run {
@@ -309,11 +386,14 @@ impl Run {
     pub fn new_adaptive(inst: &Instance, d: usize, d_max: usize, accept: Accept, permute_on: bool, seed: u64) -> Run {
         let mut rng = Rng::new(seed);
         let mut evals: u64 = 0;
+        // cutoff pruning is exact only when every objective cost is non-negative
+        let prune = inst.setup_c.iter().all(|&c| c >= 0)
+            && inst.jobs.iter().all(|j| j.mode_cost >= 0 && j.w >= 0 && j.rej >= 0);
         let mut cur = State::all_rejected(inst);
         cur.rebuild(inst);
-        construct(inst, &mut cur, &mut rng, &mut evals);
+        construct(inst, &mut cur, &mut rng, &mut evals, prune);
         if permute_on {
-            permute(inst, &mut cur, &mut rng, &mut evals);
+            permute(inst, &mut cur, &mut rng, &mut evals, prune);
         }
         let best = cur.clone();
         Run {
@@ -327,6 +407,7 @@ impl Run {
             stall: 0,
             accept: accept,
             permute: permute_on,
+            prune,
         }
     }
 
@@ -337,7 +418,7 @@ impl Run {
         for _ in 0..iters {
             self.iterations += 1;
             if let Accept::Best = self.accept {
-                self.cur = self.best.clone();
+                self.cur.clone_from(&self.best);
             }
             let d_eff = if self.d_max > self.d {
                 (self.d + (self.stall / RAMP) as usize).min(self.d_max)
@@ -345,12 +426,12 @@ impl Run {
                 self.d
             };
             self.cur.remove_random(inst, d_eff, &mut self.rng);
-            construct(inst, &mut self.cur, &mut self.rng, &mut self.evaluations);
+            construct(inst, &mut self.cur, &mut self.rng, &mut self.evaluations, self.prune);
             if self.permute {
-                permute(inst, &mut self.cur, &mut self.rng, &mut self.evaluations);
+                permute(inst, &mut self.cur, &mut self.rng, &mut self.evaluations, self.prune);
             }
             if self.cur.total() < self.best.total() {
-                self.best = self.cur.clone();
+                self.best.clone_from(&self.cur);
                 self.stall = 0;
             } else {
                 self.stall += 1;
@@ -483,6 +564,76 @@ mod tests {
             } else if !s.order.is_empty() {
                 s.remove_random(&inst, 1, &mut rng);
                 assert_eq!(s.total(), brute(&inst, &s.order));
+            }
+        }
+    }
+
+    /// The `_within` cutoff variants must be exact-and-safe: with `i64::MAX` they
+    /// reproduce the unpruned methods byte-for-byte, and for *any* cutoff a
+    /// candidate whose true cost is `< cutoff` is returned exactly, while every
+    /// other outcome (a loser, or an infeasible candidate) is reported as `None`
+    /// or a value `>= cutoff` — never as a spuriously-cheap winner. This is the
+    /// regression guard for the cutoff-pruning search path.
+    fn check_within(exact: Option<i64>, within: Option<i64>, cutoff: i64) {
+        match exact {
+            Some(e) if e < cutoff => {
+                assert_eq!(within, Some(e), "a winner must be priced exactly")
+            }
+            _ => {
+                if let Some(w) = within {
+                    assert!(w >= cutoff, "loser reported below cutoff: {w} < {cutoff}");
+                    if let Some(e) = exact {
+                        assert!(w <= e, "lower bound exceeded true cost: {w} > {e}");
+                    }
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn within_cutoff_is_exact_and_safe() {
+        let inst = tiny(); // has non-zero setup times and costs
+        let mut rng = Rng::new(123);
+        let mut s = State::all_rejected(&inst);
+        s.rebuild(&inst);
+        for _ in 0..4000 {
+            match rng.below(3) {
+                0 if s.order.len() < inst.n() => {
+                    let rej = s.rejected();
+                    let jid = rej[rng.below(rej.len())];
+                    let pos = rng.below(s.order.len() + 1);
+                    if s.try_insert(&inst, jid, pos).is_some() {
+                        s.insert(&inst, jid, pos);
+                    }
+                }
+                1 if !s.order.is_empty() && s.order.len() < inst.n() => {
+                    let rej = s.rejected();
+                    let jid = rej[rng.below(rej.len())];
+                    let pos = rng.below(s.order.len());
+                    if s.try_replace(&inst, jid, pos).is_some() {
+                        s.replace(&inst, jid, pos);
+                    }
+                }
+                _ if !s.order.is_empty() => s.remove_random(&inst, 1, &mut rng),
+                _ => {}
+            }
+            let total = s.total();
+            let cutoffs = [0, total / 2, total, total + 1, i64::MAX];
+            for jid in s.rejected() {
+                for pos in 0..=s.order.len() {
+                    let exact = s.try_insert(&inst, jid, pos);
+                    assert_eq!(exact, s.try_insert_within(&inst, jid, pos, i64::MAX));
+                    for &c in &cutoffs {
+                        check_within(exact, s.try_insert_within(&inst, jid, pos, c), c);
+                    }
+                }
+                for pos in 0..s.order.len() {
+                    let exact = s.try_replace(&inst, jid, pos);
+                    assert_eq!(exact, s.try_replace_within(&inst, jid, pos, i64::MAX));
+                    for &c in &cutoffs {
+                        check_within(exact, s.try_replace_within(&inst, jid, pos, c), c);
+                    }
+                }
             }
         }
     }
