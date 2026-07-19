@@ -251,7 +251,9 @@ class IGStudioApp {
     this.state.error = null;
     if (render) {
       this.render();
-      requestAnimationFrame(() => window.scrollTo(0, 0));
+      // Keep the viewport where it is on scenario/instance switch. A window-level
+      // scroll-to-top here yanked the page up on every carousel tap — jarring on
+      // mobile, where the rail (and carousel) stack above the main content.
     }
   }
 
