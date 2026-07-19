@@ -7,7 +7,10 @@ shop) show this is where evolved operators pay off. A candidate is a function
 
     destroy_score(feat) -> float      # higher = more likely to be destroyed
 
-evaluated per scheduled job over a feature dict; the harness removes the top-d.
+evaluated per scheduled job over a feature dict; the harness samples d jobs with a
+standardized-softmax bias toward the higher scorers (deterministic top-d removal
+measured worse than random, and the sampler degenerates to exactly uniform random
+when all scores are equal).
 A candidate is scored by running the IG with that operator on a train split of
 MaScLib instances (fixed iteration budget, so scores are deterministic and
 comparable) and returning the mean relative gap to the best-known values.

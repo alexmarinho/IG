@@ -10,7 +10,7 @@ Each Iterated Greedy iteration removes `d` scheduled jobs so greedy repair can r
 
 `late`, `slack`, `proc`, `setup_credits`, `reject_credits`, `position`, `weight`
 
-The harness ([`harness.py`](harness.py)) removes the top-`d` scorers, runs the IG for a fixed iteration budget on a **train split** of MaScLib instances, and returns the mean relative gap to the best-known values. A **held-out test split** measures generalization. Random destruction is the baseline every candidate must beat — and a naive hand-written heuristic scores *worse* than random, so there is real work to do.
+The harness ([`harness.py`](harness.py)) *samples* `d` jobs with a standardized-softmax bias toward the higher scorers — deterministic top-`d` removal measured **worse than random** (8.75% vs 4.15% mean gap; see [RESULTS.md](../RESULTS.md)), because always removing the same jobs kills the diversification IG depends on, and the sampler degenerates to exactly uniform random when all scores are equal. It runs the IG for a fixed iteration budget on a **train split** of MaScLib instances, and returns the mean relative gap to the best-known values. A **held-out test split** measures generalization. Random destruction is the baseline every candidate must beat — and a naive hand-written heuristic scores *worse* than random, so there is real work to do.
 
 ## Run it
 
