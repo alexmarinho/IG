@@ -141,7 +141,7 @@ function IG_ensureSheetSize_(sheet, rows, columns) {
   }
 }
 
-function IG_setTable_(sheetName, headers, rows, clearRows) {
+function IG_setTable_(sheetName, headers, rows, clearRows, variableWidth) {
   var sheet = IG_sheet_(sheetName);
   var dataColumns = Math.max(1, headers.length);
   // Write header + data + blank filler up to the table's fixed contract height in
@@ -157,6 +157,15 @@ function IG_setTable_(sheetName, headers, rows, clearRows) {
   var blank = new Array(dataColumns).fill('');
   for (var f = rows.length + 1; f < totalRows; f += 1) block[f] = blank;
   sheet.getRange(1, 1, totalRows, dataColumns).setValues(block);
+  // A table whose width depends on the instance (only the setup matrix, at
+  // 2 * stateCount + 3 columns) can be narrower than the one written before it,
+  // which would leave the previous instance's columns stranded to the right.
+  // Blank them. Safe only for such tables precisely because they carry no
+  // audit-formula columns — the fixed-width tables must keep theirs untouched.
+  if (variableWidth) {
+    var stale = sheet.getLastColumn() - dataColumns;
+    if (stale > 0) sheet.getRange(1, dataColumns + 1, totalRows, stale).clearContent();
+  }
 }
 
 function IG_ensureAuditFormulas_() {
@@ -549,7 +558,7 @@ function IG_writeTrustedRuns_(mode, trustedRuns) {
     'internal_id', 'job_id', 'family', 'processing_time', 'release', 'due',
     'hard_deadline', 'tardiness_weight', 'execution_cost', 'rejection_cost',
   ], IG_instanceRows_(best), 600);
-  IG_setTable_(IG_SHEETS.setups, setup.headers, setup.rows, 30);
+  IG_setTable_(IG_SHEETS.setups, setup.headers, setup.rows, 30, true);
   IG_setTable_(IG_SHEETS.state, ['key', 'value', 'purpose'], IG_stateRows_(best), 12);
   IG_ensureAuditFormulas_();
   SpreadsheetApp.flush();
