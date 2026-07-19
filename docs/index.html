@@ -49,6 +49,40 @@ h1.brand em{font-style:normal;color:var(--terra)}
   padding:5px 10px;background:var(--card);white-space:nowrap;
 }
 
+
+/* ---- Comparison lab: controls, standings, stage ---- */
+#m-racelab{
+  --surface-1:var(--card); --ink-2:var(--ink-soft); --muted:#8a8377;
+  --baseline:#c3c2b7; --grid:var(--rule); --fam-c:var(--brass);
+  --race-greedy:#c9a148; --race-descent:#7d94b0; --race-tabu:#7a8b6f;
+  --race-tabudiv:#5f7d6e; --race-ama:#ad7644; --race-ig:#b0562f;
+  display:grid;grid-template-columns:272px minmax(0,1fr);gap:16px;margin-top:10px;align-items:start;
+}
+@media(max-width:900px){#m-racelab{grid-template-columns:1fr}}
+.lab-console{display:flex;flex-direction:column;gap:12px;min-width:0}
+.lab-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:13px 14px}
+.lab-card h3{font:600 15px/1.2 var(--serif);margin:0 0 10px}
+.lab-actions{display:flex;gap:8px;margin-bottom:12px}
+.lab-actions .btn{flex:1}
+.lab-field{display:block;font:700 10px/1.4 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:11px}
+.lab-field select{display:block;width:100%;margin-top:5px;padding:7px 8px;border:1px solid var(--rule);border-radius:7px;background:var(--paper);font:500 12.5px var(--sans);color:var(--ink)}
+.lab-field .seg{display:flex;margin-top:5px}
+.lab-field .seg button{flex:1}
+.lab-budget{margin-top:2px}
+.lab-budget-bar{height:6px;background:#e9e1d0;border-radius:99px;overflow:hidden}
+.lab-budget-bar span{display:block;height:100%;width:0;background:var(--terra);border-radius:99px;transition:width .18s linear}
+.lab-budget-label{font:500 10.5px/1.4 var(--mono);color:var(--ink-soft);margin-top:5px}
+.standings{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.standings li{display:flex;align-items:center;gap:8px;font-size:12px;padding:5px 6px;border-radius:6px;cursor:pointer}
+.standings li:hover{background:var(--paper)}
+.standings li.off{opacity:.38}
+.standings .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.standings .nm{font-weight:600;flex:1;min-width:0}
+.standings .val{font:700 11.5px var(--mono);color:var(--terra)}
+.lab-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin-top:9px}
+.lab-stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+.lab-inst{font:500 11px var(--mono);color:var(--ink-soft)}
+.btn.tiny{padding:4px 9px;font-size:11px}
 /* ---- Arena: per-method explainer + recorded 2015 benchmark ---- */
 #m-arena{
   --page:var(--card); --ink-2:var(--ink-soft); --muted:#8a8377; --baseline:#c3c2b7;
@@ -776,34 +810,79 @@ footer code{font-family:var(--mono);color:var(--maple)}
 </section>
 <section class="section" id="demo-race">
   <p class="kicker"><span class="fig">Six strategies, one budget</span></p>
-  <h2 class="section-title">The race, under an equal evaluation budget.</h2>
-  <p class="lede">Six search strategies on the same seeded instance, each allowed exactly
-  <b>3,000 complete-plan evaluations</b>. A fair fight needs a shared currency: not wall-clock time,
-  but objective evaluations. Lines draw left to right as budget is consumed.</p>
+  <h2 class="section-title">Test a real scenario — and watch every method search it.</h2>
+  <p class="lede">Choose a terrain and a field size, then start. Six compact implementations of the
+  methods explained above run right here on the same generated problem, under the same
+  <b>evaluation budget</b> — a fair fight needs a shared currency, not wall-clock time. The tree
+  underneath plots that very run: where each method is standing in the space of possible orders.</p>
 
-  <figure class="demo">
-    <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 04</span> <span class="fig-name">Cost vs evaluations consumed — lower is better</span></span>
-    </figcaption>
-    <div class="controls">
-      <button class="btn primary" id="raceRun" type="button">Run race</button>
-      <button class="btn" id="raceReset" type="button">Reset</button>
-      <span class="ctl-label">budget 3,000 evals each</span>
+  <div class="lab-cockpit" id="m-racelab">
+    <aside class="lab-console">
+      <div class="lab-card">
+        <h3>Comparison controls</h3>
+        <div class="lab-actions">
+          <button class="btn primary" id="rcPlay" type="button">&#9654; Start</button>
+          <button class="btn" id="rcNew" type="button">&#8635; Reset</button>
+        </div>
+        <label class="lab-field">Terrain
+          <select id="rcTerrain" aria-label="Instance terrain">
+            <option value="balanced" selected>Balanced costs</option>
+            <option value="setups">High setup costs</option>
+            <option value="tight">Tight due dates</option>
+            <option value="reject">Low outside-processing cost</option>
+          </select>
+        </label>
+        <label class="lab-field">Field size
+          <select id="rcN" aria-label="Number of jobs">
+            <option value="16">16 jobs — small</option>
+            <option value="28" selected>28 jobs — medium</option>
+            <option value="44">44 jobs — large</option>
+            <option value="60">60 jobs — extended</option>
+          </select>
+        </label>
+        <div class="lab-field">Speed
+          <span class="seg" id="rcSpeed" role="group" aria-label="Race speed">
+            <button type="button" data-rspeed="0.25" aria-pressed="false">&frac14;&times;</button>
+            <button type="button" data-rspeed="1" aria-pressed="true" class="on">1&times;</button>
+            <button type="button" data-rspeed="4" aria-pressed="false">4&times;</button>
+            <button type="button" data-rspeed="16" aria-pressed="false">16&times;</button>
+          </span>
+        </div>
+        <div class="lab-budget">
+          <div class="lab-budget-bar" aria-hidden="true"><span id="budgetFill"></span></div>
+          <p class="lab-budget-label" id="budgetLabel">evaluation budget</p>
+        </div>
+      </div>
+      <div class="lab-card">
+        <h3>Current results</h3>
+        <ol class="standings" id="standings"></ol>
+        <p class="lab-hint"><strong>Ranks are provisional until the budget is spent</strong> — constructive
+        methods stop early; iterative ones keep searching, so watch who is still climbing. Click a method to
+        hide or show it.</p>
+      </div>
+    </aside>
+
+    <div class="lab-stage">
+      <figure class="demo">
+        <figcaption class="fig-cap">
+          <span><span class="fig-no">Fig. 04</span> <span class="fig-name">Live comparison — cost per evaluation</span></span>
+          <span class="lab-inst" id="raceInst"></span>
+          <button class="btn tiny" id="btnCopyRace" type="button">Share</button>
+        </figcaption>
+        <canvas class="chart" id="cvRace" aria-label="Race cost curves"></canvas>
+        <p class="status-line" id="raceNote"></p>
+      </figure>
+
+      <figure class="demo">
+        <figcaption class="fig-cap">
+          <span><span class="fig-no">Fig. 05</span> <span class="fig-name">A sample of the solution space</span></span>
+          <span>higher is cheaper — branches group related orders</span>
+        </figcaption>
+        <canvas class="chart" id="cvSpace" aria-label="Solution-space tree"></canvas>
+        <p class="status-line" id="spaceNote"></p>
+      </figure>
     </div>
-    <canvas class="chart" id="raceChart" style="height:230px" aria-label="Race chart: best cost vs evaluations"></canvas>
-    <div class="race-legend" id="raceLegend"></div>
-    <div class="banner" id="raceBanner" role="status"></div>
-    <p class="status-line" id="d4status" aria-live="polite"></p>
-  </figure>
-
-  <figure class="demo" id="spaceFigure">
-    <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 05</span> <span class="fig-name">A sample of the solution space</span></span>
-      <span>higher is cheaper — branches group related orders</span>
-    </figcaption>
-    <canvas class="chart" id="cvSpace" aria-label="Solution-space tree"></canvas>
-    <p class="status-line" id="spaceNote">About 400 schedules are sampled and arranged as a tree: branches group related orders, height means lower cost, and the gold leaf is the best sample. Each arrow is one method's best-so-far — run the race and watch them climb. This samples the space; it does not enumerate it or identify the true optimum.</p>
-  </figure>
+  </div>
 </section>
 
 <section class="section" id="demo-benchmark">
@@ -2374,369 +2453,6 @@ function onWinResize(fn){
 <script>
 'use strict';
 /* ============================================================
-   Demo 4 — algorithm race under an equal evaluation budget.
-   Six strategies, one shared currency: complete-plan evaluations.
-   Lines draw progressively as each strategy spends its 3,000.
-   ============================================================ */
-(function demo4(){
-  var section = $('#demo-race'); if(!section) return;
-  var runBtn = $('#raceRun'), resetBtn = $('#raceReset'), legendEl = $('#raceLegend');
-  var banner = $('#raceBanner'), cv = $('#raceChart'), statusEl = $('#d4status');
-  var inst = genInstance(IG_SEED, 12, 4);
-  var BUDGET = 3000, RATE = 360; // evaluations per second per strategy
-  var COLORS = ['#8a8072', '#c9a148', '#7d94b0', '#b0562f', '#ad7644', '#7a8b6f'];
-
-  /* ---------- solution-space tree ----------
-     Recovered from the 2015 page and re-wired to this engine. A leaf is a complete
-     order priced by evaluate(); a branch is one seed order plus small perturbations
-     of it, so neighbouring leaves really are related schedules. Height = cheaper. */
-  var FS = '-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif';
-  var spCv = $('#cvSpace');
-  var space = { leaves:[], clusters:[], yLo:0, yHi:1, bestLeaf:null, pre:null, dirty:true, w:0, h:300 };
-
-  function solFeatures(sq){
-    var v = new Float32Array(inst.n), L = Math.max(1, sq.length);
-    for(var k = 0; k < sq.length; k++) v[sq[k]] = k / L;
-    return v;
-  }
-  function vDist(a, b){ var d = 0; for(var i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]); return d; }
-
-  function buildSpace(rng){
-    var SEEDS = 24, KIDS = 16;                    /* ~384 sampled orders */
-    space.leaves = []; space.clusters = [];
-    var put = function(sq, cl, ci){
-      var leaf = { vec:solFeatures(sq), cost:evaluate(inst, sq).total, cluster:ci, x:0, y:0, order:sq.slice() };
-      space.leaves.push(leaf); cl.leaves.push(leaf);
-    };
-    for(var c = 0; c < SEEDS; c++){
-      var seed = shuffleRng(rng, allIds(inst.n)), cluster = { id:c, leaves:[], cx:0 };
-      put(seed, cluster, c);
-      for(var k = 1; k < KIDS; k++){
-        var kid = seed.slice(), nd = 2 + Math.floor(rng() * 4);
-        for(var q = 0; q < nd; q++){
-          var i1 = Math.floor(rng() * kid.length), i2 = Math.floor(rng() * kid.length);
-          var t = kid[i1]; kid[i1] = kid[i2]; kid[i2] = t;
-        }
-        put(kid, cluster, c);
-      }
-      space.clusters.push(cluster);
-    }
-    /* order branches by similarity: project each centroid between the two farthest */
-    var cent = space.clusters.map(function(cl){
-      var m = new Float32Array(inst.n);
-      cl.leaves.forEach(function(lf){ for(var i = 0; i < m.length; i++) m[i] += lf.vec[i] / cl.leaves.length; });
-      return m;
-    });
-    var A = 0, B = 1, maxd = -1, i, j;
-    for(i = 0; i < cent.length; i++) for(j = i + 1; j < cent.length; j++){
-      var dd = vDist(cent[i], cent[j]); if(dd > maxd){ maxd = dd; A = i; B = j; }
-    }
-    space.clusters.forEach(function(cl, k){
-      var da = vDist(cent[k], cent[A]), db = vDist(cent[k], cent[B]);
-      cl.t = da / Math.max(1e-6, da + db);
-    });
-    space.clusters.slice().sort(function(a, b){ return a.t - b.t; })
-      .forEach(function(cl, rank){ cl.rank = rank; });
-    var lo = Infinity, hi = 0;
-    space.leaves.forEach(function(lf){ if(lf.cost < lo) lo = lf.cost; if(lf.cost > hi) hi = lf.cost; });
-    space.yLo = lo; space.yHi = hi;
-    space.bestLeaf = space.leaves.reduce(function(b, l){ return l.cost < b.cost ? l : b; }, space.leaves[0]);
-    space.dirty = true;
-  }
-
-  var CROWN = 30;
-  function spaceY(cost, H){
-    var t = (cost - space.yLo) / Math.max(1, space.yHi - space.yLo);
-    return CROWN + 10 + Math.max(0, Math.min(1.02, t)) * (H - CROWN - 50);
-  }
-  function layoutSpace(W, H){
-    var pad = 24, span = W - pad * 2, n = space.clusters.length;
-    space.clusters.forEach(function(cl){
-      cl.cx = pad + (cl.rank + 0.5) / n * span;
-      var jig = mulberry32(cl.id * 977 + IG_SEED);
-      cl.leaves.forEach(function(lf){
-        lf.x = cl.cx + (jig() - 0.5) * (span / n) * 1.3;
-        lf.y = spaceY(lf.cost, H);
-      });
-    });
-  }
-  function prerenderSpace(W, H){
-    var cv2 = document.createElement('canvas'), dpr = devicePixelRatio || 1;
-    cv2.width = W * dpr; cv2.height = H * dpr;
-    var g = cv2.getContext('2d'); g.setTransform(dpr, 0, 0, dpr, 0, 0);
-    var grad = g.createLinearGradient(0, 0, 0, CROWN + 14);
-    grad.addColorStop(0, 'rgba(201,161,72,.22)'); grad.addColorStop(1, 'rgba(201,161,72,0)');
-    g.fillStyle = grad; g.fillRect(0, 0, W, CROWN + 14);
-    g.font = '600 10px ' + FS; g.textBaseline = 'middle'; g.fillStyle = '#9a8f7a';
-    g.fillText(window.__t ? window.__t('above the canopy') : 'above the canopy', 10, 11);
-    var bx = W / 2, by = H - 6, ty = H - 38;
-    g.strokeStyle = '#c8bca4'; g.lineCap = 'round'; g.lineWidth = 5;
-    g.beginPath(); g.moveTo(bx, by); g.lineTo(bx, ty); g.stroke();
-    space.clusters.forEach(function(cl){
-      var my = 0; cl.leaves.forEach(function(lf){ my += lf.y / cl.leaves.length; });
-      g.strokeStyle = '#c8bca4'; g.lineWidth = 1.8;
-      g.beginPath(); g.moveTo(bx, ty); g.quadraticCurveTo(cl.cx, H - 26, cl.cx, my + 18); g.stroke();
-      g.lineWidth = 0.85; g.globalAlpha = 0.55;
-      cl.leaves.forEach(function(lf){
-        g.beginPath(); g.moveTo(cl.cx, my + 18);
-        g.quadraticCurveTo((cl.cx + lf.x) / 2, (my + lf.y) / 2 + 6, lf.x, lf.y); g.stroke();
-      });
-      g.globalAlpha = 0.5; g.fillStyle = '#8a8072';
-      cl.leaves.forEach(function(lf){ g.beginPath(); g.arc(lf.x, lf.y, 2, 0, 7); g.fill(); });
-      g.globalAlpha = 1;
-    });
-    var bl = space.bestLeaf;
-    if(bl){
-      g.fillStyle = '#c9a148'; g.beginPath(); g.arc(bl.x, bl.y, 4.2, 0, 7); g.fill();
-      g.strokeStyle = '#2a2620'; g.lineWidth = 1.2;
-      g.beginPath(); g.arc(bl.x, bl.y, 6.6, 0, 7); g.stroke();
-      g.fillStyle = '#6a6255'; g.font = '600 10px ' + FS;
-      g.fillText((window.__t ? window.__t('best sampled leaf') : 'best sampled leaf') + ' Σ ' + Math.round(bl.cost),
-                 Math.min(bl.x + 10, W - 160), bl.y);
-    }
-    return cv2;
-  }
-  function nearestLeaf(vec){
-    var best = null, bd = Infinity;
-    space.leaves.forEach(function(lf){ var d = vDist(vec, lf.vec); if(d < bd){ bd = d; best = lf; } });
-    return best;
-  }
-  function sizeSpace(){
-    if(!spCv || !spCv.parentElement) return;
-    var dpr = devicePixelRatio || 1, w = Math.max(260, spCv.parentElement.clientWidth - 24);
-    space.w = w; spCv.width = w * dpr; spCv.height = space.h * dpr;
-    spCv.style.width = w + 'px'; spCv.style.height = space.h + 'px';
-    spCv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
-    space.dirty = true;
-  }
-  function drawSpace(){
-    if(!spCv || !space.leaves.length || !space.w) return;
-    var W = space.w, H = space.h, g = spCv.getContext('2d');
-    if(space.dirty || !space.pre){ layoutSpace(W, H); space.pre = prerenderSpace(W, H); space.dirty = false; }
-    g.clearRect(0, 0, W, H);
-    g.drawImage(space.pre, 0, 0, W, H);
-    var gb = Infinity;
-    race.strats.forEach(function(st){ var b = st.s.best(); if(isFinite(b) && b < gb) gb = b; });
-    if(isFinite(gb)){
-      var y = spaceY(gb, H);
-      g.strokeStyle = '#c9a148'; g.setLineDash([4, 4]); g.lineWidth = 1;
-      g.beginPath(); g.moveTo(8, y); g.lineTo(W - 8, y); g.stroke(); g.setLineDash([]);
-      g.fillStyle = '#2a2620'; g.font = '600 10px ' + FS; g.textBaseline = 'bottom';
-      g.fillText((window.__t ? window.__t('race best') : 'race best') + ' Σ ' + Math.round(gb), Math.max(8, W - 120), y - 3);
-    }
-    g.textBaseline = 'middle';
-    race.strats.forEach(function(st, i){
-      var sq = st.s.bestSeq && st.s.bestSeq(), b = st.s.best();
-      if(!sq || !isFinite(b)) return;
-      var lf = nearestLeaf(solFeatures(sq));
-      var mx = (lf ? lf.x : W / 2) + (i - 2.5) * 4, my = spaceY(b, H);
-      g.fillStyle = st.color;
-      g.beginPath(); g.moveTo(mx, my - 6); g.lineTo(mx - 4.2, my + 3); g.lineTo(mx + 4.2, my + 3);
-      g.closePath(); g.fill();
-      g.strokeStyle = '#fdfaf3'; g.lineWidth = 0.9; g.stroke();
-    });
-  }
-
-  function buildStrategies(){
-    return [
-      { s:makeRandomSampler(inst, mulberry32((IG_SEED ^ 0x11) >>> 0)), color:COLORS[0] },
-      { s:makeGreedyOnly(inst), color:COLORS[1] },
-      { s:makeSteepest(inst), color:COLORS[2] },
-      { s:makeIGStrategy(inst, mulberry32((IG_SEED ^ 0x77) >>> 0), false), color:COLORS[3] },
-      { s:makeIGStrategy(inst, mulberry32((IG_SEED ^ 0x77) >>> 0), true), color:COLORS[4] },
-      { s:makeRandomRestart(inst, mulberry32((IG_SEED ^ 0x44) >>> 0)), color:COLORS[5] }
-    ].map(function(o){
-      o.pts = []; o.done = false; o.lastBest = Infinity; o.lastPush = -1;
-      /* strategies that pre-charge construction start from that point */
-      if(o.s.evals() > 0 && isFinite(o.s.best())){
-        o.pts.push([o.s.evals(), o.s.best()]);
-        o.lastBest = o.s.best(); o.lastPush = o.s.evals();
-      }
-      return o;
-    });
-  }
-
-  var race = { strats:[], running:false, active:false, last:0, raf:0, on:false };
-
-  /* ---- progressive step-line chart (best-so-far curves) ---- */
-  function drawRace(){
-    var dpr = fitCanvas(cv), ctx = cv.getContext('2d');
-    if(!ctx) return;
-    var W = cv.width / dpr, H = cv.height / dpr;
-    ctx.clearRect(0, 0, W, H);
-    var L = 40, R = 12, T = 12, B = 24, iw = W - L - R, ih = H - T - B;
-    /* domain from the current head of each line — early bad samples would
-       otherwise squash the interesting 200–350 band permanently */
-    var vals = [];
-    race.strats.forEach(function(st){
-      if(st.pts.length) vals.push(st.pts[st.pts.length - 1][1]);
-      else if(isFinite(st.s.best())) vals.push(st.s.best());
-    });
-    ctx.font = '9px ui-monospace,Menlo,monospace';
-    if(!vals.length){
-      ctx.fillStyle = '#a2967f';
-      ctx.fillText('press “Run race” — each strategy spends 3,000 evaluations live', L, T + 14);
-      /* still draw the x axis for orientation */
-    }
-    var lo = vals.length ? Math.min.apply(null, vals) : 200;
-    var hi = vals.length ? Math.max.apply(null, vals) : 560;
-    if(hi - lo < 20){ hi += 10; lo -= 10; }
-    var pad = (hi - lo) * 0.1; hi += pad; lo -= pad;
-    function X(e){ return L + iw * e / BUDGET; }
-    function Y(c){ return T + ih * (1 - (c - lo) / (hi - lo)); }
-    /* grid + axis labels */
-    ctx.strokeStyle = '#ece2cf'; ctx.fillStyle = '#9a8f7a'; ctx.lineWidth = 1;
-    for(var g = 0; g <= 4; g++){
-      var vv = lo + (hi - lo) * g / 4, yy = Y(vv);
-      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(W - R, yy); ctx.stroke();
-      ctx.fillText(String(Math.round(vv)), 4, yy + 3);
-    }
-    for(var x = 0; x <= BUDGET; x += 1000){
-      ctx.fillText((x / 1000) + 'k', X(x) - 6, H - 8);
-    }
-    ctx.fillText('evaluations →', L + iw / 2 - 30, H - 8);
-    /* one step-line per strategy: horizontal at the old best, then vertical drop */
-    race.strats.forEach(function(st){
-      if(st.pts.length < 1) return;
-      ctx.strokeStyle = st.color; ctx.lineWidth = 1.8;
-      ctx.beginPath();
-      ctx.moveTo(X(st.pts[0][0]), Y(st.pts[0][1]));
-      for(var i = 1; i < st.pts.length; i++){
-        ctx.lineTo(X(st.pts[i][0]), Y(st.pts[i - 1][1])); // hold previous best…
-        ctx.lineTo(X(st.pts[i][0]), Y(st.pts[i][1]));     // …then drop to the new one
-      }
-      /* extend to the current evaluation frontier */
-      var last = st.pts[st.pts.length - 1];
-      ctx.lineTo(X(st.s.evals()), Y(last[1]));
-      ctx.stroke();
-      /* head dot */
-      ctx.fillStyle = st.color;
-      ctx.beginPath(); ctx.arc(X(st.s.evals()), Y(last[1]), 2.6, 0, 6.2832); ctx.fill();
-    });
-    drawSpace();
-  }
-
-  function buildLegend(){
-    legendEl.textContent = '';
-    race.strats.forEach(function(st){
-      var row = el('div', 'legend-row');
-      row.appendChild(el('span', 'rank', '·'));
-      var sw = el('span', 'sw'); sw.style.background = st.color;
-      row.appendChild(sw);
-      row.appendChild(el('span', 'nm', st.s.name));
-      row.appendChild(el('span', 'st', 'evals 0 / ' + BUDGET.toLocaleString('en-US')));
-      row.appendChild(el('span', 'bst', 'best —'));
-      legendEl.appendChild(row);
-      st.row = row;
-      legendEl.__order = '';
-    });
-  }
-  function updateLegend(){
-    race.strats.forEach(function(st){
-      if(!st.row) return;
-      var cells = st.row.children;
-      cells[3].textContent = 'evals ' + st.s.evals().toLocaleString('en-US') + ' / ' + BUDGET.toLocaleString('en-US');
-      cells[4].textContent = isFinite(st.s.best()) ? 'best Σ ' + st.s.best() : 'best —';
-      st.row.classList.toggle('done', st.done || st.s.evals() >= BUDGET);
-    });
-    /* Live standings: best (lowest cost) on top; methods with no result yet sink
-       to the bottom. Ranks are provisional until the budget is spent. */
-    var ordered = race.strats.slice().sort(function(a, b){
-      var ba = isFinite(a.s.best()) ? a.s.best() : Infinity;
-      var bb = isFinite(b.s.best()) ? b.s.best() : Infinity;
-      return ba - bb;
-    });
-    ordered.forEach(function(st, i){
-      if(!st.row) return;
-      st.row.children[0].textContent = isFinite(st.s.best()) ? String(i + 1) : '·';
-      st.row.classList.toggle('lead', i === 0 && isFinite(st.s.best()));
-    });
-    /* only touch the DOM order when the ranking actually changed (avoids per-frame reflow) */
-    var key = ordered.map(function(st){ return race.strats.indexOf(st); }).join(',');
-    if(key !== legendEl.__order){
-      legendEl.__order = key;
-      ordered.forEach(function(st){ if(st.row) legendEl.appendChild(st.row); });
-    }
-  }
-
-  function frame(ts){
-    if(!race.running || !race.active){ race.on = false; return; }
-    race.on = true;
-    var dt = Math.min(100, ts - race.last); race.last = ts;
-    var slice = RATE * dt / 1000;
-    race.strats.forEach(function(st){
-      if(st.done) return;
-      var want = Math.min(BUDGET - st.s.evals(), slice);
-      var got = 0, guard = Math.ceil(want) * 6 + 120; // some moves are eval-free batch applications
-      while(got < want && guard-- > 0){
-        if(!st.s.nextEval()){ st.done = true; break; }
-        got++;
-      }
-      var e = st.s.evals(), b = st.s.best();
-      if(isFinite(b) && (b !== st.lastBest || e - st.lastPush > 40)){
-        st.pts.push([e, b]); st.lastBest = b; st.lastPush = e;
-      }
-    });
-    drawRace();
-    updateLegend();
-    var allDone = race.strats.every(function(st){ return st.done || st.s.evals() >= BUDGET; });
-    if(allDone){ finishRace(); return; }
-    race.raf = requestAnimationFrame(frame);
-  }
-
-  function finishRace(){
-    race.running = false; race.on = false;
-    runBtn.disabled = false;
-    var winner = race.strats.reduce(function(a, b){ return a.s.best() <= b.s.best() ? a : b; });
-    var greedy = race.strats[1].s.best();
-    var pct = Math.round((1 - winner.s.best() / greedy) * 100);
-    banner.innerHTML = 'Winner: <b>' + winner.s.name + '</b> — Σ <b>' + winner.s.best() + '</b> after 3,000 evaluations ' +
-      '(greedy construction alone: Σ ' + greedy + ' → <b>−' + pct + '%</b>). Same budget, same instance — the destroy–rebuild loop is the difference.';
-    banner.classList.add('show');
-    statusEl.innerHTML = 'Race over — <b>' + winner.s.name + '</b> wins with Σ ' + winner.s.best() + '.';
-    updateLegend();
-  }
-
-  function startRace(){
-    resetRace();
-    race.running = true;
-    race.last = performance.now();
-    runBtn.disabled = true;
-    banner.classList.remove('show');
-    statusEl.textContent = 'Racing… each line is one strategy spending its budget.';
-    if(race.active && !race.on){
-      race.last = performance.now();
-      race.raf = requestAnimationFrame(frame);
-    }
-  }
-  function resetRace(){
-    race.running = false; race.on = false;
-    if(race.raf) cancelAnimationFrame(race.raf);
-    race.strats = buildStrategies();
-    buildLegend();
-    drawRace();
-    banner.classList.remove('show');
-    runBtn.disabled = false;
-    statusEl.textContent = '';
-  }
-
-  runBtn.addEventListener('click', startRace);
-  resetBtn.addEventListener('click', resetRace);
-  makeGate(section, function(active){
-    race.active = active;
-    if(active && race.running && !race.on){
-      race.last = performance.now();
-      race.raf = requestAnimationFrame(frame);
-    }
-    if(active) drawRace();
-  });
-  onWinResize(function(){ sizeSpace(); drawRace(); });
-  sizeSpace();
-  buildSpace(mulberry32((IG_SEED ^ 0xA11CE) >>> 0));
-  resetRace();
-})();
-
-/* ============================================================
    Demo 5 — technique lab: the SAME Gantt morph implemented by
    three genuinely separate renderers (DOM / SVG attrs / Canvas).
    ============================================================ */
@@ -3244,6 +2960,23 @@ function onWinResize(fn){
     "Engineering ledger": "Registro de engenharia",
     "Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.": "Benchmarks, verificações exatas, comandos reproduzíveis, resultados mistos e o limite atual de cada implementação.",
     "Read results": "Ler resultados",
+    "Test a real scenario — and watch every method search it.": "Teste um cenário real — e veja cada método buscar nele.",
+    "Comparison controls": "Controles da comparação",
+    "Terrain": "Terreno",
+    "Balanced costs": "Custos equilibrados",
+    "High setup costs": "Custos de setup altos",
+    "Tight due dates": "Prazos apertados",
+    "Low outside-processing cost": "Custo de rejeição baixo",
+    "Field size": "Tamanho do campo",
+    "16 jobs — small": "16 jobs — pequeno",
+    "28 jobs — medium": "28 jobs — médio",
+    "44 jobs — large": "44 jobs — grande",
+    "60 jobs — extended": "60 jobs — estendido",
+    "Speed": "Velocidade",
+    "evaluation budget": "orçamento de avaliações",
+    "Current results": "Resultados atuais",
+    "Live comparison — cost per evaluation": "Comparação ao vivo — custo por avaliação",
+    "Share": "Compartilhar",
     "A sample of the solution space": "Uma amostra do espa\u00e7o de solu\u00e7\u00f5es",
     "higher is cheaper \u2014 branches group related orders": "mais alto \u00e9 mais barato \u2014 os galhos agrupam ordens parecidas",
     "About 400 schedules are sampled and arranged as a tree: branches group related orders, height means lower cost, and the gold leaf is the best sample. Each arrow is one method's best-so-far \u2014 run the race and watch them climb. This samples the space; it does not enumerate it or identify the true optimum.": "Cerca de 400 programa\u00e7\u00f5es s\u00e3o amostradas e organizadas como uma \u00e1rvore: os galhos agrupam ordens parecidas, a altura representa menor custo e a folha dourada \u00e9 a melhor amostra. Cada seta \u00e9 o melhor-at\u00e9-agora de um m\u00e9todo \u2014 rode a corrida e veja-as subir. Isto amostra o espa\u00e7o; n\u00e3o o enumera nem identifica o \u00f3timo verdadeiro.",
@@ -3306,7 +3039,20 @@ function onWinResize(fn){
     "jobs": "tarefas",
     "above the canopy": "acima da copa \u2014 melhor que toda amostra",
     "best sampled leaf": "melhor folha amostrada",
-    "race best": "melhor da corrida"
+    "race best": "melhor da corrida",
+    "instance": "instância",
+    "preparing": "preparando",
+    "constructing": "construindo",
+    "constructing (Greedy)": "construindo (Greedy)",
+    "descending": "descendo",
+    "done — a constructive does not iterate": "concluído — um construtivo não itera",
+    "iteration": "iteração",
+    "generation": "geração",
+    "diversified": "diversificado",
+    "destroy → rebuild": "destruir → reconstruir",
+    "local optimum": "ótimo local",
+    "Share": "Compartilhar",
+    "✓ copied": "✓ copiado"
   };
   window.__t = function (k) { return (window.__lang === "pt" && DYN_PT[k]) || k; };
   try { window.__lang = localStorage.getItem("ig-lang") === "pt" ? "pt" : "en"; }
@@ -3878,6 +3624,944 @@ function onWinResize(fn){
     const target = ALGOS.some(a => a.id === id) ? id : (map[id] || 'ig');
     sel = target; renderDetail();
   };
+})();
+</script>
+
+<script>
+(() => {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  const fmt = { format: (n) => new Intl.NumberFormat(window.__lang === 'pt' ? 'pt-BR' : 'en-US').format(n) };
+  const labRoot = () => document.getElementById('m-racelab');
+  const labVisible = () => { const el = labRoot(); if (!el) return false;
+    const r = el.getBoundingClientRect(); return r.bottom > -400 && r.top < innerHeight + 400; };
+  const cssVar = n => getComputedStyle(labRoot() || document.documentElement).getPropertyValue(n).trim();
+  const FAMS = 4;
+  const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const arenaText = (en, pt) => window.__lang === 'pt' ? pt : en;
+  const arenaStatus = status => {
+    const match = String(status || '').match(/^(iteration|generation|diversified)( .*)$/);
+    return match ? __t(match[1]) + match[2] : __t(status);
+  };
+
+  /* ---- RNG + instance (same generator as the playground) ---- */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  /* terrain presets: same generator, different physics of the problem */
+  const TERRAINS = {
+    balanced: { fams: 4, dueLo: 1.5, dueHi: 3.0, dueAdd: 60, rejLo: 2.8, rejHi: 5.0, rejBase: 80, suLo: 8, suHi: 22, scLo: 1.5, scHi: 3 },
+    setups:   { fams: 6, dueLo: 1.5, dueHi: 3.0, dueAdd: 60, rejLo: 2.8, rejHi: 5.0, rejBase: 80, suLo: 18, suHi: 45, scLo: 3, scHi: 6 },
+    tight:    { fams: 4, dueLo: 1.0, dueHi: 1.6, dueAdd: 15, rejLo: 2.8, rejHi: 5.0, rejBase: 80, suLo: 8, suHi: 22, scLo: 1.5, scHi: 3 },
+    reject:   { fams: 4, dueLo: 1.1, dueHi: 1.8, dueAdd: 20, rejLo: 1.2, rejHi: 2.2, rejBase: 25, suLo: 8, suHi: 22, scLo: 1.5, scHi: 3 },
+  };
+  function genInstance(n, seed, tKey) {
+    const T = TERRAINS[tKey] || TERRAINS.balanced;
+    const rng = mulberry32(seed);
+    const U = (a, b) => a + rng() * (b - a), UI = (a, b) => Math.floor(U(a, b + 1));
+    const jobs = []; let sumP = 0;
+    for (let i = 0; i < n; i++) { const p = UI(16, 60); sumP += p; jobs.push({ id: i, fam: UI(0, T.fams - 1), p }); }
+    const H = sumP * 0.95;
+    for (const j of jobs) {
+      j.rel = Math.round(U(0, H * 0.75));
+      j.due = Math.round(j.rel + j.p * U(T.dueLo, T.dueHi) + U(0, T.dueAdd));
+      j.w = UI(1, 4);
+      j.rej = Math.round(j.p * U(T.rejLo, T.rejHi)) + T.rejBase;
+    }
+    const setup = [], setup0 = [];
+    for (let a = 0; a < T.fams; a++) {
+      setup[a] = [];
+      for (let b = 0; b < T.fams; b++) { const t = a === b ? UI(2, 6) : UI(T.suLo, T.suHi); setup[a][b] = { t, c: Math.round(t * U(T.scLo, T.scHi)) }; }
+    }
+    for (let b = 0; b < T.fams; b++) setup0[b] = { t: UI(4, 12), c: UI(8, 24) };
+    return { n, jobs, setup, setup0 };
+  }
+
+  /* ---- lean evaluator (allocation-free) ---- */
+  let inst = null;
+  function costOnly(order, rejected) {
+    let t = 0, prev = -1, cost = 0;
+    for (let k = 0; k < order.length; k++) {
+      const j = inst.jobs[order[k]];
+      const su = prev < 0 ? inst.setup0[j.fam] : inst.setup[prev][j.fam];
+      const ss = Math.max(t, j.rel - su.t), f = ss + su.t + j.p;
+      cost += su.c; const late = f - j.due; if (late > 0) cost += late * j.w;
+      t = f; prev = j.fam;
+    }
+    for (let k = 0; k < rejected.length; k++) cost += inst.jobs[rejected[k]].rej;
+    return cost;
+  }
+
+  /* ---- solution-space tree: sample, cluster, lay out as a canopy ---- */
+  function solFeatures(sol) {
+    const v = new Float32Array(inst.n).fill(1.25);   // rejected sentinel
+    const L = Math.max(1, sol.order.length);
+    sol.order.forEach((id, k) => { v[id] = k / L; });
+    return v;
+  }
+  const vDist = (a, b) => { let d = 0; for (let i = 0; i < a.length; i++) d += Math.abs(a[i] - b[i]); return d; };
+
+  const space = { leaves: [], clusters: [], yLo: 0, yHi: 1, bestLeaf: null, pre: null, dirty: true };
+  const SPACE_CAPTION = () => window.__lang === 'pt'
+    ? 'Cada \u25cf vaga-lume = o agendamento vivo de um competidor vagando pela árvore amostrada (mais alto = mais barato); \u25b2 pino = o melhor que ele já travou. Passe o mouse numa folha para ver aquele agendamento, clique para fixar; cruzar a faixa dourada = melhor que todos os amostrados.'
+    : 'Each \u25cf firefly = a racer\u2019s live schedule wandering the sampled tree (higher = cheaper); \u25b2 pin = its locked-in best. Hover a leaf to preview that schedule, click to pin it; cross the gold band and the racer has beaten every sampled schedule.';
+
+  function buildSpace(rng) {
+    const SEEDS = inst.n >= 60 ? 20 : 26, KIDS = inst.n >= 60 ? 12 : 14;
+    space.leaves = []; space.clusters = [];
+    for (let c = 0; c < SEEDS; c++) {
+      const seed = { order: [], rejected: inst.jobs.map(j => j.id) };
+      greedyPass(seed, rng, null);
+      const cluster = { id: c, leaves: [], cx: 0 };
+      const put = (sol) => {
+        const cost = costOnly(sol.order, sol.rejected);
+        const leaf = { vec: solFeatures(sol), cost, nSch: sol.order.length, cluster: c, x: 0, y: 0,
+                       order: sol.order.slice(), rejected: sol.rejected.slice() };
+        space.leaves.push(leaf); cluster.leaves.push(leaf);
+      };
+      put(seed);
+      for (let k = 1; k < KIDS; k++) {
+        const kid = { order: seed.order.slice(), rejected: seed.rejected.slice() };
+        const nd = 2 + Math.floor(rng() * 5);
+        for (let q = 0; q < nd && kid.order.length; q++) {
+          const i = Math.floor(rng() * kid.order.length);
+          kid.rejected.push(kid.order[i]); kid.order.splice(i, 1);
+        }
+        greedyPass(kid, rng, null);
+        put(kid);
+      }
+      space.clusters.push(cluster);
+    }
+    // 1D similarity ordering of clusters: project between the two farthest centroids
+    const cent = space.clusters.map(cl => {
+      const m = new Float32Array(inst.n);
+      for (const lf of cl.leaves) for (let i = 0; i < m.length; i++) m[i] += lf.vec[i] / cl.leaves.length;
+      return m;
+    });
+    let A = 0, B = 1, maxd = -1;
+    for (let i = 0; i < cent.length; i++) for (let j = i + 1; j < cent.length; j++) {
+      const d = vDist(cent[i], cent[j]);
+      if (d > maxd) { maxd = d; A = i; B = j; }
+    }
+    space.clusters.forEach((cl, i) => {
+      const da = vDist(cent[i], cent[A]), db = vDist(cent[i], cent[B]);
+      cl.t = da / Math.max(1e-6, da + db);
+    });
+    const order = space.clusters.slice().sort((a, b) => a.t - b.t);
+    order.forEach((cl, rank) => { cl.rank = rank; });
+    // cost domain
+    let lo = Infinity, hi = 0;
+    for (const lf of space.leaves) { lo = Math.min(lo, lf.cost); hi = Math.max(hi, lf.cost); }
+    space.yLo = lo; space.yHi = hi;
+    space.bestLeaf = space.leaves.reduce((b, l) => l.cost < b.cost ? l : b, space.leaves[0]);
+    space.dirty = true;
+  }
+
+  const CROWN = 46; // px band at the top: better than every sampled leaf
+  function spaceY(cost, H) {
+    const t = (cost - space.yLo) / Math.max(1, space.yHi - space.yLo);
+    return CROWN + 12 + Math.max(0, Math.min(1.02, t)) * (H - CROWN - 70);
+  }
+
+  function layoutSpace(W, H) {
+    const pad = 30, span = W - pad * 2, n = space.clusters.length;
+    for (const cl of space.clusters) {
+      cl.cx = pad + (cl.rank + 0.5) / n * span;
+      const jig = mulberry32(cl.id * 977 + raceSeed);
+      for (const lf of cl.leaves) {
+        lf.x = cl.cx + (jig() - 0.5) * (span / n) * 1.35;
+        lf.y = spaceY(lf.cost, H);
+      }
+    }
+  }
+
+  function prerenderSpace(W, H) {
+    const cv = document.createElement('canvas');
+    const dpr = devicePixelRatio || 1;
+    cv.width = W * dpr; cv.height = H * dpr;
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const muted = cssVar('--muted'), base = cssVar('--baseline'), gold = cssVar('--fam-c');
+    // crown band: beyond every sampled schedule
+    const grad = ctx.createLinearGradient(0, 0, 0, CROWN + 16);
+    grad.addColorStop(0, gold + '2e'); grad.addColorStop(1, gold + '00');
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, CROWN + 16);
+    ctx.font = '600 10.5px system-ui, sans-serif'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = cssVar('--ink-2');
+    ctx.fillText(__t('above the canopy'), 12, 14);
+    // trunk
+    const bx = W / 2, by = H - 12, ty = H - 58;
+    ctx.strokeStyle = base; ctx.lineCap = 'round';
+    ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx, ty); ctx.stroke();
+    // limbs + twigs + leaves
+    for (const cl of space.clusters) {
+      let my = 0; for (const lf of cl.leaves) my += lf.y / cl.leaves.length;
+      ctx.strokeStyle = base; ctx.lineWidth = 2.4;
+      ctx.beginPath(); ctx.moveTo(bx, ty);
+      ctx.quadraticCurveTo(cl.cx, H - 40, cl.cx, my + 26); ctx.stroke();
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.7;
+      for (const lf of cl.leaves) {
+        ctx.beginPath(); ctx.moveTo(cl.cx, my + 26);
+        ctx.quadraticCurveTo((cl.cx + lf.x) / 2, (my + lf.y) / 2 + 8, lf.x, lf.y); ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = muted;
+      for (const lf of cl.leaves) {
+        ctx.globalAlpha = 0.55;
+        ctx.beginPath(); ctx.arc(lf.x, lf.y, 2.4, 0, 7); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    // the golden leaf (best sample)
+    const bl = space.bestLeaf;
+    if (bl) {
+      ctx.fillStyle = gold;
+      ctx.beginPath(); ctx.arc(bl.x, bl.y, 4.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = cssVar('--ink'); ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(bl.x, bl.y, 7, 0, 7); ctx.stroke();
+      ctx.fillStyle = cssVar('--ink-2'); ctx.font = '600 10.5px system-ui, sans-serif';
+      ctx.fillText(`${__t('best sampled leaf')} · ${fmt.format(Math.round(bl.cost))}`, Math.min(bl.x + 12, W - 170), bl.y);
+    }
+    return cv;
+  }
+
+  function nearestLeaf(vec) {
+    let best = null, bd = Infinity;
+    for (const lf of space.leaves) {
+      const d = vDist(vec, lf.vec);
+      if (d < bd) { bd = d; best = lf; }
+    }
+    return best;
+  }
+
+  function drawSpace(t) {
+    const cv = $('cvSpace'); if (!cv || !space.leaves.length) return;
+    const ctx = cv.getContext('2d');
+    const W = sizes.space || 600, H = 440;
+    if (space.dirty || !space.pre) { layoutSpace(W, H); space.pre = prerenderSpace(W, H); space.dirty = false; }
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(space.pre, 0, 0, W, H);
+    // global best line
+    const gb = racers.reduce((m, r) => r.off ? m : Math.min(m, r.bestCost), Infinity);
+    if (isFinite(gb)) {
+      const y = spaceY(gb, H);
+      const gold = cssVar('--fam-c');
+      ctx.strokeStyle = gold; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(10, y); ctx.lineTo(W - 10, y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = cssVar('--ink');
+      ctx.font = '600 10.5px system-ui, sans-serif'; ctx.textBaseline = 'bottom';
+      ctx.fillText(`${__t('race best')} ${fmt.format(Math.round(gb))}`, W - 130, y - 3);
+    }
+    // fireflies
+    ctx.textBaseline = 'middle';
+    racers.forEach((r, idx) => {
+      if (r.off) return;
+      const view = r.view && r.view();
+      if (!view || !view.sol) return;
+      const fA = raceFocus && raceFocus !== r.id ? 0.25 : 1;
+      const cost = view.cost != null ? view.cost : costOnly(view.sol.order, view.sol.rejected);
+      if (!r.fly) r.fly = { x: W / 2, y: H - 30, trail: [] };
+      // throttle nearest-leaf search
+      if (!r.fly.tick || t - r.fly.tick > 200) {
+        r.fly.leaf = nearestLeaf(solFeatures(view.sol));
+        r.fly.tick = t;
+      }
+      const lx = (r.fly.leaf ? r.fly.leaf.x : W / 2) + (idx - 2.5) * 5;
+      const ly = spaceY(cost, H);
+      const k = RM ? 1 : 0.12;
+      r.fly.x += (lx - r.fly.x) * k;
+      r.fly.y += (ly - r.fly.y) * k;
+      const tr = r.fly.trail;
+      const last = tr[tr.length - 1];
+      if (!last || Math.hypot(last.x - r.fly.x, last.y - r.fly.y) > 3) {
+        tr.push({ x: r.fly.x, y: r.fly.y });
+        if (tr.length > 46) tr.shift();
+      }
+      const col = cssVar(r.colorVar);
+      ctx.strokeStyle = col; ctx.lineWidth = 1.4; ctx.lineJoin = 'round';
+      for (let i = 1; i < tr.length; i++) {
+        ctx.globalAlpha = fA * 0.35 * (i / tr.length);
+        ctx.beginPath(); ctx.moveTo(tr[i - 1].x, tr[i - 1].y); ctx.lineTo(tr[i].x, tr[i].y); ctx.stroke();
+      }
+      ctx.globalAlpha = fA;
+      // pin at the racer's locked-in best
+      if (isFinite(r.bestCost)) {
+        const py = spaceY(r.bestCost, H);
+        if (r.bestVec && (!r.fly.pinTick || t - r.fly.pinTick > 600)) {
+          const lf = nearestLeaf(r.bestVec);
+          r.fly.pinX = lf ? lf.x + (idx - 2.5) * 5 : r.fly.x;
+          r.fly.pinTick = t;
+        }
+        const pinX = r.fly.pinX != null ? r.fly.pinX : r.fly.x;
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.moveTo(pinX, py - 5); ctx.lineTo(pinX - 4, py + 3); ctx.lineTo(pinX + 4, py + 3);
+        ctx.closePath(); ctx.fill();
+      }
+      // the firefly
+      const pulse = RM ? 1 : 1 + 0.2 * Math.sin(t / 260 + idx);
+      ctx.save();
+      ctx.shadowColor = col; ctx.shadowBlur = 12 * pulse;
+      ctx.fillStyle = cssVar('--surface-1');
+      ctx.beginPath(); ctx.arc(r.fly.x, r.fly.y, 5.4, 0, 7); ctx.fill();
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(r.fly.x, r.fly.y, 3.6, 0, 7); ctx.fill();
+      ctx.restore();
+    });
+    ctx.globalAlpha = 1;
+    if (selLeaf && space.leaves.includes(selLeaf)) {
+      ctx.strokeStyle = cssVar('--ink'); ctx.lineWidth = 1.8;
+      ctx.beginPath(); ctx.arc(selLeaf.x, selLeaf.y, 8, 0, 7); ctx.stroke();
+    }
+  }
+
+  /* ---- leaf & firefly inspector ---- */
+  let selLeaf = null;
+  const FAMV = ['--fam-a', '--fam-b', '--fam-c', '--fam-d', '--race-tabudiv', '--race-ama'];
+  function schedStrip(order, rejected) {
+    const tot = Math.max(1, order.reduce((a, id) => a + inst.jobs[id].p, 0));
+    let html = '<span style="display:flex;height:10px;border-radius:3px;overflow:hidden;margin-top:5px">';
+    for (const id of order) {
+      const j = inst.jobs[id];
+      html += `<span style="width:${(100 * j.p / tot).toFixed(2)}%;background:var(${FAMV[j.fam % FAMV.length]})"></span>`;
+    }
+    html += '</span>';
+    return html;
+  }
+  function spaceHit(mx, my) {
+    for (const r of racers) {
+      if (r.off || !r.fly) continue;
+      if (Math.hypot(r.fly.x - mx, r.fly.y - my) < 10) return { fly: r };
+    }
+    let best = null, bd = 121;
+    for (const lf of space.leaves) {
+      const d = (lf.x - mx) ** 2 + (lf.y - my) ** 2;
+      if (d < bd) { bd = d; best = lf; }
+    }
+    return best ? { leaf: best } : null;
+  }
+  const spTip = document.getElementById('tip');
+  $('cvSpace').addEventListener('pointermove', e => {
+    const r = $('cvSpace').getBoundingClientRect();
+    const hit = spaceHit(e.clientX - r.left, e.clientY - r.top);
+    $('cvSpace').style.cursor = hit ? 'pointer' : 'default';
+    if (!hit) { spTip.style.display = 'none'; return; }
+    spTip.innerHTML = hit.fly
+      ? `<b>${hit.fly.name}</b> · ${arenaText('best', 'melhor')} ${isFinite(hit.fly.bestCost) ? fmt.format(Math.round(hit.fly.bestCost)) : '…'} · ${arenaStatus(hit.fly.status)}`
+      : `<b>${fmt.format(Math.round(hit.leaf.cost))}</b> · ${hit.leaf.order.length} ${arenaText('scheduled', 'programadas')} / ${hit.leaf.rejected.length} ${arenaText('rejected', 'rejeitadas')}` + schedStrip(hit.leaf.order, hit.leaf.rejected);
+    spTip.style.display = 'block';
+    spTip.style.left = Math.min(e.clientX + 14, innerWidth - spTip.offsetWidth - 10) + 'px';
+    spTip.style.top = Math.min(e.clientY + 16, innerHeight - spTip.offsetHeight - 10) + 'px';
+  });
+  $('cvSpace').addEventListener('pointerleave', () => { spTip.style.display = 'none'; $('cvSpace').style.cursor = 'default'; });
+  function renderPinnedLeaf() {
+    $('spaceNote').innerHTML = selLeaf
+      ? `<b>${arenaText('pinned leaf', 'folha fixada')}</b> — ${arenaText('cost', 'custo')} ${fmt.format(Math.round(selLeaf.cost))} · ${selLeaf.order.length} ${arenaText('scheduled', 'programadas')} / ${selLeaf.rejected.length} ${arenaText('rejected', 'rejeitadas')} ${schedStrip(selLeaf.order, selLeaf.rejected)}`
+      : SPACE_CAPTION();
+  }
+  $('cvSpace').addEventListener('click', e => {
+    const r = $('cvSpace').getBoundingClientRect();
+    const hit = spaceHit(e.clientX - r.left, e.clientY - r.top);
+    selLeaf = hit && hit.leaf ? hit.leaf : null;
+    renderPinnedLeaf();
+    drawAll(performance.now());
+  });
+
+  /* ---- neighborhood (Descent/Tabu): best move ---- */
+  function bestNeighbor(cur, tabuUntil, iter, bestCost, rng) {
+    // moves: add rejected / remove scheduled / reposition / swap scheduled×rejected
+    let evals = 0, best = null;
+    const O = cur.order, R = cur.rejected;
+    const consider = (cost, apply, job) => {
+      evals++;
+      const isTabu = tabuUntil && (tabuUntil[job] || 0) > iter;
+      if (isTabu && cost >= bestCost) return;               // aspiration
+      if (!best || cost < best.cost) best = { cost, apply, job };
+    };
+    for (let ri = 0; ri < R.length; ri++) {                 // adicionar
+      const j = R[ri];
+      for (let p = 0; p <= O.length; p++) {
+        O.splice(p, 0, j); const r2 = R.slice(); r2.splice(ri, 1);
+        consider(costOnly(O, r2), { type: 'add', j, p }, j);
+        O.splice(p, 1);
+      }
+    }
+    for (let oi = 0; oi < O.length; oi++) {                 // remover
+      const j = O[oi]; const o2 = O.slice(); o2.splice(oi, 1);
+      consider(costOnly(o2, R.concat(j)), { type: 'rem', j, oi }, j);
+    }
+    for (let oi = 0; oi < O.length; oi++) {                 // reposicionar
+      const j = O[oi]; const o2 = O.slice(); o2.splice(oi, 1);
+      for (let p = 0; p <= o2.length; p++) {
+        if (p === oi) continue;
+        o2.splice(p, 0, j);
+        consider(costOnly(o2, R), { type: 'mov', j, oi, p }, j);
+        o2.splice(p, 1);
+      }
+    }
+    for (let oi = 0; oi < O.length; oi++) {                 // trocar
+      for (let ri = 0; ri < R.length; ri++) {
+        const o2 = O.slice(); o2[oi] = R[ri];
+        const r2 = R.slice(); r2[ri] = O[oi];
+        consider(costOnly(o2, r2), { type: 'swp', oi, ri }, R[ri]);
+      }
+    }
+    return { best, evals };
+  }
+  function applyMove(cur, mv) {
+    const O = cur.order, R = cur.rejected;
+    if (mv.type === 'add') { O.splice(mv.p, 0, mv.j); R.splice(R.indexOf(mv.j), 1); }
+    else if (mv.type === 'rem') { O.splice(mv.oi, 1); R.push(mv.j); }
+    else if (mv.type === 'mov') { O.splice(mv.oi, 1); O.splice(mv.p, 0, mv.j); }
+    else if (mv.type === 'swp') { const t = O[mv.oi]; O[mv.oi] = R[mv.ri]; R[mv.ri] = t; }
+  }
+
+  function bestInsertion(order, rejected, id) {
+    let evals = 0;
+    const base = costOnly(order, rejected);
+    const rIdx = rejected.indexOf(id);
+    const r2 = rejected.slice(); r2.splice(rIdx, 1);
+    let best = { cost: base, pos: -1 };
+    for (let p = 0; p <= order.length; p++) {
+      order.splice(p, 0, id);
+      const c = costOnly(order, r2); evals++;
+      if (c < best.cost - 1e-9) best = { cost: c, pos: p };
+      order.splice(p, 1);
+    }
+    return { ...best, evals };
+  }
+  // shared greedy construction (random order) — consumes evaluations
+  function greedyPass(cur, rng, cb) {
+    let evals = 0;
+    const pend = cur.rejected.slice();
+    for (let i = pend.length - 1; i > 0; i--) { const k = Math.floor(rng() * (i + 1)); [pend[i], pend[k]] = [pend[k], pend[i]]; }
+    for (const id of pend) {
+      const bi = bestInsertion(cur.order, cur.rejected, id);
+      evals += bi.evals;
+      if (bi.pos >= 0) {
+        cur.order.splice(bi.pos, 0, id);
+        cur.rejected.splice(cur.rejected.indexOf(id), 1);
+        if (cb) cb(bi.cost, bi.evals);
+      }
+    }
+    return evals;
+  }
+
+  /* ---- racers ---- */
+  function baseRacer(id, name, colorVar) {
+    return {
+      id, name, colorVar, evals: 0, done: false, status: 'preparing',
+      cur: { order: [], rejected: inst.jobs.map(j => j.id) },
+      bestCost: Infinity, hist: [], credit: 0, bestVec: null,
+      rng: mulberry32(0xBEEF ^ id.length * 2654435761 ^ raceSeed),
+      note(cost, sol) {
+        if (cost < this.bestCost - 1e-9) {
+          this.bestCost = cost;
+          this.hist.push({ e: this.evals, c: cost });
+          if (sol) this.bestVec = solFeatures(sol);
+        }
+      },
+    };
+  }
+
+  function makeGreedy() {
+    const r = baseRacer('greedy', 'Greedy', '--race-greedy');
+    r.status = 'constructing';
+    r.step = function (budget) {
+      if (this.done) return 0;
+      let used = 0;
+      const pend = this.pend || (this.pend = (() => {
+        const p = this.cur.rejected.slice();
+        for (let i = p.length - 1; i > 0; i--) { const k = Math.floor(this.rng() * (i + 1)); [p[i], p[k]] = [p[k], p[i]]; }
+        return p;
+      })());
+      while (pend.length && used < budget) {
+        const id = pend.shift();
+        const bi = bestInsertion(this.cur.order, this.cur.rejected, id);
+        used += bi.evals; this.evals += bi.evals;
+        if (bi.pos >= 0) {
+          this.cur.order.splice(bi.pos, 0, id);
+          this.cur.rejected.splice(this.cur.rejected.indexOf(id), 1);
+          this.note(bi.cost, this.cur);
+        }
+      }
+      if (!pend.length) { this.done = true; this.status = 'done — a constructive does not iterate'; }
+      return used;
+    };
+    return r;
+  }
+
+  function makeDescent() {
+    const r = baseRacer('descent', 'Descent', '--race-descent');
+    r.phase = 'build'; r.status = 'constructing (Greedy)';
+    r.step = function (budget) {
+      if (this.done) return 0;
+      let used = 0;
+      if (this.phase === 'build') {
+        used = greedyPass(this.cur, this.rng, c => this.note(c, this.cur));
+        this.evals += used; this.phase = 'search'; this.status = 'descending';
+        return used;
+      }
+      this.credit += budget;
+      while (this.credit > 0 && !this.done) {
+        const { best, evals } = bestNeighbor(this.cur, null, 0, this.bestCost, this.rng);
+        used += evals; this.evals += evals; this.credit -= evals;
+        if (best && best.cost < this.bestCost - 1e-9) {
+          applyMove(this.cur, best.apply);
+          this.note(best.cost, this.cur);
+        } else {
+          this.done = true; this.status = 'stuck in a local minimum';
+        }
+      }
+      return used;
+    };
+    return r;
+  }
+
+  function makeTabu(div) {
+    const r = baseRacer(div ? 'tabudiv' : 'tabu', div ? 'TabuDiv' : 'Tabu', div ? '--race-tabudiv' : '--race-tabu');
+    r.phase = 'build'; r.iter = 0; r.tabuUntil = {}; r.age = {}; r.jumps = 0;
+    r.status = 'constructing (Greedy)';
+    r.step = function (budget) {
+      if (this.done) return 0;
+      let used = 0;
+      if (this.phase === 'build') {
+        used = greedyPass(this.cur, this.rng, c => this.note(c, this.cur));
+        this.evals += used; this.phase = 'search';
+        this.cur.order.forEach(j => { this.age[j] = 0; });
+        return used;
+      }
+      this.credit += budget;
+      let curCost = costOnly(this.cur.order, this.cur.rejected);
+      while (this.credit > 0) {
+        this.iter++;
+        if (div && this.iter % 45 === 0) {                    // diversification: reject the 30% oldest
+          const byAge = this.cur.order.slice().sort((a, b) => (this.age[a] || 0) - (this.age[b] || 0));
+          const k = Math.max(1, Math.floor(this.cur.order.length * 0.3));
+          for (const j of byAge.slice(0, k)) {
+            this.cur.order.splice(this.cur.order.indexOf(j), 1);
+            this.cur.rejected.push(j);
+            this.tabuUntil[j] = this.iter + 12;
+          }
+          curCost = costOnly(this.cur.order, this.cur.rejected); this.evals++; used++; this.credit--;
+          this.jumps++;
+          this.status = `diversified ×${this.jumps}`;
+          continue;
+        }
+        const { best, evals } = bestNeighbor(this.cur, this.tabuUntil, this.iter, this.bestCost, this.rng);
+        used += evals; this.evals += evals; this.credit -= evals;
+        if (!best) break;
+        applyMove(this.cur, best.apply);
+        this.tabuUntil[best.job] = this.iter + 8;
+        if (best.apply.type === 'add') this.age[best.job] = this.iter;
+        curCost = best.cost;
+        this.note(best.cost, this.cur);
+        if (!div) this.status = `iteration ${this.iter}`;
+      }
+      return used;
+    };
+    return r;
+  }
+
+  function makeAMA() {
+    const r = baseRacer('ama', 'AMA (memetic)', '--race-ama');
+    r.phase = 'build'; r.pop = []; r.gen = 0; r.status = 'breeding population';
+    r.step = function (budget) {
+      if (this.done) return 0;
+      let used = 0;
+      if (this.phase === 'build') {
+        while (this.pop.length < 6 && used < budget + 4000) {
+          const sol = { order: [], rejected: inst.jobs.map(j => j.id) };
+          const e = greedyPass(sol, this.rng, null);
+          used += e; this.evals += e;
+          const c = costOnly(sol.order, sol.rejected); used++; this.evals++;
+          this.pop.push({ ...sol, cost: c });
+          this.note(c, sol);
+        }
+        if (this.pop.length >= 6) { this.phase = 'evolve'; this.status = 'generation 0'; }
+        return used;
+      }
+      this.credit += budget;
+      while (this.credit > 0) {
+        this.gen++;
+        const pick = () => {
+          let b = null;
+          for (let k = 0; k < 3; k++) { const c = this.pop[Math.floor(this.rng() * this.pop.length)]; if (!b || c.cost < b.cost) b = c; }
+          return b;
+        };
+        const pa = pick(); let pb = pick(); if (pb === pa) pb = pick();
+        // OX-lite crossover: A's prefix + the rest in B's order
+        const cut = 1 + Math.floor(this.rng() * Math.max(1, pa.order.length - 1));
+        const head = pa.order.slice(0, cut);
+        const tail = pb.order.filter(j => !head.includes(j));
+        const child = { order: head.concat(tail), rejected: inst.jobs.map(j => j.id).filter(j => !head.includes(j) && !tail.includes(j)) };
+        let e = 1; this.evals++;
+        e += greedyPass(child, this.rng, null);                       // repair/intensification
+        if (this.rng() < 0.35 && child.order.length > 2) {            // mutation: destroy 2 + reinsert
+          for (let k = 0; k < 2; k++) {
+            const i = Math.floor(this.rng() * child.order.length);
+            child.rejected.push(child.order[i]); child.order.splice(i, 1);
+          }
+          e += greedyPass(child, this.rng, null);
+        }
+        const cc = costOnly(child.order, child.rejected); e++;
+        this.evals += e - 1; used += e; this.credit -= e;
+        const worst = this.pop.reduce((w, s) => s.cost > w.cost ? s : w, this.pop[0]);
+        if (cc < worst.cost) Object.assign(worst, { order: child.order, rejected: child.rejected, cost: cc });
+        this.note(cc, child);
+        this.status = `generation ${this.gen}`;
+      }
+      return used;
+    };
+    return r;
+  }
+
+  function makeIGr() {
+    const r = baseRacer('ig', 'Iterated Greedy', '--race-ig');
+    r.phase = 'build'; r.iter = 0; r.bestSol = null; r.stall = 0; r.status = 'constructing (EDD)';
+    r.step = function (budget) {
+      if (this.done) return 0;
+      let used = 0;
+      if (this.phase === 'build') {
+        const edd = inst.jobs.slice().sort((a, b) => a.due - b.due).map(j => j.id);
+        for (const id of edd) {
+          const bi = bestInsertion(this.cur.order, this.cur.rejected, id);
+          used += bi.evals; this.evals += bi.evals;
+          if (bi.pos >= 0) {
+            this.cur.order.splice(bi.pos, 0, id);
+            this.cur.rejected.splice(this.cur.rejected.indexOf(id), 1);
+            this.note(bi.cost, this.cur);
+          }
+        }
+        this.bestSol = { order: this.cur.order.slice(), rejected: this.cur.rejected.slice() };
+        this.phase = 'search'; this.status = 'destroy - rebuild - swap';
+        return used;
+      }
+      this.credit += budget;
+      while (this.credit > 0) {
+        this.iter++;
+        const order = this.bestSol.order.slice(), rejected = this.bestSol.rejected.slice();
+        // the full IG loop: destroy d (adaptive on stagnation), greedy rebuild, swap phase
+        const nd = Math.min(order.length, 2 + Math.floor(this.stall / 40));
+        for (let k = 0; k < nd; k++) {
+          const i = Math.floor(this.rng() * order.length);
+          rejected.push(order[i]); order.splice(i, 1);
+        }
+        let e = 0;
+        const sol = { order, rejected };
+        e += greedyPass(sol, this.rng, null);
+        let c = costOnly(sol.order, sol.rejected); e++;
+        // swap scheduled<->rejected, first-improvement sweeps (the third move of the recipe)
+        let improved = true;
+        while (improved) {
+          improved = false;
+          for (let oi = 0; oi < sol.order.length && !improved; oi++) {
+            for (let ri = 0; ri < sol.rejected.length && !improved; ri++) {
+              const o2 = sol.order.slice(), r2 = sol.rejected.slice();
+              const tmp = o2[oi]; o2[oi] = r2[ri]; r2[ri] = tmp;
+              const c2 = costOnly(o2, r2); e++;
+              if (c2 < c - 1e-9) { sol.order = o2; sol.rejected = r2; c = c2; improved = true; }
+            }
+          }
+        }
+        this.evals += e; used += e; this.credit -= e;
+        if (c < this.bestCost - 1e-9) {
+          this.bestSol = sol; this.stall = 0;
+          this.note(c, sol);
+        } else this.stall++;
+        this.status = `iteration ${this.iter}`;
+      }
+      return used;
+    };
+    return r;
+  }
+  /* ---- race assembly ---- */
+  let racers = [], raceSeed = 0, playing = false, speed = 1, started = false;
+  let raceHover = null, raceFocus = null;
+  let forcedRaceSeed = null;
+  (() => {
+    window.__bootHash = window.__bootHash ?? location.hash;
+    const m = window.__bootHash.match(/^#r=(\d+)\.(\w+)\.([0-9a-f]+)/i);
+    if (!m) return;
+    const opt = [...document.querySelectorAll('#rcN option')].find(o => o.value === m[1]);
+    if (opt) $('rcN').value = m[1];
+    if (TERRAINS[m[2]]) $('rcTerrain').value = m[2];
+    forcedRaceSeed = parseInt(m[3], 16) >>> 0;
+    addEventListener('DOMContentLoaded', () => {
+      if (document.getElementById('editorialHome')?.dataset.mainView === 'compare') window.__showTab?.('race');
+    });
+  })();
+  const cap = () => (inst && inst.n >= 44 ? 1500000 : 350000);
+
+  function newRace() {
+    raceSeed = forcedRaceSeed != null ? forcedRaceSeed : (Math.random() * 0xffffffff) >>> 0;
+    forcedRaceSeed = null;
+    const shareUrl = new URL(location.href);
+    shareUrl.searchParams.set('view', 'compare');
+    shareUrl.hash = `r=${$('rcN').value}.${$('rcTerrain').value}.${raceSeed.toString(16)}`;
+    history.replaceState(history.state, '', shareUrl);
+    inst = genInstance(+$('rcN').value, raceSeed, $('rcTerrain').value);
+    buildSpace(mulberry32(raceSeed ^ 0xA11CE));
+    racers = [makeIGr(), makeGreedy(), makeDescent(), makeTabu(false), makeTabu(true), makeAMA()];
+    for (const rr of racers) {
+      if (rr.id === 'ig') rr.view = () => ({ sol: rr.bestSol || rr.cur, cost: isFinite(rr.bestCost) ? rr.bestCost : null });
+      else if (rr.id === 'ama') rr.view = () => {
+        if (!rr.pop.length) return { sol: rr.cur, cost: null };
+        const b = rr.pop.reduce((x, m) => m.cost < x.cost ? m : x, rr.pop[0]);
+        return { sol: b, cost: b.cost };
+      };
+      else rr.view = () => ({ sol: rr.cur, cost: null });
+    }
+    $('raceInst').textContent = `${inst.n} ${__t('jobs')} · ${__t('instance')} #${raceSeed.toString(16).slice(0, 6)}`;
+    selLeaf = null;
+    $('spaceNote').innerHTML = SPACE_CAPTION();
+    buildStandings();
+    drawAll(performance.now());
+    setPlaying(started = true);
+  }
+  function setPlaying(v) {
+    playing = v;
+    $('rcPlay').textContent = v ? __t('⏸ Pause') : __t('▶ Run');
+  }
+
+  function buildStandings() {
+    const ol = $('standings');
+    ol.innerHTML = '';
+    for (const r of racers) {
+      const li = document.createElement('li');
+      li.id = 'st-' + r.id;
+      li.title = __t('click to hide / show in the charts');
+      li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'true');
+      li.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); li.click(); } });
+      li.innerHTML = `
+        <span class="st-rank" id="st-rank-${r.id}">–</span>
+        <span class="st-dot" style="background:var(${r.colorVar})"></span>
+        <span class="st-name">${r.name}<small id="st-status-${r.id}">…</small></span>
+        <span class="st-cost"><span id="st-cost-${r.id}">–</span><small id="st-evals-${r.id}"></small></span>`;
+      li.addEventListener('click', () => {
+        r.off = !r.off;
+        li.classList.toggle('off', r.off);
+        li.setAttribute('aria-pressed', r.off ? 'false' : 'true');
+        drawAll(performance.now());
+      });
+      ol.appendChild(li);
+    }
+    sizeAll();
+  }
+  /* ---- desenho ---- */
+  function sizeCv(cv, cssH) {
+    const dpr = devicePixelRatio || 1;
+    const holder = cv.parentElement;
+    const w = Math.max(240, holder.clientWidth - (36));
+    cv.width = w * dpr; cv.height = cssH * dpr;
+    cv.style.width = w + 'px'; cv.style.height = cssH + 'px';
+    cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
+    return w;
+  }
+  const sizes = {};
+  function sizeAll() {
+    if (!labRoot()) return;
+    sizes.race = sizeCv($('cvRace'), 290);
+    sizes.space = sizeCv($('cvSpace'), 440);
+    space.dirty = true;
+  }
+  addEventListener('resize', sizeAll);
+  /* the lab lives inline in the page: boot it the first time it scrolls into view */
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { if (!started) newRace(); else sizeAll(); } });
+    }, { rootMargin: '200px' });
+    const el0 = labRoot(); if (el0) io.observe(el0);
+  }
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { space.dirty = true; });
+  addEventListener('langchange', () => {
+    space.dirty = true;
+    if (started) {
+      $('spaceNote').innerHTML = selLeaf ? $('spaceNote').innerHTML : SPACE_CAPTION();
+      setPlaying(playing);
+      drawAll(performance.now());
+    }
+  });
+
+  function drawRace() {
+    const cv = $('cvRace'); const ctx = cv.getContext('2d');
+    const W = sizes.race || 600, H = 290;
+    ctx.clearRect(0, 0, W, H);
+    if (!racers.length) return;
+    const padL = 56, padR = 130, padT = 12, padB = 26;
+    const pw = W - padL - padR, ph = H - padT - padB;
+    const maxE = Math.max(2000, ...racers.map(r => r.evals));
+    let lo = Infinity, hi = 0;
+    for (const r of racers) { if (r.bestCost < lo) lo = r.bestCost; for (const h of r.hist) hi = Math.max(hi, h.c); }
+    if (!isFinite(lo)) return;
+    const span = Math.max(1, hi - lo);
+    lo -= span * 0.06; hi += span * 0.04;
+    const X = e => padL + (e / maxE) * pw;
+    const Y = c => padT + (1 - (c - lo) / (hi - lo)) * ph;
+    ctx.font = '11px system-ui'; ctx.textBaseline = 'middle'; ctx.textAlign = 'right';
+    const ys = (hi - lo) / 3;
+    for (let k = 0; k <= 3; k++) {
+      const c = lo + ys * k;
+      ctx.strokeStyle = cssVar('--grid'); ctx.beginPath(); ctx.moveTo(padL, Y(c)); ctx.lineTo(W - padR, Y(c)); ctx.stroke();
+      ctx.fillStyle = cssVar('--muted'); ctx.fillText(fmt.format(Math.round(c)), padL - 6, Y(c));
+    }
+    ctx.textAlign = 'left';
+    ctx.fillText(__t('cost evaluations →'), padL, H - 8);
+    // linhas
+    const ends = [];
+    for (const r of racers) {
+      if (r.off) continue;
+      const col = cssVar(r.colorVar);
+      ctx.globalAlpha = raceFocus && raceFocus !== r.id ? 0.28 : 1;
+      ctx.strokeStyle = col; ctx.lineWidth = raceFocus === r.id ? 3 : 2; ctx.lineJoin = 'round';
+      ctx.beginPath();
+      let prev = null;
+      for (const h of r.hist) {
+        if (!prev) ctx.moveTo(X(h.e), Y(h.c));
+        else { ctx.lineTo(X(h.e), Y(prev.c)); ctx.lineTo(X(h.e), Y(h.c)); }
+        prev = h;
+      }
+      if (prev) { ctx.lineTo(X(r.evals), Y(prev.c)); ctx.stroke(); ends.push({ r, y: Y(prev.c), col, c: prev.c }); }
+      ctx.globalAlpha = 1;
+    }
+    // crosshair scrubber: cost of every racer at a chosen budget
+    raceFocus = null;
+    if (raceHover && raceHover.x > padL && raceHover.x < W - padR && raceHover.y > padT && raceHover.y < H - padB) {
+      const eAt = ((raceHover.x - padL) / pw) * maxE;
+      ctx.strokeStyle = cssVar('--muted'); ctx.setLineDash([3, 4]); ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(raceHover.x, padT); ctx.lineTo(raceHover.x, H - padB); ctx.stroke();
+      ctx.setLineDash([]);
+      const rows = [];
+      for (const r of racers) {
+        if (r.off) continue;
+        let c = null;
+        for (let i = r.hist.length - 1; i >= 0; i--) if (r.hist[i].e <= eAt) { c = r.hist[i].c; break; }
+        if (c != null) rows.push({ r, c, dy: Math.abs(Y(c) - raceHover.y) });
+      }
+      rows.sort((a, b) => a.c - b.c);
+      const near = rows.slice().sort((a, b) => a.dy - b.dy)[0];
+      if (near && near.dy < 14) raceFocus = near.r.id;
+      const tipEl = document.getElementById('tip');
+      if (rows.length) {
+        tipEl.innerHTML = `<b>@ ${fmt.format(Math.round(eAt))} ${__t('evals')}</b><br>` + rows.map(x =>
+          `<span style="color:${cssVar(x.r.colorVar)}">\u25cf</span> ${x.r.name.split(' ')[0]} ${fmt.format(Math.round(x.c))}`).join('<br>');
+        tipEl.style.display = 'block';
+        tipEl.style.left = Math.min(raceHover.cx + 14, innerWidth - tipEl.offsetWidth - 10) + 'px';
+        tipEl.style.top = Math.min(raceHover.cy + 16, innerHeight - tipEl.offsetHeight - 10) + 'px';
+      }
+    }
+    // collision-free end labels (stack, then shift the stack up if it overflows)
+    ends.sort((a, b) => a.y - b.y);
+    let lastY = -99;
+    const lys = ends.map(e => (lastY = Math.max(e.y, lastY + 14)));
+    const over = lys[lys.length - 1] - (H - 10);
+    if (over > 0) for (let i = 0; i < lys.length; i++) lys[i] -= over;
+    for (let i = 0; i < ends.length; i++) {
+      const e = ends[i], ly = lys[i];
+      ctx.fillStyle = cssVar('--surface-1');
+      ctx.beginPath(); ctx.arc(X(e.r.evals), e.y, 5, 0, 7); ctx.fill();
+      ctx.fillStyle = e.col;
+      ctx.beginPath(); ctx.arc(X(e.r.evals), e.y, 3.2, 0, 7); ctx.fill();
+      ctx.fillStyle = cssVar('--ink'); ctx.font = '600 11px system-ui';
+      ctx.fillText(`${e.r.id === 'ig' ? 'IG' : e.r.name.split(' ')[0]} ${fmt.format(Math.round(e.c))}`, X(e.r.evals) + 9, ly);
+    }
+  }
+
+  function updateStandings() {
+    const standing = racers.slice().sort((a, b) => a.bestCost - b.bestCost);
+    for (const r of racers) {
+      const rank = standing.indexOf(r);
+      const li = $('st-' + r.id);
+      if (!li) continue;
+      li.style.order = rank;
+      li.classList.toggle('leader', rank === 0 && isFinite(r.bestCost) && !r.off);
+      $('st-rank-' + r.id).textContent = isFinite(r.bestCost) ? '#' + (rank + 1) : '–';
+      $('st-cost-' + r.id).textContent = isFinite(r.bestCost) ? fmt.format(Math.round(r.bestCost)) : '–';
+      $('st-evals-' + r.id).textContent = `${fmt.format(r.evals)} ${__t('evals')}`;
+      const statusMatch = r.status.match(/^(iteration|generation|diversified)( .*)$/);
+      $('st-status-' + r.id).textContent = statusMatch ? __t(statusMatch[1]) + statusMatch[2] : __t(r.status);
+    }
+    const maxE = Math.max(...racers.map(r => r.evals));
+    $('budgetFill').style.width = Math.min(100, 100 * maxE / cap()) + '%';
+    $('budgetLabel').textContent = `${__t('budget')} ${fmt.format(maxE)} / ${fmt.format(cap())} ${__t('evaluations')}`;
+    const lead = standing[0];
+    $('raceNote').innerHTML = lead && isFinite(lead.bestCost)
+      ? (window.__lang === 'pt'
+        ? `Líder: <strong>${lead.name}</strong> com custo ${fmt.format(Math.round(lead.bestCost))}. Repare nas formas: o Descent é uma trepadeira que para; o Tabu serpenteia; o TabuDiv dá saltos; o AMA é um bosque; o IG roda o ciclo completo — destruir, reconstruir, trocar — reiniciando só do melhor nó.`
+        : `Leader: <strong>${lead.name}</strong> at cost ${fmt.format(Math.round(lead.bestCost))}. Watch the shapes: Descent is a vine that stops; Tabu snakes along; TabuDiv makes dashed jumps; the AMA is a grove; the IG runs its full loop — destroy, rebuild, swap — restarting only from the best node.`)
+      : '';
+  }
+  function drawAll(t) {
+    drawRace();
+    drawSpace(t);
+    updateStandings();
+  }
+
+  /* ---- loop ---- */
+  let lastDraw = 0;
+  function tick(t) {
+    requestAnimationFrame(tick);
+    if (!labVisible() || !racers.length) return;
+    if (playing) {
+      const perRacer = 130 * speed;
+      let allDone = true;
+      for (const r of racers) {
+        if (r.done || r.evals >= cap()) {
+          if (!r.done) { r.done = true; r.status = 'budget exhausted'; }
+          continue;
+        }
+        allDone = false;
+        r.step(Math.min(perRacer, cap() - r.evals));
+      }
+      if (allDone) { setPlaying(false); }
+    }
+    if (t - lastDraw > 40) { drawAll(t); lastDraw = t; }
+  }
+
+  /* ---- controles ---- */
+  $('cvRace').addEventListener('pointermove', e => {
+    const r = $('cvRace').getBoundingClientRect();
+    raceHover = { x: e.clientX - r.left, y: e.clientY - r.top, cx: e.clientX, cy: e.clientY };
+    if (!playing) drawAll(performance.now());
+  });
+  $('cvRace').addEventListener('pointerleave', () => {
+    raceHover = null; raceFocus = null;
+    document.getElementById('tip').style.display = 'none';
+    if (!playing) drawAll(performance.now());
+  });
+  $('rcPlay').addEventListener('click', () => { if (!started || racers.every(r => r.done)) newRace(); else setPlaying(!playing); });
+  $('btnCopyRace').addEventListener('click', () => {
+    navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => {
+      $('btnCopyRace').textContent = __t('✓ copied');
+      setTimeout(() => { $('btnCopyRace').textContent = __t('Share'); }, 1400);
+    });
+  });
+  $('rcNew').addEventListener('click', newRace);
+  $('rcN').addEventListener('change', newRace);
+  $('rcTerrain').addEventListener('change', newRace);
+  document.querySelectorAll('[data-rspeed]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-rspeed]').forEach(x => x.setAttribute('aria-pressed', x === b ? 'true' : 'false'));
+      speed = +b.dataset.rspeed;
+    });
+  });
+
+  addEventListener('langchange', () => {
+    if (inst) $('raceInst').textContent = `${inst.n} ${__t('jobs')} · ${__t('instance')} #${raceSeed.toString(16).slice(0, 6)}`;
+    if (racers.length) updateStandings();
+    renderPinnedLeaf();
+  });
+
+  requestAnimationFrame(tick);
+  window.__raceDraw = (n) => { if (!started) newRace(); for (const r of racers) if (!r.done) r.step(Math.min(n || 0, Math.max(0, cap() - r.evals))); drawAll(performance.now()); return racers.map(r => r.id + ':' + (isFinite(r.bestCost) ? Math.round(r.bestCost) : '-')).join(' '); };
 })();
 </script>
 </body>
