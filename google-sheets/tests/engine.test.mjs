@@ -289,8 +289,8 @@ test('Apps Script manifest stays V8 and current-document only', async () => {
     serverFunctions.push(...[...source.matchAll(/^(?:async )?function\s+([A-Za-z0-9_]+)/gm)].map((match) => match[1]));
   }
   assert.deepEqual(serverFunctions.filter((name) => !name.endsWith('_')).sort(), [
-    'igCommitExperiment', 'igCommitSingle', 'igComputeRun', 'igGetBootstrap', 'igSetLanguage',
-    'installIgButtons', 'onOpen', 'setIgLanguageEnglish', 'setIgLanguagePortuguese',
+    'igCommitExperiment', 'igCommitSingle', 'igComputeExperiment', 'igComputeRun', 'igGetBootstrap',
+    'igSetLanguage', 'installIgButtons', 'onOpen', 'setIgLanguageEnglish', 'setIgLanguagePortuguese',
     'showIgAbout', 'showIgSidebar', 'verifyIgEngine',
   ]);
   assert.doesNotMatch(code, /Reset generated results/);

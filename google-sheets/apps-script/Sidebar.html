@@ -565,16 +565,25 @@
         const count = integerInput('runs', tr('runs'), 2, 30);
         const seedStart = integerInput('seed', tr('seed'), 0, 4294967295);
         if (seedStart + count - 1 > 4294967295) throw new RangeError(tr('seedOverflow'));
-        for (let index = 0; index < count; index += 1) {
-          setStatus('running', index
-            ? { detailKey: 'runProgress', detailValues: { done: index, total: count }, indeterminate: true }
-            : { detailKey: 'runningDetail', indeterminate: true });
-          const run = await server('igComputeRun', readConfig(seedStart + index, true));
-          runs.push(run);
+        // Compute the seeds in server-side chunks: one execution per chunk
+        // instantiates the engine and unpacks the catalog once, instead of
+        // paying a fresh execution per seed. Results are identical and each is
+        // still individually signed before it returns.
+        const config = readConfig(seedStart, true);
+        const CHUNK = 8;
+        setStatus('running', { detailKey: 'runningDetail', indeterminate: true });
+        for (let start = 0; start < count; start += CHUNK) {
+          const seeds = [];
+          for (let index = start; index < Math.min(start + CHUNK, count); index += 1) {
+            seeds.push(seedStart + index);
+          }
+          const chunk = await server('igComputeExperiment', { config, seeds });
+          for (const run of chunk) runs.push(run);
+          const last = runs[runs.length - 1];
           setStatus('runProgress', {
-            titleValues: { done: index + 1, total: count },
-            detailText: `${formatNumber(run.bestCost, 1)} · ${tr('seedShort')} ${run.seed}`,
-            ratio: (index + 1) / count,
+            titleValues: { done: runs.length, total: count },
+            detailText: `${formatNumber(last.bestCost, 1)} · ${tr('seedShort')} ${last.seed}`,
+            ratio: runs.length / count,
           });
         }
         setStatus('writing', { indeterminate: true });

@@ -1,7 +1,13 @@
 /* global IG_PAYLOAD, Utilities, WebAssembly */
 
 var IG_CATALOG_CACHE = null;
+var IG_CSV_CACHE = {};
+var IG_WASM_MODULE_CACHE = null;
 var IG_DEFAULT_INSTANCE = 'STC_NCOS_32';
+// Upper bound on seeds per experiment chunk: the sidebar sends small chunks so
+// each server execution stays well under the Apps Script 6-minute limit even on
+// the largest bundled instances; this only guards against an oversized request.
+var IG_MAX_EXPERIMENT_SEEDS = 16;
 
 function IG_integer_(value, label, minimum, maximum, fallback) {
   var candidate = value == null || value === '' ? fallback : Number(value);
@@ -17,13 +23,34 @@ function IG_boolean_(value, label, fallback) {
   return value;
 }
 
+function IG_instanceCsv_(name) {
+  if (!Object.prototype.hasOwnProperty.call(IG_CSV_CACHE, name)) {
+    var encoded = IG_PAYLOAD.instanceGzipBase64[name];
+    if (!encoded) throw new RangeError('Unknown bundled instance: ' + name + '.');
+    var compressed = Utilities.base64Decode(encoded);
+    var blob = Utilities.newBlob(compressed, 'application/gzip', name + '.csv.gz');
+    IG_CSV_CACHE[name] = Utilities.ungzip(blob).getDataAsString('UTF-8');
+  }
+  return IG_CSV_CACHE[name];
+}
+
 function IG_unpackCatalog_() {
+  // Metadata is a small plain-JSON map; each instance's CSV is ungzipped only on
+  // first access. Listing the catalog (the sidebar bootstrap) therefore never
+  // decompresses a single instance, while `item.csv` still works everywhere.
   if (IG_CATALOG_CACHE) return IG_CATALOG_CACHE;
-  var compressed = Utilities.base64Decode(IG_PAYLOAD.catalogGzipBase64);
-  var blob = Utilities.newBlob(compressed, 'application/gzip', 'instances.json.gz');
-  var json = Utilities.ungzip(blob).getDataAsString('UTF-8');
-  IG_CATALOG_CACHE = JSON.parse(json);
-  return IG_CATALOG_CACHE;
+  var meta = JSON.parse(IG_PAYLOAD.catalogMetaJson);
+  var catalog = {};
+  Object.keys(meta).forEach(function(name) {
+    var entry = { metadata: meta[name] };
+    Object.defineProperty(entry, 'csv', {
+      enumerable: true,
+      get: function() { return IG_instanceCsv_(name); },
+    });
+    catalog[name] = entry;
+  });
+  IG_CATALOG_CACHE = catalog;
+  return catalog;
 }
 
 function IG_catalogJobCount_(item, name) {
@@ -88,12 +115,29 @@ function IG_unsignedBytes_(bytes) {
   return Uint8Array.from(bytes, function(value) { return value & 255; });
 }
 
-async function IG_instantiateEngine_() {
-  var wasmBytes = IG_unsignedBytes_(Utilities.base64Decode(IG_PAYLOAD.wasmBase64));
-  var loaded = await WebAssembly.instantiate(wasmBytes, {});
+function IG_wasmModule_() {
+  // Compile the embedded engine once per server execution and reuse the compiled
+  // Module across every seed in an experiment; only the cheap instantiation is
+  // repeated. (Apps Script resets globals between executions, so this pays off
+  // within a chunked experiment call, not across separate single runs.)
+  if (!IG_WASM_MODULE_CACHE) {
+    var wasmBytes = IG_unsignedBytes_(Utilities.base64Decode(IG_PAYLOAD.wasmBase64));
+    IG_WASM_MODULE_CACHE = new WebAssembly.Module(wasmBytes);
+  }
+  return IG_WASM_MODULE_CACHE;
+}
+
+async function IG_instantiateModule_(module) {
+  // A fresh instance per run keeps runs_clear semantics and linear-memory
+  // isolation unchanged; instantiating a pre-compiled Module is ~0.1 ms.
+  var loaded = await WebAssembly.instantiate(module, {});
   var api = loaded.instance ? loaded.instance.exports : loaded.exports;
   IG_validateExports_(api);
   return api;
+}
+
+async function IG_instantiateEngine_() {
+  return IG_instantiateModule_(IG_wasmModule_());
 }
 
 function IG_loadInstance_(api, csv) {
@@ -126,8 +170,38 @@ async function IG_computeRun_(rawConfig) {
   var config = IG_normalizeConfig_(rawConfig);
   var catalog = IG_unpackCatalog_();
   var item = catalog[config.instance];
+  var model = IG_parseInstance_(item.csv, config.instance);
+  return IG_runSeeded_(IG_wasmModule_(), item, model, config, config.seed, includeDetail);
+}
+
+// One server execution that runs every requested seed on the same instance,
+// compiling the engine and unpacking the catalog once. Semantics are identical
+// to calling IG_computeRun_ per seed — same engine, same per-seed signing later
+// — only the orchestration (and amortized compile/parse metadata) changes.
+async function IG_computeExperiment_(rawConfig, seeds) {
+  if (!Array.isArray(seeds) || !seeds.length) throw new RangeError('At least one seed is required.');
+  if (seeds.length > IG_MAX_EXPERIMENT_SEEDS) {
+    throw new RangeError('An experiment chunk may not exceed ' + IG_MAX_EXPERIMENT_SEEDS + ' seeds.');
+  }
+  var config = IG_normalizeConfig_(rawConfig);
+  var catalog = IG_unpackCatalog_();
+  var item = catalog[config.instance];
+  var model = IG_parseInstance_(item.csv, config.instance);
+  var module = IG_wasmModule_();
+  var results = [];
+  for (var i = 0; i < seeds.length; i += 1) {
+    var seed = IG_integer_(seeds[i], 'seed', 0, 0xffffffff, config.seed);
+    results.push(await IG_runSeeded_(module, item, model, config, seed, false));
+  }
+  return results;
+}
+
+async function IG_runSeeded_(module, item, model, config, seed, includeDetail) {
+  // Each run reports its own seed as config.seed so the trust boundary
+  // (result.seed === config.seed) and the signature envelope stay consistent.
+  var runConfig = seed === config.seed ? config : Object.assign({}, config, { seed: seed });
   var startedAt = Date.now();
-  var api = await IG_instantiateEngine_();
+  var api = await IG_instantiateModule_(module);
   var compiledAt = Date.now();
   var instanceId = IG_loadInstance_(api, item.csv);
   var engineJobs = Number(api.inst_n(instanceId));
@@ -140,19 +214,19 @@ async function IG_computeRun_(rawConfig) {
   var searchStartedAt = Date.now();
   var runId = Number(api.run_new(
     instanceId,
-    config.d,
-    config.accept === 'best' ? 1 : 0,
-    config.permute ? 1 : 0,
-    config.seed,
+    runConfig.d,
+    runConfig.accept === 'best' ? 1 : 0,
+    runConfig.permute ? 1 : 0,
+    seed,
   ));
   if (!Number.isSafeInteger(runId) || runId < 0) throw new Error('The embedded engine could not start the run.');
   var checkpoints = [IG_snapshot_(api, runId)];
-  var checkpointEvery = Math.max(1, Math.ceil(config.iterationBudget / config.checkpointCount));
+  var checkpointEvery = Math.max(1, Math.ceil(runConfig.iterationBudget / runConfig.checkpointCount));
 
-  while (Number(api.run_iters(runId)) < config.iterationBudget) {
+  while (Number(api.run_iters(runId)) < runConfig.iterationBudget) {
     var completed = Number(api.run_iters(runId));
     var boundary = Math.min(
-      config.iterationBudget,
+      runConfig.iterationBudget,
       (Math.floor(completed / checkpointEvery) + 1) * checkpointEvery,
     );
     api.run_step(runId, boundary - completed);
@@ -162,7 +236,6 @@ async function IG_computeRun_(rawConfig) {
   var finishedAt = Date.now();
   var finalSnapshot = IG_snapshot_(api, runId);
   var order = IG_readOrder_(api, runId);
-  var model = IG_parseInstance_(item.csv, config.instance);
   if (engineJobs !== model.jobs.length) {
     throw new Error('Canonical and independent parsers disagree on the number of jobs.');
   }
@@ -181,7 +254,7 @@ async function IG_computeRun_(rawConfig) {
 
   return {
     schemaVersion: 1,
-    instance: config.instance,
+    instance: runConfig.instance,
     metadata: {
       jobs: model.jobs.length,
       families: model.familyCount,
@@ -190,8 +263,8 @@ async function IG_computeRun_(rawConfig) {
         : null,
       dataset: item.metadata && item.metadata.dataset ? item.metadata.dataset : '',
     },
-    config: config,
-    seed: config.seed,
+    config: runConfig,
+    seed: seed,
     bestCost: finalSnapshot.bestCost,
     iterations: finalSnapshot.iteration,
     evaluations: finalSnapshot.evaluations,
