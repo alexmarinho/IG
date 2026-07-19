@@ -56,6 +56,39 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .gh-link{font:600 11px/1 var(--sans);letter-spacing:.04em;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
 .gh-link:hover{color:var(--terra)}
 @media(max-width:560px){.head-utils{margin-left:0;width:100%;margin-top:6px;justify-content:flex-start}}
+
+/* ---- Future: evidence, roadmap, ecosystem ---- */
+.f-head{font:600 clamp(19px,2vw,23px)/1.2 var(--serif);margin:26px 0 10px;letter-spacing:.2px}
+.f-lede{max-width:70ch;color:var(--ink-soft);font-size:14.5px;margin-bottom:14px}
+.f-evidence{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}
+.f-ev{background:var(--card);border:1px solid var(--rule);border-radius:9px;padding:12px 14px}
+.f-ev-top{display:flex;flex-wrap:wrap;align-items:center;gap:7px;margin-bottom:5px}
+.f-ev-top strong{font:600 14.5px/1.2 var(--serif)}
+.f-ev p{font-size:13px;color:var(--ink-soft);line-height:1.5}
+.f-chip{font:700 9.5px/1 var(--sans);letter-spacing:.09em;text-transform:uppercase;padding:3px 7px;border-radius:999px;border:1px solid var(--rule);color:var(--ink-soft)}
+.f-chip.ok{background:rgba(122,139,111,.16);border-color:var(--sage);color:#4f6047}
+.f-chip.meas{background:rgba(201,161,72,.16);border-color:var(--brass);color:#7a5f14}
+.f-roadmap{border-top:1px solid var(--rule)}
+.f-item{border-bottom:1px solid var(--rule)}
+.f-item>summary{cursor:pointer;list-style:none;display:grid;grid-template-columns:42px 1fr auto;gap:4px 12px;align-items:baseline;padding:13px 2px}
+.f-item>summary::-webkit-details-marker{display:none}
+.f-pri{font:800 12px/1 var(--mono);color:var(--terra)}
+.f-it-title{font:600 16px/1.25 var(--serif)}
+.f-next{font:700 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:#fdf8ef;background:var(--terra);padding:4px 8px;border-radius:999px;white-space:nowrap}
+.f-sum{grid-column:2/-1;font-size:13px;color:var(--ink-soft);line-height:1.5}
+.f-item[open]>summary{background:rgba(176,86,47,.05)}
+.f-fields{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;padding:2px 2px 16px 54px;font-size:13px}
+.f-fields dt{font:700 10px/1.5 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--terra);white-space:nowrap}
+.f-fields dd{color:var(--ink-soft);line-height:1.5}
+.f-eco{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.f-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 15px;display:flex;flex-direction:column}
+.f-num{font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
+.f-card h4{font:600 16px/1.25 var(--serif);margin:8px 0 6px}
+.f-card p{font-size:13px;color:var(--ink-soft);line-height:1.5;flex:1}
+.f-acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.f-acts a{font:700 11px/1 var(--sans);color:var(--terra);text-decoration:none;border:1px solid #cfc4ac;border-radius:6px;padding:7px 10px;background:var(--paper)}
+.f-acts a:hover{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
+@media(max-width:640px){.f-fields{grid-template-columns:1fr;padding-left:8px}.f-item>summary{grid-template-columns:36px 1fr}.f-next{grid-column:2}}
 .subtitle{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
 .subtitle code{font-family:var(--mono);font-size:11.5px;color:var(--maple)}
 nav.anchor-nav{max-width:1120px;margin:0 auto;padding:0 20px}
@@ -322,10 +355,13 @@ canvas.chart{
 /* ---------- demo 4 race ---------- */
 .race-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px}
 .legend-row{
-  display:grid;grid-template-columns:14px minmax(150px,1.2fr) minmax(0,1fr) auto;gap:10px;
+  display:grid;grid-template-columns:22px 14px minmax(140px,1.2fr) minmax(0,1fr) auto;gap:10px;
   align-items:center;font-size:12px;padding:5px 8px;border:1px solid var(--rule);
-  border-radius:7px;background:#fdfaf3;
+  border-radius:7px;background:#fdfaf3;transition:background .2s;
 }
+.legend-row .rank{font:800 12px/1 var(--mono);color:var(--ink-soft);text-align:center}
+.legend-row.lead{background:#fbf3e6;border-color:var(--brass)}
+.legend-row.lead .rank{color:var(--terra)}
 .legend-row .sw{width:14px;height:14px;border-radius:4px}
 .legend-row .nm{font-weight:600}
 .legend-row .st{color:var(--ink-soft);font-family:var(--mono);font-size:11px}
@@ -394,7 +430,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
   h2.section-title{font-size:22px}
   section.section{padding:34px 0 6px;scroll-margin-top:104px}
   figure.demo{padding:14px 12px}
-  .legend-row{grid-template-columns:14px minmax(110px,1fr) auto}
+  .legend-row{grid-template-columns:20px 14px minmax(90px,1fr) auto}
   .legend-row .st{display:none}
 }
 @media (prefers-reduced-motion:reduce){
@@ -755,7 +791,19 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <h2 class="m-title">A tested baseline — and what comes next.</h2>
     <p class="m-lede">This is a reproducible baseline against the 2015 study; the next steps extend the search and the model, one validated change at a time.</p>
   </div>
-  <div class="m-placeholder"><nav class="m-links" aria-label="Resources">
+  <div class="m-placeholder">
+    <h3 class="f-head">Current evidence</h3>
+    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified, but the fleet is still slower than one optimized Rust core; its value is breadth.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Training improvements did not generalize to held-out seeds and instances.</p></div></div>
+
+    <h3 class="f-head">Research sequence</h3>
+    <p class="f-lede">The next step is not to add complexity. It is to prove where the current method is strong, then extend one assumption at a time.</p>
+    <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P0</span><span class="f-it-title">External validation</span><span class="f-next">Next milestone</span><span class="f-sum">Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.</span></summary><dl class="f-fields"><dt>Question</dt><dd>How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?</dd><dt>Change</dt><dd>No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.</dd><dt>Comparator</dt><dd>Published baselines and exact solutions for small cases.</dd><dt>Success criterion</dt><dd>Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.</dd><dt>Evidence</dt><dd>Archived configurations, raw result tables, plots and exact small-case checks.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P1</span><span class="f-it-title">Reactive operators</span><span class="f-sum">Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can operator choice adapt without losing the exploration supplied by random removal?</dd><dt>Change</dt><dd>Add a stochastic operator portfolio with a minimum exploration probability.</dd><dt>Comparator</dt><dd>Random removal, measured adaptive destruction and tuned ALNS/tabu variants.</dd><dt>Success criterion</dt><dd>Better time-to-target and tails without degradation on held-out instances.</dd><dt>Evidence</dt><dd>Operator traces, ablations, paired seeds and distribution-shift tests.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P2</span><span class="f-it-title">Exact repair</span><span class="f-sum">Let IG define a bounded neighbourhood and solve only that repair exactly.</span></summary><dl class="f-fields"><dt>Question</dt><dd>When does exact local repair repay its solver overhead?</dd><dt>Change</dt><dd>Pass a bounded removed-job neighbourhood to an exact repair model.</dd><dt>Comparator</dt><dd>Current lowest-cost reinsertion under the same outer search budget.</dd><dt>Success criterion</dt><dd>Higher improvement per millisecond and lower time-to-target.</dd><dt>Evidence</dt><dd>Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P3</span><span class="f-it-title">Multiple machines</span><span class="f-sum">Add assignment, eligibility and machine-dependent setup in a separate mathematical model.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Which gains survive when jobs also choose a machine?</dd><dt>Change</dt><dd>Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.</dd><dt>Comparator</dt><dd>Open multi-machine OAS data and exact small solutions.</dd><dt>Success criterion</dt><dd>Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.</dd><dt>Evidence</dt><dd>Eligibility tests, model validation and published multi-machine instances.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P4</span><span class="f-it-title">Parallel search</span><span class="f-sum">Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Does parallel breadth improve wall-clock time rather than only evaluation count?</dd><dt>Change</dt><dd>Add deterministic CPU multi-start first, then evaluate GPU replicas.</dd><dt>Comparator</dt><dd>One optimized Rust core with serial-equivalent per-seed results.</dd><dt>Success criterion</dt><dd>Lower time-to-target with reported wall time, energy and deterministic ordering.</dd><dt>Evidence</dt><dd>Replayable seeds, hardware disclosure, anytime curves and energy measurements.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P5</span><span class="f-it-title">Learned discovery</span><span class="f-sum">Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can learned proposals generalize beyond the instances that suggested them?</dd><dt>Change</dt><dd>Sandbox proposed operators while keeping the exact evaluator authoritative.</dd><dt>Comparator</dt><dd>Simple hand-designed baselines under nested train/validation/test splits.</dd><dt>Success criterion</dt><dd>Registered gains on fresh seeds and held-out distributions with a stated failure criterion.</dd><dt>Evidence</dt><dd>Sandboxed code, nested splits, ablations and distribution-shift tests.</dd></dl></details></div>
+
+    <h3 class="f-head">Use IG at the depth you need</h3>
+    <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.</p>
+    <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="#m-run">Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization; the downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Read results</a></div></div></div>
+
+    <nav class="m-links" aria-label="Resources" style="margin-top:22px">
     <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
     <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation</a>
     <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 thesis (PDF)</a>
@@ -2320,6 +2368,7 @@ function onWinResize(fn){
     legendEl.textContent = '';
     race.strats.forEach(function(st){
       var row = el('div', 'legend-row');
+      row.appendChild(el('span', 'rank', '·'));
       var sw = el('span', 'sw'); sw.style.background = st.color;
       row.appendChild(sw);
       row.appendChild(el('span', 'nm', st.s.name));
@@ -2327,16 +2376,35 @@ function onWinResize(fn){
       row.appendChild(el('span', 'bst', 'best —'));
       legendEl.appendChild(row);
       st.row = row;
+      legendEl.__order = '';
     });
   }
   function updateLegend(){
     race.strats.forEach(function(st){
       if(!st.row) return;
       var cells = st.row.children;
-      cells[2].textContent = 'evals ' + st.s.evals().toLocaleString('en-US') + ' / ' + BUDGET.toLocaleString('en-US');
-      cells[3].textContent = isFinite(st.s.best()) ? 'best Σ ' + st.s.best() : 'best —';
+      cells[3].textContent = 'evals ' + st.s.evals().toLocaleString('en-US') + ' / ' + BUDGET.toLocaleString('en-US');
+      cells[4].textContent = isFinite(st.s.best()) ? 'best Σ ' + st.s.best() : 'best —';
       st.row.classList.toggle('done', st.done || st.s.evals() >= BUDGET);
     });
+    /* Live standings: best (lowest cost) on top; methods with no result yet sink
+       to the bottom. Ranks are provisional until the budget is spent. */
+    var ordered = race.strats.slice().sort(function(a, b){
+      var ba = isFinite(a.s.best()) ? a.s.best() : Infinity;
+      var bb = isFinite(b.s.best()) ? b.s.best() : Infinity;
+      return ba - bb;
+    });
+    ordered.forEach(function(st, i){
+      if(!st.row) return;
+      st.row.children[0].textContent = isFinite(st.s.best()) ? String(i + 1) : '·';
+      st.row.classList.toggle('lead', i === 0 && isFinite(st.s.best()));
+    });
+    /* only touch the DOM order when the ranking actually changed (avoids per-frame reflow) */
+    var key = ordered.map(function(st){ return race.strats.indexOf(st); }).join(',');
+    if(key !== legendEl.__order){
+      legendEl.__order = key;
+      ordered.forEach(function(st){ if(st.row) legendEl.appendChild(st.row); });
+    }
   }
 
   function frame(ts){
@@ -2827,7 +2895,95 @@ function onWinResize(fn){
     /* footer */
     "Iterated Greedy — an interactive explanation · single self-contained HTML file, zero external requests · demos seeded with":
       "Iterated Greedy — uma explicação interativa · um único arquivo HTML autocontido, zero requisições externas · demos com seed",
-    "for reproducibility ·": "para reprodutibilidade ·"
+    "for reproducibility ·": "para reprodutibilidade ·",
+    "Current evidence": "Evidência atual",
+    "Research sequence": "Sequência de pesquisa",
+    "Use IG at the depth you need": "Use o IG na profundidade que você precisa",
+    "The next step is not to add complexity. It is to prove where the current method is strong, then extend one assumption at a time.": "O próximo passo não é adicionar complexidade. É demonstrar onde o método atual é forte e depois ampliar uma hipótese por vez.",
+    "The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.": "A mesma lógica de scheduling testada está disponível como experimento interativo, planilha de BI, notebook científico e código legível. Comece pela interface que responde à sua próxima pergunta.",
+    "Implemented": "Implementado",
+    "Measured": "Medido",
+    "Canonical": "Canônico",
+    "Exact evaluator": "Avaliador exato",
+    "Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.": "Objetivo em ponto fixo, concordância dos testes Rust/Python e WASM compilado para o navegador.",
+    "Adaptive destruction": "Destruição adaptativa",
+    "Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.": "Alcançou os melhores valores registrados em dois casos de estagnação; rampas agressivas prejudicaram casos mais granulares.",
+    "GPU replica fleet": "Frota de réplicas em GPU",
+    "Exact pricing verified, but the fleet is still slower than one optimized Rust core; its value is breadth.": "A precificação exata foi verificada, mas a frota permanece mais lenta que um núcleo Rust otimizado; seu valor está na amplitude.",
+    "Learned removal operators": "Operadores de remoção aprendidos",
+    "Training improvements did not generalize to held-out seeds and instances.": "Melhorias no treino não se generalizaram para sementes e instâncias reservadas.",
+    "Question": "Pergunta",
+    "Change": "Mudança",
+    "Comparator": "Comparador",
+    "Success criterion": "Critério de sucesso",
+    "Evidence": "Evidência",
+    "Next milestone": "Próximo marco",
+    "External validation": "Validação externa",
+    "Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.": "Congelar o IG canônico e avaliá-lo no OAS/Sparrow antes de alterar a busca.",
+    "How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?": "Como o IG canônico se compara às referências públicas OAS/Sparrow sob orçamentos equivalentes?",
+    "No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.": "Nenhuma mudança na busca. Adicionar adaptadores e congelar solver, sementes, orçamentos e protocolo.",
+    "Published baselines and exact solutions for small cases.": "Baselines publicados e soluções exatas para casos pequenos.",
+    "Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.": "Sementes pareadas, orçamentos fixos de tempo e avaliações, curvas anytime, tempo até o alvo e quantis de cauda.",
+    "Archived configurations, raw result tables, plots and exact small-case checks.": "Configurações arquivadas, tabelas brutas, gráficos e checagens exatas em casos pequenos.",
+    "Reactive operators": "Operadores reativos",
+    "Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.": "Preservar a remoção aleatória e testar um portfólio estocástico que se adapta pela melhoria por unidade de tempo.",
+    "Can operator choice adapt without losing the exploration supplied by random removal?": "A escolha de operadores pode se adaptar sem perder a exploração da remoção aleatória?",
+    "Add a stochastic operator portfolio with a minimum exploration probability.": "Adicionar um portfólio estocástico com probabilidade mínima de exploração.",
+    "Random removal, measured adaptive destruction and tuned ALNS/tabu variants.": "Remoção aleatória, destruição adaptativa medida e variantes ALNS/tabu ajustadas.",
+    "Better time-to-target and tails without degradation on held-out instances.": "Melhor tempo até o alvo e melhores caudas sem degradar instâncias reservadas.",
+    "Operator traces, ablations, paired seeds and distribution-shift tests.": "Traços de operadores, ablações, sementes pareadas e testes de mudança de distribuição.",
+    "Exact repair": "Reparo exato",
+    "Let IG define a bounded neighbourhood and solve only that repair exactly.": "Deixar o IG delimitar uma vizinhança e resolver exatamente apenas esse reparo.",
+    "When does exact local repair repay its solver overhead?": "Quando o reparo local exato compensa o custo adicional do solver?",
+    "Pass a bounded removed-job neighbourhood to an exact repair model.": "Enviar uma vizinhança limitada de tarefas removidas a um modelo de reparo exato.",
+    "Current lowest-cost reinsertion under the same outer search budget.": "Reinserção atual pelo menor custo sob o mesmo orçamento externo.",
+    "Higher improvement per millisecond and lower time-to-target.": "Maior melhoria por milissegundo e menor tempo até o alvo.",
+    "Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.": "Variação do tamanho do reparo, overhead do solver e checagem exata em vizinhanças pequenas.",
+    "Multiple machines": "Múltiplas máquinas",
+    "Add assignment, eligibility and machine-dependent setup in a separate mathematical model.": "Adicionar atribuição, elegibilidade e setup dependente da máquina em um modelo matemático separado.",
+    "Which gains survive when jobs also choose a machine?": "Quais ganhos permanecem quando as tarefas também escolhem uma máquina?",
+    "Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.": "Introduzir cadeias por máquina, elegibilidade e setup dependente da máquina como extensão de modelo.",
+    "Open multi-machine OAS data and exact small solutions.": "Dados OAS abertos de múltiplas máquinas e soluções exatas pequenas.",
+    "Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.": "Programações viáveis, concordância exata em casos pequenos e qualidade competitiva em benchmarks públicos.",
+    "Eligibility tests, model validation and published multi-machine instances.": "Testes de elegibilidade, validação do modelo e instâncias publicadas de múltiplas máquinas.",
+    "Parallel search": "Busca paralela",
+    "Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.": "Começar por multi-start determinístico em CPU; a GPU deve superar um núcleo Rust otimizado no tempo até o alvo.",
+    "Does parallel breadth improve wall-clock time rather than only evaluation count?": "A amplitude paralela melhora o tempo de parede, não apenas a contagem de avaliações?",
+    "Add deterministic CPU multi-start first, then evaluate GPU replicas.": "Adicionar primeiro multi-start determinístico em CPU e depois avaliar réplicas em GPU.",
+    "One optimized Rust core with serial-equivalent per-seed results.": "Um núcleo Rust otimizado com resultados serialmente equivalentes por semente.",
+    "Lower time-to-target with reported wall time, energy and deterministic ordering.": "Menor tempo até o alvo com tempo de parede, energia e ordenação determinística reportados.",
+    "Replayable seeds, hardware disclosure, anytime curves and energy measurements.": "Sementes reproduzíveis, hardware declarado, curvas anytime e medições de energia.",
+    "Learned discovery": "Descoberta aprendida",
+    "Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.": "Usar bandits ou LLMs para propor operadores estocásticos e ablações; nunca para precificar programações.",
+    "Can learned proposals generalize beyond the instances that suggested them?": "As propostas aprendidas se generalizam além das instâncias que as sugeriram?",
+    "Sandbox proposed operators while keeping the exact evaluator authoritative.": "Isolar os operadores propostos e manter o avaliador exato como autoridade.",
+    "Simple hand-designed baselines under nested train/validation/test splits.": "Baselines simples projetados manualmente sob divisões aninhadas de treino, validação e teste.",
+    "Registered gains on fresh seeds and held-out distributions with a stated failure criterion.": "Ganhos registrados em sementes novas e distribuições reservadas, com critério de falha declarado.",
+    "Sandboxed code, nested splits, ablations and distribution-shift tests.": "Código isolado, divisões aninhadas, ablações e testes de mudança de distribuição.",
+    "01 · Browser": "01 · Navegador",
+    "Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.": "Execute uma seed ou compare várias. Inspecione convergência, componentes do objetivo, programações completas e o problema fixo por trás de cada resultado.",
+    "Open the Studio": "Abrir o Studio",
+    "02 · BI workbook": "02 · Planilha BI",
+    "The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization; the downloadable .xlsx is an analytics-only snapshot.": "O mesmo solver WebAssembly rodando dentro de uma planilha. Uma cópia privada é necessária uma vez para a autorização do Google; o .xlsx para download é apenas um retrato analítico.",
+    "Create runnable copy": "Criar cópia executável",
+    "View example": "Ver exemplo",
+    "Download .xlsx": "Baixar .xlsx",
+    "03 · Research": "03 · Pesquisa",
+    "Scientific Colab": "Colab científico",
+    "Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.": "Execute online o notebook documentado para estatísticas entre seeds, sensibilidade, incerteza e evidência reproduzível.",
+    "Open in Colab": "Abrir no Colab",
+    "04 · Source": "04 · Código",
+    "Python reference": "Referência em Python",
+    "Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.": "Instale ou leia a implementação sem dependências para linha de comando, experimentos em lote e extensões.",
+    "Open Python guide": "Abrir guia Python",
+    "05 · Archive": "05 · Arquivo",
+    "Original 2015 project": "Projeto original de 2015",
+    "The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.": "O Excel/VBA histórico e a implementação da época da pesquisa que deram origem ao projeto antes do motor e das interfaces atuais.",
+    "Open original project": "Abrir projeto original",
+    "06 · Evidence": "06 · Evidência",
+    "Engineering ledger": "Registro de engenharia",
+    "Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.": "Benchmarks, verificações exatas, comandos reproduzíveis, resultados mistos e o limite atual de cada implementação.",
+    "Read results": "Ler resultados"
   };
 
   /* build the reverse map (PT -> EN) so toggling works both ways */
