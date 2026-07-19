@@ -143,15 +143,36 @@ function IG_ensureSheetSize_(sheet, rows, columns) {
 
 function IG_setTable_(sheetName, headers, rows, clearRows) {
   var sheet = IG_sheet_(sheetName);
-  var requiredRows = Math.max(2, rows.length + 1);
-  var requiredColumns = Math.max(1, headers.length);
-  IG_ensureSheetSize_(sheet, requiredRows, requiredColumns);
-  var rowsToClear = Math.max(requiredRows, sheet.getLastRow(), clearRows ? clearRows + 1 : 0);
-  var columnsToClear = Math.max(requiredColumns, sheet.getLastColumn());
-  IG_ensureSheetSize_(sheet, rowsToClear, columnsToClear);
-  sheet.getRange(1, 1, rowsToClear, columnsToClear).clearContent();
-  sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-  if (rows.length) sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
+  var dataColumns = Math.max(1, headers.length);
+  // Write header + data + blank filler up to the table's fixed contract height in
+  // a single setValues over just the data columns. This overwrites the whole data
+  // region without a clearContent pass or any getLastRow/getLastColumn probe, and
+  // never touches the audit-formula columns that live to the right of the data —
+  // so those formulas survive every commit instead of being wiped and rewritten.
+  var totalRows = Math.max(2, (clearRows ? clearRows : rows.length) + 1);
+  IG_ensureSheetSize_(sheet, totalRows, dataColumns);
+  var block = new Array(totalRows);
+  block[0] = headers;
+  for (var r = 0; r < rows.length; r += 1) block[r + 1] = rows[r];
+  var blank = new Array(dataColumns).fill('');
+  for (var f = rows.length + 1; f < totalRows; f += 1) block[f] = blank;
+  sheet.getRange(1, 1, totalRows, dataColumns).setValues(block);
+}
+
+function IG_ensureAuditFormulas_() {
+  // The audit formulas are static and now survive commits (IG_setTable_ leaves
+  // their columns untouched), so they only need writing when a fresh or reset
+  // workbook is missing them. A three-header spot-check replaces the ~950-cell
+  // rewrite that used to run on every commit.
+  var present;
+  try {
+    present = IG_sheet_(IG_SHEETS.runs).getRange('L1').getValue() === 'budget_match'
+      && IG_sheet_(IG_SHEETS.checkpoints).getRange('J1').getValue() === 'monotone'
+      && IG_sheet_(IG_SHEETS.schedule).getRange('T1').getValue() === 'job_duplicate_count';
+  } catch (error) {
+    present = false;
+  }
+  if (!present) IG_refreshAuditFormulas_();
 }
 
 function IG_validatedOrder_(result, model) {
@@ -530,7 +551,7 @@ function IG_writeTrustedRuns_(mode, trustedRuns) {
   ], IG_instanceRows_(best), 600);
   IG_setTable_(IG_SHEETS.setups, setup.headers, setup.rows, 30);
   IG_setTable_(IG_SHEETS.state, ['key', 'value', 'purpose'], IG_stateRows_(best), 12);
-  IG_refreshAuditFormulas_();
+  IG_ensureAuditFormulas_();
   SpreadsheetApp.flush();
   return { best: best, stats: stats };
 }

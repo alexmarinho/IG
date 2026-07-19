@@ -152,6 +152,13 @@ async function igComputeRun(config) {
   return IG_signRunResult_(await IG_computeRun_(config));
 }
 
+async function igComputeExperiment(payload) {
+  var config = payload && payload.config ? payload.config : payload;
+  var seeds = payload && payload.seeds ? payload.seeds : [];
+  var results = await IG_computeExperiment_(config, seeds);
+  return results.map(IG_signRunResult_);
+}
+
 function igCommitSingle(result) {
   return IG_commitSingle_(result);
 }
