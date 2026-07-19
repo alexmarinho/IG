@@ -117,7 +117,10 @@ class Fleet:
             state = torch.full((R, P), self.init_state, dtype=torch.int64, device=self.dev)
             cost = torch.zeros(R, P, dtype=torch.int64, device=self.dev)
             bad = torch.zeros(R, P, dtype=torch.bool, device=self.dev)
-            max_len = int((self.len.max() + 1).item())
+            # A replica that has scheduled all n jobs is already inactive for this
+            # step (ptr >= n), so its virtual row is never applied; clamping keeps
+            # the scan inside vjob's n columns instead of running one past the end.
+            max_len = min(int(self.len.max().item()) + 1, n)
             for pos in range(max_len):
                 on = pos < vlen                                          # [R,1] -> broadcast
                 jj = vjob[:, :, pos]
