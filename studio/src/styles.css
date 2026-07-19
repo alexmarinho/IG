@@ -228,7 +228,7 @@ a { color: inherit; text-decoration: none; }
   max-height: calc(100vh - var(--header));
   overflow-y: auto;
   scrollbar-width: thin;
-  padding: 31px 26px 52px 88px;
+  padding: 31px 26px 52px 30px;
   border-right: 1px solid var(--rule-strong);
   background-color: rgba(243, 239, 228, .96);
   background-image:
@@ -298,6 +298,26 @@ a { color: inherit; text-decoration: none; }
   color: #fff9e9;
   box-shadow: 3px 3px 0 rgba(96, 31, 8, .32);
 }
+
+/* Horizontal scenario chooser (drafting-board chips below the title) */
+.scenario-chooser {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 22px;
+}
+.scenario-chooser .scenario-tab {
+  position: static;
+  width: auto;
+  min-height: 0;
+  padding: 10px 16px;
+  writing-mode: horizontal-tb;
+  transform: none;
+  font-size: 12px;
+  letter-spacing: .05em;
+  line-height: 1;
+}
+.scenario-chooser .scenario-tab::after { inset: 4px 5px; }
 
 .scenario-name {
   margin: 0 0 9px;
@@ -1101,6 +1121,15 @@ a { color: inherit; text-decoration: none; }
   aspect-ratio: 12 / 5;
   object-fit: cover;
   object-position: var(--scenario-focus, 50% 50%);
+}
+
+/* Cross-fade the image when the scenario is switched */
+@keyframes scenarioFade {
+  from { opacity: 0; transform: scale(1.02); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .scenario-figure.is-switching img { animation: scenarioFade .42s cubic-bezier(.22, .8, .24, 1) both; }
 }
 
 .scenario-figure figcaption {

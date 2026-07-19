@@ -476,6 +476,7 @@ class IGStudioApp {
         ${this.renderBottomNav()}
         ${this.renderMobileSheet()}
       </div>`;
+    this._scenarioSwitched = false;
     document.documentElement.lang = this.state.locale;
     this.bindEvents();
     requestAnimationFrame(() => this.drawCharts());
@@ -517,12 +518,6 @@ class IGStudioApp {
       ? `${this.t("controls.compare")} · ${this.state.runs} · ${this.fmt(this.state.iterationBudget)} ${this.t("controls.perSeed")}`
       : `${this.t("controls.oneRun")} · ${this.fmt(this.state.iterationBudget)} · seed ${this.state.seed}`;
     return `<aside class="control-rail ${compactRail ? "is-compact" : ""}" aria-label="${escapeHtml(this.t("a11y.controls"))}">
-      <div class="scenario-tabs" role="group" aria-label="${escapeHtml(this.t("controls.scenario"))}">
-        ${SCENARIO_CATALOG.map(({ id }) => {
-          const name = getLocalizedScenario(id, this.state.locale).name;
-          return `<button class="scenario-tab" data-scenario="${id}" aria-label="${escapeHtml(name)}" aria-pressed="${id === this.state.scenarioId}" title="${escapeHtml(name)}">${escapeHtml(name.split(/\s+/)[0])}</button>`;
-        }).join("")}
-      </div>
       ${this.state.page === "overview" ? `<header class="mobile-rail-intro"><h1>${escapeHtml(mobileTitle)}</h1></header>` : ""}
       <h2 class="scenario-name">${escapeHtml(scenario.name)}</h2>
       <p class="scenario-description">${escapeHtml(scenario.description)}</p>
@@ -680,7 +675,13 @@ class IGStudioApp {
     ];
     return `<section class="problem-brief">
       <header><span class="eyebrow">${escapeHtml(scenario.name)}</span><h2>${escapeHtml(this.t("overview.problemTitle"))}</h2><p>${escapeHtml(this.t("overview.problemSub"))}</p></header>
-      <figure class="scenario-figure" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
+      <div class="scenario-chooser" role="group" aria-label="${escapeHtml(this.t("controls.scenario"))}">
+        ${SCENARIO_CATALOG.map(({ id }) => {
+          const name = getLocalizedScenario(id, this.state.locale).name;
+          return `<button class="scenario-tab" data-scenario="${id}" aria-pressed="${id === this.state.scenarioId}" title="${escapeHtml(name)}">${escapeHtml(name)}</button>`;
+        }).join("")}
+      </div>
+      <figure class="scenario-figure${this._scenarioSwitched ? " is-switching" : ""}" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
         <img src="${escapeHtml(this.scenarioVisualUrl(scenario))}" alt="${escapeHtml(scenario.visualAlt)}" loading="lazy" decoding="async">
         <figcaption>${escapeHtml(scenario.visualCaption)}</figcaption>
       </figure>
@@ -829,6 +830,7 @@ class IGStudioApp {
       const scenarioId = button.dataset.scenario;
       if (scenarioId === this.state.scenarioId) return;
       this.state.scenarioId = scenarioId;
+      this._scenarioSwitched = true;
       const scenario = getLocalizedScenario(scenarioId, this.state.locale);
       await this.selectInstance(scenario.recommendedDefaultInstance);
     }));
