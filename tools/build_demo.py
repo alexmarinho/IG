@@ -98,7 +98,7 @@ html_path.write_text(html)
 
 docs = root / "docs/index.html"
 docs.write_text(
-    '<!doctype html>\n<html lang="en">\n<meta charset="utf-8">\n'
+    '<!doctype html>\n<html lang="en" data-theme="light">\n'
     "<style>html,body{margin:0;padding:0}</style>\n" + html + "\n</html>\n"
 )
 print(
