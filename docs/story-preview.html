@@ -1,0 +1,2523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Explaining Iterated Greedy — Animation Approaches Explorer</title>
+<meta name="description" content="A live, self-contained mockup to explore and compare animation techniques for explaining the Iterated Greedy scheduling algorithm.">
+<link rel="icon" href="data:,"><!-- suppress favicon request: zero external requests, zero 404 console noise -->
+<style>
+/* ============================================================
+   Design system — warm low-saturation editorial
+   paper #f6f1e8 · ink #2a2620 · terracotta #b0562f · maple #ad7644
+   steel #7d94b0 · brass #c9a148 · sage #7a8b6f · rule #e2d9c8
+   ============================================================ */
+:root{
+  --paper:#f6f1e8; --card:#fbf8f1; --ink:#2a2620; --ink-soft:#6a6255;
+  --terra:#b0562f; --maple:#ad7644; --steel:#7d94b0; --brass:#c9a148;
+  --sage:#7a8b6f; --rule:#e2d9c8; --red:#a8432e;
+  --f1:#b0562f; --f2:#7d94b0; --f3:#7a8b6f; --f4:#c9a148;
+  --f1-bg:#f1ddd3; --f2-bg:#dfe5ed; --f3-bg:#e3e7db; --f4-bg:#f2e8cf;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{
+  background:var(--paper); color:var(--ink);
+  font:15px/1.6 var(--sans);
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:#ead9c2}
+:focus-visible{outline:2px solid var(--steel);outline-offset:2px;border-radius:2px}
+
+/* ---------- header / nav ---------- */
+.site-head{
+  position:sticky;top:0;z-index:50;
+  background:var(--paper);
+  border-bottom:1px solid var(--rule);
+}
+.site-head-inner{max-width:1120px;margin:0 auto;padding:14px 20px 10px}
+.brand-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px}
+h1.brand{font:600 21px/1.25 var(--serif);letter-spacing:.2px}
+h1.brand em{font-style:normal;color:var(--terra)}
+.badge{
+  font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-soft);border:1px solid var(--rule);border-radius:999px;
+  padding:5px 10px;background:var(--card);white-space:nowrap;
+}
+.subtitle{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
+.subtitle code{font-family:var(--mono);font-size:11.5px;color:var(--maple)}
+nav.anchor-nav{max-width:1120px;margin:0 auto;padding:0 20px}
+nav.anchor-nav ul{
+  display:flex;gap:2px;list-style:none;overflow-x:auto;scrollbar-width:thin;
+}
+nav.anchor-nav a{
+  display:block;padding:9px 11px;font-size:12px;font-weight:600;
+  color:var(--ink-soft);text-decoration:none;white-space:nowrap;
+  border-bottom:2px solid transparent;
+}
+nav.anchor-nav a:hover{color:var(--terra)}
+nav.anchor-nav a.active{color:var(--terra);border-bottom-color:var(--terra)}
+
+/* ---------- page layout ---------- */
+main{max-width:1120px;margin:0 auto;padding:0 20px 40px}
+section.section{padding:44px 0 8px;scroll-margin-top:118px}
+.kicker{
+  font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
+  color:var(--terra);margin-bottom:8px;
+}
+.kicker .fig{color:var(--ink-soft);font-weight:500;letter-spacing:.1em}
+h2.section-title{font:600 27px/1.2 var(--serif);margin-bottom:10px}
+h2.section-title .no{color:var(--brass);font-weight:400;margin-right:8px}
+p.lede{max-width:72ch;color:var(--ink-soft);margin-bottom:18px}
+p.lede b, p.lede strong{color:var(--ink)}
+.rule{height:1px;background:var(--rule);margin:26px 0 0}
+
+/* ---------- concept cards ---------- */
+.cards-grid{
+  display:grid;gap:14px;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+}
+.card{
+  background:var(--card);border:1px solid var(--rule);border-radius:10px;
+  padding:16px 16px 14px;position:relative;
+}
+.card .num{
+  font:600 22px/1 var(--serif);color:var(--brass);position:absolute;top:12px;right:14px;
+}
+.card h3{font:600 16.5px/1.3 var(--serif);margin-bottom:6px;padding-right:34px}
+.card p{font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+.card .now,.card .fit{font-size:12px;line-height:1.5;border-top:1px dashed var(--rule);padding-top:7px;margin-top:7px}
+.card .now b{color:var(--steel)}
+.card .fit b{color:var(--terra)}
+.card .now b,.card .fit b{font-weight:700;display:inline-block;min-width:0}
+
+/* ---------- demo figure blocks ---------- */
+figure.demo{
+  background:var(--card);border:1px solid var(--rule);border-radius:12px;
+  padding:18px 18px 16px;margin:14px 0 8px;
+}
+figcaption.fig-cap{
+  font:600 11px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-soft);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px 14px;
+  align-items:baseline;
+}
+figcaption.fig-cap .fig-no{color:var(--terra);font-weight:700}
+figcaption.fig-cap .fig-name{color:var(--ink);letter-spacing:.06em}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 4px}
+button.btn{
+  font:600 12.5px/1 var(--sans);color:var(--ink);
+  background:var(--card);border:1px solid #cfc4ac;border-radius:7px;
+  padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+}
+button.btn:hover{border-color:var(--terra);color:var(--terra)}
+button.btn:disabled{opacity:.45;cursor:not-allowed}
+button.btn.primary{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
+button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
+.seg{display:inline-flex;border:1px solid #cfc4ac;border-radius:7px;overflow:hidden}
+.seg button{
+  font:600 12px/1 var(--sans);color:var(--ink-soft);background:transparent;
+  border:0;padding:9px 12px;cursor:pointer;border-right:1px solid var(--rule);
+}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.seg button:hover:not(.on){color:var(--terra)}
+.ctl-label{font:600 11px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);margin-right:2px}
+.status-line{
+  font-size:12px;color:var(--ink-soft);min-height:18px;margin-top:8px;font-style:italic;
+}
+.status-line b{color:var(--terra);font-style:normal}
+
+/* ---------- job chips ---------- */
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  border:1px solid;border-left-width:4px;border-radius:6px;
+  padding:4px 8px 4px 7px;font:700 12px/1.2 var(--sans);color:var(--ink);
+  user-select:none;white-space:nowrap;background:var(--card);
+  will-change:transform;
+}
+.chip .fam{
+  font:700 9px/1 var(--sans);color:#fdf8ef;border-radius:3px;padding:3px 4px;letter-spacing:.05em;
+}
+.chip small{font-weight:500;color:var(--ink-soft);font-size:10px}
+.chip.f1{background:var(--f1-bg);border-color:var(--f1)} .chip.f1 .fam{background:var(--f1)}
+.chip.f2{background:var(--f2-bg);border-color:var(--f2)} .chip.f2 .fam{background:var(--f2)}
+.chip.f3{background:var(--f3-bg);border-color:var(--f3)} .chip.f3 .fam{background:var(--f3)}
+.chip.f4{background:var(--f4-bg);border-color:var(--f4)} .chip.f4 .fam{background:var(--f4)}
+.chip.ghost{opacity:.55;border-style:dashed}
+
+/* ---------- demo 1 rails + gantt ---------- */
+.rail-block{margin-top:14px}
+.rail-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
+.rail-title{font:700 13px/1 var(--sans);letter-spacing:.04em}
+.rail-title .tag{font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-left:6px}
+.chips-row{
+  display:flex;flex-wrap:wrap;gap:6px;align-items:center;
+  background:#f2ebdd;border:1px dashed #d8cdb6;border-radius:8px;padding:8px;min-height:44px;
+}
+.gantt-wrap{margin-top:10px;overflow-x:auto}
+svg.gantt{display:block;width:100%;min-width:520px;height:auto}
+.readouts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:8px;font-size:12.5px}
+.readout{color:var(--ink-soft)}
+.readout b{color:var(--ink);font-family:var(--mono);font-size:12.5px;font-weight:600}
+.readout.total b{color:var(--terra);font-weight:700}
+table.data{
+  border-collapse:collapse;font-size:12px;margin:10px 0 2px;
+}
+table.data caption{
+  text-align:left;font:600 10.5px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;
+  color:var(--ink-soft);padding-bottom:6px;
+}
+table.data th,table.data td{border:1px solid var(--rule);padding:4px 9px;text-align:right}
+table.data th{background:#f2ebdd;font-weight:600;color:var(--ink-soft);text-align:center}
+table.data td:first-child,table.data th:first-child{text-align:left}
+table.data .famcell{font-weight:700;text-align:center}
+.progress-track{height:6px;background:#ece3d1;border-radius:99px;overflow:hidden;margin-top:10px}
+.progress-fill{height:100%;width:0%;background:var(--terra);border-radius:99px;transition:width .12s linear}
+.gantt-legend{display:flex;flex-wrap:wrap;gap:5px 18px;font-size:11px;color:var(--ink-soft);margin:-4px 0 10px}
+.gantt-legend>span{display:inline-flex;align-items:center;gap:6px}
+.swatch{width:14px;height:10px;border-radius:2px;display:inline-block;flex:none}
+.swatch.hatch{border:1px solid #d9cdb4;background-color:#efe7d7;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 7 L7 -1 M-1 1 L1 -1 M5 7 L7 5' stroke='%23d9cdb4' stroke-width='1.4'/%3E%3C/svg%3E")}
+.swatch.setup{background:#ad7644;height:6px;border-radius:3px}
+.swatch.proc{background:var(--steel)}
+.swatch.tard{background:rgba(168,67,46,.45)}
+.tick-demo{width:2px;height:12px;background:var(--red);display:inline-block;flex:none}
+
+/* ---------- demo 2 factorial ---------- */
+.fact-grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));margin:14px 0 6px}
+.fact{
+  background:#f2ebdd;border:1px solid var(--rule);border-radius:10px;padding:14px 16px;
+}
+.fact .lbl{font:600 10.5px/1.3 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+.fact .val{font:600 24px/1.15 var(--serif);color:var(--ink);word-break:break-word}
+.fact .val small{font-size:14px;color:var(--ink-soft)}
+.fact.hot .val{color:var(--terra)}
+.slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin:6px 0 4px}
+input[type=range]{accent-color:var(--terra);width:min(340px,100%);height:28px;cursor:pointer}
+.slider-val{font:700 15px/1 var(--mono);color:var(--terra);min-width:64px}
+.bar-zone{margin:16px 0 4px}
+.bar-legend{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-soft);margin-bottom:4px}
+.bar-track{
+  position:relative;height:34px;background:#f2ebdd;border:1px solid var(--rule);border-radius:8px;overflow:hidden;
+}
+.bar-fill{
+  position:absolute;left:0;top:0;bottom:0;width:20%;
+  background:var(--maple);border-right:3px solid var(--terra);
+  transition:width .45s cubic-bezier(.2,.7,.3,1);
+}
+.bar-fill-label{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  font:700 11px/1 var(--sans);color:#fdf8ef;white-space:nowrap;
+}
+.bar-ticks{position:absolute;inset:0;pointer-events:none}
+.bar-ticks i{position:absolute;top:0;bottom:0;width:1px;background:#e0d4bd}
+.bar-ticks b{position:absolute;top:2px;font:600 8.5px/1 var(--sans);color:var(--ink-soft);transform:translateX(3px)}
+.mult-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:10px;font-size:12px;color:var(--ink-soft)}
+.mult-chip{
+  font:700 11px/1 var(--mono);background:var(--card);border:1px solid var(--rule);
+  border-radius:6px;padding:5px 8px;color:var(--maple);
+}
+.mult-chip.last{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
+
+/* ---------- demo 3 : the IG loop ---------- */
+.ig-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;margin-top:6px}
+@media (max-width:920px){.ig-grid{grid-template-columns:1fr}}
+.ig-left,.ig-right{min-width:0}
+.ig-rail-label{
+  font:600 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
+  margin:12px 0 5px;display:flex;align-items:baseline;gap:8px;
+}
+.ig-rail-label .hint{font-weight:500;text-transform:none;letter-spacing:0;font-size:11px;color:#9a8f7a}
+.ig-rail{
+  position:relative;display:flex;flex-wrap:nowrap;gap:5px;align-items:center;
+  min-height:46px;padding:6px;border-radius:8px;overflow-x:auto;
+}
+.ig-rail.protected{background:#f2ebdd;border:1px solid #d8cdb6}
+.ig-rail.working{background:#fdfaf3;border:1.5px solid var(--brass)}
+.ig-rail.tray{background:#f7f2e7;border:1px dashed #cfc4ac;min-height:42px;flex-wrap:wrap}
+.ig-outside{
+  display:flex;flex-wrap:wrap;gap:5px;align-items:center;
+  background:#f6ecec;border:1px dashed #c39a8c;border-radius:8px;padding:6px;min-height:42px;margin-top:6px;
+}
+.ig-outside .outside-title{font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-right:4px}
+.rail-empty{font-size:11.5px;color:#a2967f;font-style:italic;padding:2px 6px}
+.ig-outside-note{font-size:11px;color:var(--red);width:100%;font-style:italic;min-height:0}
+.ig-outside-note:empty{display:none}
+/* trial track — the sweep marker lives here, aligned over the working rail */
+.trial-track{
+  position:relative;height:30px;margin:2px 0 0;display:none;
+}
+.trial-track.on{display:block}
+.trial-caret{
+  position:absolute;top:0;left:0;width:0;height:100%;pointer-events:none;
+  transform:translateX(0);
+}
+.trial-caret::before{
+  content:"";position:absolute;left:-1px;top:16px;width:2px;height:14px;background:var(--terra);
+}
+.trial-caret .pill{
+  position:absolute;top:0;left:0;transform:translateX(-50%);
+  font:700 10.5px/1 var(--mono);background:var(--ink);color:var(--paper);
+  border-radius:4px;padding:3px 6px;white-space:nowrap;
+}
+.trial-caret.best .pill{background:var(--brass);color:var(--ink)}
+.trial-tick{position:absolute;top:24px;width:3px;height:3px;border-radius:50%;background:#c4b795}
+.insert-bar{
+  position:absolute;top:2px;bottom:2px;width:3px;background:var(--brass);border-radius:2px;
+  box-shadow:0 0 0 2px rgba(201,161,72,.25);pointer-events:none;z-index:2;
+}
+.ig-phase{
+  margin-top:14px;font:600 14px/1.4 var(--serif);color:var(--terra);min-height:22px;
+}
+.ig-phase .ph-no{color:var(--ink-soft);font-family:var(--mono);font-size:11px;margin-right:8px}
+/* objective sheet */
+.sheet{
+  width:100%;border-collapse:collapse;font-size:12px;margin-top:2px;
+}
+.sheet th,.sheet td{border:1px solid var(--rule);padding:5px 8px;text-align:right}
+.sheet th{background:#f2ebdd;color:var(--ink-soft);font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
+.sheet td:first-child,.sheet th:first-child{text-align:left;font-weight:600}
+.sheet td{font-family:var(--mono);font-size:11.5px}
+.sheet tr.cand td{background:#fdf6e4}
+.sheet tfoot td{font-weight:700;border-top:2px solid #d8cdb6}
+.delta-pill{
+  display:inline-block;font:700 11px/1 var(--mono);border-radius:99px;padding:4px 9px;margin-top:8px;
+  background:#ece3d1;color:var(--ink-soft);
+}
+.delta-pill.down{background:#e4e9da;color:#55663f}
+.delta-pill.up{background:#f3ddd4;color:var(--red)}
+canvas.chart{
+  display:block;width:100%;height:170px;background:#fdfaf3;
+  border:1px solid var(--rule);border-radius:8px;margin-top:10px;
+}
+.chart-cap{font-size:10.5px;color:var(--ink-soft);margin-top:4px;letter-spacing:.04em}
+.log{
+  margin-top:10px;background:#f2ebdd;border:1px solid var(--rule);border-radius:8px;
+  padding:8px 10px;font-family:var(--mono);font-size:11px;line-height:1.7;color:var(--ink-soft);
+  min-height:96px;max-height:150px;overflow-y:auto;
+}
+.log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.log div b{color:var(--terra);font-weight:600}
+.log div .ok{color:#55663f;font-weight:700}
+.log div .no{color:var(--red);font-weight:700}
+
+/* ---------- demo 4 race ---------- */
+.race-legend{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.legend-row{
+  display:grid;grid-template-columns:14px minmax(150px,1.2fr) minmax(0,1fr) auto;gap:10px;
+  align-items:center;font-size:12px;padding:5px 8px;border:1px solid var(--rule);
+  border-radius:7px;background:#fdfaf3;
+}
+.legend-row .sw{width:14px;height:14px;border-radius:4px}
+.legend-row .nm{font-weight:600}
+.legend-row .st{color:var(--ink-soft);font-family:var(--mono);font-size:11px}
+.legend-row .bst{font-family:var(--mono);font-weight:700;font-size:11.5px;color:var(--terra)}
+.legend-row.done .nm::after{content:" · done";color:var(--sage);font-weight:600;font-size:10.5px}
+.banner{
+  display:none;margin-top:12px;border:1.5px solid var(--brass);background:#faf3df;
+  border-radius:9px;padding:11px 14px;font-size:13.5px;
+}
+.banner.show{display:block}
+.banner b{color:var(--terra)}
+
+/* ---------- demo 5 technique lab ---------- */
+.lab-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:12px}
+.lab-panel{border:1px solid var(--rule);border-radius:10px;background:#fdfaf3;padding:12px;display:flex;flex-direction:column}
+.lab-panel h4{font:600 13.5px/1.3 var(--serif);margin-bottom:2px}
+.lab-panel .impl{font:500 10.5px/1.4 var(--mono);color:var(--ink-soft);margin-bottom:10px}
+.lab-stage{min-height:96px;border:1px dashed var(--rule);border-radius:8px;background:#f7f2e7;padding:8px;position:relative;overflow-x:auto}
+.note-card{
+  margin-top:10px;border-top:1px dashed var(--rule);padding-top:8px;font-size:11.5px;color:var(--ink-soft);line-height:1.55;
+}
+.note-card b{color:var(--ink)}
+.gseg{position:absolute;height:22px;border-radius:4px;top:34px}
+.lab-chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;min-height:30px}
+
+/* ---------- tool matrix ---------- */
+.matrix-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--rule);border-radius:10px;background:var(--card)}
+table.matrix{border-collapse:collapse;width:100%;min-width:900px;font-size:12.5px}
+table.matrix th,table.matrix td{border-bottom:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
+table.matrix thead th{
+  background:#f2ebdd;font:600 10.5px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
+  border-bottom:1.5px solid #d8cdb6;
+}
+table.matrix tbody tr:last-child td{border-bottom:0}
+table.matrix tbody tr:hover{background:#f7f1e4}
+table.matrix td.tname{font-weight:700;white-space:nowrap}
+table.matrix td.tname .ver{display:block;font:500 10.5px/1.4 var(--mono);color:var(--ink-soft)}
+table.matrix .star{color:var(--brass);font-weight:700}
+table.matrix .flag{font:700 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--red);border:1px solid #ddb6a8;border-radius:4px;padding:2px 5px;white-space:nowrap}
+table.matrix .lic-mit{color:#55663f;font-weight:600}
+.footnote{font-size:11.5px;color:var(--ink-soft);margin-top:10px;font-style:italic}
+.matrix-legend{font-size:11.5px;color:var(--ink-soft);margin-top:8px}
+.matrix-legend .star{color:var(--brass);font-weight:700}
+
+/* ---------- recommended stack ---------- */
+.stack-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:12px}
+.stack-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:16px;border-top:3px solid var(--terra)}
+.stack-card:nth-child(2){border-top-color:var(--steel)}
+.stack-card:nth-child(3){border-top-color:var(--brass)}
+.stack-card h3{font:600 16px/1.3 var(--serif);margin-bottom:4px}
+.stack-card .use{font:600 10.5px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:10px}
+.stack-card p{font-size:12.5px;color:var(--ink-soft);margin-bottom:8px}
+.stack-card p b{color:var(--ink)}
+.stack-card ul{margin:0 0 8px 18px;font-size:12.5px;color:var(--ink-soft)}
+.stack-card li{margin-bottom:3px}
+.stack-card .effort{border-top:1px dashed var(--rule);padding-top:8px;font-size:12px}
+.stack-card .effort b{color:var(--maple)}
+
+/* ---------- footer ---------- */
+footer{border-top:1px solid var(--rule);margin-top:44px;padding:18px 20px 30px;text-align:center;font-size:11.5px;color:var(--ink-soft)}
+footer code{font-family:var(--mono);color:var(--maple)}
+
+/* ---------- responsive ---------- */
+@media (max-width:640px){
+  h1.brand{font-size:17px}
+  h2.section-title{font-size:22px}
+  section.section{padding:34px 0 6px;scroll-margin-top:104px}
+  figure.demo{padding:14px 12px}
+  .legend-row{grid-template-columns:14px minmax(110px,1fr) auto}
+  .legend-row .st{display:none}
+}
+@media (prefers-reduced-motion:reduce){
+  .bar-fill,.progress-fill,button.btn{transition:none !important}
+}
+</style>
+<style id="ig-story-proto">
+  /* Prototype: keep only the story arc — hero + Demo 1 (order) + Demo 2 (factorial) */
+  #concepts, #demo-ig, #demo-race, #demo-lab, #tools, #stack { display: none !important; }
+  nav.anchor-nav a[href="#concepts"], nav.anchor-nav a[href="#demo-ig"],
+  nav.anchor-nav a[href="#demo-race"], nav.anchor-nav a[href="#demo-lab"],
+  nav.anchor-nav a[href="#tools"], nav.anchor-nav a[href="#stack"] { display: none !important; }
+  .site-head .badge { display: none; }
+  /* Embedded in the page's STORY tab — hide the standalone header/nav, blend in */
+  .site-head { display: none !important; }
+  main { padding-top: 4px; padding-bottom: 8px; }
+  /* Hero intro block */
+  .ig-hero { max-width: 1120px; margin: 0 auto; padding: 40px 20px 8px; }
+  .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
+  .ig-hero h2 { font: 600 clamp(30px, 3.4vw, 46px)/1.08 var(--serif); letter-spacing: .2px; max-width: 20ch; margin-bottom: 16px; }
+  .ig-hero h2 em { font-style: normal; color: var(--terra); }
+  .ig-hero .bridge { max-width: 60ch; font: italic 400 clamp(17px,1.6vw,21px)/1.5 var(--serif); color: var(--ink); margin-bottom: 6px; }
+</style>
+</head>
+<body>
+<!-- ============================================================
+     0 · Header / sticky anchor nav
+     ============================================================ -->
+<header class="site-head">
+  <div class="site-head-inner">
+    <div class="brand-row">
+      <h1 class="brand"><em>Iterated Greedy</em> — single-machine scheduling</h1>
+    </div>
+    <p class="subtitle">An interactive explanation — the same jobs, a better order, and how a small algorithm finds it.</p>
+  </div>
+  <nav class="anchor-nav" aria-label="Sections">
+    <ul id="navList">
+      <li><a href="#concepts">The 9 concepts</a></li>
+      <li><a href="#demo-order">1 · Order &amp; cost</a></li>
+      <li><a href="#demo-factorial">2 · Factorial explosion</a></li>
+      <li><a href="#demo-ig">3 · The IG loop</a></li>
+      <li><a href="#demo-race">4 · Algorithm race</a></li>
+      <li><a href="#demo-lab">5 · Technique lab</a></li>
+      <li><a href="#tools">Tool matrix</a></li>
+      <li><a href="#stack">Recommended stack</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+<section class="ig-hero">
+  <p class="kick">Why order matters</p>
+  <h2>Order changes time. <em>Time changes cost.</em></h2>
+  <p class="bridge">A best order does exist — but there are more of them than you could ever check. So the game isn't to try them all; it's to guess well and improve fast.</p>
+</section>
+<!-- ============================================================
+     1 · The 9 concepts to animate
+     ============================================================ -->
+<section class="section" id="concepts">
+  <p class="kicker"><span class="fig">Inventory</span></p>
+  <h2 class="section-title"><span class="no">§1</span>The nine concepts the story must teach</h2>
+  <p class="lede">Everything on the story page serves one of these nine ideas. For each: how the
+  current page already presents it, and the best-in-class technique this mockup recommends for comparison — each demonstrated live further down.</p>
+  <div class="cards-grid" id="conceptGrid"><!-- cards injected by JS from data — keeps copy in one place --></div>
+</section>
+
+<!-- ============================================================
+     2 · Live demo 1 — Order changes time. Time changes cost.
+     ============================================================ -->
+<section class="section" id="demo-order">
+  <p class="kicker"><span class="fig">Fig. 01 / order</span></p>
+  <h2 class="section-title"><span class="no">§2</span>Live demo 1 — “Order changes time. Time changes cost.”</h2>
+  <p class="lede">The same five jobs in two different orders, scored exactly. Every change of sequence
+  re-draws the timelines: <b>hatched</b> is the machine waiting for a release date, <b>orange</b> is a
+  sequence-dependent setup, <b>red</b> is weighted tardiness past a due date. Then let the machine
+  answer the obvious question: how good are these two orders, out of all 120?</p>
+
+  <table class="data" aria-label="Demo dataset">
+    <caption>Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)</caption>
+    <thead><tr><th>Job</th><th>Family</th><th>Release r</th><th>Processing p</th><th>Due d</th><th>Weight w</th></tr></thead>
+    <tbody id="d1data"></tbody>
+  </table>
+
+  <figure class="demo" id="d1figure">
+    <figcaption class="fig-cap">
+      <span><span class="fig-no">Fig. 01a</span> <span class="fig-name">Two rails, two orders</span></span>
+      <span>processing cost (Σp = 25) is identical for every order — omitted from totals</span>
+    </figcaption>
+    <p class="gantt-legend" aria-hidden="true">
+      <span><i class="swatch hatch"></i> idle wait for a release date</span>
+      <span><i class="swatch setup"></i> setup between families</span>
+      <span><i class="swatch proc"></i> processing (family colour)</span>
+      <span><i class="swatch tard"></i> weighted tardiness</span>
+      <span><i class="tick-demo"></i> due date</span>
+    </p>
+
+    <div class="rail-block" id="railBlockA">
+      <div class="rail-head">
+        <span class="rail-title">Rail A <span class="tag">the intuitive order</span></span>
+        <button class="btn" id="shuffleA" type="button">Shuffle A</button>
+      </div>
+      <div class="chips-row" id="railA" aria-label="Order A"></div>
+      <div class="gantt-wrap"><svg class="gantt" id="ganttA" role="img" aria-label="Gantt timeline for order A"></svg></div>
+      <div class="readouts" id="readA">
+        <span class="readout">setup cost <b id="roAsetup">–</b></span>
+        <span class="readout">tardiness cost <b id="roAtard">–</b></span>
+        <span class="readout total">total <b id="roAtotal">–</b></span>
+      </div>
+    </div>
+
+    <div class="rail-block" id="railBlockB">
+      <div class="rail-head">
+        <span class="rail-title">Rail B <span class="tag">the family-grouped order</span></span>
+        <button class="btn" id="shuffleB" type="button">Shuffle B</button>
+      </div>
+      <div class="chips-row" id="railB" aria-label="Order B"></div>
+      <div class="gantt-wrap"><svg class="gantt" id="ganttB" role="img" aria-label="Gantt timeline for order B"></svg></div>
+      <div class="readouts" id="readB">
+        <span class="readout">setup cost <b id="roBsetup">–</b></span>
+        <span class="readout">tardiness cost <b id="roBtard">–</b></span>
+        <span class="readout total">total <b id="roBtotal">–</b></span>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="btn primary" id="eval120" type="button">Evaluate all 120 orders</button>
+      <span class="ctl-label">sweeps every permutation, exactly</span>
+    </div>
+    <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="evalProg"></div></div>
+    <p class="status-line" id="d1status" aria-live="polite"></p>
+  </figure>
+</section>
+
+<!-- ============================================================
+     3 · Live demo 2 — Factorial explosion
+     ============================================================ -->
+<section class="section" id="demo-factorial">
+  <p class="kicker"><span class="fig">Fig. 02 / explosion</span></p>
+  <h2 class="section-title"><span class="no">§3</span>Live demo 2 — Factorial explosion</h2>
+  <p class="lede">Why not just try every order? Drag <b>n</b>. Complete orders grow as <b>n!</b>;
+  counting every ordered subset with the rest rejected multiplies that by roughly <b>e</b>
+  (Σ<sub>k</sub> n!/(n−k)! ≈ ⌊e·n!⌋). Even at one <i>billion</i> evaluated plans per second,
+  enumeration dies long before the 28-job instance.</p>
+
+  <figure class="demo">
+    <figcaption class="fig-cap">
+      <span><span class="fig-no">Fig. 02</span> <span class="fig-name">Enumeration budget vs n</span></span>
+      <span>bars are log₁₀ scale — each added job multiplies the count</span>
+    </figcaption>
+    <div class="slider-row">
+      <label class="ctl-label" for="nSlider">jobs n</label>
+      <input type="range" id="nSlider" min="3" max="30" step="1" value="28">
+      <span class="slider-val" id="nVal">n = 28</span>
+    </div>
+    <div class="fact-grid">
+      <div class="fact"><div class="lbl">Complete orders — n!</div><div class="val" id="fOrders">–</div></div>
+      <div class="fact"><div class="lbl">Candidate plans incl. rejection — Σ n!/(n−k)!</div><div class="val" id="fPlans">–</div></div>
+      <div class="fact hot"><div class="lbl">Time to enumerate orders at 10⁹ plans/sec</div><div class="val" id="fTime">–</div></div>
+    </div>
+    <div class="bar-zone" aria-hidden="true">
+      <div class="bar-legend"><span>orders n! · log₁₀ scale</span><span id="barEndLabel"></span></div>
+      <div class="bar-track">
+        <div class="bar-ticks" id="barTicks"></div>
+        <div class="bar-fill" id="factBar"><span class="bar-fill-label" id="factBarLabel"></span></div>
+      </div>
+      <div class="mult-row" id="multRow"><span>each job multiplies:</span></div>
+    </div>
+    <table class="data" aria-label="Analogies">
+      <caption>What the numbers mean — computed live, not hardcoded</caption>
+      <thead><tr><th>n</th><th>orders n!</th><th>enumerate at 10⁹/s</th><th>analogy</th></tr></thead>
+      <tbody id="analogyBody"></tbody>
+    </table>
+    <p class="status-line" id="d2status" aria-live="polite"></p>
+  </figure>
+</section>
+
+<!-- ============================================================
+     4 · Live demo 3 — THE CENTERPIECE: the IG loop, step by step
+     ============================================================ -->
+<section class="section" id="demo-ig">
+  <p class="kicker"><span class="fig">Fig. 03 / iterated greedy</span></p>
+  <h2 class="section-title"><span class="no">§4</span>Live demo 3 — The IG loop, step by step</h2>
+  <p class="lede">A real Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance
+  (<b>mulberry32, seed 0xce29767d</b>). Nothing is pre-recorded: every insertion position is re-evaluated
+  against the complete objective while you watch. Watch for the five beats —
+  <b>construct</b> by best insertion, <b>destroy</b> three jobs, <b>measure every insertion</b> on the trial
+  track, <b>reject at break-even</b> when no position beats the rejection cost, <b>accept or revert</b>.</p>
+
+  <figure class="demo" id="d3figure">
+    <figcaption class="fig-cap">
+      <span><span class="fig-no">Fig. 03</span> <span class="fig-name">One central clock drives every beat — Play / Pause / Step / Speed all scale the same timeline</span></span>
+    </figcaption>
+
+    <div class="controls" role="group" aria-label="Playback controls">
+      <button class="btn primary" id="igPlay" type="button">Play</button>
+      <button class="btn" id="igStep" type="button">Step</button>
+      <span class="ctl-label">speed</span>
+      <span class="seg" id="igSpeed" role="group" aria-label="Speed">
+        <button type="button" data-speed="0.5">0.5×</button><button type="button" data-speed="1" class="on">1×</button><button type="button" data-speed="2">2×</button><button type="button" data-speed="4">4×</button>
+      </span>
+      <button class="btn" id="igRestart" type="button">Restart</button>
+    </div>
+
+    <div class="ig-grid">
+      <div class="ig-left">
+        <p class="ig-rail-label">Protected plan <span class="hint">the reference — never touched mid-iteration</span></p>
+        <div class="ig-rail protected" id="igProtected" aria-label="Protected plan"></div>
+        <p class="ig-rail-label" style="margin-top:10px">Outside — rejected jobs <span class="hint">penalty per job instead of scheduling it</span></p>
+        <div class="ig-outside" id="igOutside" aria-label="Rejected jobs">
+          <span class="outside-title">Outside</span>
+          <span class="rail-empty" id="igOutsideEmpty">none — every job is scheduled</span>
+          <p class="ig-outside-note" id="igOutsideNote"></p>
+        </div>
+
+        <p class="ig-rail-label">Working copy <span class="hint">the candidate being built</span></p>
+        <div class="trial-track" id="igTrialTrack" aria-hidden="true">
+          <div class="trial-caret" id="igCaret"><span class="pill" id="igPill">Σ 0</span></div>
+        </div>
+        <div class="ig-rail working" id="igWorking" aria-label="Working copy"></div>
+
+        <p class="ig-rail-label">Pending tray <span class="hint">jobs waiting to be re-inserted</span></p>
+        <div class="ig-rail tray" id="igTray" aria-label="Pending tray"></div>
+
+        <p class="ig-phase" id="igPhase" aria-live="polite">Idle — press Play or Step.</p>
+      </div>
+
+      <div class="ig-right">
+        <p class="ig-rail-label" style="margin-top:0">Objective sheet <span class="hint">setup&amp;proc + delay + outside = total</span></p>
+        <table class="sheet" aria-label="Objective decomposition">
+          <thead><tr><th>Plan</th><th>setup+p</th><th>delay</th><th>outside</th><th>Σ total</th></tr></thead>
+          <tbody>
+            <tr><td>Protected</td><td id="shPsetup">–</td><td id="shPdelay">–</td><td id="shPout">–</td><td id="shPtot">–</td></tr>
+            <tr class="cand"><td>Candidate</td><td id="shCsetup">–</td><td id="shCdelay">–</td><td id="shCout">–</td><td id="shCtot">–</td></tr>
+          </tbody>
+        </table>
+        <span class="delta-pill" id="igDelta">Δ vs protected —</span>
+        <canvas class="chart" id="igChart" aria-label="Convergence chart: cost vs iteration"></canvas>
+        <p class="chart-cap">convergence — incumbent line + every evaluated candidate (filled = accepted)</p>
+        <div class="log" id="igLog" aria-label="Event log"></div>
+      </div>
+    </div>
+    <p class="status-line" id="d3status" aria-live="polite"></p>
+  </figure>
+</section>
+
+<!-- ============================================================
+     5 · Live demo 4 — Algorithm race under an equal evaluation budget
+     ============================================================ -->
+<section class="section" id="demo-race">
+  <p class="kicker"><span class="fig">Fig. 04 / race</span></p>
+  <h2 class="section-title"><span class="no">§5</span>Live demo 4 — Algorithm race, equal evaluation budget</h2>
+  <p class="lede">Six search strategies on the same seeded instance, each allowed exactly
+  <b>3,000 complete-plan evaluations</b>. A fair fight needs a shared currency: not wall-clock time,
+  but objective evaluations. Lines draw left to right as budget is consumed.</p>
+
+  <figure class="demo">
+    <figcaption class="fig-cap">
+      <span><span class="fig-no">Fig. 04</span> <span class="fig-name">Cost vs evaluations consumed — lower is better</span></span>
+    </figcaption>
+    <div class="controls">
+      <button class="btn primary" id="raceRun" type="button">Run race</button>
+      <button class="btn" id="raceReset" type="button">Reset</button>
+      <span class="ctl-label">budget 3,000 evals each</span>
+    </div>
+    <canvas class="chart" id="raceChart" style="height:230px" aria-label="Race chart: best cost vs evaluations"></canvas>
+    <div class="race-legend" id="raceLegend"></div>
+    <div class="banner" id="raceBanner" role="status"></div>
+    <p class="status-line" id="d4status" aria-live="polite"></p>
+  </figure>
+</section>
+
+<!-- ============================================================
+     6 · Live demo 5 — Technique lab: same animation, three renderers
+     ============================================================ -->
+<section class="section" id="demo-lab">
+  <p class="kicker"><span class="fig">Fig. 05 / renderers</span></p>
+  <h2 class="section-title"><span class="no">§6</span>Technique lab — same animation, three renderers</h2>
+  <p class="lede">The demo-1 Gantt, implemented three times with three different technologies —
+  genuinely separate implementations, shuffled in sync, so the code styles can be compared line by line.
+  Open the source and compare <code>labDom.render</code>, <code>labSvg.render</code>, <code>labCanvas.render</code>.</p>
+
+  <div class="controls">
+    <button class="btn primary" id="labShuffle" type="button">Shuffle all three</button>
+    <span class="ctl-label">one order, three renderers</span>
+  </div>
+  <div class="lab-chip-row" id="labChips" aria-label="Current order"></div>
+
+  <div class="lab-grid">
+    <div class="lab-panel">
+      <h4>(a) DOM + CSS transitions</h4>
+      <p class="impl">&lt;div&gt; segments · animate style.left / style.width via CSS transition</p>
+      <div class="lab-stage" id="labDom" aria-label="DOM renderer"></div>
+      <div class="note-card"><b>Strengths:</b> accessible by default, easiest layout &amp; text, FLIP-friendly, trivially inspectable.
+      <b>Limits:</b> comfortable to ~hundreds of nodes; animating layout properties (left/width) costs style recalc — fine for 5 segments, wrong for 5,000.</div>
+    </div>
+    <div class="lab-panel">
+      <h4>(b) SVG + JS attribute animation</h4>
+      <p class="impl">&lt;rect&gt; nodes · rAF tween writes x / width attributes</p>
+      <div class="lab-stage" id="labSvgWrap"><svg class="gantt" id="labSvg" style="min-width:0" role="img" aria-label="SVG renderer"></svg></div>
+      <div class="note-card"><b>Strengths:</b> crisp at any zoom, still a DOM (inspectable, styleable), the natural fit for diagrams &amp; timelines.
+      <b>Limits:</b> heavier per node than canvas; no layout engine — you compute every x yourself.</div>
+    </div>
+    <div class="lab-panel">
+      <h4>(c) Canvas 2D redraw loop</h4>
+      <p class="impl">single &lt;canvas&gt; · full redraw every frame</p>
+      <div class="lab-stage" id="labCanvasWrap"><canvas id="labCanvas" style="width:100%;height:96px;display:block" role="img" aria-label="Canvas renderer"></canvas></div>
+      <div class="note-card"><b>Strengths:</b> fastest for thousands of marks, zero DOM overhead, pixel-exact.
+      <b>Limits:</b> manual hit-testing, no accessibility tree, redraw-everything mindset; text &amp; DPI are your problem.</div>
+    </div>
+  </div>
+  <p class="status-line" id="d5status" aria-live="polite"></p>
+</section>
+
+<!-- ============================================================
+     7 · Tool matrix
+     ============================================================ -->
+<section class="section" id="tools">
+  <p class="kicker"><span class="fig">Survey</span></p>
+  <h2 class="section-title"><span class="no">§7</span>Tool matrix — what exists, what it is best at</h2>
+  <p class="lede">The strongest existing tools for this kind of animated explanation, verified July 2026.
+  <span class="star" style="color:var(--brass);font-weight:700">★</span> marks a category top pick.</p>
+  <div class="matrix-wrap">
+    <table class="matrix">
+      <thead><tr><th>Tool</th><th>Type</th><th>Output</th><th>License / cost</th><th>Best at</th><th>Fit for these concepts</th></tr></thead>
+      <tbody id="matrixBody"><!-- rows injected from data --></tbody>
+    </table>
+  </div>
+  <p class="matrix-legend"><span class="star">★</span> GSAP — live step-by-step choreography in a vanilla single-file page ·
+  <span class="star">★</span> Manim CE — rendered narrative math video ·
+  <span class="star">★</span> Remotion — polished social/marketing clips ·
+  <span class="star">★</span> Observable Framework — data-centric explorable articles ·
+  <span class="star">★</span> Rive — designer-authored interactive mascots wired to live state.</p>
+  <p class="footnote">Caution flags: <b>Idyll</b> is effectively dead (last release 2022); <b>distill.pub</b> is on indefinite hiatus since 2021 — a design lineage, not a tool;
+  <b>Scrollama</b> is stable but minimal — the modern scrollytelling default is GSAP ScrollTrigger (+ Lenis); <b>Popmotion</b> is dormant, superseded by Motion;
+  <b>Spline</b> (commercial 3D, free tier watermarked, from $12/seat/mo) suits landing pages, not precise 2D algorithm pedagogy.</p>
+  <p class="footnote">Tool versions verified against public registries (npm, PyPI, official release notes), July 2026.</p>
+</section>
+
+<!-- ============================================================
+     8 · Recommended stack
+     ============================================================ -->
+<section class="section" id="stack">
+  <p class="kicker"><span class="fig">Verdict</span></p>
+  <h2 class="section-title"><span class="no">§8</span>Recommended stack — three concrete paths</h2>
+  <div class="stack-grid">
+    <div class="stack-card">
+      <p class="use">Path 1 — your case</p>
+      <h3>Interactive explorable single-file page</h3>
+      <p><b>Vanilla JS + WAAPI/FLIP</b>, exactly as this mockup: one central clock, FLIP chip choreography, a
+      live trial track. Add <b>GSAP 3.15 + Flip/ScrollTrigger</b> as a drop-in accelerator and <b>D3</b> for the
+      factorial counters and convergence charts. MIT-pure alternative: <b>Anime.js v4</b>.</p>
+      <ul>
+        <li>Why: zero build step preserved — the page stays one file; FLIP is precisely what “remove / re-insert a job” needs.</li>
+        <li>Tradeoffs: hand-rolled timing demands discipline (single clock, seeded RNG); GSAP is free incl. commercial but “Standard No-Charge”, not MIT.</li>
+      </ul>
+      <p class="effort"><b>Migration effort:</b> days. Keep your engine and DOM; port one beat at a time — this page is the proof of feasibility.</p>
+    </div>
+    <div class="stack-card">
+      <p class="use">Path 2 — long-form</p>
+      <h3>Rendered narrative video</h3>
+      <p><b>Manim CE 0.20</b> for math fidelity (Python, 3Blue1Brown-grade exposition), or <b>Motion Canvas 3.17</b>
+      if you want to stay in TypeScript with generator-function storyboards and a visual editor.</p>
+      <ul>
+        <li>Why: frame-perfect control, voiceover sync, YouTube-native; LLM-assisted Manim authoring is now a mainstream workflow.</li>
+        <li>Tradeoffs: loses interactivity — a second artifact to maintain; Motion Canvas public development has been quiet since late 2024.</li>
+      </ul>
+      <p class="effort"><b>Migration effort:</b> 1–2 weeks. The storyboard mirrors the beats in Fig. 03; your seeded instance and objective port directly.</p>
+    </div>
+    <div class="stack-card">
+      <p class="use">Path 3 — distribution</p>
+      <h3>Clips &amp; polish</h3>
+      <p><b>Remotion 4</b> for social/marketing cuts (free for individuals &amp; orgs ≤ 3 people; renders locally, on Lambda, or
+      in-browser via WebCodecs), <b>Rive</b> for interactive mascots/operators with Data Binding wired to live algorithm
+      state, <b>dotLottie</b> for exported micro-animations.</p>
+      <ul>
+        <li>Why: distribution formats reward polish; Rive state machines make a reactive “operator” character cheap.</li>
+        <li>Tradeoffs: three extra toolchains — keep them out of the core explainer; Remotion’s license turns paid above 3 employees.</li>
+      </ul>
+      <p class="effort"><b>Migration effort:</b> incremental — nothing until you need distribution; clips reuse the same beats and palette.</p>
+    </div>
+  </div>
+  <div class="rule"></div>
+</section>
+</main>
+
+<footer>
+  <p>Explaining Iterated Greedy — Animation Approaches Explorer · single self-contained HTML file ·
+  zero external requests · seeded with <code>mulberry32(0xce29767d)</code> · companion mockup to <code>alexmarinho.github.io/IG</code></p>
+</footer>
+
+<!-- ============================================================
+     SCRIPT 1 — pure logic: PRNG, instance, objective, IG, race.
+     Deliberately DOM-free so it can be executed in node for tests.
+     ============================================================ -->
+<script>
+'use strict';
+/* ===== Seeded PRNG (mulberry32) — every demo is deterministic ===== */
+var IG_SEED = 0xce29767d;
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    var t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function ri(rng, a, b){ return a + Math.floor(rng() * (b - a + 1)); } // random int in [a,b]
+
+/* ===== Instance generator — spec: n jobs, nf families =====
+   job: family, release 0–40, processing 3–9, due = release+p+slack(2–20),
+        weight 1–5, rejection cost 15–60
+   setup: time 2–6 / cost 4–12 between different families, 0 same-family   */
+function genInstance(seed, n, nf){
+  var rng = mulberry32(seed), jobs = [], i, a, b;
+  for(i = 0; i < n; i++){
+    var fam = ri(rng, 0, nf - 1), release = ri(rng, 0, 40), p = ri(rng, 3, 9), slack = ri(rng, 2, 20);
+    jobs.push({ id:i, fam:fam, release:release, p:p, due:release + p + slack, w:ri(rng, 1, 5), rej:ri(rng, 15, 60) });
+  }
+  var sT = [], sC = [];
+  for(a = 0; a < nf; a++){
+    sT.push([]); sC.push([]);
+    for(b = 0; b < nf; b++){
+      if(a === b){ sT[a].push(0); sC[a].push(0); }
+      else { sT[a].push(ri(rng, 2, 6)); sC[a].push(ri(rng, 4, 12)); }
+    }
+  }
+  return { n:n, nf:nf, jobs:jobs, sT:sT, sC:sC };
+}
+
+/* ===== Complete objective — every trial is scored on the full sum =====
+   total = Σ setup cost + Σ processing + Σ weight·max(0, completion−due)
+         + Σ rejection cost of unscheduled jobs.
+   The machine timeline respects release dates (idle wait) and
+   sequence-dependent setup times between consecutive families.          */
+function evaluate(inst, seq){
+  var inSeq = {};
+  for(var q = 0; q < seq.length; q++) inSeq[seq[q]] = true;
+  var t = 0, prev = -1, setup = 0, proc = 0, tard = 0, timeline = [];
+  for(var k = 0; k < seq.length; k++){
+    var j = inst.jobs[seq[k]];
+    var st = (prev >= 0 && prev !== j.fam) ? inst.sT[prev][j.fam] : 0;
+    var sc = (prev >= 0 && prev !== j.fam) ? inst.sC[prev][j.fam] : 0;
+    t += st;
+    var start = Math.max(t, j.release);   // idle wait if the job is not yet released
+    var idle = start - t, c = start + j.p;
+    t = c;
+    setup += sc; proc += j.p; tard += j.w * Math.max(0, c - j.due);
+    timeline.push({ id:j.id, st:st, idle:idle, start:start, end:c });
+    prev = j.fam;
+  }
+  var rej = 0;
+  for(var m = 0; m < inst.jobs.length; m++) if(!inSeq[inst.jobs[m].id]) rej += inst.jobs[m].rej;
+  return { total: setup + proc + tard + rej, setup:setup, proc:proc, tard:tard, rej:rej, timeline:timeline };
+}
+
+/* ===== Evaluate one insertion position (used live by the trial sweep) ===== */
+function evalInsertion(inst, seq, jobId, pos){
+  var s2 = seq.slice(); s2.splice(pos, 0, jobId);
+  return evaluate(inst, s2).total;
+}
+
+/* ===== Best insertion with break-even rejection =====
+   base = current total with jobId unscheduled (its rejection cost counts).
+   Insert only if the cheapest position does not cost more than rejecting. */
+function bestInsertion(inst, seq, jobId){
+  var base = evaluate(inst, seq).total, bPos = -1, bCost = Infinity;
+  for(var p = 0; p <= seq.length; p++){
+    var c = evalInsertion(inst, seq, jobId, p);
+    if(c < bCost){ bCost = c; bPos = p; }
+  }
+  return { base:base, bCost:bCost, bPos:bPos, insert: bCost <= base };
+}
+
+/* ===== Greedy construction: jobs in earliest-due-date order, best insertion ===== */
+function constructJobs(inst){
+  var order = inst.jobs.slice().sort(function(a, b){ return a.due - b.due || a.id - b.id; }).map(function(j){ return j.id; });
+  var seq = [], steps = [];
+  for(var i = 0; i < order.length; i++){
+    var r = bestInsertion(inst, seq, order[i]);
+    steps.push({ id:order[i], base:r.base, bCost:r.bCost, bPos:r.bPos, insert:r.insert });
+    if(r.insert) seq.splice(r.bPos, 0, order[i]);
+  }
+  return { seq:seq, steps:steps, order:order };
+}
+
+/* ===== Destroy: pick d random scheduled jobs (Fisher–Yates on positions) ===== */
+function destroyJobs(inst, seq, rng, d){
+  var idx = [];
+  for(var i = 0; i < seq.length; i++) idx.push(i);
+  for(var k = idx.length - 1; k > 0; k--){
+    var m = Math.floor(rng() * (k + 1)), t = idx[k]; idx[k] = idx[m]; idx[m] = t;
+  }
+  var cut = Math.min(d, seq.length), victims = [], rest = [];
+  var chosen = {};
+  for(var v = 0; v < cut; v++) chosen[idx[v]] = true;
+  for(var s = 0; s < seq.length; s++) (chosen[s] ? victims : rest).push(seq[s]);
+  return { victims:victims, rest:rest };
+}
+
+/* ===== All permutations (Heap's algorithm, iterative-friendly) ===== */
+function permutations(arr){
+  var out = [], a = arr.slice();
+  (function hp(n){
+    if(n <= 1){ out.push(a.slice()); return; }
+    for(var i = 0; i < n; i++){
+      hp(n - 1);
+      var j = n % 2 ? i : 0, t = a[n - 1]; a[n - 1] = a[j]; a[j] = t;
+    }
+  })(a.length);
+  return out;
+}
+
+/* ===== Demo-1 fixed dataset (5 jobs) as a mini-instance, so the same
+   objective code drives the Gantt. Setup 3 time / 6 cost across families. ===== */
+var DEMO1 = (function(){
+  var jobs = [
+    { id:0, fam:0, release:0, p:6, due:16, w:2, rej:0 },
+    { id:1, fam:1, release:2, p:4, due:12, w:3, rej:0 },
+    { id:2, fam:0, release:0, p:5, due:22, w:1, rej:0 },
+    { id:3, fam:2, release:4, p:7, due:26, w:2, rej:0 },
+    { id:4, fam:1, release:1, p:3, due:14, w:4, rej:0 }
+  ];
+  return { n:5, nf:3, jobs:jobs, sT:[[0,3,3],[3,0,3],[3,3,0]], sC:[[0,6,6],[6,0,6],[6,6,0]] };
+})();
+
+/* ===== Factorial helpers ===== */
+function factorial(n){ var f = 1; for(var i = 2; i <= n; i++) f *= i; return f; }
+function planCount(n){ // Σ_{k=0..n} n!/(n−k)! — every ordered subset, rest rejected
+  var s = 0;
+  for(var k = 0; k <= n; k++){ var p = 1; for(var i = 0; i < k; i++) p *= (n - i); s += p; }
+  return s;
+}
+var UNIVERSE_YEARS = 13.8e9, SEC_PER_YEAR = 31557600;
+
+/* ===== Number formatting (superscript exponents for big values) ===== */
+var SUP = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻' };
+function supExp(e){
+  var s = String(e), r = '';
+  for(var i = 0; i < s.length; i++) r += SUP[s[i]] || s[i];
+  return r;
+}
+function fmtInt(n){ return Math.round(n).toLocaleString('en-US'); }
+function fmtBig(n){
+  if(n < 1e15) return fmtInt(n);
+  var exp = Math.floor(Math.log10(n)), mant = n / Math.pow(10, exp);
+  return mant.toFixed(2) + '×10' + supExp(exp);
+}
+function fmtTime(sec){ // adaptive: µs → s → min → h → years → 10^x years × universe
+  if(sec < 1e-3){ var us = sec * 1e6; return (us < 10 ? us.toFixed(2) : Math.round(us)) + ' µs'; }
+  if(sec < 1){ var ms = sec * 1000; return (ms < 10 ? ms.toFixed(1) : Math.round(ms)) + ' ms'; }
+  if(sec < 90) return (sec < 10 ? sec.toFixed(2) : Math.round(sec)) + ' seconds';
+  var min = sec / 60; if(min < 90) return min.toFixed(1) + ' minutes';
+  var h = min / 60; if(h < 48) return h.toFixed(1) + ' hours';
+  var y = sec / SEC_PER_YEAR;
+  if(y < 1e4) return fmtInt(y) + ' years';
+  var vs = y / UNIVERSE_YEARS;
+  var vsTxt = vs >= 2 ? ' — ≈ ' + (vs < 100 ? vs.toPrecision(2) : fmtBig(vs)) + '× the age of the universe' : '';
+  return fmtBig(y) + ' years' + vsTxt;
+}
+
+/* ============================================================
+   Race strategies — each consumes exactly ONE complete-plan
+   evaluation per nextEval() call that returns true.
+   ============================================================ */
+function shuffleRng(rng, arr){
+  for(var i = arr.length - 1; i > 0; i--){
+    var k = Math.floor(rng() * (i + 1)), t = arr[i]; arr[i] = arr[k]; arr[k] = t;
+  }
+  return arr;
+}
+function allIds(n){ var a = []; for(var i = 0; i < n; i++) a.push(i); return a; }
+
+/* --- 1 · Random sampling: random order, ~15% independent rejections --- */
+function makeRandomSampler(inst, rng){
+  var evals = 0, best = Infinity, hist = [];
+  return { name:'Random sampling', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    nextEval:function(){
+      var perm = shuffleRng(rng, allIds(inst.n));
+      var seq = perm.filter(function(){ return rng() > 0.15; });
+      var c = evaluate(inst, seq).total; evals++;
+      if(c < best){ best = c; hist.push([evals, best]); }
+      return true;
+    }};
+}
+
+/* --- 2 · Greedy construction only: real trial evaluations, then stops --- */
+function makeGreedyOnly(inst){
+  var order = inst.jobs.slice().sort(function(a, b){ return a.due - b.due || a.id - b.id; }).map(function(j){ return j.id; });
+  var seq = [], evals = 0, best = Infinity, hist = [], curJob = 0, pos = 0, base = 0, bCost = Infinity, bPos = -1;
+  return { name:'Greedy construction only', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    nextEval:function(){
+      if(curJob >= order.length) return false;
+      var id = order[curJob];
+      if(pos === 0){ base = evaluate(inst, seq).total; bCost = Infinity; bPos = -1; }
+      var c = evalInsertion(inst, seq, id, pos); evals++;
+      if(c < bCost){ bCost = c; bPos = pos; }
+      pos++;
+      if(pos > seq.length){
+        if(bCost <= base) seq.splice(bPos, 0, id);
+        var tot = evaluate(inst, seq).total;
+        if(tot < best){ best = tot; hist.push([evals, best]); }
+        curJob++; pos = 0;
+      }
+      return true;
+    }};
+}
+
+/* --- pairwise-swap neighborhood helper --- */
+function swapPairs(len){
+  var out = [];
+  for(var i = 0; i < len; i++) for(var j = i + 1; j < len; j++) out.push([i, j]);
+  return out;
+}
+
+/* --- 3 · Steepest descent from the greedy solution (starts at eval 78) --- */
+function makeSteepest(inst){
+  var g = constructJobs(inst), seq = g.seq.slice(), i;
+  var evals = 0;                                 // charge the real construction…
+  for(i = 0; i < g.order.length; i++) evals += (i + 1); // …Σ insertion trials = 78
+
+  var best = evaluate(inst, seq).total, hist = [[evals, best]];
+  var nbrs = null, bi = -1, bj = -1, bCost = Infinity, curCost = best;
+  return { name:'Steepest descent (pairwise swap)', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    nextEval:function(){
+      if(!nbrs){ nbrs = swapPairs(seq.length); bi = -1; bj = -1; bCost = curCost; }
+      if(nbrs.length === 0){
+        if(bi >= 0){
+          var t = seq[bi]; seq[bi] = seq[bj]; seq[bj] = t; curCost = bCost; nbrs = null;
+          if(bCost < best){ best = bCost; hist.push([evals, best]); }
+          return true;
+        }
+        return false; // local optimum — line goes flat
+      }
+      var pr = nbrs.pop(), s2 = seq.slice();
+      var tt = s2[pr[0]]; s2[pr[0]] = s2[pr[1]]; s2[pr[1]] = tt;
+      var c = evaluate(inst, s2).total; evals++;
+      if(c < bCost){ bCost = c; bi = pr[0]; bj = pr[1]; }
+      return true;
+    }};
+}
+
+/* --- 4 & 5 · Iterated Greedy (optionally + swap-with-rejected) --- */
+function makeIGStrategy(inst, rng, useSwap){
+  var seq = constructJobs(inst).seq.slice();
+  var evals = 78, best = evaluate(inst, seq).total, hist = [[evals, best]];
+  var phase = 'destroy', victims = [], rest = [], plIdx = 0, curId = -1, pos = 0, base = 0, bCost = Infinity, bPos = -1, swapList = null, swapBase = 0;
+  return { name: useSwap ? 'IG + swap-with-rejected' : 'Iterated Greedy',
+    evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    nextEval:function(){
+      for(;;){
+        if(phase === 'destroy'){
+          var d = destroyJobs(inst, seq, rng, 3);
+          victims = d.victims; rest = d.rest; plIdx = 0; curId = -1; phase = 'rebuild';
+          continue;
+        }
+        if(phase === 'rebuild'){
+          if(plIdx >= victims.length){ phase = useSwap ? 'swap' : 'decide'; continue; }
+          var id = victims[plIdx];
+          if(curId !== id){ curId = id; pos = 0; base = evaluate(inst, rest).total; bCost = Infinity; bPos = -1; }
+          var c = evalInsertion(inst, rest, id, pos); evals++;
+          if(c < bCost){ bCost = c; bPos = pos; }
+          pos++;
+          if(pos > rest.length){ if(bCost <= base) rest.splice(bPos, 0, id); plIdx++; curId = -1; }
+          return true;
+        }
+        if(phase === 'swap'){
+          if(!swapList){
+            swapList = []; swapBase = evaluate(inst, rest).total; evals++; // pass base, once
+            var inSeq = {}; for(var q = 0; q < rest.length; q++) inSeq[rest[q]] = true;
+            for(var m = 0; m < inst.jobs.length; m++){
+              var jid = inst.jobs[m].id;
+              if(!inSeq[jid]) for(var s = 0; s < rest.length; s++) swapList.push([jid, s]);
+            }
+            if(swapList.length === 0){ swapList = null; phase = 'decide'; continue; }
+            return true;
+          }
+          if(swapList.length === 0){ swapList = null; phase = 'decide'; continue; }
+          var sw = swapList.shift(), cand = rest.slice(); cand[sw[1]] = sw[0];
+          var c1 = evaluate(inst, cand).total; evals++;
+          if(c1 < swapBase){ rest = cand; swapList = null; phase = 'decide'; } // first improvement only
+          return true;
+        }
+        /* decide — strict improvement acceptance */
+        var cc = evaluate(inst, rest).total; evals++;
+        if(cc < best){ seq = rest.slice(); best = cc; hist.push([evals, best]); }
+        phase = 'destroy';
+        return true;
+      }
+    }};
+}
+
+/* --- 6 · Random-restart steepest descent over all-scheduled permutations --- */
+function makeRandomRestart(inst, rng){
+  var seq = null, evals = 0, best = Infinity, hist = [];
+  var nbrs = null, bi = -1, bj = -1, bCost = Infinity, curCost = Infinity;
+  return { name:'Random-restart descent', evals:function(){ return evals; }, best:function(){ return best; }, hist:hist,
+    nextEval:function(){
+      for(;;){
+        if(!seq){
+          seq = shuffleRng(rng, allIds(inst.n));
+          curCost = evaluate(inst, seq).total; evals++; nbrs = null;
+          if(curCost < best){ best = curCost; hist.push([evals, best]); }
+          return true;
+        }
+        if(!nbrs){ nbrs = swapPairs(seq.length); bi = -1; bj = -1; bCost = curCost; }
+        if(nbrs.length === 0){
+          if(bi >= 0){
+            var t = seq[bi]; seq[bi] = seq[bj]; seq[bj] = t; curCost = bCost; nbrs = null;
+            if(bCost < best){ best = bCost; hist.push([evals, best]); }
+            return true;
+          }
+          seq = null; // restart from a fresh permutation
+          continue;
+        }
+        var pr = nbrs.pop(), s2 = seq.slice();
+        var tt = s2[pr[0]]; s2[pr[0]] = s2[pr[1]]; s2[pr[1]] = tt;
+        var c = evaluate(inst, s2).total; evals++;
+        if(c < bCost){ bCost = c; bi = pr[0]; bj = pr[1]; }
+        return true;
+      }
+    }};
+}
+
+/* node harness hook (ignored in the browser) */
+if(typeof module !== 'undefined' && module.exports){
+  module.exports = {
+    IG_SEED:IG_SEED, mulberry32:mulberry32, ri:ri, genInstance:genInstance, evaluate:evaluate,
+    evalInsertion:evalInsertion, bestInsertion:bestInsertion, constructJobs:constructJobs,
+    destroyJobs:destroyJobs, permutations:permutations, DEMO1:DEMO1, factorial:factorial,
+    planCount:planCount, fmtBig:fmtBig, fmtInt:fmtInt, fmtTime:fmtTime, supExp:supExp,
+    UNIVERSE_YEARS:UNIVERSE_YEARS, SEC_PER_YEAR:SEC_PER_YEAR,
+    makeRandomSampler:makeRandomSampler, makeGreedyOnly:makeGreedyOnly, makeSteepest:makeSteepest,
+    makeIGStrategy:makeIGStrategy, makeRandomRestart:makeRandomRestart
+  };
+}
+</script>
+
+<!-- ============================================================
+     SCRIPT 2 — shared animation helpers, concepts grid,
+     demo 1 (order & cost) and demo 2 (factorial explosion)
+     ============================================================ -->
+<script>
+'use strict';
+/* ===== tiny DOM + motion toolkit =====================================
+   Everything visual on the page routes through these helpers so the
+   motion policy lives in one place: respects prefers-reduced-motion,
+   pauses with tab visibility, uses transform/opacity-friendly tweens. */
+function $(sel, root){ return (root || document).querySelector(sel); }
+function $all(sel, root){ return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
+var REDUCED = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+var SVGNS = 'http://www.w3.org/2000/svg';
+function el(tag, cls, text){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(text != null) e.textContent = text;
+  return e;
+}
+function svgEl(tag, attrs){
+  var e = document.createElementNS(SVGNS, tag);
+  if(attrs) for(var k in attrs) e.setAttribute(k, attrs[k]);
+  return e;
+}
+function easeOutCubic(k){ return 1 - Math.pow(1 - k, 3); }
+
+/* --- central tween engine: one shared rAF, idles when empty --------- */
+var Tweens = (function(){
+  var list = [], running = false;
+  function frame(ts){
+    for(var i = list.length - 1; i >= 0; i--){
+      var tw = list[i];
+      if(tw.start == null) tw.start = ts + (tw.delay || 0);
+      if(ts < tw.start) continue;
+      var k = tw.dur <= 0 ? 1 : Math.min(1, (ts - tw.start) / tw.dur);
+      tw.update(tw.ease(k), k);
+      if(k >= 1){ list.splice(i, 1); if(tw.done) tw.done(); }
+    }
+    if(list.length) requestAnimationFrame(frame);
+    else running = false;
+  }
+  return {
+    add:function(tw){
+      list.push(tw);
+      if(!running){ running = true; requestAnimationFrame(frame); }
+    },
+    cancelAll:function(){ list.length = 0; }
+  };
+})();
+/* tween(opts): {dur, delay, ease, update(e,k), done} — reduced motion jumps to the end state */
+function tween(opts){
+  var tw = { dur: opts.dur == null ? 400 : opts.dur, delay: opts.delay || 0,
+    ease: opts.ease || easeOutCubic, update: opts.update || function(){}, done: opts.done || null, start: null };
+  if(REDUCED){ tw.update(1, 1); if(tw.done) tw.done(); return { cancel:function(){} }; }
+  var cancelled = false;
+  Tweens.add({ start:null, dur:tw.dur, delay:tw.delay, ease:tw.ease,
+    update:function(e, k){ if(!cancelled) tw.update(e, k); },
+    done:function(){ if(!cancelled && tw.done) tw.done(); } });
+  return { cancel:function(){ cancelled = true; } };
+}
+
+/* --- FLIP: move an element, animate the gap with a transform --------- */
+function flipMove(elm, parent, beforeEl, dur){
+  if(!elm || !parent) return null;
+  var r1 = elm.getBoundingClientRect();
+  parent.insertBefore(elm, beforeEl || null);
+  var r2 = elm.getBoundingClientRect();
+  var dx = r1.left - r2.left, dy = r1.top - r2.top;
+  if(REDUCED || (Math.abs(dx) < 1 && Math.abs(dy) < 1)) return null;
+  try{
+    return elm.animate(
+      [{ transform:'translate(' + dx + 'px,' + dy + 'px)' }, { transform:'translate(0px,0px)' }],
+      { duration: dur || 450, easing:'cubic-bezier(.2,.7,.25,1)' });
+  }catch(err){ return null; }
+}
+
+/* --- visibility gate: demos run only while on-screen & tab visible --- */
+function makeGate(elem, onChange){
+  var state = { onscreen:false, active:false };
+  function recompute(){
+    var a = state.onscreen && !document.hidden;
+    if(a !== state.active){ state.active = a; onChange(a); }
+  }
+  if('IntersectionObserver' in window){
+    new IntersectionObserver(function(en){
+      state.onscreen = !!(en[0] && en[0].isIntersecting);
+      recompute();
+    }, { threshold:0.02 }).observe(elem);
+  } else { state.onscreen = true; }
+  document.addEventListener('visibilitychange', function(){ recompute(); });
+  // kick once so demos render their initial frame even before scrolling
+  state.onscreen = true; recompute();
+  return state;
+}
+
+/* --- job chip markup (family-tinted, letter badge, processing length) --- */
+function chipEl(job, opts){
+  var c = el('span', 'chip f' + (job.fam + 1));
+  c.appendChild(el('span', null, 'J' + (job.id + 1)));
+  c.appendChild(el('span', 'fam', 'F' + (job.fam + 1)));
+  if(!opts || opts.p !== false) c.appendChild(el('small', null, 'p' + job.p));
+  c.dataset.job = job.id;
+  return c;
+}
+var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
+
+/* ============================================================
+   §1 — concepts grid (data-driven so copy stays in one place)
+   ============================================================ */
+var CONCEPTS = [
+  ['Order changes cost', 'The same five jobs sequenced two ways can differ 2–3× in total cost: sequence-dependent setups and weighted tardiness are order-sensitive.',
+   'Two animated timelines whose wait / setup / process / due / late segments reveal as the evaluator runs; all 120 orders ranked exactly, with a verdict.', 'Paired live Gantts + an exact 120-order ranking sweep (Fig. 01).'],
+  ['Factorial explosion', 'n! orders outgrow any enumeration budget; counting ordered subsets with rejection multiplies n! by ≈ e.',
+   'An animated log-scale ruler with live counters and universe-age analogies as n grows.', 'Slider-driven tweened counters + log-scale multiplication bar (Fig. 02).'],
+  ['Greedy construction', 'Best-insertion builds a plan job by job, each placed at its cheapest position under the full objective.',
+   'Inside the live film: jobs insert one by one at their cheapest position, with cost readout and captions.', 'FLIP chip choreography with a live insertion sweep (Fig. 03).'],
+  ['Destroy & rebuild loop', 'Remove a few jobs, re-insert each at its cheapest position, repeat — the loop escapes local optima.',
+   'Inside the live film: protected plan vs working copy; operator figures remove and return jobs through a pending tray.', 'Staged beats — lift-out, trial sweep, fly-in — on one central clock (Fig. 03).'],
+  ['Rejection / break-even', 'A job stays outside when every insertion position costs more than its rejection cost.',
+   'A dynamic break-even deadline recomputed from real costs; jobs stay in the \'outside the machine\' zone when every insertion is pricier than rejecting.', 'Per-position totals on the trial track + a flight to the Outside zone with the break-even note (Fig. 03).'],
+  ['Objective decomposition', 'Total = setup cost + processing + weighted tardiness + rejection penalties; every trial is scored on the complete sum.',
+   'A live objective sheet — setup + delay + outside = total — with protected-vs-candidate Δ each iteration.', 'A live two-row sheet — protected vs candidate — with a Δ pill (Fig. 03).'],
+  ['Convergence', 'The incumbent cost falls in steps; most late iterations fail to improve and that is fine.',
+   'A live attempts/incumbent chart drawn during the film, plus a scrolling event log.', 'A live canvas chart: incumbent line + every evaluated candidate dot (Fig. 03).'],
+  ['Algorithm race', 'Six strategies under an equal evaluation budget show what the destroy–rebuild loop actually buys.',
+   'A live JS race of six strategies under an equal evaluation budget, plus recorded 2015 benchmark tables.', 'Progressive cost-vs-evaluations canvas race with a live legend (Fig. 04).'],
+  ['Scenario lenses', 'CNC factory, GPU/AI server, kitchen, surgery — the same mathematics in four costumes.',
+   'One engine with swappable scenario lenses — CNC factory, GPU, kitchen, surgery — relabelling the same mathematics.', 'One engine, swapped labels & palette — CSS custom properties as “lenses” (§6 notes).']
+];
+(function renderConcepts(){
+  var grid = $('#conceptGrid');
+  if(!grid) return;
+  var nums = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨'];
+  CONCEPTS.forEach(function(c, i){
+    var card = el('div', 'card');
+    card.appendChild(el('span', 'num', nums[i]));
+    card.appendChild(el('h3', null, c[0]));
+    card.appendChild(el('p', null, c[1]));
+    var now = el('p', 'now'); now.appendChild(el('b', null, 'Now on the page: ')); now.appendChild(document.createTextNode(c[2]));
+    var fit = el('p', 'fit'); fit.appendChild(el('b', null, 'Best-in-class fit: ')); fit.appendChild(document.createTextNode(c[3]));
+    card.appendChild(now); card.appendChild(fit);
+    grid.appendChild(card);
+  });
+})();
+
+/* ============================================================
+   Demo 1 — “Order changes time. Time changes cost.”
+   Two rails, two orders of the same 5 jobs; exact Gantt math;
+   an animated sweep over all 120 permutations ranks A and B.
+   ============================================================ */
+(function demo1(){
+  var railAEl = $('#railA'), railBEl = $('#railB');
+  if(!railAEl || !railBEl) return;
+  var orderA = [0, 1, 2, 3, 4];      // the intuitive order (job id order)
+  var orderB = [1, 4, 3, 0, 2];      // the family-grouped order
+  var rng = mulberry32(0x5eed1);     // deterministic shuffle sequence
+  var U = 13, PADL = 6, BARY = 8, BARH = 24; // px per time unit & geometry
+
+  /* --- fixed dataset table --- */
+  var tbody = $('#d1data');
+  DEMO1.jobs.forEach(function(j){
+    var tr = el('tr');
+    tr.appendChild(el('td', null, 'J' + (j.id + 1)));
+    var f = el('td', 'famcell', 'F' + (j.fam + 1));
+    f.style.color = FAMILY_CSS[j.fam];
+    tr.appendChild(f);
+    [j.release, j.p, j.due, j.w].forEach(function(v){ tr.appendChild(el('td', null, String(v))); });
+    tbody.appendChild(tr);
+  });
+
+  function renderChips(row, order){
+    row.textContent = '';
+    order.forEach(function(id){ row.appendChild(chipEl(DEMO1.jobs[id])); });
+  }
+
+  /* --- one SVG Gantt per rail; segments grow from 0, staggered --- */
+  function renderGantt(svg, order, animate){
+    var ev = evaluate(DEMO1, order);
+    var horizon = ev.timeline.length ? ev.timeline[ev.timeline.length - 1].end * 1.04 + 1 : 10;
+    var W = Math.ceil(horizon * U + PADL * 2), H = 96;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    svg.textContent = '';
+    /* per-svg hatch pattern for idle waits */
+    var defs = svgEl('defs'), patId = svg.id + '-hatch';
+    var pat = svgEl('pattern', { id:patId, width:6, height:6, patternUnits:'userSpaceOnUse', patternTransform:'rotate(45)' });
+    pat.appendChild(svgEl('rect', { width:6, height:6, fill:'#efe7d7' }));
+    pat.appendChild(svgEl('line', { x1:0, y1:0, x2:0, y2:6, stroke:'#d9cdb4', 'stroke-width':2 }));
+    defs.appendChild(pat); svg.appendChild(defs);
+    var g = svgEl('g'); svg.appendChild(g);
+    var animated = [];
+    ev.timeline.forEach(function(t, idx){
+      var job = DEMO1.jobs[t.id];
+      var xPrevEnd = t.start - t.idle - t.st;
+      /* setup segment (orange connector, inset so it reads as a changeover) */
+      if(t.st > 0){
+        var rs = svgEl('rect', { x:PADL + xPrevEnd * U, y:BARY + 6, width:t.st * U, height:BARH - 12, fill:'#ad7644', rx:3 });
+        g.appendChild(rs); animated.push({ node:rs, w:t.st * U });
+      }
+      /* idle wait (hatched) */
+      if(t.idle > 0.001){
+        var ri2 = svgEl('rect', { x:PADL + (xPrevEnd + t.st) * U, y:BARY, width:t.idle * U, height:BARH, fill:'url(#' + patId + ')', stroke:'#d9cdb4', 'stroke-width':0.5 });
+        g.appendChild(ri2); animated.push({ node:ri2, w:t.idle * U });
+      }
+      /* processing segment (family colour) */
+      var rp = svgEl('rect', { x:PADL + t.start * U, y:BARY, width:job.p * U, height:BARH, fill:FAMILY_CSS[job.fam], rx:2 });
+      g.appendChild(rp); animated.push({ node:rp, w:job.p * U });
+      var lbl = svgEl('text', { x:PADL + (t.start + job.p / 2) * U, y:BARY + BARH / 2 + 3.5, 'text-anchor':'middle', 'font-size':10, 'font-weight':700, fill:'#fdf8ef', 'font-family':'inherit' });
+      lbl.textContent = 'J' + (job.id + 1);
+      g.appendChild(lbl); animated.push({ node:lbl, w:0, fadeOnly:true });
+      /* due-date marker (red tick) */
+      var dx = PADL + job.due * U;
+      var tick = svgEl('line', { x1:dx, y1:BARY + BARH + 2, x2:dx, y2:BARY + BARH + 9, stroke:'#a8432e', 'stroke-width':1.5 });
+      g.appendChild(tick); animated.push({ node:tick, w:0, fadeOnly:true });
+      var dlbl = svgEl('text', { x:dx, y:BARY + BARH + 18, 'text-anchor':'middle', 'font-size':7.5, fill:'#a8432e' });
+      dlbl.textContent = 'd' + (job.id + 1) + '=' + job.due;
+      g.appendChild(dlbl); animated.push({ node:dlbl, w:0, fadeOnly:true });
+      /* tardiness overlay ∝ late time */
+      if(t.end > job.due){
+        var rt = svgEl('rect', { x:dx, y:BARY, width:(t.end - job.due) * U, height:BARH, fill:'#a8432e', opacity:0.38 });
+        g.appendChild(rt); animated.push({ node:rt, w:(t.end - job.due) * U });
+        var late = job.w * (t.end - job.due);
+        var tlbl = svgEl('text', { x:dx + (t.end - job.due) * U / 2, y:BARY + BARH + 27, 'text-anchor':'middle', 'font-size':7.5, 'font-weight':700, fill:'#a8432e' });
+        tlbl.textContent = '+' + late;
+        g.appendChild(tlbl); animated.push({ node:tlbl, w:0, fadeOnly:true });
+      }
+    });
+    /* time axis, ticks every 5 units */
+    var axisY = BARY + BARH + 34;
+    g.appendChild(svgEl('line', { x1:PADL, y1:axisY, x2:W - PADL, y2:axisY, stroke:'#d8cdb6', 'stroke-width':1 }));
+    for(var tt = 0; tt <= horizon; tt += 5){
+      var tx = PADL + tt * U;
+      g.appendChild(svgEl('line', { x1:tx, y1:axisY, x2:tx, y2:axisY + 3, stroke:'#d8cdb6', 'stroke-width':1 }));
+      var albl = svgEl('text', { x:tx, y:axisY + 11, 'text-anchor':'middle', 'font-size':7.5, fill:'#9a8f7a' });
+      albl.textContent = String(tt);
+      g.appendChild(albl);
+    }
+    /* entrance animation: widths grow from 0, staggered left→right */
+    if(animate && !REDUCED){
+      animated.forEach(function(a, i){
+        var target = a.w;
+        if(a.fadeOnly){ a.node.setAttribute('opacity', 0); }
+        else a.node.setAttribute('width', 0);
+        tween({ dur:340, delay:90 + i * 65, update:function(e){
+          if(a.fadeOnly) a.node.setAttribute('opacity', e);
+          else a.node.setAttribute('width', Math.max(0.01, target * e));
+        }});
+      });
+    }
+    return ev;
+  }
+
+  function updateRail(order, svg, prefix, animate){
+    renderChips(prefix === 'A' ? railAEl : railBEl, order);
+    var ev = renderGantt(svg, order, animate);
+    $('#ro' + prefix + 'setup').textContent = ev.setup;
+    $('#ro' + prefix + 'tard').textContent = ev.tard;
+    $('#ro' + prefix + 'total').textContent = 'Σ ' + (ev.setup + ev.tard);
+    return ev;
+  }
+  function refresh(animate){
+    updateRail(orderA, $('#ganttA'), 'A', animate);
+    updateRail(orderB, $('#ganttB'), 'B', animate);
+  }
+  $('#shuffleA').addEventListener('click', function(){
+    shuffleRng(rng, orderA); refresh(true);
+    setStatus('Rail A shuffled to ' + orderA.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
+  });
+  $('#shuffleB').addEventListener('click', function(){
+    shuffleRng(rng, orderB); refresh(true);
+    setStatus('Rail B shuffled to ' + orderB.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
+  });
+  function setStatus(html){ $('#d1status').innerHTML = html; }
+
+  /* --- exact sweep over all 120 permutations, in animation slices --- */
+  var sweeping = false;
+  $('#eval120').addEventListener('click', function(){
+    if(sweeping) return;
+    sweeping = true;
+    var btn = $('#eval120'); btn.disabled = true;
+    var perms = permutations([0, 1, 2, 3, 4]);
+    var totals = new Array(perms.length), i = 0, best = Infinity, worst = -Infinity;
+    var prog = $('#evalProg');
+    setStatus('Sweeping… <b>0</b>/120 orders evaluated.');
+    function costOf(s){ var e = evaluate(DEMO1, s); return e.setup + e.tard; }
+    function slice(){
+      var n = 0;
+      while(i < perms.length && n < (REDUCED ? 120 : 5)){ // ~24 frames at 1×
+        var c = costOf(perms[i]);
+        totals[i] = c;
+        if(c < best) best = c;
+        if(c > worst) worst = c;
+        i++; n++;
+      }
+      prog.style.width = (i / perms.length * 100) + '%';
+      setStatus('Sweeping… <b>' + i + '</b>/120 orders evaluated. Best so far Σ ' + best + ', worst so far Σ ' + worst + '.');
+      if(i < perms.length){ requestAnimationFrame(slice); return; }
+      /* rank = 1 + number of strictly better orders (ties share the rank) */
+      var cA = costOf(orderA), cB = costOf(orderB);
+      var rA = 1 + totals.filter(function(c){ return c < cA; }).length;
+      var rB = 1 + totals.filter(function(c){ return c < cB; }).length;
+      setStatus('All <b>120</b> orders evaluated exactly. Best Σ <b>' + best + '</b>, worst Σ <b>' + worst + '</b>. ' +
+        'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>. Same jobs — only the order changed.');
+      btn.disabled = false; sweeping = false;
+      setTimeout(function(){ prog.style.width = '0%'; }, 900);
+    }
+    requestAnimationFrame(slice);
+  });
+
+  /* initial paint (no motion on load) + repaint on resize-independent gate */
+  refresh(false);
+  makeGate($('#d1figure'), function(active){ if(active) refresh(true); });
+})();
+
+/* ============================================================
+   Demo 2 — Factorial explosion: slider → tweened counters,
+   log-scale multiplication bar, exact analogies.
+   ============================================================ */
+(function demo2(){
+  var slider = $('#nSlider');
+  if(!slider) return;
+  var cur = { log:Math.log10(factorial(28)), plans:Math.log10(planCount(28)) };
+  var tw = null;
+
+  /* static ticks at 10^0, 10^10, 10^20, 10^30 */
+  var maxLog = Math.log10(factorial(30));
+  var ticks = $('#barTicks');
+  [0, 10, 20, 30].forEach(function(e){
+    var x = e / maxLog * 100;
+    var i = el('i'); i.style.left = x + '%'; ticks.appendChild(i);
+    var b = el('b', null, '10' + supExp(e)); b.style.left = x + '%'; ticks.appendChild(b);
+  });
+  /* analogies, computed live */
+  var analogies = { 5:'faster than one screen refresh', 10:'one frame on a 240 Hz monitor',
+    12:'a blink — and demo 3 already uses 12 jobs', 20:'a human lifetime', 28:'≈ 700× the age of the universe' };
+  var abody = $('#analogyBody');
+  [5, 10, 12, 20, 28].forEach(function(n){
+    var f = factorial(n), tr = el('tr');
+    tr.appendChild(el('td', null, String(n)));
+    tr.appendChild(el('td', null, fmtBig(f)));
+    tr.appendChild(el('td', null, fmtTime(f / 1e9)));
+    tr.appendChild(el('td', null, analogies[n]));
+    abody.appendChild(tr);
+  });
+
+  function paint(n, logOrders, logPlans){
+    $('#nVal').textContent = 'n = ' + n;
+    var o = Math.pow(10, logOrders), p = Math.pow(10, logPlans);
+    $('#fOrders').innerHTML = fmtBig(o);
+    $('#fPlans').innerHTML = fmtBig(p) + ' <small>≈ ⌊e·n!⌋</small>';
+    $('#fTime').textContent = fmtTime(o / 1e9);
+    var pct = Math.max(1.2, logOrders / maxLog * 100);
+    $('#factBar').style.width = pct + '%';
+    $('#factBarLabel').textContent = '10' + supExp(Math.round(logOrders));
+    $('#barEndLabel').textContent = 'max 30! ≈ 2.65×10' + supExp(32);
+    /* multiplier chips: …×(n−2) ×(n−1) ×n */
+    var row = $('#multRow');
+    row.textContent = ''; row.appendChild(el('span', null, 'each job multiplies:'));
+    var from = Math.max(2, n - 3);
+    for(var k = from; k <= n; k++){
+      var chip = el('span', 'mult-chip' + (k === n ? ' last' : ''), '×' + k);
+      row.appendChild(chip);
+    }
+    if(n < 2) row.appendChild(el('span', 'mult-chip last', '×1'));
+  }
+
+  function onSlide(){
+    var n = parseInt(slider.value, 10);
+    var target = { log:Math.log10(factorial(n)), plans:Math.log10(planCount(n)) };
+    if(tw) tw.cancel();
+    if(REDUCED){ paint(n, target.log, target.plans); }
+    else{
+      var fromLog = cur.log, fromPlans = cur.plans, snapN = n;
+      tw = tween({ dur:320, update:function(e){
+        paint(snapN, fromLog + (target.log - fromLog) * e, fromPlans + (target.plans - fromPlans) * e);
+      }});
+    }
+    cur = target;
+    $('#d2status').innerHTML = 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> complete orders; at 10⁹ plans/sec, ' + fmtTime(factorial(n) / 1e9) + '.';
+  }
+  slider.addEventListener('input', onSlide);
+  paint(28, cur.log, cur.plans);
+  $('#d2status').innerHTML = 'n = 28 → <b>' + fmtBig(factorial(28)) + '</b> complete orders; at 10⁹ plans/sec, ' + fmtTime(factorial(28) / 1e9) + '.';
+})();
+</script>
+
+<!-- ============================================================
+     SCRIPT 3 — demo 3: the IG loop, step by step (centerpiece)
+     A real engine: every trial on the sweep is a genuine full
+     objective evaluation; one central clock drives all beats.
+     ============================================================ -->
+<script>
+'use strict';
+/* ===== shared canvas helpers (also used by demo 4) ===== */
+function fitCanvas(cv){
+  var dpr = Math.min(2, window.devicePixelRatio || 1);
+  var w = cv.clientWidth || 300, h = cv.clientHeight || 150;
+  if(cv.width !== Math.round(w * dpr) || cv.height !== Math.round(h * dpr)){
+    cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr);
+  }
+  var ctx = cv.getContext('2d');
+  if(ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  return dpr;
+}
+function onWinResize(fn){
+  var t = null;
+  window.addEventListener('resize', function(){
+    if(t) clearTimeout(t);
+    t = setTimeout(fn, 160);
+  });
+}
+
+(function demo3(){
+  var fig = $('#d3figure'); if(!fig) return;
+  /* ---- the seeded instance this whole page talks about ---- */
+  var inst = genInstance(IG_SEED, 12, 4);
+  var N = 12, DESTROY_N = 3, MAX_ITER = 24, STALE_MAX = 8;
+  var SWEEP_PER_POS = 95, FLY_DUR = 460;
+
+  var protectedEl = $('#igProtected'), workingEl = $('#igWorking'), trayEl = $('#igTray');
+  var outsideEl = $('#igOutside'), outsideNote = $('#igOutsideNote'), outsideEmpty = $('#igOutsideEmpty');
+  var phaseEl = $('#igPhase'), trialTrack = $('#igTrialTrack'), caret = $('#igCaret'), pill = $('#igPill');
+  var logEl = $('#igLog'), chart = $('#igChart'), statusEl = $('#d3status');
+  var btnPlay = $('#igPlay'), btnStep = $('#igStep'), btnRestart = $('#igRestart'), speedSeg = $('#igSpeed');
+
+  /* ---- mutable demo state ---- */
+  var chips = {};                 // job id -> the one live chip element
+  var S = null;                   // {protSeq, protRej, workSeq, workRej, tray}
+  var incumbent = [], candidates = [];
+  var incumbentCost = Infinity, iter = 0, genDone = false, destroyRng = null;
+
+  /* ---- the one central clock: beat queue + speed multiplier ---- */
+  var player = { gen:null, cur:null, t:0, playing:false, speed:1, active:false, running:false, lastTs:0, raf:0, anims:[] };
+  function beat(dur, onStart, onUpdate, onDone){ return { dur:dur, onStart:onStart, onUpdate:onUpdate, onDone:onDone }; }
+  function trackAnim(a){
+    if(!a) return;
+    try{ a.playbackRate = player.speed; if(!player.playing) a.pause(); }catch(e){}
+    player.anims.push(a);
+    a.onfinish = function(){
+      var i = player.anims.indexOf(a);
+      if(i >= 0) player.anims.splice(i, 1);
+    };
+  }
+  function killAnims(){
+    player.anims.forEach(function(a){ try{ a.cancel(); }catch(e){} });
+    player.anims.length = 0;
+  }
+  function finishAnims(){
+    player.anims.forEach(function(a){ try{ a.finish(); }catch(e){} });
+    player.anims.length = 0;
+  }
+  function loop(ts){
+    if(!player.running) return;
+    var dt = Math.min(100, ts - player.lastTs);
+    player.lastTs = ts;
+    if(player.playing) advance(dt * player.speed);
+    player.raf = requestAnimationFrame(loop);
+  }
+  function advance(dt){
+    var guard = 400;
+    while(dt > 0 && guard-- > 0){
+      if(!player.cur){
+        if(!player.gen){ player.playing = false; updatePlayBtn(); return; }
+        var n = player.gen.next();
+        if(n.done){ setDone(); return; }
+        player.cur = n.value; player.t = 0;
+        if(player.cur.onStart) player.cur.onStart();
+      }
+      var b = player.cur;
+      if(REDUCED){ // reduced motion: every beat completes instantly
+        if(b.onUpdate) b.onUpdate(1);
+        if(b.onDone) b.onDone();
+        player.cur = null;
+        continue;
+      }
+      var use = Math.min(b.dur - player.t, dt);
+      player.t += use; dt -= use;
+      if(b.onUpdate) b.onUpdate(b.dur ? Math.min(1, player.t / b.dur) : 1);
+      if(player.t >= b.dur){
+        if(b.onDone) b.onDone();
+        player.cur = null;
+      }
+      if(dt <= 0) break;
+    }
+  }
+  function ensureLoop(){
+    if(!player.running && player.active){
+      player.running = true;
+      player.lastTs = performance.now();
+      player.raf = requestAnimationFrame(loop);
+    }
+  }
+  function updatePlayBtn(){ btnPlay.textContent = player.playing ? 'Pause' : 'Play'; }
+  function setDone(){
+    genDone = true;
+    player.playing = false;
+    updatePlayBtn();
+    btnPlay.disabled = true; btnStep.disabled = true;
+  }
+  function setPlaying(p){
+    if(p && genDone) return;
+    player.playing = p;
+    updatePlayBtn();
+    player.anims.forEach(function(a){ try{ p ? a.play() : a.pause(); }catch(e){} });
+    if(p) ensureLoop();
+  }
+  function stepOnce(){
+    if(genDone) return;
+    if(!player.cur){
+      if(!player.gen) return;
+      var n = player.gen.next();
+      if(n.done){ setDone(); return; }
+      player.cur = n.value; player.t = 0;
+      if(player.cur.onStart) player.cur.onStart();
+    }
+    var b = player.cur;
+    if(b.onUpdate) b.onUpdate(1);
+    if(b.onDone) b.onDone();
+    player.cur = null;
+    finishAnims();
+  }
+
+  /* ---- small DOM utilities ---- */
+  function setPhase(title, sub){
+    phaseEl.innerHTML = '';
+    phaseEl.appendChild(el('span', 'ph-no', 'PHASE'));
+    phaseEl.appendChild(document.createTextNode(title + (sub ? ' — ' + sub : '')));
+  }
+  function log(html){
+    var d = el('div'); d.innerHTML = html;
+    logEl.appendChild(d);
+    while(logEl.children.length > 8) logEl.removeChild(logEl.firstChild);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+  function chipListOf(rail){ return $all('.chip', rail); }
+  function syncOutsideEmpty(){
+    outsideEmpty.style.display = S.workRej.length ? 'none' : '';
+  }
+  /* fill the protected rail with static (ghost) reference chips */
+  function renderProtected(){
+    protectedEl.textContent = '';
+    if(!S.protSeq.length){
+      protectedEl.appendChild(el('span', 'rail-empty', '— appears once construction commits —'));
+      return;
+    }
+    S.protSeq.forEach(function(id){
+      var c = chipEl(inst.jobs[id]);
+      c.classList.add('ghost');
+      protectedEl.appendChild(c);
+    });
+  }
+  /* FLIP every live chip from its current rect to its new home */
+  function flipAll(mutate, dur){
+    var before = {};
+    for(var id in chips) before[id] = chips[id].getBoundingClientRect();
+    mutate();
+    for(var id2 in chips){
+      var r2 = chips[id2].getBoundingClientRect(), r1 = before[id2];
+      var dx = r1.left - r2.left, dy = r1.top - r2.top;
+      if(!REDUCED && (Math.abs(dx) > 1 || Math.abs(dy) > 1)){
+        try{
+          trackAnim(chips[id2].animate(
+            [{ transform:'translate(' + dx + 'px,' + dy + 'px)' }, { transform:'translate(0px,0px)' }],
+            { duration:dur, easing:'cubic-bezier(.2,.7,.25,1)' }));
+        }catch(e){}
+      }
+    }
+  }
+  function refillWorking(){
+    S.workSeq.forEach(function(id, i){
+      workingEl.insertBefore(chips[id], chipListOf(workingEl)[i] || null);
+    });
+  }
+  function refillOutside(){
+    S.workRej.forEach(function(id){ outsideEl.insertBefore(chips[id], outsideNote); });
+    syncOutsideEmpty();
+  }
+
+  /* ---- objective sheet + delta pill ---- */
+  function sheetVals(row, ev){
+    $(row + 'setup').textContent = ev.setup + ev.proc; // machine column: setups + processing
+    $(row + 'delay').textContent = ev.tard;
+    $(row + 'out').textContent = ev.rej;
+    $(row + 'tot').textContent = 'Σ ' + ev.total;
+  }
+  function updateSheets(candEv){
+    sheetVals('#shP', evaluate(inst, S.protSeq));
+    if(candEv) sheetVals('#shC', candEv);
+    else ['#shCsetup', '#shCdelay', '#shCout', '#shCtot'].forEach(function(s){ $(s).textContent = '–'; });
+  }
+  function showDelta(delta, note){
+    var pillEl = $('#igDelta');
+    pillEl.className = 'delta-pill ' + (delta < 0 ? 'down' : 'up');
+    pillEl.textContent = 'Δ vs protected ' + (delta > 0 ? '+' : '') + delta + (note ? ' — ' + note : '');
+  }
+
+  /* ---- convergence chart: incumbent line + candidate dots ---- */
+  function drawChart(){
+    var dpr = fitCanvas(chart), ctx = chart.getContext('2d');
+    if(!ctx) return;
+    var W = chart.width / dpr, H = chart.height / dpr;
+    ctx.clearRect(0, 0, W, H);
+    var L = 36, R = 10, T = 10, B = 20, iw = W - L - R, ih = H - T - B;
+    var all = incumbent.map(function(p){ return p.cost; }).concat(candidates.map(function(p){ return p.cost; }));
+    ctx.font = '9px ui-monospace,Menlo,monospace';
+    if(!all.length){
+      ctx.fillStyle = '#a2967f';
+      ctx.fillText('convergence appears after construction', L, T + 14);
+      return;
+    }
+    var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
+    if(hi - lo < 10){ hi += 5; lo -= 5; }
+    var pad = (hi - lo) * 0.12; hi += pad; lo -= pad;
+    var maxIter = Math.max(8, iter);
+    function X(i){ return L + iw * i / maxIter; }
+    function Y(c){ return T + ih * (1 - (c - lo) / (hi - lo)); }
+    ctx.strokeStyle = '#ece2cf'; ctx.fillStyle = '#9a8f7a'; ctx.lineWidth = 1;
+    for(var g = 0; g <= 3; g++){
+      var vv = lo + (hi - lo) * g / 3, yy = Y(vv);
+      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(W - R, yy); ctx.stroke();
+      ctx.fillText(String(Math.round(vv)), 4, yy + 3);
+    }
+    ctx.fillText('it 0', X(0) - 6, H - 6);
+    ctx.fillText('it ' + maxIter, X(maxIter) - 14, H - 6);
+    if(incumbent.length > 1){
+      ctx.strokeStyle = '#2a2620'; ctx.lineWidth = 1.5; ctx.beginPath();
+      incumbent.forEach(function(p, i){
+        if(i) ctx.lineTo(X(p.iter), Y(p.cost)); else ctx.moveTo(X(p.iter), Y(p.cost));
+      });
+      ctx.stroke();
+    }
+    incumbent.forEach(function(p){
+      ctx.fillStyle = '#2a2620';
+      ctx.fillRect(X(p.iter) - 2, Y(p.cost) - 2, 4, 4);
+    });
+    candidates.forEach(function(p){
+      ctx.beginPath(); ctx.arc(X(p.iter), Y(p.cost), 3, 0, 6.2832);
+      if(p.accepted){ ctx.fillStyle = '#b0562f'; ctx.fill(); }
+      else { ctx.strokeStyle = '#a2967f'; ctx.lineWidth = 1.2; ctx.stroke(); }
+    });
+  }
+
+  /* ---- trial track (sweep marker over the working rail) ---- */
+  function gapPositions(){
+    var cs = chipListOf(workingEl), trackR = trialTrack.getBoundingClientRect(), pts = [];
+    for(var i = 0; i < cs.length; i++){
+      var r = cs[i].getBoundingClientRect();
+      var prevR = i ? cs[i - 1].getBoundingClientRect() : null;
+      pts.push({ pos:i, x: prevR ? (prevR.right + r.left) / 2 - trackR.left : r.left - trackR.left - 5 });
+    }
+    var lastR = cs.length ? cs[cs.length - 1].getBoundingClientRect() : null;
+    pts.push({ pos:cs.length, x: lastR ? lastR.right - trackR.left + 5 : 30 });
+    return pts;
+  }
+  function showTrial(){ trialTrack.classList.add('on'); $all('.trial-tick', trialTrack).forEach(function(t){ t.remove(); }); }
+  function hideTrial(){ trialTrack.classList.remove('on'); caret.classList.remove('best'); }
+  function addTick(x){
+    var t = el('i', 'trial-tick');
+    t.style.left = (x - 1) + 'px';
+    trialTrack.appendChild(t);
+  }
+  var insertBar = null;
+  function showInsertBar(posIdx){
+    removeInsertBar();
+    var cs = chipListOf(workingEl);
+    insertBar = el('i', 'insert-bar');
+    var x;
+    if(posIdx < cs.length) x = cs[posIdx].offsetLeft - 4;
+    else x = cs.length ? cs[cs.length - 1].offsetLeft + cs[cs.length - 1].offsetWidth + 2 : 8;
+    insertBar.style.left = x + 'px';
+    workingEl.appendChild(insertBar);
+  }
+  function removeInsertBar(){ if(insertBar && insertBar.parentNode) insertBar.parentNode.removeChild(insertBar); insertBar = null; }
+
+  /* ---- one beat: fly a chip into a rail (FLIP transform only) ---- */
+  function flyBeat(id, rail, index, dur, onApplied){
+    return beat(dur, function(){
+      var chip = chips[id], cs = chipListOf(rail);
+      var before = (index != null && index < cs.length) ? cs[index] : null;
+      if(rail === outsideEl) before = outsideNote; // keep chips above the note
+      var a = flipMove(chip, rail, before, dur);
+      trackAnim(a);
+      if(onApplied) onApplied();
+    }, null, null);
+  }
+
+  /* ---- the sweep: measure EVERY insertion position live ----
+     A GENERATOR: the code after `yield sweepBeat` only runs once the
+     player has fully completed the sweep — decisions are made on real,
+     finished measurements, never at beat-construction time. */
+  function* sweepAndPlace(jobId){
+    var jobLabel = 'J' + (jobId + 1);
+    var base = evaluate(inst, S.workSeq).total; // jobId currently unscheduled → its rejection cost counts
+    var nPos = S.workSeq.length + 1;
+    var pts = [], best = { cost:Infinity, pos:-1, x:0 }, lastIdx = -1;
+    /* beat 1 — the marker sweeps all positions; each tick is a real evaluation */
+    yield beat(Math.max(300, SWEEP_PER_POS * nPos),
+      function(){
+        pts = gapPositions();
+        showTrial();
+        caret.classList.remove('best');
+        pill.textContent = 'Σ …';
+      },
+      function(k){
+        if(!pts.length) return;
+        var idx = Math.min(pts.length - 1, Math.floor(k * pts.length));
+        if(idx === lastIdx) return;
+        lastIdx = idx;
+        var cost = evalInsertion(inst, S.workSeq, jobId, pts[idx].pos); // ← the real trial
+        var tx = pts[idx].x;
+        caret.style.transform = 'translateX(' + tx + 'px)';
+        pill.textContent = 'Σ ' + cost;
+        /* keep the pill inside the track even at the extreme gaps */
+        var pw = (pill.offsetWidth || 44) / 2, tw2 = trialTrack.clientWidth || 200;
+        var adj = Math.max(0, pw - tx) - Math.max(0, tx + pw - tw2);
+        pill.style.transform = 'translateX(calc(-50% + ' + adj + 'px))';
+        addTick(tx);
+        if(cost < best.cost){
+          best = { cost:cost, pos:pts[idx].pos, x:tx };
+          caret.classList.add('best');
+        }
+      },
+      function(){
+        /* catch-up: big dt jumps and reduced-motion can skip position ticks.
+           Recompute the cheapest position exactly — the decision below must
+           always rest on ALL positions, whatever the frame rate did. */
+        var r = bestInsertion(inst, S.workSeq, jobId);
+        var bx = pts.length && pts[r.bPos] ? pts[r.bPos].x : best.x;
+        best = { cost:r.bCost, pos:r.bPos, x:bx };
+        caret.style.transform = 'translateX(' + bx + 'px)';
+        pill.textContent = 'Σ ' + best.cost;
+        caret.classList.add('best');
+      });
+    /* beat 2 — decide: fly to cheapest position, or break-even reject */
+    if(best.cost <= base){
+      yield beat(240, function(){ showInsertBar(best.pos); }, null, null);
+      yield flyBeat(jobId, workingEl, best.pos, FLY_DUR, function(){
+        S.workSeq.splice(best.pos, 0, jobId);
+        S.tray = S.tray.filter(function(x){ return x !== jobId; });
+        log('insert <b>' + jobLabel + '</b> at pos ' + (best.pos + 1) + '/' + nPos + ' — Σ ' + best.cost + ' (reject would be ' + base + ')');
+      });
+      yield beat(120, null, null, function(){ removeInsertBar(); hideTrial(); });
+    }else{
+      yield beat(520, function(){
+        outsideNote.textContent = jobLabel + ' — break-even: cheapest insertion Σ ' + best.cost + ' > rejecting Σ ' + base + ' → stays outside';
+        caret.classList.remove('best');
+      }, null, null);
+      yield flyBeat(jobId, outsideEl, null, FLY_DUR, function(){
+        S.workRej.push(jobId);
+        S.tray = S.tray.filter(function(x){ return x !== jobId; });
+        syncOutsideEmpty();
+        log('<span class="no">reject</span> <b>' + jobLabel + '</b> — break-even: ' + best.cost + ' &gt; ' + base);
+      });
+      yield beat(120, null, null, function(){ hideTrial(); });
+    }
+  }
+
+  /* ---- the algorithm as a linear, readable beat script ---- */
+  function* igScript(){
+    /* ===== phase 1 · greedy construction (EDD order, best insertion) ===== */
+    var edd = inst.jobs.slice().sort(function(a, b){ return a.due - b.due || a.id - b.id; }).map(function(j){ return j.id; });
+    setPhase('Constructing', 'greedy best-insertion, earliest due date first');
+    log('construction — EDD order ' + edd.map(function(i){ return 'J' + (i + 1); }).join(' '));
+    for(var c = 0; c < edd.length; c++){
+      setPhase('Constructing', 'measuring insertions for J' + (edd[c] + 1));
+      yield* sweepAndPlace(edd[c]);
+    }
+    /* commit construction to the protected rail */
+    S.protSeq = S.workSeq.slice();
+    S.protRej = S.workRej.slice();
+    var ev0 = evaluate(inst, S.protSeq);
+    incumbentCost = ev0.total;
+    incumbent.push({ iter:0, cost:ev0.total });
+    updateSheets(ev0);
+    drawChart();
+    yield beat(560, function(){
+      renderProtected();
+      if(!REDUCED){
+        try{ trackAnim(protectedEl.animate([{ opacity:0.25 }, { opacity:1 }], { duration:560 })); }catch(e){}
+      }
+    }, null, null);
+    log('<span class="ok">construction committed</span> — Σ ' + ev0.total + ' (setup+proc ' + (ev0.setup + ev0.proc) + ' · delay ' + ev0.tard + ' · outside ' + ev0.rej + ')');
+    statusEl.innerHTML = 'Construction complete: Σ <b>' + ev0.total + '</b>. The destroy–rebuild loop starts.';
+
+    /* ===== phase 2 · iterated greedy loop ===== */
+    var stale = 0;
+    while(iter < MAX_ITER && stale < STALE_MAX){
+      iter++;
+      /* --- destroy: lift DESTROY_N random jobs into the tray --- */
+      var d = destroyJobs(inst, S.protSeq, destroyRng, DESTROY_N);
+      setPhase('Destroying', 'iteration ' + iter + ' — lifting out ' + d.victims.map(function(v){ return 'J' + (v + 1); }).join(', '));
+      log('<b>it ' + iter + '</b> — destroy ' + d.victims.map(function(v){ return 'J' + (v + 1); }).join(' '));
+      S.tray = d.victims.slice();
+      for(var v = 0; v < d.victims.length; v++){
+        yield flyBeat(d.victims[v], trayEl, null, 380, (function(id){
+          return function(){ S.workSeq = S.workSeq.filter(function(x){ return x !== id; }); };
+        })(d.victims[v]));
+      }
+      /* --- rebuild: sweep every insertion for each pending job ---
+         (iterate over a copy: S.tray shrinks as jobs are placed) --- */
+      var pending = S.tray.slice();
+      for(var p = 0; p < pending.length; p++){
+        setPhase('Measuring insertions for J' + (pending[p] + 1), 'iteration ' + iter + ' — every position, full objective');
+        yield* sweepAndPlace(pending[p]);
+      }
+      /* --- swap pass: rejected ↔ scheduled (first improvement) --- */
+      setPhase('Swapping', 'iteration ' + iter + ' — try outside jobs against the sequence');
+      var swapBase = evaluate(inst, S.workSeq).total, found = null, trials = 0;
+      if(S.workRej.length){
+        for(var sr = 0; sr < S.workRej.length && !found; sr++){
+          for(var si = 0; si < S.workSeq.length; si++){
+            trials++;
+            var candSeq = S.workSeq.slice(); candSeq[si] = S.workRej[sr];
+            if(evaluate(inst, candSeq).total < swapBase){ found = { r:S.workRej[sr], i:si }; break; }
+          }
+        }
+      }
+      if(!S.workRej.length){
+        log('swap pass — outside empty, skipped');
+        yield beat(220, null, null, null);
+      }else if(!found){
+        log('swap pass — no improving swap (' + trials + ' trials)');
+        yield beat(320, null, null, null);
+      }else{
+        var outJob = S.workSeq[found.i], inJob = found.r, newCost = evaluate(inst,
+          (function(){ var s = S.workSeq.slice(); s[found.i] = inJob; return s; })()).total;
+        yield beat(420, function(){ // flash the pair
+          if(!REDUCED){
+            [chips[inJob], chips[outJob]].forEach(function(ch){
+              try{ trackAnim(ch.animate([{ opacity:1 }, { opacity:0.35 }, { opacity:1 }], { duration:420 })); }catch(e){}
+            });
+          }
+        }, null, null);
+        yield flyBeat(inJob, workingEl, found.i, FLY_DUR, function(){
+          S.workSeq[found.i] = inJob;
+          S.workRej = S.workRej.filter(function(x){ return x !== inJob; });
+          S.workRej.push(outJob);
+          refillOutside();
+          outsideNote.textContent = ''; // the break-even note referred to the old outside set
+        });
+        yield flyBeat(outJob, outsideEl, null, FLY_DUR, null);
+        log('swap — <b>J' + (inJob + 1) + '</b> in for <b>J' + (outJob + 1) + '</b> (Σ ' + swapBase + ' → ' + newCost + ', ' + trials + ' trials)');
+      }
+      /* --- decide: accept or revert --- */
+      var candEv = evaluate(inst, S.workSeq);
+      updateSheets(candEv);
+      var delta = candEv.total - incumbentCost;
+      candidates.push({ iter:iter, cost:candEv.total, accepted:delta < 0 });
+      drawChart();
+      if(delta < 0){
+        setPhase('Accepting', 'iteration ' + iter + ' — Δ ' + delta + ' improves the reference');
+        showDelta(delta, 'candidate wins');
+        yield beat(600, function(){
+          S.protSeq = S.workSeq.slice();
+          S.protRej = S.workRej.slice();
+          incumbentCost = candEv.total;
+          incumbent.push({ iter:iter, cost:candEv.total });
+          renderProtected();
+          updateSheets(candEv);
+          drawChart();
+          if(!REDUCED){ try{ trackAnim(protectedEl.animate([{ opacity:0.3 }, { opacity:1 }], { duration:600 })); }catch(e){} }
+        }, null, null);
+        log('<span class="ok">accept</span> it ' + iter + ' — Σ ' + candEv.total + ' (Δ ' + delta + ')');
+        statusEl.innerHTML = 'Iteration ' + iter + ': candidate Σ ' + candEv.total + ' <b>accepted</b> (Δ ' + delta + ').';
+        stale = 0;
+      }else{
+        setPhase('Reverting', 'iteration ' + iter + ' — Δ +' + delta + ', working copy snaps back');
+        showDelta(delta, 'no improvement');
+        yield beat(520, function(){
+          flipAll(function(){
+            S.workSeq = S.protSeq.slice();
+            S.workRej = S.protRej.slice();
+            S.tray = [];
+            refillWorking();
+            refillOutside();
+          }, 500);
+          outsideNote.textContent = '';
+        }, null, null);
+        log('<span class="no">revert</span> it ' + iter + ' — Σ ' + candEv.total + ' (Δ +' + delta + ')');
+        statusEl.innerHTML = 'Iteration ' + iter + ': candidate Σ ' + candEv.total + ' rejected (Δ +' + delta + ') — snapped back.';
+        stale++;
+      }
+    }
+    /* ===== done: converged or iteration cap ===== */
+    var why = stale >= STALE_MAX ? 'no improvement in ' + STALE_MAX + ' iterations' : 'iteration cap (' + MAX_ITER + ')';
+    setPhase('Converged', why + ' — final Σ ' + incumbentCost);
+    showDelta(0, 'converged at Σ ' + incumbentCost);
+    log('<b>done</b> — ' + why + '; incumbent Σ <b>' + incumbentCost + '</b> (construction was ' + incumbent[0].cost + ')');
+    statusEl.innerHTML = 'Converged: ' + why + '. Final incumbent Σ <b>' + incumbentCost + '</b> — the loop shaved ' +
+      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% off greedy construction. Press Restart to run it again.';
+    hideTrial();
+  }
+
+  /* ---- controls ---- */
+  btnPlay.addEventListener('click', function(){ setPlaying(!player.playing); });
+  btnStep.addEventListener('click', function(){ setPlaying(false); stepOnce(); });
+  btnRestart.addEventListener('click', function(){ reset(); });
+  speedSeg.addEventListener('click', function(ev){
+    var b = ev.target.closest('button[data-speed]');
+    if(!b) return;
+    $all('button', speedSeg).forEach(function(x){ x.classList.remove('on'); });
+    b.classList.add('on');
+    player.speed = parseFloat(b.dataset.speed);
+    player.anims.forEach(function(a){ try{ a.playbackRate = player.speed; }catch(e){} });
+  });
+
+  /* ---- build chips + reset everything ---- */
+  function buildChips(){
+    for(var i = 0; i < N; i++){
+      var c = chipEl(inst.jobs[i]);
+      chips[i] = c;
+    }
+  }
+  function reset(){
+    setPlaying(false);
+    killAnims();
+    if(player.raf) cancelAnimationFrame(player.raf);
+    player.running = false; player.cur = null; player.gen = null;
+    genDone = false; iter = 0; incumbent = []; candidates = []; incumbentCost = Infinity;
+    btnPlay.disabled = false; btnStep.disabled = false;
+    destroyRng = mulberry32((IG_SEED ^ 0x9e3779b9) >>> 0);
+    S = { protSeq:[], protRej:[], workSeq:[], workRej:[], tray:[] };
+    for(var i = 0; i < N; i++) S.tray.push(i);
+    removeInsertBar();
+    /* detach all 12 live chips BEFORE clearing rails — appendChild moves
+       nodes safely, whereas textContent='' would destroy them */
+    var frag = document.createDocumentFragment();
+    for(var j = 0; j < N; j++) frag.appendChild(chips[j]);
+    renderProtected();
+    workingEl.textContent = '';
+    trayEl.textContent = '';
+    chipListOf(outsideEl).forEach(function(c){ c.remove(); });
+    S.tray.forEach(function(id){ trayEl.appendChild(chips[id]); });
+    outsideNote.textContent = '';
+    syncOutsideEmpty();
+    ['#shCsetup', '#shCdelay', '#shCout', '#shCtot'].forEach(function(s){ $(s).textContent = '–'; });
+    ['#shPsetup', '#shPdelay', '#shPout', '#shPtot'].forEach(function(s){ $(s).textContent = '–'; });
+    var pillEl = $('#igDelta');
+    pillEl.className = 'delta-pill'; pillEl.textContent = 'Δ vs protected —';
+    logEl.textContent = '';
+    log('seeded instance ready — 12 jobs · 4 families · mulberry32(0xce29767d)');
+    setPhase('Idle', 'press Play or Step');
+    statusEl.textContent = '';
+    hideTrial();
+    removeInsertBar();
+    drawChart();
+    player.gen = igScript();
+    updatePlayBtn();
+    if(player.active && player.playing) ensureLoop();
+  }
+
+  /* ---- boot ---- */
+  buildChips();
+  reset();
+  makeGate(fig, function(active){
+    player.active = active;
+    if(!active){
+      player.running = false;
+      if(player.raf) cancelAnimationFrame(player.raf);
+      player.anims.forEach(function(a){ try{ a.pause(); }catch(e){} });
+    }else{
+      if(player.playing){
+        player.anims.forEach(function(a){ try{ a.play(); }catch(e){} });
+        ensureLoop();
+      }
+      drawChart();
+    }
+  });
+  onWinResize(function(){ drawChart(); });
+})();
+</script>
+
+<!-- ============================================================
+     SCRIPT 4 — demo 4 (algorithm race), demo 5 (technique lab),
+     tool matrix data, nav scroll-spy
+     ============================================================ -->
+<script>
+'use strict';
+/* ============================================================
+   Demo 4 — algorithm race under an equal evaluation budget.
+   Six strategies, one shared currency: complete-plan evaluations.
+   Lines draw progressively as each strategy spends its 3,000.
+   ============================================================ */
+(function demo4(){
+  var section = $('#demo-race'); if(!section) return;
+  var runBtn = $('#raceRun'), resetBtn = $('#raceReset'), legendEl = $('#raceLegend');
+  var banner = $('#raceBanner'), cv = $('#raceChart'), statusEl = $('#d4status');
+  var inst = genInstance(IG_SEED, 12, 4);
+  var BUDGET = 3000, RATE = 360; // evaluations per second per strategy
+  var COLORS = ['#8a8072', '#c9a148', '#7d94b0', '#b0562f', '#ad7644', '#7a8b6f'];
+
+  function buildStrategies(){
+    return [
+      { s:makeRandomSampler(inst, mulberry32((IG_SEED ^ 0x11) >>> 0)), color:COLORS[0] },
+      { s:makeGreedyOnly(inst), color:COLORS[1] },
+      { s:makeSteepest(inst), color:COLORS[2] },
+      { s:makeIGStrategy(inst, mulberry32((IG_SEED ^ 0x77) >>> 0), false), color:COLORS[3] },
+      { s:makeIGStrategy(inst, mulberry32((IG_SEED ^ 0x77) >>> 0), true), color:COLORS[4] },
+      { s:makeRandomRestart(inst, mulberry32((IG_SEED ^ 0x44) >>> 0)), color:COLORS[5] }
+    ].map(function(o){
+      o.pts = []; o.done = false; o.lastBest = Infinity; o.lastPush = -1;
+      /* strategies that pre-charge construction start from that point */
+      if(o.s.evals() > 0 && isFinite(o.s.best())){
+        o.pts.push([o.s.evals(), o.s.best()]);
+        o.lastBest = o.s.best(); o.lastPush = o.s.evals();
+      }
+      return o;
+    });
+  }
+
+  var race = { strats:[], running:false, active:false, last:0, raf:0, on:false };
+
+  /* ---- progressive step-line chart (best-so-far curves) ---- */
+  function drawRace(){
+    var dpr = fitCanvas(cv), ctx = cv.getContext('2d');
+    if(!ctx) return;
+    var W = cv.width / dpr, H = cv.height / dpr;
+    ctx.clearRect(0, 0, W, H);
+    var L = 40, R = 12, T = 12, B = 24, iw = W - L - R, ih = H - T - B;
+    /* domain from the current head of each line — early bad samples would
+       otherwise squash the interesting 200–350 band permanently */
+    var vals = [];
+    race.strats.forEach(function(st){
+      if(st.pts.length) vals.push(st.pts[st.pts.length - 1][1]);
+      else if(isFinite(st.s.best())) vals.push(st.s.best());
+    });
+    ctx.font = '9px ui-monospace,Menlo,monospace';
+    if(!vals.length){
+      ctx.fillStyle = '#a2967f';
+      ctx.fillText('press “Run race” — each strategy spends 3,000 evaluations live', L, T + 14);
+      /* still draw the x axis for orientation */
+    }
+    var lo = vals.length ? Math.min.apply(null, vals) : 200;
+    var hi = vals.length ? Math.max.apply(null, vals) : 560;
+    if(hi - lo < 20){ hi += 10; lo -= 10; }
+    var pad = (hi - lo) * 0.1; hi += pad; lo -= pad;
+    function X(e){ return L + iw * e / BUDGET; }
+    function Y(c){ return T + ih * (1 - (c - lo) / (hi - lo)); }
+    /* grid + axis labels */
+    ctx.strokeStyle = '#ece2cf'; ctx.fillStyle = '#9a8f7a'; ctx.lineWidth = 1;
+    for(var g = 0; g <= 4; g++){
+      var vv = lo + (hi - lo) * g / 4, yy = Y(vv);
+      ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(W - R, yy); ctx.stroke();
+      ctx.fillText(String(Math.round(vv)), 4, yy + 3);
+    }
+    for(var x = 0; x <= BUDGET; x += 1000){
+      ctx.fillText((x / 1000) + 'k', X(x) - 6, H - 8);
+    }
+    ctx.fillText('evaluations →', L + iw / 2 - 30, H - 8);
+    /* one step-line per strategy: horizontal at the old best, then vertical drop */
+    race.strats.forEach(function(st){
+      if(st.pts.length < 1) return;
+      ctx.strokeStyle = st.color; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(X(st.pts[0][0]), Y(st.pts[0][1]));
+      for(var i = 1; i < st.pts.length; i++){
+        ctx.lineTo(X(st.pts[i][0]), Y(st.pts[i - 1][1])); // hold previous best…
+        ctx.lineTo(X(st.pts[i][0]), Y(st.pts[i][1]));     // …then drop to the new one
+      }
+      /* extend to the current evaluation frontier */
+      var last = st.pts[st.pts.length - 1];
+      ctx.lineTo(X(st.s.evals()), Y(last[1]));
+      ctx.stroke();
+      /* head dot */
+      ctx.fillStyle = st.color;
+      ctx.beginPath(); ctx.arc(X(st.s.evals()), Y(last[1]), 2.6, 0, 6.2832); ctx.fill();
+    });
+  }
+
+  function buildLegend(){
+    legendEl.textContent = '';
+    race.strats.forEach(function(st){
+      var row = el('div', 'legend-row');
+      var sw = el('span', 'sw'); sw.style.background = st.color;
+      row.appendChild(sw);
+      row.appendChild(el('span', 'nm', st.s.name));
+      row.appendChild(el('span', 'st', 'evals 0 / ' + BUDGET.toLocaleString('en-US')));
+      row.appendChild(el('span', 'bst', 'best —'));
+      legendEl.appendChild(row);
+      st.row = row;
+    });
+  }
+  function updateLegend(){
+    race.strats.forEach(function(st){
+      if(!st.row) return;
+      var cells = st.row.children;
+      cells[2].textContent = 'evals ' + st.s.evals().toLocaleString('en-US') + ' / ' + BUDGET.toLocaleString('en-US');
+      cells[3].textContent = isFinite(st.s.best()) ? 'best Σ ' + st.s.best() : 'best —';
+      st.row.classList.toggle('done', st.done || st.s.evals() >= BUDGET);
+    });
+  }
+
+  function frame(ts){
+    if(!race.running || !race.active){ race.on = false; return; }
+    race.on = true;
+    var dt = Math.min(100, ts - race.last); race.last = ts;
+    var slice = RATE * dt / 1000;
+    race.strats.forEach(function(st){
+      if(st.done) return;
+      var want = Math.min(BUDGET - st.s.evals(), slice);
+      var got = 0, guard = Math.ceil(want) * 6 + 120; // some moves are eval-free batch applications
+      while(got < want && guard-- > 0){
+        if(!st.s.nextEval()){ st.done = true; break; }
+        got++;
+      }
+      var e = st.s.evals(), b = st.s.best();
+      if(isFinite(b) && (b !== st.lastBest || e - st.lastPush > 40)){
+        st.pts.push([e, b]); st.lastBest = b; st.lastPush = e;
+      }
+    });
+    drawRace();
+    updateLegend();
+    var allDone = race.strats.every(function(st){ return st.done || st.s.evals() >= BUDGET; });
+    if(allDone){ finishRace(); return; }
+    race.raf = requestAnimationFrame(frame);
+  }
+
+  function finishRace(){
+    race.running = false; race.on = false;
+    runBtn.disabled = false;
+    var winner = race.strats.reduce(function(a, b){ return a.s.best() <= b.s.best() ? a : b; });
+    var greedy = race.strats[1].s.best();
+    var pct = Math.round((1 - winner.s.best() / greedy) * 100);
+    banner.innerHTML = 'Winner: <b>' + winner.s.name + '</b> — Σ <b>' + winner.s.best() + '</b> after 3,000 evaluations ' +
+      '(greedy construction alone: Σ ' + greedy + ' → <b>−' + pct + '%</b>). Same budget, same instance — the destroy–rebuild loop is the difference.';
+    banner.classList.add('show');
+    statusEl.innerHTML = 'Race over — <b>' + winner.s.name + '</b> wins with Σ ' + winner.s.best() + '.';
+    updateLegend();
+  }
+
+  function startRace(){
+    resetRace();
+    race.running = true;
+    race.last = performance.now();
+    runBtn.disabled = true;
+    banner.classList.remove('show');
+    statusEl.textContent = 'Racing… each line is one strategy spending its budget.';
+    if(race.active && !race.on){
+      race.last = performance.now();
+      race.raf = requestAnimationFrame(frame);
+    }
+  }
+  function resetRace(){
+    race.running = false; race.on = false;
+    if(race.raf) cancelAnimationFrame(race.raf);
+    race.strats = buildStrategies();
+    buildLegend();
+    drawRace();
+    banner.classList.remove('show');
+    runBtn.disabled = false;
+    statusEl.textContent = '';
+  }
+
+  runBtn.addEventListener('click', startRace);
+  resetBtn.addEventListener('click', resetRace);
+  makeGate(section, function(active){
+    race.active = active;
+    if(active && race.running && !race.on){
+      race.last = performance.now();
+      race.raf = requestAnimationFrame(frame);
+    }
+    if(active) drawRace();
+  });
+  onWinResize(function(){ drawRace(); });
+  resetRace();
+})();
+
+/* ============================================================
+   Demo 5 — technique lab: the SAME Gantt morph implemented by
+   three genuinely separate renderers (DOM / SVG attrs / Canvas).
+   ============================================================ */
+(function demo5(){
+  var section = $('#demo-lab'); if(!section) return;
+  var chipsRow = $('#labChips'), statusEl = $('#d5status');
+  var labRng = mulberry32(0x1ab);
+  var order = [0, 1, 2, 3, 4];
+  var LOGICAL_W = 300, BAR_H = 22, BAR_Y = 8, H = 64;
+
+  /* one shared layout calculation — each renderer only draws it */
+  function computeLayout(ord){
+    var ev = evaluate(DEMO1, ord);
+    var horizon = ev.timeline.length ? ev.timeline[ev.timeline.length - 1].end * 1.05 + 1 : 10;
+    var scale = LOGICAL_W / horizon, segs = [];
+    ev.timeline.forEach(function(t){
+      var job = DEMO1.jobs[t.id];
+      var xPrev = t.start - t.idle - t.st;
+      if(t.st > 0) segs.push({ x:xPrev * scale, w:t.st * scale, kind:'setup', label:'' });
+      if(t.idle > 0.001) segs.push({ x:(xPrev + t.st) * scale, w:t.idle * scale, kind:'idle', label:'' });
+      segs.push({ x:t.start * scale, w:job.p * scale, kind:'proc', fam:job.fam, label:'J' + (job.id + 1) });
+      if(t.end > job.due) segs.push({ x:job.due * scale, w:(t.end - job.due) * scale, kind:'tard', label:'' });
+    });
+    return segs;
+  }
+  var COLORS = { setup:'#ad7644', idle:'#e9e1d2', tard:'rgba(168,67,46,.45)', proc:['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'] };
+
+  function renderChips(){
+    chipsRow.textContent = '';
+    order.forEach(function(id){ chipsRow.appendChild(chipEl(DEMO1.jobs[id])); });
+  }
+
+  /* ---- renderer (a): DOM nodes + CSS transitions on left/width ---- */
+  var labDom = (function(){
+    var stage = $('#labDom'), pool = [];
+    function render(segs){
+      var px = stage.clientWidth || 280;
+      segs.forEach(function(s, i){
+        var d = pool[i];
+        if(!d){
+          d = el('div', 'gseg');
+          d.style.transition = REDUCED ? 'none' : 'left .55s cubic-bezier(.2,.7,.25,1), width .55s cubic-bezier(.2,.7,.25,1), background-color .55s';
+          d.style.font = '700 10px/22px -apple-system,"Segoe UI",Roboto,sans-serif';
+          d.style.color = '#fdf8ef'; d.style.textAlign = 'center'; d.style.overflow = 'hidden';
+          stage.appendChild(d); pool[i] = d;
+        }
+        d.style.display = '';
+        d.style.top = BAR_Y + 'px'; d.style.height = BAR_H + 'px';
+        var u = px / LOGICAL_W;
+        d.style.left = (s.x * u) + 'px';
+        d.style.width = Math.max(1, s.w * u) + 'px';
+        d.style.background = s.kind === 'proc' ? COLORS.proc[s.fam] : COLORS[s.kind];
+        d.style.border = s.kind === 'idle' ? '1px dashed #cfc2a6' : '0';
+        d.textContent = s.label || '';
+      });
+      for(var i = segs.length; i < pool.length; i++) pool[i].style.display = 'none';
+    }
+    return { render:render };
+  })();
+
+  /* ---- renderer (b): SVG rects + JS-driven attribute tweens ---- */
+  var labSvg = (function(){
+    var svg = $('#labSvg');
+    svg.setAttribute('viewBox', '0 0 ' + LOGICAL_W + ' ' + H);
+    var pool = [];
+    function render(segs){
+      segs.forEach(function(s, i){
+        var node = pool[i];
+        if(!node){
+          node = { rect:svgEl('rect', { y:BAR_Y, height:BAR_H, rx:2 }), text:svgEl('text', { y:BAR_Y + BAR_H / 2 + 3.5, 'text-anchor':'middle', 'font-size':9, 'font-weight':700, fill:'#fdf8ef' }) };
+          svg.appendChild(node.rect); svg.appendChild(node.text);
+          pool[i] = node;
+        }
+        node.rect.style.display = ''; node.text.style.display = '';
+        var fill = s.kind === 'proc' ? COLORS.proc[s.fam] : COLORS[s.kind];
+        node.rect.setAttribute('fill', fill);
+        if(s.kind === 'idle'){ node.rect.setAttribute('stroke', '#cfc2a6'); node.rect.setAttribute('stroke-dasharray', '3 2'); node.rect.setAttribute('stroke-width', 0.7); }
+        else node.rect.removeAttribute('stroke');
+        var fromX = parseFloat(node.rect.getAttribute('x') || s.x), fromW = parseFloat(node.rect.getAttribute('width') || s.w);
+        var label = s.label || '';
+        /* the point of this renderer: attributes are interpolated by JS, not CSS */
+        tween({ dur:550, update:function(e){
+          var cx = fromX + (s.x - fromX) * e, cw = Math.max(0.2, fromW + (s.w - fromW) * e);
+          node.rect.setAttribute('x', cx);
+          node.rect.setAttribute('width', cw);
+          node.text.setAttribute('x', cx + cw / 2);
+          node.text.textContent = cw > 14 ? label : '';
+        }});
+      });
+      for(var i = segs.length; i < pool.length; i++){ pool[i].rect.style.display = 'none'; pool[i].text.style.display = 'none'; }
+    }
+    return { render:render };
+  })();
+
+  /* ---- renderer (c): one canvas, full redraw every frame ---- */
+  var labCanvas = (function(){
+    var cv = $('#labCanvas');
+    var prev = null, target = null, anim = null;
+    function draw(segs){
+      var dpr = fitCanvas(cv), ctx = cv.getContext('2d');
+      if(!ctx) return;
+      var W = cv.width / dpr, Hpx = cv.height / dpr;
+      ctx.clearRect(0, 0, W, Hpx);
+      var u = W / LOGICAL_W;
+      segs.forEach(function(s){
+        var x = s.x * u, w = Math.max(0.5, s.w * u);
+        ctx.fillStyle = s.kind === 'proc' ? COLORS.proc[s.fam] : COLORS[s.kind];
+        ctx.fillRect(x, BAR_Y, w, BAR_H);
+        if(s.kind === 'idle'){
+          ctx.strokeStyle = '#cfc2a6'; ctx.lineWidth = 1;
+          /* manual hatch — canvas has no pattern shorthand here */
+          for(var hx = x - BAR_H; hx < x + w; hx += 5){
+            ctx.beginPath();
+            ctx.moveTo(Math.max(x, hx), BAR_Y + BAR_H - Math.max(0, x - hx));
+            ctx.lineTo(Math.min(x + w, hx + BAR_H), BAR_Y + Math.max(0, hx + BAR_H - (x + w)));
+            ctx.stroke();
+          }
+          ctx.strokeRect(x + 0.5, BAR_Y + 0.5, w - 1, BAR_H - 1);
+        }
+        if(s.label && w > 16){
+          ctx.fillStyle = '#fdf8ef'; ctx.font = '700 10px sans-serif'; ctx.textAlign = 'center';
+          ctx.fillText(s.label, x + w / 2, BAR_Y + BAR_H / 2 + 3.5);
+        }
+      });
+      /* frame tick */
+      ctx.fillStyle = '#9a8f7a'; ctx.font = '9px sans-serif'; ctx.textAlign = 'left';
+      ctx.fillText('canvas 2d · full redraw ' + (anim ? '(animating)' : '(static)'), 2, Hpx - 6);
+    }
+    function lerpSegs(a, b, e){
+      var out = [], i;
+      for(i = 0; i < b.length; i++){
+        var from = (a && a[i]) || b[i];
+        out.push({ x:from.x + (b[i].x - from.x) * e, w:from.w + (b[i].w - from.w) * e, kind:b[i].kind, fam:b[i].fam, label:b[i].label });
+      }
+      return out;
+    }
+    function render(segs){
+      if(anim) anim.cancel();
+      if(REDUCED){ prev = segs; draw(segs); return; }
+      var from = prev, to = segs;
+      anim = tween({ dur:550, update:function(e){ draw(lerpSegs(from, to, e)); },
+        done:function(){ prev = to; anim = null; draw(to); } });
+    }
+    return { render:render };
+  })();
+
+  function renderAll(){
+    renderChips();
+    var segs = computeLayout(order);
+    labDom.render(segs);
+    labSvg.render(segs);
+    labCanvas.render(segs);
+  }
+  $('#labShuffle').addEventListener('click', function(){
+    shuffleRng(labRng, order);
+    renderAll();
+    statusEl.innerHTML = 'Order shuffled to <b>' + order.map(function(i){ return 'J' + (i + 1); }).join(' ') + '</b> — all three renderers morph in sync.';
+  });
+  makeGate(section, function(active){ if(active) renderAll(); });
+  onWinResize(function(){ labDom.render(computeLayout(order)); });
+  renderAll();
+})();
+
+/* ============================================================
+   Tool matrix — data-driven rows (verified facts, July 2026)
+   ============================================================ */
+(function matrix(){
+  var body = $('#matrixBody'); if(!body) return;
+  var MIT = '<span class="lic-mit">MIT</span>';
+  var ROWS = [
+    ['GSAP', 'v3.15.0 · Apr 2026', 'JS animation library', 'live DOM / SVG, zero build', 'Standard No-Charge — free incl. commercial since v3.13 (all plugins); <b>not</b> MIT; Webflow acquired GreenSock (Oct 2024)', '<span class="star">★</span> Live step-by-step choreography in a vanilla single-file page; Flip + ScrollTrigger', 'The accelerator for this page: IG-loop beats, chip FLIP, scroll cues'],
+    ['Anime.js', 'v4.5.0 · Jun 2026', 'JS animation library', 'live DOM', MIT, 'v4 rewrite: timelines, springs, scroll-linked, ~10 KB core, createLayout FLIP', 'MIT-pure runner-up to GSAP — same choreography jobs'],
+    ['D3.js', 'v7.9.0', 'data-visualisation library', 'live SVG / Canvas', 'ISC', 'Data-join graphics — factorial counters, convergence charts', 'Charts for demos 2–4; pair with GSAP for choreography'],
+    ['Motion (ex-Framer Motion)', 'v12.42.2 · Jun 2026', 'React-first + vanilla API', 'live DOM', MIT, 'Best layout/FLIP animation if the page were React', 'Only via a React rewrite — skip for a single-file page'],
+    ['Svelte 5 transitions', '5.56.x', 'framework', 'live DOM', MIT, 'Built-in transitions, animate:flip, spring/tweened', 'Excellent inside Svelte only — a full rewrite here'],
+    ['Manim Community', 'v0.20.1 · Feb 2026', 'Python scene library', 'rendered video (MP4)', MIT, '<span class="star">★</span> Rendered math/algorithm exposition (3Blue1Brown-style); LLM-assisted authoring is now mainstream', 'The factorial ruler and the IG loop as a narrated video'],
+    ['Motion Canvas', 'v3.17.2 · Dec 2024', 'TypeScript storyboards + visual editor', 'rendered video', MIT, 'Generator-function scenes, JS-native Manim alternative', 'Strong if you stay in TS — public development quiet since late 2024'],
+    ['Remotion', 'v4.0.x · Jul 2026', 'React video framework', 'rendered video + interactive &lt;Player&gt;', 'Source-available: free for individuals &amp; orgs ≤ 3 people, paid Company License above; v5 announced, not released', '<span class="star">★</span> Polished marketing/social clips; data-driven video; renders locally, on Lambda, or in-browser WebCodecs', 'Social cuts of the race and the ruler'],
+    ['Observable Framework + Plot', 'v1.13.4 · Mar 2026', 'build-time site generator', 'static site with live JS', 'ISC', '<span class="star">★</span> Data-centric interactive explorable articles', 'Best-in-class for explorables — but a different architecture from one self-contained file'],
+    ['Rive', 'canvas runtime v2.38.5 · Jul 2026', 'runtime + editor', 'live interactive .riv', 'Runtimes MIT; editor freemium (free tier 3 files; from ~$9/seat/mo)', '<span class="star">★</span> Designer-authored mascots/operators; Data Binding (GA Apr 2025) wires live algorithm state to any property; exports video', 'A reactive “machine operator” mascot beside the demos'],
+    ['Lottie / dotLottie', 'lottie-web v5.13.0 · dotlottie-web v0.78.x', 'players + .lottie bundles', 'live vector playback', MIT + ' (lottie-web); dotLottie: Rust/WASM ThorVG renderer, theming + state machines', 'Decorative vector micro-animation', 'Weak for algorithm-driven choreography — polish only'],
+    ['Three.js / react-three-fiber', 'r185.1 · Jul 2026 · r3f v9.6.x', 'WebGL/WebGPU 3D', 'live 3D', MIT, 'WebGPURenderer + TSL now the default (~95% WebGPU coverage, WebGL2 auto-fallback)', 'Overkill for Gantt charts — the pick when real 3D is needed'],
+    ['p5.js', 'v2.3.0 · May 2026 (1.x EOL Mar 2026)', 'creative-coding sketchbook', 'live canvas', 'LGPL', 'Gentlest learning curve for quick interactive sims', 'No timeline/tween choreography — prototypes only'],
+    ['Theatre.js', 'v0.7.2 · May 2024', 'animation tooling', 'live DOM / Three.js', MIT, 'Timeline editor for programmatic motion', '<span class="flag">risky bet in 2026</span> development has gone private']
+  ];
+  ROWS.forEach(function(r){
+    var tr = el('tr');
+    var td = el('td', 'tname');
+    td.innerHTML = r[0] + '<span class="ver">' + r[1] + '</span>';
+    tr.appendChild(td);
+    for(var i = 2; i < 6; i++){
+      var c = el('td');
+      c.innerHTML = r[i];
+      tr.appendChild(c);
+    }
+    body.appendChild(tr);
+  });
+})();
+
+/* ============================================================
+   Nav scroll-spy — highlight the anchor of the visible section
+   ============================================================ */
+(function scrollSpy(){
+  var links = $all('#navList a');
+  if(!links.length || !('IntersectionObserver' in window)) return;
+  var map = {}, visible = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var sections = $all('section.section');
+  function refresh(){
+    /* activate the first visible section in document order */
+    var activeId = null;
+    for(var i = 0; i < sections.length; i++){
+      if(visible[sections[i].id]){ activeId = sections[i].id; break; }
+    }
+    links.forEach(function(a){ a.classList.remove('active'); });
+    if(activeId && map[activeId]) map[activeId].classList.add('active');
+  }
+  var spy = new IntersectionObserver(function(entries){
+    entries.forEach(function(en){ visible[en.target.id] = en.isIntersecting; });
+    refresh();
+  }, { rootMargin:'-20% 0px -60% 0px' });
+  sections.forEach(function(s){ spy.observe(s); });
+})();
+</script>
+<script>
+/* Report content height to the hosting STORY tab so the iframe can grow to fit */
+(function(){
+  function postH(){ try{ parent.postMessage({ igStoryH: document.documentElement.scrollHeight }, '*'); }catch(e){} }
+  window.addEventListener('load', postH);
+  if (window.ResizeObserver) new ResizeObserver(postH).observe(document.body);
+  window.addEventListener('resize', postH);
+  setTimeout(postH, 400); setTimeout(postH, 1200);
+})();
+</script>
+</body>
+</html>
