@@ -483,7 +483,7 @@ class IGStudioApp {
   }
 
   renderTopbar() {
-    const pages = ["overview", "schedule"];
+    const pages = [];
     return `<header class="topbar">
       <a class="brand" href="#overview" data-page="overview" aria-label="Iterated Greedy">
         <span class="brand-mark">${icons.logo}</span><span>Iterated Greedy</span>
@@ -518,6 +518,10 @@ class IGStudioApp {
       ? `${this.t("controls.compare")} · ${this.state.runs} · ${this.fmt(this.state.iterationBudget)} ${this.t("controls.perSeed")}`
       : `${this.t("controls.oneRun")} · ${this.fmt(this.state.iterationBudget)} · seed ${this.state.seed}`;
     return `<aside class="control-rail ${compactRail ? "is-compact" : ""}" aria-label="${escapeHtml(this.t("a11y.controls"))}">
+      <nav class="rail-modes" aria-label="${escapeHtml(this.t("a11y.primary"))}">
+        <button class="rail-mode" data-page="overview" aria-current="${this.state.page === "overview" ? "page" : "false"}">${escapeHtml(this.t("nav.overview"))}</button>
+        <button class="rail-mode" data-page="schedule" aria-current="${this.state.page === "schedule" ? "page" : "false"}"${(this.state.singleResult || this.state.comparisonResult) ? "" : " disabled"}>${escapeHtml(this.t("nav.schedule"))}</button>
+      </nav>
       ${this.state.page === "overview" ? `<header class="mobile-rail-intro"><h1>${escapeHtml(mobileTitle)}</h1></header>` : ""}
       <h2 class="scenario-name">${escapeHtml(scenario.name)}</h2>
       <p class="scenario-description">${escapeHtml(scenario.description)}</p>
