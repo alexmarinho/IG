@@ -184,6 +184,8 @@ The Apps Script engine and workbook contract are documented in [`google-sheets/R
 
 ## Repository map
 
+![Architecture: benchmark data feeds one Rust core whose objective is cross-checked against a Python reference; the core compiles to a native CLI and WebAssembly, which every browser surface reuses.](docs/assets/architecture.svg)
+
 | Path | Purpose |
 |---|---|
 | [`engine/`](engine/) | Canonical Rust engine, CLI, WebAssembly exports and tests |
