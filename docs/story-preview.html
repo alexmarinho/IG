@@ -394,12 +394,24 @@ footer code{font-family:var(--mono);color:var(--maple)}
 }
 </style>
 <style id="ig-story-proto">
-  /* Prototype: keep only the story arc — hero + Demo 1 (order) + Demo 2 (factorial) */
-  #concepts, #demo-ig, #demo-race, #demo-lab, #tools, #stack { display: none !important; }
-  nav.anchor-nav a[href="#concepts"], nav.anchor-nav a[href="#demo-ig"],
-  nav.anchor-nav a[href="#demo-race"], nav.anchor-nav a[href="#demo-lab"],
-  nav.anchor-nav a[href="#tools"], nav.anchor-nav a[href="#stack"] { display: none !important; }
+  /* Single-scroll notebook: drop the explorer-only meta sections; keep the four demos */
+  #concepts, #demo-lab, #tools, #stack { display: none !important; }
   .site-head .badge { display: none; }
+  /* Movements flow one after another in a single scroll */
+  section.movement { padding: 0; scroll-margin-top: 104px; border-top: 1px solid var(--rule); }
+  section.movement:first-of-type { border-top: 0; }
+  .movement-head { max-width: 1120px; margin: 0 auto; padding: 40px 20px 2px; }
+  .movement-head .m-kick { font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin-bottom: 10px; }
+  .movement-head h2.m-title { font: 600 clamp(26px,2.9vw,38px)/1.12 var(--serif); letter-spacing: .2px; margin-bottom: 10px; }
+  .movement-head h2.m-title em { font-style: normal; color: var(--terra); }
+  .movement-head .m-lede { max-width: 66ch; color: var(--ink-soft); font-size: 15.5px; line-height: 1.55; }
+  .m-placeholder { max-width: 1120px; margin: 8px auto 0; padding: 0 20px 44px; }
+  .m-placeholder .card { background: var(--card); border: 1px dashed #cfc4ac; border-radius: 10px; padding: 22px; color: var(--ink-soft); }
+  .m-code { background: #2a2620; color: #f0e9dc; border-radius: 10px; padding: 18px 20px; font: 500 13px/1.7 var(--mono); overflow-x: auto; white-space: pre; }
+  .m-code .cmt { color: #b0a58f; }
+  .m-links { display: flex; flex-wrap: wrap; gap: 8px; }
+  .m-links a { display: inline-block; padding: 10px 15px; border: 1px solid #cfc4ac; border-radius: 7px; background: var(--card); color: var(--terra); text-decoration: none; font: 700 12px/1 var(--sans); }
+  .m-links a:hover { background: var(--terra); border-color: var(--terra); color: #fdf8ef; }
   /* Hero intro block */
   .ig-hero { max-width: 1120px; margin: 0 auto; padding: 40px 20px 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
@@ -428,21 +440,18 @@ footer code{font-family:var(--mono);color:var(--maple)}
   </div>
   <nav class="anchor-nav" aria-label="Sections">
     <ul id="navList">
-      <li><a href="#concepts">The 9 concepts</a></li>
-      <li><a href="#" class="active">Story</a></li>
-      <li><a href="#">Compare</a></li>
-      <li><a href="#">Run</a></li>
-      <li><a href="#">Method</a></li>
-      <li><a href="#">Future</a></li>
-      <li><a href="#tools">Tool matrix</a></li>
-      <li><a href="#stack">Recommended stack</a></li>
+      <li><a href="#m-story" class="active">Story</a></li>
+      <li><a href="#m-compare">Compare</a></li>
+      <li><a href="#m-run">Run</a></li>
+      <li><a href="#m-method">Method</a></li>
+      <li><a href="#m-future">Future</a></li>
     </ul>
   </nav>
 </header>
 
 <main>
-<section class="ig-hero">
-  <p class="kick">Why order matters</p>
+<section class="ig-hero" id="m-story">
+  <p class="kick">Story · why order matters</p>
   <h2>Order changes time. <em>Time changes cost.</em></h2>
   <p class="bridge">A best order does exist — but there are more of them than you could ever check. So the game isn't to try them all; it's to guess well and improve fast.</p>
 </section>
@@ -587,8 +596,8 @@ footer code{font-family:var(--mono);color:var(--maple)}
      4 · Live demo 3 — THE CENTERPIECE: the IG loop, step by step
      ============================================================ -->
 <section class="section" id="demo-ig">
-  <p class="kicker"><span class="fig">Fig. 03 / iterated greedy</span></p>
-  <h2 class="section-title"><span class="no">§4</span>Live demo 3 — The IG loop, step by step</h2>
+  <p class="kicker"><span class="fig">The method</span></p>
+  <h2 class="section-title">So you guess — then destroy, rebuild, and keep what's better.</h2>
   <p class="lede">A real Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance
   (<b>mulberry32, seed 0xce29767d</b>). Nothing is pre-recorded: every insertion position is re-evaluated
   against the complete objective while you watch. Watch for the five beats —
@@ -655,9 +664,16 @@ footer code{font-family:var(--mono);color:var(--maple)}
 <!-- ============================================================
      5 · Live demo 4 — Algorithm race under an equal evaluation budget
      ============================================================ -->
+<section class="movement" id="m-compare">
+  <div class="movement-head">
+    <p class="m-kick">Compare · does it work?</p>
+    <h2 class="m-title">Does the guessing actually <em>pay off?</em></h2>
+    <p class="m-lede">Put Iterated Greedy in a race against five other strategies — same instance, same evaluation budget — and watch who reaches the lowest cost per plan checked.</p>
+  </div>
+</section>
 <section class="section" id="demo-race">
-  <p class="kicker"><span class="fig">Fig. 04 / race</span></p>
-  <h2 class="section-title"><span class="no">§5</span>Live demo 4 — Algorithm race, equal evaluation budget</h2>
+  <p class="kicker"><span class="fig">Six strategies, one budget</span></p>
+  <h2 class="section-title">The race, under an equal evaluation budget.</h2>
   <p class="lede">Six search strategies on the same seeded instance, each allowed exactly
   <b>3,000 complete-plan evaluations</b>. A fair fight needs a shared currency: not wall-clock time,
   but objective evaluations. Lines draw left to right as budget is consumed.</p>
@@ -676,6 +692,44 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <div class="banner" id="raceBanner" role="status"></div>
     <p class="status-line" id="d4status" aria-live="polite"></p>
   </figure>
+</section>
+
+<section class="movement" id="m-run">
+  <div class="movement-head">
+    <p class="m-kick">Run · your turn</p>
+    <h2 class="m-title">Run the real engine, on real problems.</h2>
+    <p class="m-lede">The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.</p>
+  </div>
+  <div class="m-placeholder"><div class="card">The interactive Studio — scenario carousel, one-seed and multi-seed runs, convergence and schedule views — mounts here. It is being ported into the notebook next.</div></div>
+</section>
+
+<section class="movement" id="m-method">
+  <div class="movement-head">
+    <p class="m-kick">Method · how it works</p>
+    <h2 class="m-title">The whole algorithm, in a few lines.</h2>
+    <p class="m-lede">Iterated Greedy is small on purpose: build a plan once, then repeat a destroy-and-rebuild step, keeping the result only when it improves.</p>
+  </div>
+  <div class="m-placeholder"><pre class="m-code">best = construct(instance)          <span class="cmt"># greedy: insert each job at its cheapest spot</span>
+while budget remains:
+    candidate = copy(best)
+    remove d random jobs from candidate
+    reinsert each at its cheapest spot   <span class="cmt"># leave a job out when that costs less</span>
+    if cost(candidate) &lt; cost(best):
+        best = candidate                 <span class="cmt"># keep it only when it improves</span></pre></div>
+</section>
+
+<section class="movement" id="m-future">
+  <div class="movement-head">
+    <p class="m-kick">Future · where it goes</p>
+    <h2 class="m-title">A tested baseline — and what comes next.</h2>
+    <p class="m-lede">This is a reproducible baseline against the 2015 study; the next steps extend the search and the model, one validated change at a time.</p>
+  </div>
+  <div class="m-placeholder"><nav class="m-links" aria-label="Resources">
+    <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 thesis (PDF)</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/CITATION.cff" target="_blank" rel="noopener">How to cite</a>
+  </nav></div>
 </section>
 
 <!-- ============================================================
