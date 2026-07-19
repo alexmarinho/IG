@@ -412,6 +412,8 @@ footer code{font-family:var(--mono);color:var(--maple)}
   .m-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .m-links a { display: inline-block; padding: 10px 15px; border: 1px solid #cfc4ac; border-radius: 7px; background: var(--card); color: var(--terra); text-decoration: none; font: 700 12px/1 var(--sans); }
   .m-links a:hover { background: var(--terra); border-color: var(--terra); color: #fdf8ef; }
+  .m-studio { max-width: 1120px; margin: 10px auto 0; padding: 0 20px 44px; }
+  .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 1px solid var(--rule); border-radius: 12px; background: #f6f1e8; }
   /* Hero intro block */
   .ig-hero { max-width: 1120px; margin: 0 auto; padding: 40px 20px 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
@@ -700,7 +702,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <h2 class="m-title">Run the real engine, on real problems.</h2>
     <p class="m-lede">The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.</p>
   </div>
-  <div class="m-placeholder"><div class="card">The interactive Studio — scenario carousel, one-seed and multi-seed runs, convergence and schedule views — mounts here. It is being ported into the notebook next.</div></div>
+  <div class="m-studio"><iframe class="studio-frame" src="studio-app.html" title="Interactive Iterated Greedy Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe></div>
 </section>
 
 <section class="movement" id="m-method">
