@@ -520,6 +520,7 @@ class IGStudioApp {
       ? `${this.t("controls.compare")} · ${this.state.runs} · ${this.fmt(this.state.iterationBudget)} ${this.t("controls.perSeed")}`
       : `${this.t("controls.oneRun")} · ${this.fmt(this.state.iterationBudget)} · seed ${this.state.seed}`;
     return `<aside class="control-rail ${compactRail ? "is-compact" : ""}" aria-label="${escapeHtml(this.t("a11y.controls"))}">
+      ${this.state.page === "overview" ? this.renderScenarioSelector() : ""}
       ${this.state.page === "overview" ? `<header class="mobile-rail-intro"><h1>${escapeHtml(mobileTitle)}</h1></header>` : ""}
       <p class="scenario-description">${escapeHtml(scenario.description)}</p>
       <p class="instance-facts">${escapeHtml(this.state.instanceId)} · ${metadata?.jobCount ?? "—"} ${escapeHtml(this.t("misc.jobs"))}${this.state.instance ? ` · ${this.state.instance.familyCount} ${escapeHtml(this.t("misc.families"))}` : ""}</p>
@@ -569,6 +570,24 @@ class IGStudioApp {
         </div>
       </div>
     </aside>`;
+  }
+
+  renderScenarioSelector() {
+    const activeId = this.state.scenarioId;
+    const tiles = SCENARIO_CATALOG.map(({ id }, index) => {
+      const sc = getLocalizedScenario(id, this.state.locale);
+      const url = this.scenarioVisualUrl(sc);
+      const active = id === activeId;
+      return `<button type="button" class="scenario-pick${active ? " is-active" : ""}" data-scenario="${escapeHtml(id)}" aria-pressed="${active}" title="${escapeHtml(sc.name)}">
+          <span class="scenario-pick-index">${String(index + 1).padStart(2, "0")}</span>
+          <span class="scenario-pick-img" style="background-image:url('${url}');--scenario-focus:${escapeHtml(sc.visual.objectPosition)}"></span>
+          <span class="scenario-pick-name">${escapeHtml(sc.name)}</span>
+        </button>`;
+    }).join("");
+    return `<section class="scenario-picker" aria-label="${escapeHtml(this.t("controls.scenario"))}">
+      <p class="scenario-picker-label">${escapeHtml(this.t("controls.scenario"))}</p>
+      <div class="scenario-pick-grid" role="group">${tiles}</div>
+    </section>`;
   }
 
   renderPage() {
@@ -680,20 +699,10 @@ class IGStudioApp {
     ];
     return `<section class="problem-brief">
       <header><h2>${escapeHtml(this.t("overview.problemTitle"))}</h2><p>${escapeHtml(this.t("overview.problemSub"))}</p></header>
-      <div class="scenario-carousel" role="group" aria-label="${escapeHtml(this.t("controls.scenario"))}">
-        <figure class="scenario-figure${this._scenarioSwitched ? " is-switching" : ""}" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
-          <img src="${escapeHtml(this.scenarioVisualUrl(scenario))}" alt="${escapeHtml(scenario.visualAlt)}" loading="lazy" decoding="async">
-          <button class="carousel-arrow prev" data-scenario-step="-1" aria-label="${escapeHtml(this.t("controls.scenarioPrev"))}">&lsaquo;</button>
-          <button class="carousel-arrow next" data-scenario-step="1" aria-label="${escapeHtml(this.t("controls.scenarioNext"))}">&rsaquo;</button>
-          <figcaption class="carousel-caption"><strong>${escapeHtml(scenario.name)}</strong><span>${escapeHtml(scenario.visualCaption)}</span></figcaption>
-        </figure>
-        <div class="carousel-dots">
-          ${SCENARIO_CATALOG.map(({ id }) => {
-            const name = getLocalizedScenario(id, this.state.locale).name;
-            return `<button class="carousel-dot" data-scenario="${id}" aria-pressed="${id === this.state.scenarioId}" aria-label="${escapeHtml(name)}" title="${escapeHtml(name)}"><span>${escapeHtml(name)}</span></button>`;
-          }).join("")}
-        </div>
-      </div>
+      <figure class="scenario-figure scenario-hero${this._scenarioSwitched ? " is-switching" : ""}" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
+        <img src="${escapeHtml(this.scenarioVisualUrl(scenario))}" alt="${escapeHtml(scenario.visualAlt)}" decoding="async">
+        <figcaption class="carousel-caption"><strong>${escapeHtml(scenario.name)}</strong><span>${escapeHtml(scenario.visualCaption)}</span></figcaption>
+      </figure>
       <div class="problem-layout"><dl class="problem-facts">${facts.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
       <div class="problem-story"><strong>${escapeHtml(instanceLabel)}</strong><p>${escapeHtml(instanceNote)}</p><p>${escapeHtml(scenario.objective.summary)}</p><h3>${escapeHtml(this.t("scenario.decisions"))}</h3><ol>${scenario.decisions.map((decision) => `<li>${escapeHtml(decision)}</li>`).join("")}</ol><button class="text-button" data-page="instance">${escapeHtml(this.t("actions.inspectInstance"))} →</button><button class="text-button" data-page="method">${escapeHtml(this.t("method.title"))} →</button></div></div>
     </section>`;

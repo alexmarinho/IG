@@ -326,6 +326,71 @@ a { color: inherit; text-decoration: none; }
 }
 
 /* Scenario carousel: big image + ‹ › arrows + labelled selector below the title */
+/* Primary scenario picker — a gallery of the four domains, elevated above the
+   text controls because choosing the scenario is the first, special decision.
+   Lives in the left rail; selecting a tile cross-fades the hero on the right. */
+.scenario-picker { margin: 0 0 20px; }
+.scenario-picker-label {
+  margin: 0 0 9px;
+  color: var(--cobalt);
+  font: 700 11px/1 var(--font-mono);
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+.scenario-pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+.scenario-pick {
+  position: relative;
+  display: block;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--rule);
+  background: var(--paper-bright);
+  color: inherit;
+  cursor: pointer;
+  overflow: hidden;
+  text-align: left;
+  box-shadow: 2px 2px 0 rgba(23, 25, 24, .12);
+  transition: border-color .16s ease, box-shadow .16s ease, transform .08s ease;
+}
+.scenario-pick-index {
+  position: absolute; top: 0; left: 0; z-index: 2;
+  padding: 2px 6px 3px;
+  background: rgba(23, 25, 24, .72);
+  color: #fbf9f2;
+  font: 700 9px/1 var(--font-mono); letter-spacing: .08em;
+}
+.scenario-pick-img {
+  display: block;
+  aspect-ratio: 16 / 10;
+  background-size: cover;
+  background-position: var(--scenario-focus, center);
+  filter: saturate(.48) opacity(.76);
+  transition: filter .24s ease;
+}
+.scenario-pick-name {
+  display: block;
+  padding: 6px 8px 7px;
+  border-top: 1px solid var(--rule);
+  color: var(--muted);
+  font: 700 10px/1.15 var(--font-mono);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  transition: color .16s ease;
+}
+.scenario-pick:hover { border-color: var(--cobalt); transform: translateY(-1px); }
+.scenario-pick:hover .scenario-pick-img { filter: saturate(.9) opacity(1); }
+.scenario-pick:focus-visible { outline: none; box-shadow: var(--shadow-focus); }
+.scenario-pick.is-active {
+  border-color: var(--signal);
+  box-shadow: 3px 3px 0 rgba(169, 46, 10, .32);
+}
+.scenario-pick.is-active .scenario-pick-img { filter: none; }
+.scenario-pick.is-active .scenario-pick-name { color: var(--signal); }
+.scenario-pick.is-active .scenario-pick-index { background: var(--signal); }
+
+/* The hero image now stands on its own in the main column (carousel removed). */
+.scenario-hero { margin: 4px 0 22px; box-shadow: 3px 3px 0 rgba(23, 25, 24, .1); }
+
 .scenario-carousel { margin: 2px 0 22px; }
 .scenario-carousel .scenario-figure { position: relative; }
 .carousel-arrow {
