@@ -518,15 +518,14 @@ class IGStudioApp {
       ? `${this.t("controls.compare")} · ${this.state.runs} · ${this.fmt(this.state.iterationBudget)} ${this.t("controls.perSeed")}`
       : `${this.t("controls.oneRun")} · ${this.fmt(this.state.iterationBudget)} · seed ${this.state.seed}`;
     return `<aside class="control-rail ${compactRail ? "is-compact" : ""}" aria-label="${escapeHtml(this.t("a11y.controls"))}">
+      ${this.state.page === "overview" ? `<header class="mobile-rail-intro"><h1>${escapeHtml(mobileTitle)}</h1></header>` : ""}
+      <p class="scenario-description">${escapeHtml(scenario.description)}</p>
+      <p class="instance-facts">${escapeHtml(this.state.instanceId)} · ${metadata?.jobCount ?? "—"} ${escapeHtml(this.t("misc.jobs"))}${this.state.instance ? ` · ${this.state.instance.familyCount} ${escapeHtml(this.t("misc.families"))}` : ""}</p>
+      <div class="selected-instance-story"><strong>${escapeHtml(instanceLabel)}</strong><span>${escapeHtml(instanceNote)}</span></div>
       <nav class="rail-modes" aria-label="${escapeHtml(this.t("a11y.primary"))}">
         <button class="rail-mode" data-page="overview" aria-current="${this.state.page === "overview" ? "page" : "false"}">${escapeHtml(this.t("nav.overview"))}</button>
         <button class="rail-mode" data-page="schedule" aria-current="${this.state.page === "schedule" ? "page" : "false"}"${(this.state.singleResult || this.state.comparisonResult) ? "" : " disabled"}>${escapeHtml(this.t("nav.schedule"))}</button>
       </nav>
-      ${this.state.page === "overview" ? `<header class="mobile-rail-intro"><h1>${escapeHtml(mobileTitle)}</h1></header>` : ""}
-      <h2 class="scenario-name">${escapeHtml(scenario.name)}</h2>
-      <p class="scenario-description">${escapeHtml(scenario.description)}</p>
-      <p class="instance-facts">${escapeHtml(this.state.instanceId)} · ${metadata?.jobCount ?? "—"} ${escapeHtml(this.t("misc.jobs"))}${this.state.instance ? ` · ${this.state.instance.familyCount} ${escapeHtml(this.t("misc.families"))}` : ""}</p>
-      <div class="selected-instance-story"><strong>${escapeHtml(instanceLabel)}</strong><span>${escapeHtml(instanceNote)}</span></div>
       <details class="model-disclosure">
         <summary>${escapeHtml(this.t("actions.simplify"))}</summary>
         <div class="disclosure-copy"><p>${escapeHtml(scenario.disclosure)}</p><ul>${scenario.simplifications.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul></div>
@@ -611,7 +610,7 @@ class IGStudioApp {
         <section class="analysis-panel objective-panel"><h2 class="panel-title">${escapeHtml(this.t("overview.objective"))}</h2>${this.renderObjective(breakdown)}<p class="interpretation">${escapeHtml(interpretation)}</p><a class="text-link" href="${escapeHtml(this.options.notebookUrl)}" target="_blank" rel="noreferrer">${escapeHtml(this.t("actions.notebook"))} →</a></section>
       </div>`;
     }
-    return `<header class="page-head"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(subtitle)}</p></header>${body}`;
+    return `<header class="page-head with-scenario"><div class="page-head-main"><h1>${escapeHtml(title)}</h1><p>${escapeHtml(subtitle)}</p></div><span class="page-scenario-tag">${escapeHtml(this.scenario().name)}</span></header>${body}`;
   }
 
   renderComparisonOverview() {
@@ -678,7 +677,7 @@ class IGStudioApp {
       [this.t("overview.changeovers"), this.metadata()?.hasSequenceDependentSetups ? this.t("overview.changeoversYes") : this.t("overview.changeoversNo")],
     ];
     return `<section class="problem-brief">
-      <header><span class="eyebrow">${escapeHtml(scenario.name)}</span><h2>${escapeHtml(this.t("overview.problemTitle"))}</h2><p>${escapeHtml(this.t("overview.problemSub"))}</p></header>
+      <header><h2>${escapeHtml(this.t("overview.problemTitle"))}</h2><p>${escapeHtml(this.t("overview.problemSub"))}</p></header>
       <div class="scenario-carousel" role="group" aria-label="${escapeHtml(this.t("controls.scenario"))}">
         <figure class="scenario-figure${this._scenarioSwitched ? " is-switching" : ""}" style="--scenario-focus:${escapeHtml(scenario.visual.objectPosition)}">
           <img src="${escapeHtml(this.scenarioVisualUrl(scenario))}" alt="${escapeHtml(scenario.visualAlt)}" loading="lazy" decoding="async">
