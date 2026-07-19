@@ -805,9 +805,37 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <div class="movement-head">
     <p class="m-kick">Compare · does it work?</p>
     <h2 class="m-title">Does the guessing actually <em>pay off?</em></h2>
-    <p class="m-lede">Put Iterated Greedy in a race against five other strategies — same instance, same evaluation budget — and watch who reaches the lowest cost per plan checked.</p>
+    <p class="m-lede">First meet the methods that compete — what each one is really doing when it searches. Then put six of them to work on a scenario you choose, under a single shared evaluation budget, and watch who reaches the lowest cost.</p>
   </div>
 </section>
+<section class="section" id="m-arena">
+  <p class="kicker"><span class="fig">Meet the methods</span></p>
+  <h2 class="section-title">Eight ways to search — and what each one actually does.</h2>
+  <p class="lede">Before you run anything, meet the competitors. These are the methods from the
+  <b>2015 study</b>: six published C++ heuristics, a one-hour MILP reference and the Iterated Greedy
+  written in Excel VBA. Pick one to watch how it moves — the diagram is schematic, nothing is being
+  solved here — and to see what it scored across the 44 MaScLib instances. Six of them go to work on
+  a scenario of your choosing just below.</p>
+
+  <div class="arena-grid">
+    <nav class="algo-list" id="algoList" aria-label="Choose an algorithm"></nav>
+    <div class="algo-detail">
+      <header class="algo-head">
+        <h3 id="algoName"></h3>
+        <span class="chip" id="algoFamily"></span>
+        <span class="chip dim" id="algoStack"></span>
+      </header>
+      <canvas role="img" id="cvMini" height="150" aria-label="Schematic animation of the algorithm"></canvas>
+      <p class="algo-desc" id="algoDesc"></p>
+      <div class="algo-stats" id="algoStats"></div>
+      <p class="algo-note" id="algoNote"></p>
+    </div>
+  </div>
+
+  <p class="arena-cite">Tables 4.1–4.2 · Marinho, A. S. — UFSCar, 2015 · <code>benchmark.json</code> · Thevenin, Zufferey &amp; Widmer (2015)</p>
+</section>
+<div class="ar-tip" id="tip" role="tooltip"></div>
+
 <section class="section" id="demo-race">
   <p class="kicker"><span class="fig">Six strategies, one budget</span></p>
   <h2 class="section-title">Test a real scenario — and watch every method search it.</h2>
@@ -908,47 +936,6 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 study (PDF)</a>
   </nav>
 </section>
-
-<section class="section" id="m-arena">
-  <p class="kicker"><span class="fig">Meet the methods</span></p>
-  <h2 class="section-title">Eight ways to search — and how each one actually scored.</h2>
-  <p class="lede">The race above is six strategies running live in your browser. This is the recorded
-  <b>2015 benchmark</b>: six published C++ heuristics, a one-hour MILP reference and the Iterated Greedy
-  written in Excel VBA, across 44 MaScLib instances with five runs each. Pick a method to see how it
-  searches — the diagram is schematic, nothing is re-run here — and what it scored.</p>
-
-  <div class="arena-grid">
-    <nav class="algo-list" id="algoList" aria-label="Choose an algorithm"></nav>
-    <div class="algo-detail">
-      <header class="algo-head">
-        <h3 id="algoName"></h3>
-        <span class="chip" id="algoFamily"></span>
-        <span class="chip dim" id="algoStack"></span>
-      </header>
-      <canvas role="img" id="cvMini" height="150" aria-label="Schematic animation of the algorithm"></canvas>
-      <p class="algo-desc" id="algoDesc"></p>
-      <div class="algo-stats" id="algoStats"></div>
-      <p class="algo-note" id="algoNote"></p>
-    </div>
-  </div>
-
-  <div class="arena-score">
-    <h3 class="ar-h">Relative error against the recorded best known (%)</h3>
-    <div class="res-controls">
-      <span class="seg" role="group" aria-label="View mode">
-        <button id="btnOverview" aria-pressed="true">Overview</button>
-        <button id="btnPerInst" aria-pressed="false">By instance</button>
-      </span>
-      <span class="ar-field" id="instPicker" hidden>instance
-        <select id="selInst" aria-label="Choose an instance"></select>
-      </span>
-    </div>
-    <canvas id="cvRes" height="640" role="img" aria-label="2015 scoreboard: relative error per algorithm"></canvas>
-    <p class="res-note" id="resNote"></p>
-  </div>
-  <p class="arena-cite">Tables 4.1–4.2 · Marinho, A. S. — UFSCar, 2015 · <code>benchmark.json</code> · Thevenin, Zufferey &amp; Widmer (2015)</p>
-</section>
-<div class="ar-tip" id="tip" role="tooltip"></div>
 
 <section class="movement" id="m-run">
   <div class="movement-head">
@@ -2703,6 +2690,12 @@ function onWinResize(fn){
 
   /* --- 1. innerHTML overrides: elements with mid-sentence emphasis --- */
   var HTML_PT = {
+    "#m-arena .lede":
+      'Antes de rodar qualquer coisa, conhe\u00e7a os competidores. Estes s\u00e3o os m\u00e9todos do ' +
+      '<b>estudo de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia MILP de uma hora e o ' +
+      'Iterated Greedy escrito em Excel VBA. Escolha um para ver como ele se move \u2014 o diagrama \u00e9 ' +
+      'esquem\u00e1tico, nada est\u00e1 sendo resolvido aqui \u2014 e quanto ele pontuou nas 44 inst\u00e2ncias MaScLib. ' +
+      'Seis deles v\u00e3o trabalhar num cen\u00e1rio da sua escolha logo abaixo.',
     "#m-story h2": 'A ordem muda o tempo. <em>O tempo muda o custo.</em>',
     "#demo-order .lede":
       'Passe cinco jobs por uma máquina em uma ordem, depois em outra. A máquina precifica cada ' +
@@ -2725,7 +2718,7 @@ function onWinResize(fn){
       '<b>3.000 avaliações de plano completo</b>. Uma disputa justa precisa de uma moeda comum: não o ' +
       'tempo de relógio, mas as avaliações do objetivo. As linhas correm da esquerda para a direita ' +
       'conforme o orçamento é consumido.',
-    "#m-arena .lede":
+    "#m-arena .lede-DISABLED":
       'A corrida acima s\u00e3o seis estrat\u00e9gias rodando ao vivo no seu navegador. Este \u00e9 o ' +
       '<b>benchmark registrado de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia MILP de ' +
       'uma hora e o Iterated Greedy escrito em Excel VBA, sobre 44 inst\u00e2ncias MaScLib com cinco ' +
@@ -2960,6 +2953,8 @@ function onWinResize(fn){
     "Engineering ledger": "Registro de engenharia",
     "Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.": "Benchmarks, verificações exatas, comandos reproduzíveis, resultados mistos e o limite atual de cada implementação.",
     "Read results": "Ler resultados",
+    "Eight ways to search — and what each one actually does.": "Oito formas de buscar — e o que cada uma realmente faz.",
+    "First meet the methods that compete — what each one is really doing when it searches. Then put six of them to work on a scenario you choose, under a single shared evaluation budget, and watch who reaches the lowest cost.": "Primeiro conheça os métodos que competem — o que cada um realmente faz ao buscar. Depois coloque seis deles para trabalhar num cenário à sua escolha, sob um único orçamento de avaliações, e veja quem chega ao menor custo.",
     "Test a real scenario — and watch every method search it.": "Teste um cenário real — e veja cada método buscar nele.",
     "Comparison controls": "Controles da comparação",
     "Terrain": "Terreno",
@@ -3456,6 +3451,7 @@ function onWinResize(fn){
   }
 
   function drawRes() {
+    if (!res.c) return;            /* scoreboard removed from the page */
     const ctx = res.c.getContext('2d');
     const W = res.w, H = res.h;
     ctx.clearRect(0, 0, W, H);
@@ -3527,6 +3523,7 @@ function onWinResize(fn){
   }
 
   function renderNote() {
+    if (!$('resNote')) return;
     if (res.mode === 'overview') {
       $('resNote').innerHTML = window.__lang === 'pt'
         ? 'Barras em escala √ (para o MILP caber no quadro); os números são os erros exatos — média de 5 execuções por instância. No <strong>conjunto NCOS (sem setups)</strong> o IG teve a melhor média de toda a arena (0,02%). No <strong>conjunto STC (com setups)</strong> fica em 3,3%, atrás do TabuDiv e dos meméticos (~1%) — quase todo por conta de STC_NCOS_51/51a (200 tarefas). <span class="beat">Em NCOS_31 e STC_NCOS_32 o IG achou soluções melhores que o ótimo então conhecido.</span> MILP: média das 36 instâncias em que retornou algo.'
@@ -3544,19 +3541,20 @@ function onWinResize(fn){
 
   /* ---------- controles ---------- */
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { drawRes(); renderNote(); });
-  $('btnOverview').addEventListener('click', () => setMode('overview'));
-  $('btnPerInst').addEventListener('click', () => setMode('inst'));
+  if ($('btnOverview')) $('btnOverview').addEventListener('click', () => setMode('overview'));
+  if ($('btnPerInst')) $('btnPerInst').addEventListener('click', () => setMode('inst'));
   function setMode(m) {
+    if (!res.c) return;
     res.mode = m;
     res.h = m === 'overview' ? 640 : 340;
-    $('btnOverview').setAttribute('aria-pressed', m === 'overview');
-    $('btnPerInst').setAttribute('aria-pressed', m === 'inst');
+    if ($('btnOverview')) $('btnOverview').setAttribute('aria-pressed', m === 'overview');
+    if ($('btnPerInst')) $('btnPerInst').setAttribute('aria-pressed', m === 'inst');
     $('instPicker').hidden = m !== 'inst';
-    sizeCv(res.c, res.c.parentElement, res.h, res);
+    if (res.c) sizeCv(res.c, res.c.parentElement, res.h, res);
     drawRes(); renderNote();
   }
   const selInst = $('selInst');
-  ['NCOS', 'STC'].forEach(g => {
+  if (selInst) ['NCOS', 'STC'].forEach(g => {
     const og = document.createElement('optgroup');
     og.dataset.setupGroup = g;
     og.label = __t(g === 'NCOS' ? 'No setups (NCOS)' : 'With setups (STC)');
@@ -3566,19 +3564,20 @@ function onWinResize(fn){
     });
     selInst.appendChild(og);
   });
-  selInst.value = res.inst;
+  if (selInst) selInst.value = res.inst;
   function localizeArenaInstances() {
+    if (!selInst) return;
     selInst.querySelectorAll('optgroup').forEach(og => {
       og.label = __t(og.dataset.setupGroup === 'NCOS' ? 'No setups (NCOS)' : 'With setups (STC)');
       og.querySelectorAll('option').forEach(o => { o.textContent = `${o.value} · ${o.dataset.jobs} ${__t('jobs')}`; });
     });
   }
   addEventListener('langchange', localizeArenaInstances);
-  selInst.addEventListener('change', () => { res.inst = selInst.value; drawRes(); renderNote(); });
+  if (selInst) selInst.addEventListener('change', () => { res.inst = selInst.value; drawRes(); renderNote(); });
 
   // tooltips on chart rows
   const tip = $('tip');
-  res.c.addEventListener('mousemove', e => {
+  res.c && res.c.addEventListener('mousemove', e => {
     const r = res.c.getBoundingClientRect();
     const my = e.clientY - r.top;
     const hit = res.rows.find(h => my >= h.y && my <= h.y + h.h);
@@ -3587,8 +3586,8 @@ function onWinResize(fn){
     tip.style.left = Math.min(e.clientX + 14, innerWidth - tip.offsetWidth - 10) + 'px';
     tip.style.top = (e.clientY + 16) + 'px';
   });
-  res.c.addEventListener('mouseleave', () => { tip.style.display = 'none'; res.c.style.cursor = 'default'; });
-  res.c.addEventListener('click', e => {
+  res.c && res.c.addEventListener('mouseleave', () => { tip.style.display = 'none'; res.c.style.cursor = 'default'; });
+  res.c && res.c.addEventListener('click', e => {
     const r = res.c.getBoundingClientRect();
     const my = e.clientY - r.top;
     const hit = res.rows.find(h => my >= h.y && my <= h.y + h.h);
@@ -3606,7 +3605,7 @@ function onWinResize(fn){
   }
   function resizeArena() {
     sizeCv(mini.c, mini.c.parentElement, mini.h, mini);
-    sizeCv(res.c, res.c.parentElement, res.h, res);
+    if (res.c) sizeCv(res.c, res.c.parentElement, res.h, res);
     drawRes();
   }
   addEventListener('resize', resizeArena);
