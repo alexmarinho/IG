@@ -5,7 +5,8 @@ import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { runChecks, SCENE_ASSET_FILES, staticSpecifiers } from "./check.mjs";
+import { runChecks, SCENE_ASSET_FILES, STYLE_PARTS, staticSpecifiers, stylesRoot } from "./check.mjs";
+import { SCENE_ASSET_DATA } from "../src/generated/scene-assets/index.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const studioRoot = path.resolve(here, "..");
@@ -56,9 +57,18 @@ async function embedModuleGraph(entry) {
   return { entryUrl: await embed(entry), modules: cache.size };
 }
 
+/**
+ * Inline the scenario artwork. The committed generated modules carry the
+ * canonical data URIs; the local .webp files are only a fallback for keys
+ * missing from the generated pack (e.g. artwork being re-authored).
+ */
 async function embedSceneAssets() {
   const entries = await Promise.all(Object.entries(SCENE_ASSET_FILES)
     .map(async ([assetKey, filename]) => {
+      const generated = SCENE_ASSET_DATA[assetKey];
+      if (typeof generated === "string" && generated.startsWith("data:image/")) {
+        return [assetKey, generated];
+      }
       const bytes = await readFile(path.join(sceneAssetRoot, filename));
       return [assetKey, `data:image/webp;base64,${bytes.toString("base64")}`];
     }));
@@ -67,12 +77,15 @@ async function embedSceneAssets() {
 
 async function build() {
   const checks = await runChecks({ quiet: true });
-  const [sourceHtml, css, bundle, sceneAssets] = await Promise.all([
+  const [sourceHtml, cssParts, bundle, sceneAssets] = await Promise.all([
     readFile(path.join(studioRoot, "index.html"), "utf8"),
-    readFile(path.join(sourceRoot, "styles.css"), "utf8"),
+    // Concatenate the stylesheet parts in the fixed cascade order — the dist
+    // inline must behave exactly like the dev <link> sequence in index.html.
+    Promise.all(STYLE_PARTS.map((part) => readFile(path.join(stylesRoot, part), "utf8"))),
     embedModuleGraph(entryPath),
     embedSceneAssets(),
   ]);
+  const css = cssParts.join("\n");
 
   const links = {
     pythonUrl: "https://github.com/alexmarinho/IG/tree/master/python",
@@ -96,10 +109,17 @@ async function build() {
     `import ${JSON.stringify(bundle.entryUrl)};\n`+
     `</script>`;
 
+  // The first stylesheet link becomes the inline <style>; the rest go away.
+  let inlinedStyles = false;
   let html = sourceHtml.replace(
-    /<link\s+rel=["']stylesheet["']\s+href=["']\.\/src\/styles\.css["']\s*\/?>/,
-    inlineStyle,
+    /<link\s+rel=["']stylesheet["']\s+href=["']\.\/src\/styles\/[a-z-]+\.css["']\s*\/?>/g,
+    () => {
+      if (inlinedStyles) return "";
+      inlinedStyles = true;
+      return inlineStyle;
+    },
   );
+  invariant(inlinedStyles, "Build found no Studio stylesheet part link to inline");
   html = html.replace(
     /<script\s+type=["']module["']\s+src=["']\.\/src\/app\.js["']\s*><\/script>/,
     `${inlineConfig}\n  ${inlineEntry}`,
