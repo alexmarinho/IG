@@ -6,15 +6,10 @@
  */
 
 /** Fixed level order used by the grid, the quick-switch arrows and the dropdown. */
-export const SCENARIO_ORDER = Object.freeze([
-  "factory", "ai", "kitchen", "surgery", "print3d", "coffee", "bakery",
-  "dental", "laser", "laundry", "studio", "lab", "brewery",
-]);
+export const SCENARIO_ORDER = Object.freeze(["factory", "print3d", "coffee", "brewery"]);
 
-/** Scenarios introduced with the level-select release; they carry the "new" ribbon. */
-export const NEW_SCENARIO_IDS = Object.freeze([
-  "print3d", "coffee", "bakery", "dental", "laser", "laundry", "studio", "lab", "brewery",
-]);
+/** Scenarios introduced with the small-business release; they carry the "new" ribbon. */
+export const NEW_SCENARIO_IDS = Object.freeze(["print3d", "coffee", "brewery"]);
 
 /** Tier glyph and rough solver time shown on each instance (tier) button. */
 export const TIER_META = Object.freeze({
@@ -94,6 +89,83 @@ export function miniBarsSvg(bins, { label = "" } = {}) {
   }).join("");
   const a11y = label ? ` role="img" aria-label="${label}"` : ' aria-hidden="true"';
   return `<svg class="mini-bars" viewBox="0 0 ${width} ${height}"${a11y} focusable="false">${rects}</svg>`;
+}
+
+/** Columns of the job explorer, keyed by the scenario vocabulary. */
+export const EXPLORER_COLUMNS = Object.freeze([
+  "job", "family", "processingTime", "releaseTime", "dueDate",
+  "hardDeadline", "tardinessWeight", "executionCost", "rejectionCost",
+]);
+
+const EXPLORER_SORT_VALUE = {
+  job: (job) => job.id,
+  family: (job) => job.family,
+  processingTime: (job) => job.processingTime,
+  releaseTime: (job) => job.releaseTime,
+  dueDate: (job) => job.due,
+  hardDeadline: (job) => job.hardDeadline,
+  tardinessWeight: (job) => job.weight,
+  executionCost: (job) => job.processingCost,
+  rejectionCost: (job) => job.rejectionCost,
+};
+
+/**
+ * Sort jobs for the explorer table. Numeric, Infinity-safe (missing hard
+ * deadlines always sink to the bottom), with the job id as a stable tiebreak.
+ * Unknown keys fall back to the id order; anything but "desc" is ascending.
+ */
+export function sortJobs(jobs, key = "job", direction = "asc") {
+  const valueOf = EXPLORER_SORT_VALUE[key] || EXPLORER_SORT_VALUE.job;
+  const sign = direction === "desc" ? -1 : 1;
+  return [...(jobs || [])].sort((left, right) => {
+    const a = Number(valueOf(left));
+    const b = Number(valueOf(right));
+    const finiteA = Number.isFinite(a);
+    const finiteB = Number.isFinite(b);
+    if (finiteA && finiteB && a !== b) return sign * (a - b);
+    if (finiteA !== finiteB) return finiteA ? -1 : 1;
+    return left.id - right.id;
+  });
+}
+
+/**
+ * Human-facing order code for a job. Domain scenarios map the job id through
+ * their `orderId { prefix, offset }` spec (ORD-1044); the factory benchmark
+ * keeps the classic `J07` label.
+ */
+export function orderCode(orderIdSpec, id) {
+  if (orderIdSpec && typeof orderIdSpec.prefix === "string" && Number.isFinite(orderIdSpec.offset)) {
+    return `${orderIdSpec.prefix}${orderIdSpec.offset + Number(id)}`;
+  }
+  return `J${String(Number(id) + 1).padStart(2, "0")}`;
+}
+
+/**
+ * "day 2, 09:00" style timestamp: 1-based day inside the scenario calendar
+ * plus the intra-day clock. The day word is injected for localization.
+ */
+export function formatDayTime(minutes, { dayLength = 1440, dayWord = "day" } = {}) {
+  const total = Number(minutes);
+  if (!Number.isFinite(total)) return "—";
+  const value = Math.max(0, Math.round(total));
+  const day = Math.floor(value / dayLength) + 1;
+  const rest = value % dayLength;
+  const hours = String(Math.floor(rest / 60)).padStart(2, "0");
+  const mins = String(rest % 60).padStart(2, "0");
+  return { day, clock: `${hours}:${mins}`, text: `${dayWord} ${day}, ${hours}:${mins}` };
+}
+
+/**
+ * Compact processing-time label: under one hour stays in minutes, anything
+ * longer becomes hours with at most one decimal ("18 min", "2,5 h").
+ */
+export function humanizeMinutes(minutes, { formatNumber = (value) => String(value) } = {}) {
+  const total = Number(minutes);
+  if (!Number.isFinite(total)) return "—";
+  const value = Math.max(0, Math.round(total));
+  if (value < 60) return `${formatNumber(value)} min`;
+  const hours = Math.round((value / 60) * 10) / 10;
+  return `${formatNumber(hours)} h`;
 }
 
 /**
