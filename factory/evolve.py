@@ -24,6 +24,7 @@ from __future__ import annotations
 import argparse
 import os
 import random
+import time
 import sys
 from pathlib import Path
 
@@ -75,6 +76,15 @@ def local_repr(g):
 
 # ------------------------------------------------------------------ llm backend
 
+LLM_SEEDS_LINEAR = ["f['late'] * f['weight']", "f['reject_credits'] - f['slack']", "f['setup_credits']"]
+# Structural seeds exist to break the few-shot anchor: the elites shown back to the
+# model are what it imitates, so a linear-only population begets linear children.
+LLM_SEEDS_STRUCTURAL = [
+    "if f['late'] > 0:\n    return f['late'] * f['weight'] + f['proc']\nreturn -f['slack']",
+    "return f['reject_credits'] / (1.0 + abs(f['slack']))",
+    "base = f['setup_credits'] + f['proc']\nif f['slack'] < 0:\n    return base * 2.0\nreturn base / (1.0 + f['slack'])",
+]
+
 LLM_PROMPT = """You are evolving the destroy operator of an Iterated Greedy metaheuristic for
 single-machine scheduling with rejection and tardiness. Each iteration removes d
 scheduled jobs so the greedy repair can rebuild a cheaper schedule. Write the body
@@ -98,6 +108,35 @@ better; random destruction scores {baseline:.3f}%%):
 
 Write one new, different heuristic likely to score lower:"""
 
+# Same task, but written to elicit the program structure the AHD literature credits
+# for its gains (conditionals, regimes, ratios) instead of one more weighted sum.
+LLM_PROMPT_STRUCTURAL = """You are evolving the destroy operator of an Iterated Greedy metaheuristic for
+single-machine scheduling with rejection and tardiness. Each iteration removes d
+scheduled jobs so the greedy repair can rebuild a cheaper schedule. Write the body
+of a Python function that scores one scheduled job — higher score = more likely to
+be removed.
+
+The argument `f` is a dict with these keys (all floats):
+  late            : seconds this job finishes past its due date (0 if on time)
+  slack           : due - finish (negative when late; large positive = very early)
+  proc            : processing time
+  setup_credits   : setup cost paid to run this job after the previous one
+  reject_credits  : what would be paid to reject this job instead
+  position        : index in the schedule, 0..1
+  weight          : tardiness penalty per second late
+
+Write a real PROGRAM, not a weighted sum. Use several statements, local variables,
+if/elif/else, ratios, and interactions between features. Regime switches (treat a
+late job differently from an early one) and normalisation (divide by something that
+varies) usually beat any linear formula. Available builtins: min, max, abs.
+End with `return <score>`. No imports, no explanation, no markdown fence.
+
+Current best heuristics and their mean gap %% (lower is better; random destruction
+scores {baseline:.3f}%%):
+{elites}
+
+Write one new heuristic, structurally DIFFERENT from those above, likely to score lower:"""
+
 
 def llm_call(prompt: str) -> str:
     import json
@@ -112,8 +151,20 @@ def llm_call(prompt: str) -> str:
         data=json.dumps({"model": model, "temperature": 1.0,
                          "messages": [{"role": "user", "content": prompt}]}).encode(),
         headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=60) as r:
-        return json.loads(r.read())["choices"][0]["message"]["content"]
+    # Reasoning-grade models answer well past 60s, and one transient timeout used to
+    # abort a whole campaign. Retry a few times, then give up on this child only.
+    timeout = float(os.environ.get("OPENAI_TIMEOUT", "300"))
+    last = None
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read())["choices"][0]["message"]["content"]
+        except Exception as exc:  # noqa: BLE001 - transport/parse, all retryable here
+            last = exc
+            if attempt < 2:
+                time.sleep(2 ** attempt)
+    print(f"  [llm_call gave up after 3 attempts: {type(last).__name__}]", flush=True)
+    return ""
 
 
 def llm_compile(text: str):
@@ -124,12 +175,28 @@ def llm_compile(text: str):
     body = body.strip()
     if "return" not in body:
         body = "return " + body.splitlines()[-1]
-    src = "def _h(f):\n" + "\n".join("    " + ln for ln in body.splitlines())
+    # A reply may be a bare body ("return ...") or a whole function ("def score(f): ...").
+    # Wrapping a whole function inside `def _h(f):` yields an outer function that
+    # returns None, which the sampler then reads as a constant score for every job —
+    # i.e. plain random destruction wearing a costume. Handle both forms explicitly.
     ns: dict = {}
+    env = {"__builtins__": {"min": min, "max": max, "abs": abs}}
     try:
-        exec(src, {"__builtins__": {"min": min, "max": max, "abs": abs}}, ns)
-        fn = ns["_h"]
-        fn({k: 1.0 for k in FEATURES})  # smoke test
+        if body.lstrip().startswith("def "):
+            exec(body, env, ns)
+            fns = [v for v in ns.values() if callable(v)]
+            if len(fns) != 1:
+                return None, None
+            fn = fns[0]
+        else:
+            src = "def _h(f):\n" + "\n".join("    " + ln for ln in body.splitlines())
+            exec(src, env, ns)
+            fn = ns["_h"]
+        probe = fn({k: 1.0 for k in FEATURES})  # smoke test: must yield a real number
+        if isinstance(probe, bool) or not isinstance(probe, (int, float)):
+            return None, None
+        if probe != probe or probe in (float("inf"), float("-inf")):
+            return None, None
         return fn, body
     except Exception:
         return None, None
@@ -138,12 +205,13 @@ def llm_compile(text: str):
 # ------------------------------------------------------------------ evolution loop
 
 
-def evolve(backend: str, gens: int, pop: int, iters: int, seed: int, eval_seeds: int = 3):
+def evolve(backend: str, gens: int, pop: int, iters: int, seed: int, eval_seeds: int = 3,
+           style: str = "linear"):
     rng = random.Random(seed)
     ES = tuple(range(1, eval_seeds + 1))
     score = lambda fn: score_candidate(fn, iters=iters, seeds=ES)
     base = baseline_gap(iters=iters, seeds=ES)
-    print(f"baseline (random destroy): {base:.3f}%  ·  backend={backend}  eval_seeds={eval_seeds}  train={TRAIN}")
+    print(f"baseline (random destroy): {base:.3f}%  ·  backend={backend}  style={style}  eval_seeds={eval_seeds}  train={TRAIN}")
 
     # (score, genome, repr, score_fn)
     population = []
@@ -152,7 +220,7 @@ def evolve(backend: str, gens: int, pop: int, iters: int, seed: int, eval_seeds:
             g = local_seed(rng)
             population.append([score(local_score_fn(g)), g, local_repr(g), local_score_fn(g)])
     else:
-        seeds = ["f['late'] * f['weight']", "f['reject_credits'] - f['slack']", "f['setup_credits']"]
+        seeds = LLM_SEEDS_STRUCTURAL if style == "structural" else LLM_SEEDS_LINEAR
         for txt in seeds[:pop]:
             fn, body = llm_compile(txt)
             if fn:
@@ -163,7 +231,12 @@ def evolve(backend: str, gens: int, pop: int, iters: int, seed: int, eval_seeds:
     for gen in range(1, gens + 1):
         elites = population[: max(2, pop // 3)]
         children = []
+        attempts = 0
         while len(children) < pop:
+            attempts += 1
+            if attempts > 6 * pop:  # every reply failed to compile; do not spin forever
+                print(f"  [gen {gen}: only {len(children)}/{pop} children compiled; continuing]", flush=True)
+                break
             if backend == "local":
                 # 20% fresh random immigrants keep the population from collapsing
                 if rng.random() < 0.2:
@@ -175,7 +248,8 @@ def evolve(backend: str, gens: int, pop: int, iters: int, seed: int, eval_seeds:
                 children.append([score(fn), g, local_repr(g), fn])
             else:
                 elite_txt = "\n".join(f"  {e[0]:.3f}%: {e[2][:80]}" for e in elites)
-                prompt = LLM_PROMPT.format(baseline=base, elites=elite_txt)
+                tmpl = LLM_PROMPT_STRUCTURAL if style == "structural" else LLM_PROMPT
+                prompt = tmpl.format(baseline=base, elites=elite_txt)
                 fn, body = llm_compile(llm_call(prompt))
                 if fn:
                     children.append([score(fn), body, body, fn])
@@ -204,8 +278,12 @@ def main():
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--eval-seeds", type=int, default=3,
                     help="IG seeds averaged per candidate score (1 = the old exploitable mode)")
+    ap.add_argument("--style", choices=["linear", "structural"], default="linear",
+                    help="llm backend only: 'structural' asks for a program (conditionals, "
+                         "ratios, regimes) and seeds the population with one, instead of "
+                         "asking for a short weighted-sum expression")
     a = ap.parse_args()
-    evolve(a.backend, a.gens, a.pop, a.iters, a.seed, a.eval_seeds)
+    evolve(a.backend, a.gens, a.pop, a.iters, a.seed, a.eval_seeds, a.style)
 
 
 if __name__ == "__main__":

@@ -129,6 +129,51 @@ The operator **overfit its training seed**: the dramatic single-seed training dr
 
 **Multi-seed scoring (the first fix) — implemented, and the null got stronger.** `score_candidate(..., seeds=...)` now averages each candidate over several IG seeds, removing the single-trajectory exploit. Re-running the same campaign with 3-seed scoring (`--eval-seeds 3`) still produces a winner that looks good on its evolution seeds (3.32% → 1.78%) but **fails fresh held-out seeds (11–15): train −0.18 pp, test −0.98 pp vs. random**. The honest conclusion sharpens: at this scale, with a linear feature basis, evolved destroy operators do not beat uniform random destruction — which matches the classic Iterated Greedy literature, where random destruction is a famously strong default. The open avenues are richer operator programs via the `llm` backend and a larger, more diverse train split; the factory is the harness for both, and the null result is the baseline any future campaign must clear.
 
+**The real-LLM campaign — three models, and the null holds.** The avenue above was then
+run. A `--style structural` prompt was added that asks for a *program* (local variables,
+`if`/`elif` regimes, ratios, normalisation) instead of the short weighted-sum expression
+the original prompt requested, and seeds the population with programs so the few-shot
+elites stop anchoring every child to a linear form. Fifteen campaigns were scored:
+three models — `deepseek-v4-flash`, `deepseek-v4-pro` and a locally served
+`Qwen3.6-35B` — five evolution seeds each, identical budget (`--gens 2 --pop 4
+--eval-seeds 3`), winners re-scored on held-out seeds 11–15. The success criterion was
+registered before the runs: *median test Δpp > 0*.
+
+| model | median test Δpp | mean | range | beat random |
+|---|---|---|---|---|
+| `deepseek-v4-pro` | **−1.673** | −1.493 | −2.639 … −0.393 | 0/5 |
+| `deepseek-v4-flash` | −1.536 | −1.361 | −2.314 … −0.421 | 0/5 |
+| `Qwen3.6-35B` (local) | −0.916 | −0.806 | −1.547 … **+0.184** | 1/5 |
+| **all** | **−1.255** | −1.220 | | **1/15** |
+
+**Verdict: null.** Free-form programs do not beat uniform random destruction here, and
+model capability does not rescue them — the ranking is *inverse* to capability and price
+(the strongest model scored worst, the free local one best), with within-model spread
+several times the between-model difference. That is noise, not a model effect: paying for
+the larger model bought nothing measurable.
+
+**What the campaign does establish is sharper than the earlier null.** Train and test are
+scored on the *same* fresh seeds; only the instance set differs. Across the fifteen
+winners the median gain on the training instances is **+0.645 pp (10/15 beat random)**
+while on held-out instances it is **−1.255 pp (1/15)**. The evolved operators therefore
+survive unseen *seeds* and fail on unseen *instances*: this is instance-level overfitting,
+not the lucky-trajectory exploit that multi-seed scoring already removed. Knowing which
+generalisation breaks is what a larger campaign has to attack — a wider, more diverse
+train split, not a better model or a longer budget.
+
+**Three harness defects surfaced and were fixed, all of which would have corrupted a paid
+campaign.** (1) `llm_compile` accepted a reply that compiled but returned `None` — which a
+whole-function reply (`def score(f): …`) produces once wrapped — and the sampler's
+`except` turned every job score into `0.0`, i.e. *exactly uniform random destruction*
+reported as a winning heuristic; five runs returning byte-identical results was the tell.
+(2) The 60-second request timeout made `deepseek-v4-pro` unrunnable: every one of its
+runs died mid-campaign, so the strongest model could not be evaluated at all. (3) A single
+transient timeout aborted the entire campaign, with no retry — over the ~2,000 calls a
+serious campaign needs, that is close to certain. The smoke test now requires a finite
+number, whole-function replies are unwrapped instead of nested, the timeout is
+configurable (`OPENAI_TIMEOUT`, default 300 s) with three attempts, and a generation that
+cannot compile enough children gives up instead of spinning forever.
+
 ## GPU fleet (RTX 3090)
 
 First hardware results of [`gpu/fleet_torch.py`](gpu/README.md) — thousands of lockstep IG replicas in PyTorch on an RTX 3090 (torch 2.13, CUDA 13):
