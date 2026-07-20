@@ -30,12 +30,14 @@
 :root{
   --paper:#f6f1e8; --card:#fbf8f1; --ink:#2a2620; --ink-soft:#6a6255;
   --terra:#b0562f; --maple:#ad7644; --steel:#7d94b0; --brass:#c9a148;
+  --terra-ink:#9c4b28; --brass-ink:#7a5f14; /* AA-contrast text variants of the brand hues */
   --sage:#7a8b6f; --rule:#e2d9c8; --red:#a8432e;
   --f1:#b0562f; --f2:#7d94b0; --f3:#7a8b6f; --f4:#c9a148;
   --f1-bg:#f1ddd3; --f2-bg:#dfe5ed; --f3-bg:#e3e7db; --f4-bg:#f2e8cf;
   --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
   --sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  --sm:118px; /* sticky-header scroll offset — recomputed by JS (header height + 10) */
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
@@ -46,7 +48,18 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 ::selection{background:#ead9c2}
-:focus-visible{outline:2px solid var(--steel);outline-offset:2px;border-radius:2px}
+:focus-visible{outline:2px solid var(--terra-ink);outline-offset:2px;border-radius:2px}
+/* H5 — visually-hidden skip link, revealed on focus */
+.skip-link{position:absolute;left:-9999px;top:0;z-index:200;background:var(--terra-ink);color:#fdf8ef;
+  font:700 12px/1 var(--sans);padding:10px 14px;border-radius:0 0 8px 0;text-decoration:none}
+.skip-link:focus{left:0}
+/* H4 — comfortable touch targets on coarse pointers */
+@media (pointer:coarse){
+  .btn,.seg button,.algo-btn{min-height:44px}
+  .lang-toggle button{padding:8px 14px}
+}
+/* H2 — keep the Fig 01 gantt legible on narrow screens (scrolls inside its wrap) */
+@media (max-width:640px){svg.gantt{min-width:480px}}
 
 /* ---------- header / nav ---------- */
 .site-head{
@@ -94,8 +107,17 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .standings .sw{width:10px;height:10px;border-radius:3px;flex:none}
 .standings .nm{font-weight:600;flex:1;min-width:0}
 .standings .val{font:700 11.5px var(--mono);color:var(--terra)}
+/* racelab standing rows: name · status kept legible, cost/evals separated */
+.standings .st-rank{font:800 11px/1 var(--mono);color:var(--ink-soft);width:20px;text-align:center;flex:none}
+.standings .st-dot{width:10px;height:10px;border-radius:3px;flex:none}
+.standings .st-name{font-weight:600;flex:1;min-width:0;line-height:1.25}
+.standings .st-name .st-sep{opacity:.5;font-weight:400}
+.standings .st-name small{opacity:.65;font-weight:500}
+.standings .st-cost{margin-left:auto;text-align:right;flex:none;font:700 11.5px/1.15 var(--mono);color:var(--terra)}
+.standings .st-cost small{display:block;font:500 10px/1.2 var(--mono);color:var(--ink-soft);opacity:.8}
+.standings li.leader{background:#fbf3e6;box-shadow:inset 0 0 0 1px var(--brass)}
 .lab-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin-top:9px}
-.lab-stage{display:flex;flex-direction:column;gap:14px;min-width:0}
+.lab-stage{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:96px;border:1px dashed var(--rule);border-radius:8px;background:#f7f2e7;padding:8px}
 .lab-inst{font:500 11px var(--mono);color:var(--ink-soft)}
 .btn.tiny{padding:4px 9px;font-size:11px}
 /* ---- Arena: per-method explainer + recorded 2015 benchmark ---- */
@@ -176,11 +198,11 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .f-fields dd{color:var(--ink-soft);line-height:1.5}
 .f-eco{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .f-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:14px 15px;display:flex;flex-direction:column}
-.f-num{font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--brass)}
+.f-num{font:700 10px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--brass-ink)}
 .f-card h4{font:600 16px/1.25 var(--serif);margin:8px 0 6px}
 .f-card p{font-size:13px;color:var(--ink-soft);line-height:1.5;flex:1}
 .f-acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-.f-acts a{font:700 11px/1 var(--sans);color:var(--terra);text-decoration:none;border:1px solid #cfc4ac;border-radius:6px;padding:7px 10px;background:var(--paper)}
+.f-acts a{font:700 11px/1 var(--sans);color:var(--terra-ink);text-decoration:none;border:1px solid #cfc4ac;border-radius:6px;padding:7px 10px;background:var(--paper)}
 .f-acts a:hover{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
 @media(max-width:640px){.f-fields{grid-template-columns:1fr;padding-left:8px}.f-item>summary{grid-template-columns:36px 1fr}.f-next{grid-column:2}}
 .subtitle{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
@@ -196,39 +218,25 @@ nav.anchor-nav a{
 }
 nav.anchor-nav a:hover{color:var(--terra)}
 nav.anchor-nav a.active{color:var(--terra);border-bottom-color:var(--terra)}
+/* 2px terracotta reading-progress hairline pinned under the sticky header */
+.read-progress{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--terra);z-index:51;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){.read-progress{transition:width .12s linear}}
+@media (max-width:560px){.site-head .subtitle{display:none}}
 
 /* ---------- page layout ---------- */
 main{max-width:1120px;margin:0 auto;padding:0 20px 40px}
-section.section{padding:44px 0 8px;scroll-margin-top:118px}
+section.section{padding:44px 0 8px;scroll-margin-top:var(--sm,118px)}
 .kicker{
   font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
-  color:var(--terra);margin-bottom:8px;
+  color:var(--terra-ink);margin-bottom:8px;
 }
 .kicker .fig{color:var(--ink-soft);font-weight:500;letter-spacing:.1em}
 h2.section-title{font:600 27px/1.2 var(--serif);margin-bottom:10px}
-h2.section-title .no{color:var(--brass);font-weight:400;margin-right:8px}
+h2.section-title .no{color:var(--brass-ink);font-weight:400;margin-right:8px}
 p.lede{max-width:72ch;color:var(--ink-soft);margin-bottom:18px}
 p.lede b, p.lede strong{color:var(--ink)}
 .rule{height:1px;background:var(--rule);margin:26px 0 0}
 
-/* ---------- concept cards ---------- */
-.cards-grid{
-  display:grid;gap:14px;
-  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
-}
-.card{
-  background:var(--card);border:1px solid var(--rule);border-radius:10px;
-  padding:16px 16px 14px;position:relative;
-}
-.card .num{
-  font:600 22px/1 var(--serif);color:var(--brass);position:absolute;top:12px;right:14px;
-}
-.card h3{font:600 16.5px/1.3 var(--serif);margin-bottom:6px;padding-right:34px}
-.card p{font-size:13px;color:var(--ink-soft);margin-bottom:8px}
-.card .now,.card .fit{font-size:12px;line-height:1.5;border-top:1px dashed var(--rule);padding-top:7px;margin-top:7px}
-.card .now b{color:var(--steel)}
-.card .fit b{color:var(--terra)}
-.card .now b,.card .fit b{font-weight:700;display:inline-block;min-width:0}
 
 /* ---------- demo figure blocks ---------- */
 figure.demo{
@@ -252,6 +260,14 @@ button.btn:hover{border-color:var(--terra);color:var(--terra)}
 button.btn:disabled{opacity:.45;cursor:not-allowed}
 button.btn.primary{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
 button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
+/* D3 — gentle pulse on Play until the first run (motion gated off for reduced-motion) */
+@media (prefers-reduced-motion:no-preference){
+  button.btn.pulse{animation:playPulse 1.6s ease-in-out infinite}
+}
+@keyframes playPulse{
+  0%,100%{box-shadow:0 0 0 0 rgba(176,86,47,.45)}
+  50%{box-shadow:0 0 0 9px rgba(176,86,47,0)}
+}
 .seg{display:inline-flex;border:1px solid #cfc4ac;border-radius:7px;overflow:hidden}
 .seg button{
   font:600 12px/1 var(--sans);color:var(--ink-soft);background:transparent;
@@ -264,7 +280,7 @@ button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
 .status-line{
   font-size:12px;color:var(--ink-soft);min-height:18px;margin-top:8px;font-style:italic;
 }
-.status-line b{color:var(--terra);font-style:normal}
+.status-line b{color:var(--terra-ink);font-style:normal}
 
 /* ---------- job chips ---------- */
 .chip{
@@ -296,12 +312,31 @@ button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
   display:flex;flex-wrap:wrap;gap:6px;align-items:center;
   background:#f2ebdd;border:1px dashed #d8cdb6;border-radius:8px;padding:8px;min-height:44px;
 }
-.gantt-wrap{margin-top:10px;overflow-x:auto}
+.gantt-wrap{margin-top:10px;overflow-x:auto;position:relative}
+/* H5 — right-edge fade hints horizontal scroll on small screens (removed on first scroll) */
+@media (max-width:640px){
+  .gantt-wrap.can-fade::after{
+    content:'';position:absolute;top:0;bottom:0;right:0;width:34px;pointer-events:none;
+    background:linear-gradient(to left, #fbf8f1, rgba(251,248,241,0));
+  }
+}
 svg.gantt{display:block;width:100%;min-width:520px;height:auto}
 .readouts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:8px;font-size:12.5px}
 .readout{color:var(--ink-soft)}
 .readout b{color:var(--ink);font-family:var(--mono);font-size:12.5px;font-weight:600}
-.readout.total b{color:var(--terra);font-weight:700}
+.readout.total b{color:var(--terra-ink);font-weight:700}
+/* cost-composition bar: orange setups + red delays on ONE shared scale across
+   rails — the bar's length IS the total (processing omitted, identical per order) */
+.costcomp{display:flex;align-items:center;height:9px;border-radius:3px;
+  background:#efe7d7;border:1px solid var(--rule);margin-top:6px;max-width:520px}
+.costcomp .cc-fill{position:relative;display:flex;flex:none;height:100%;border-radius:3px 0 0 3px}
+.costcomp .cc-seg{display:block;height:100%;flex:none}
+.costcomp .cc-proc{background:var(--steel)}
+.costcomp .cc-setup{background:#ad7644}
+.costcomp .cc-delay{background:var(--red)}
+.costcomp .cc-total{position:absolute;left:100%;top:50%;transform:translate(5px,-50%);
+  font:700 9px/1 var(--mono);color:var(--terra);white-space:nowrap}
+.costcomp-cap{font-size:11px;color:var(--ink-soft);font-style:italic;margin:8px 0 0}
 table.data{
   border-collapse:collapse;font-size:12px;margin:10px 0 2px;
 }
@@ -330,18 +365,20 @@ table.data .famcell{font-weight:700;text-align:center}
   background:#f2ebdd;border:1px solid var(--rule);border-radius:10px;padding:14px 16px;
 }
 .fact .lbl{font:600 10.5px/1.3 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
+/* E3 — keep case-sensitive math tokens literal + italic inside uppercased labels */
+.math{text-transform:none;font-style:italic;letter-spacing:.02em}
 .fact .val{font:600 24px/1.15 var(--serif);color:var(--ink);word-break:break-word}
 .fact .val small{font-size:14px;color:var(--ink-soft)}
-.fact.hot .val{color:var(--terra)}
+.fact.hot .val{color:var(--terra-ink)}
 .slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 6px;padding:13px 16px;background:var(--f4-bg);border:1px solid var(--brass);border-radius:9px}
-.slider-prompt{display:flex;align-items:center;gap:7px;font:700 12.5px/1.2 var(--sans);letter-spacing:.02em;color:var(--terra);text-transform:none;white-space:nowrap}
+.slider-prompt{display:flex;align-items:center;gap:7px;font:700 12.5px/1.2 var(--sans);letter-spacing:.02em;color:var(--terra-ink);text-transform:none;white-space:nowrap}
 .slider-prompt .hand{font-size:15px;animation:nudge 1.6s ease-in-out infinite}
 @keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
 @media (prefers-reduced-motion:reduce){.slider-prompt .hand{animation:none}}
 input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cursor:pointer;flex:1 1 200px}
 .slider-val{font:800 20px/1 var(--mono);color:var(--terra);min-width:78px;text-align:right}
 .bar-zone{margin:16px 0 4px}
-.bar-legend{display:flex;justify-content:space-between;font-size:10.5px;color:var(--ink-soft);margin-bottom:4px}
+.bar-legend{display:flex;justify-content:space-between;font-size:10.5px;color:#776e59;margin-bottom:4px}
 .bar-track{
   position:relative;height:34px;background:#f2ebdd;border:1px solid var(--rule);border-radius:8px;overflow:hidden;
 }
@@ -354,6 +391,8 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
   position:absolute;right:8px;top:50%;transform:translateY(-50%);
   font:700 11px/1 var(--sans);color:#fdf8ef;white-space:nowrap;
 }
+/* H5 — when the bar is too thin (pct<8) the label sits outside-right in maple */
+.bar-fill-label.outside{left:calc(100% + 7px);right:auto;color:var(--maple)}
 .bar-ticks{position:absolute;inset:0;pointer-events:none}
 .bar-ticks i{position:absolute;top:0;bottom:0;width:1px;background:#e0d4bd}
 .bar-ticks b{position:absolute;top:2px;font:600 8.5px/1 var(--sans);color:var(--ink-soft);transform:translateX(3px)}
@@ -362,7 +401,7 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
 .mult-chip{
   font:700 12.5px/1 var(--mono);color:var(--maple);background:none;border:0;padding:0;
 }
-.mult-chip.last{color:var(--terra);font-weight:800;background:none;border:0}
+.mult-chip.last{color:var(--terra-ink);font-weight:800;background:none;border:0}
 
 /* ---------- demo 3 : the IG loop ---------- */
 .ig-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;margin-top:6px}
@@ -372,10 +411,10 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
   font:600 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
   margin:12px 0 5px;display:flex;align-items:baseline;gap:8px;
 }
-.ig-rail-label .hint{font-weight:500;text-transform:none;letter-spacing:0;font-size:11px;color:#9a8f7a}
+.ig-rail-label .hint{font-weight:500;text-transform:none;letter-spacing:0;font-size:11px;color:#776e59}
 .ig-rail{
-  position:relative;display:flex;flex-wrap:nowrap;gap:5px;align-items:center;
-  min-height:46px;padding:6px;border-radius:8px;overflow-x:auto;
+  position:relative;display:flex;flex-wrap:wrap;gap:5px;align-items:center;
+  min-height:46px;padding:6px;border-radius:8px;
 }
 .ig-rail.protected{background:#f2ebdd;border:1px solid #d8cdb6}
 .ig-rail.working{background:#fdfaf3;border:1.5px solid var(--brass)}
@@ -385,28 +424,30 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
   background:#f6ecec;border:1px dashed #c39a8c;border-radius:8px;padding:6px;min-height:42px;margin-top:6px;
 }
 .ig-outside .outside-title{font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-right:4px}
-.rail-empty{font-size:11.5px;color:#a2967f;font-style:italic;padding:2px 6px}
-.ig-outside-note{font-size:11px;color:var(--red);width:100%;font-style:italic;min-height:0}
+.rail-empty{font-size:11.5px;color:#776e59;font-style:italic;padding:2px 6px}
+.ig-outside-note{font-size:11px;color:#776e59;width:100%;font-style:italic;min-height:0}
 .ig-outside-note:empty{display:none}
-/* trial track — the sweep marker lives here, aligned over the working rail */
+/* trial track — overlay ON the working rail; row-aware (the rail wraps).
+   Sibling of the rail (inside .rail-wrap) so the reset's rail clears can't kill it */
+.rail-wrap{position:relative}
 .trial-track{
-  position:relative;height:30px;margin:2px 0 0;display:none;
+  position:absolute;inset:0;margin:0;display:none;pointer-events:none;z-index:3;
 }
 .trial-track.on{display:block}
 .trial-caret{
-  position:absolute;top:0;left:0;width:0;height:100%;pointer-events:none;
-  transform:translateX(0);
+  position:absolute;top:0;left:0;width:0;pointer-events:none;
+  transform:translate(0,0);
 }
 .trial-caret::before{
-  content:"";position:absolute;left:-1px;top:16px;width:2px;height:14px;background:var(--terra);
+  content:"";position:absolute;left:-1px;top:-4px;width:2px;height:calc(100% + 8px);background:var(--terra);
 }
 .trial-caret .pill{
-  position:absolute;top:0;left:0;transform:translateX(-50%);
+  position:absolute;top:-26px;left:0;transform:translateX(-50%);
   font:700 10.5px/1 var(--mono);background:var(--ink);color:var(--paper);
   border-radius:4px;padding:3px 6px;white-space:nowrap;
 }
 .trial-caret.best .pill{background:var(--brass);color:var(--ink)}
-.trial-tick{position:absolute;top:24px;width:3px;height:3px;border-radius:50%;background:#c4b795}
+.trial-tick{position:absolute;width:3px;height:3px;border-radius:50%;background:#c4b795}
 .insert-bar{
   position:absolute;top:2px;bottom:2px;width:3px;background:var(--brass);border-radius:2px;
   box-shadow:0 0 0 2px rgba(201,161,72,.25);pointer-events:none;z-index:2;
@@ -442,6 +483,7 @@ canvas.chart{
   min-height:96px;max-height:150px;overflow-y:auto;
 }
 .log div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:640px){.log div{white-space:normal;overflow:visible;text-overflow:clip}} /* D4 */
 .log div b{color:var(--terra);font-weight:600}
 .log div .ok{color:#55663f;font-weight:700}
 .log div .no{color:var(--red);font-weight:700}
@@ -468,61 +510,19 @@ canvas.chart{
 .banner.show{display:block}
 .banner b{color:var(--terra)}
 
-/* ---------- demo 5 technique lab ---------- */
-.lab-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:12px}
-.lab-panel{border:1px solid var(--rule);border-radius:10px;background:#fdfaf3;padding:12px;display:flex;flex-direction:column}
-.lab-panel h4{font:600 13.5px/1.3 var(--serif);margin-bottom:2px}
-.lab-panel .impl{font:500 10.5px/1.4 var(--mono);color:var(--ink-soft);margin-bottom:10px}
-.lab-stage{min-height:96px;border:1px dashed var(--rule);border-radius:8px;background:#f7f2e7;padding:8px;position:relative;overflow-x:auto}
-.note-card{
-  margin-top:10px;border-top:1px dashed var(--rule);padding-top:8px;font-size:11.5px;color:var(--ink-soft);line-height:1.55;
-}
-.note-card b{color:var(--ink)}
-.gseg{position:absolute;height:22px;border-radius:4px;top:34px}
-.lab-chip-row{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;min-height:30px}
 
-/* ---------- tool matrix ---------- */
-.matrix-wrap{overflow-x:auto;margin-top:12px;border:1px solid var(--rule);border-radius:10px;background:var(--card)}
-table.matrix{border-collapse:collapse;width:100%;min-width:900px;font-size:12.5px}
-table.matrix th,table.matrix td{border-bottom:1px solid var(--rule);padding:9px 12px;text-align:left;vertical-align:top}
-table.matrix thead th{
-  background:#f2ebdd;font:600 10.5px/1.3 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft);
-  border-bottom:1.5px solid #d8cdb6;
-}
-table.matrix tbody tr:last-child td{border-bottom:0}
-table.matrix tbody tr:hover{background:#f7f1e4}
-table.matrix td.tname{font-weight:700;white-space:nowrap}
-table.matrix td.tname .ver{display:block;font:500 10.5px/1.4 var(--mono);color:var(--ink-soft)}
-table.matrix .star{color:var(--brass);font-weight:700}
-table.matrix .flag{font:700 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--red);border:1px solid #ddb6a8;border-radius:4px;padding:2px 5px;white-space:nowrap}
-table.matrix .lic-mit{color:#55663f;font-weight:600}
-.footnote{font-size:11.5px;color:var(--ink-soft);margin-top:10px;font-style:italic}
-.matrix-legend{font-size:11.5px;color:var(--ink-soft);margin-top:8px}
-.matrix-legend .star{color:var(--brass);font-weight:700}
 
-/* ---------- recommended stack ---------- */
-.stack-grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));margin-top:12px}
-.stack-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:16px;border-top:3px solid var(--terra)}
-.stack-card:nth-child(2){border-top-color:var(--steel)}
-.stack-card:nth-child(3){border-top-color:var(--brass)}
-.stack-card h3{font:600 16px/1.3 var(--serif);margin-bottom:4px}
-.stack-card .use{font:600 10.5px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--terra);margin-bottom:10px}
-.stack-card p{font-size:12.5px;color:var(--ink-soft);margin-bottom:8px}
-.stack-card p b{color:var(--ink)}
-.stack-card ul{margin:0 0 8px 18px;font-size:12.5px;color:var(--ink-soft)}
-.stack-card li{margin-bottom:3px}
-.stack-card .effort{border-top:1px dashed var(--rule);padding-top:8px;font-size:12px}
-.stack-card .effort b{color:var(--maple)}
 
 /* ---------- footer ---------- */
 footer{border-top:1px solid var(--rule);margin-top:44px;padding:18px 20px 30px;text-align:center;font-size:11.5px;color:var(--ink-soft)}
-footer code{font-family:var(--mono);color:var(--maple)}
+footer code{font-family:var(--mono);color:var(--brass-ink)}
+footer a{color:var(--terra-ink)}
 
 /* ---------- responsive ---------- */
 @media (max-width:640px){
   h1.brand{font-size:17px}
   h2.section-title{font-size:22px}
-  section.section{padding:34px 0 6px;scroll-margin-top:104px}
+  section.section{padding:34px 0 6px}
   figure.demo{padding:14px 12px}
   .legend-row{grid-template-columns:20px 14px minmax(90px,1fr) auto}
   .legend-row .st{display:none}
@@ -535,10 +535,10 @@ footer code{font-family:var(--mono);color:var(--maple)}
   /* Single-scroll notebook: drop the explorer-only meta sections; keep the four demos */
   .site-head .badge { display: none; }
   /* Movements flow one after another in a single scroll */
-  section.movement { padding: 0; scroll-margin-top: 104px; border-top: 1px solid var(--rule); }
+  section.movement { padding: 0; scroll-margin-top: var(--sm, 104px); border-top: 1px solid var(--rule); }
   section.movement:first-of-type { border-top: 0; }
   .movement-head { max-width: 1120px; margin: 0 auto; padding: 40px 20px 2px; }
-  .movement-head .m-kick { font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--brass); margin-bottom: 10px; }
+  .movement-head .m-kick { font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--brass-ink); margin-bottom: 10px; }
   .movement-head h2.m-title { font: 600 clamp(26px,2.9vw,38px)/1.12 var(--serif); letter-spacing: .2px; margin-bottom: 10px; }
   .movement-head h2.m-title em { font-style: normal; color: var(--terra); }
   .movement-head .m-lede { max-width: 66ch; color: var(--ink-soft); font-size: 15.5px; line-height: 1.55; }
@@ -552,7 +552,8 @@ footer code{font-family:var(--mono);color:var(--maple)}
   /* No side padding: the iframe spans the column so the Studio's own 20px rail
      padding lands the text on the same line as the notebook's prose. */
   .m-studio { max-width: 1120px; margin: 10px auto 0; padding: 0 0 44px; }
-  .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 1px solid var(--rule); border-radius: 12px; background: #f6f1e8; }
+  .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); }
+  .studio-cap { max-width: 1120px; margin: 8px 2px 0; font-size: 11.5px; color: var(--ink-soft); font-style: italic; }
   /* On phones the Studio is a full app — reclaim the page's side gutters so it
      isn't squeezed into a narrow column, and give it a touch more height. */
   @media (max-width: 760px) {
@@ -565,9 +566,20 @@ footer code{font-family:var(--mono);color:var(--maple)}
   .ig-hero h2 { font: 600 clamp(30px, 3.4vw, 46px)/1.08 var(--serif); letter-spacing: .2px; max-width: 20ch; margin-bottom: 16px; }
   .ig-hero h2 em { font-style: normal; color: var(--terra); }
   .ig-hero .bridge { max-width: 60ch; font: italic 400 clamp(17px,1.6vw,21px)/1.5 var(--serif); color: var(--ink); margin-bottom: 6px; }
+  /* H3 — one-time staggered hero entrance + scroll cue (both gated off for reduced-motion) */
+  .ig-hero .scroll-cue { font: 600 12px/1 var(--sans); letter-spacing: .05em; color: var(--terra-ink); margin: 14px 0 0; }
+  .ig-hero .scroll-cue.hide { display: none; }
+  @media (prefers-reduced-motion:no-preference){
+    .ig-hero .kick, .ig-hero h2, .ig-hero .bridge { opacity: 0; transform: translateY(10px); animation: heroFadeUp 420ms cubic-bezier(.22,.61,.36,1) forwards; }
+    .ig-hero h2 { animation-delay: 90ms; }
+    .ig-hero .bridge { animation-delay: 180ms; }
+    .ig-hero .scroll-cue { animation: cueNudge 1.8s ease-in-out infinite; }
+  }
+  @keyframes heroFadeUp { to { opacity: 1; transform: none; } }
+  @keyframes cueNudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
   /* Collapsible "exact numbers" — keeps the opening intuitive, not technical */
   .data-fold { margin: 4px 0 16px; }
-  .data-fold > summary { cursor: pointer; font: 600 12px/1 var(--sans); letter-spacing: .04em; color: var(--terra); padding: 7px 0; list-style: none; display: inline-block; }
+  .data-fold > summary { cursor: pointer; font: 600 12px/1 var(--sans); letter-spacing: .04em; color: var(--terra-ink); padding: 7px 0; list-style: none; display: inline-block; }
   .data-fold > summary::-webkit-details-marker { display: none; }
   .data-fold > summary::before { content: "▸\00a0"; color: var(--ink-soft); }
   .data-fold[open] > summary::before { content: "▾\00a0"; }
@@ -578,6 +590,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
 <!-- ============================================================
      0 · Header / sticky anchor nav
      ============================================================ -->
+<a class="skip-link" href="#demo-order">Skip to the first demo</a>
 <header class="site-head">
   <div class="site-head-inner">
     <div class="brand-row">
@@ -596,10 +609,12 @@ footer code{font-family:var(--mono);color:var(--maple)}
     <ul id="navList">
       <li><a href="#m-story" class="active">Story</a></li>
       <li><a href="#m-compare">Compare</a></li>
+      <li><a href="#m-arena">Methods</a></li>
       <li><a href="#m-run">Run</a></li>
       <li><a href="#m-future">Future</a></li>
     </ul>
   </nav>
+  <div class="read-progress" id="readProgress" aria-hidden="true"></div>
 </header>
 
 <main>
@@ -607,6 +622,9 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <p class="kick">Story · why order matters</p>
   <h2>Order changes time. <em>Time changes cost.</em></h2>
   <p class="bridge">A best order does exist — but there are more of them than you could ever check. So the game isn't to try them all; it's to guess well and improve fast.</p>
+  <p class="scroll-cue" id="scrollCue">↓ it starts with five jobs</p>
+</section>
+
 </section>
 <!-- ============================================================
      1 · The 9 concepts to animate
@@ -655,6 +673,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
         <span class="readout">tardiness cost <b id="roAtard">–</b></span>
         <span class="readout total">total <b id="roAtotal">–</b></span>
       </div>
+      <div class="costcomp" id="ccA" aria-hidden="true"></div>
     </div>
 
     <div class="rail-block" id="railBlockB">
@@ -669,6 +688,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
         <span class="readout">tardiness cost <b id="roBtard">–</b></span>
         <span class="readout total">total <b id="roBtotal">–</b></span>
       </div>
+      <div class="costcomp" id="ccB" aria-hidden="true"></div>
     </div>
 
     <div class="rail-block rail-best" id="railBlockC" hidden>
@@ -683,7 +703,10 @@ footer code{font-family:var(--mono);color:var(--maple)}
         <span class="readout">tardiness cost <b id="roCtard">–</b></span>
         <span class="readout total">total <b id="roCtotal">–</b></span>
       </div>
+      <div class="costcomp" id="ccC" aria-hidden="true"></div>
     </div>
+
+    <p class="costcomp-cap">Time runs left to right; the bill sits below it on one shared scale — orange setups + red delays, and the bar's length is the total. The clock stops at the last job's end (t); the bill stops at Σ.</p>
 
     <div class="controls">
       <button class="btn primary" id="eval120" type="button">Evaluate all 120 orders</button>
@@ -716,8 +739,8 @@ footer code{font-family:var(--mono);color:var(--maple)}
       <span class="slider-val" id="nVal">n = 28</span>
     </div>
     <div class="fact-grid">
-      <div class="fact"><div class="lbl">Complete orders — n!</div><div class="val" id="fOrders">–</div></div>
-      <div class="fact"><div class="lbl">Candidate plans incl. rejection — Σ n!/(n−k)!</div><div class="val" id="fPlans">–</div></div>
+      <div class="fact"><div class="lbl">Complete orders — <span class="math">n!</span></div><div class="val" id="fOrders">–</div></div>
+      <div class="fact"><div class="lbl">Candidate plans incl. rejection — <span class="math">Σ n!/(n−k)!</span></div><div class="val" id="fPlans">–</div></div>
       <div class="fact hot"><div class="lbl">Time to enumerate orders at 10⁹ plans/sec</div><div class="val" id="fTime">–</div></div>
     </div>
     <div class="bar-zone" aria-hidden="true">
@@ -744,8 +767,10 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <p class="kicker"><span class="fig">The method</span></p>
   <h2 class="section-title">So you guess — then destroy, rebuild, and keep what's better.</h2>
   <p class="lede">A real Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance
-  (<b>mulberry32, seed 0xce29767d</b>). Nothing is pre-recorded: every insertion position is re-evaluated
-  against the complete objective while you watch. Watch for the five beats —
+  (<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b>, because every move grabs the cheapest insertion;
+  <b>iterated</b>, because it loops — build, break, rebuild. Nothing is pre-recorded: every insertion position
+  is re-evaluated against the complete objective while you watch — and sometimes a job is cheaper to refuse
+  than to squeeze in. Watch for the five beats —
   <b>construct</b> by best insertion, <b>destroy</b> three jobs, <b>measure every insertion</b> on the trial
   track, <b>reject at break-even</b> when no position beats the rejection cost, <b>accept or revert</b>.</p>
 
@@ -755,7 +780,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
     </figcaption>
 
     <div class="controls" role="group" aria-label="Playback controls">
-      <button class="btn primary" id="igPlay" type="button">Play</button>
+      <button class="btn primary pulse" id="igPlay" type="button">Play</button>
       <button class="btn" id="igStep" type="button">Step</button>
       <span class="ctl-label">speed</span>
       <span class="seg" id="igSpeed" role="group" aria-label="Speed">
@@ -776,15 +801,15 @@ footer code{font-family:var(--mono);color:var(--maple)}
         </div>
 
         <p class="ig-rail-label">Working copy <span class="hint">the candidate being built</span></p>
-        <div class="trial-track" id="igTrialTrack" aria-hidden="true">
-          <div class="trial-caret" id="igCaret"><span class="pill" id="igPill">Σ 0</span></div>
+        <div class="rail-wrap">
+          <div class="ig-rail working" id="igWorking" aria-label="Working copy"></div>
+          <div class="trial-track" id="igTrialTrack" aria-hidden="true"><div class="trial-caret" id="igCaret"><span class="pill" id="igPill">Σ 0</span></div></div>
         </div>
-        <div class="ig-rail working" id="igWorking" aria-label="Working copy"></div>
 
         <p class="ig-rail-label">Pending tray <span class="hint">jobs waiting to be re-inserted</span></p>
         <div class="ig-rail tray" id="igTray" aria-label="Pending tray"></div>
 
-        <p class="ig-phase" id="igPhase" aria-live="polite">Idle — press Play or Step.</p>
+        <p class="ig-phase" id="igPhase">Idle — press Play or Step.</p>
       </div>
 
       <div class="ig-right">
@@ -820,10 +845,10 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <p class="kicker"><span class="fig">Meet the methods</span></p>
   <h2 class="section-title">Eight ways to search — and what each one actually does.</h2>
   <p class="lede">Before you run anything, meet the competitors. These are the methods from the
-  <b>2015 study</b>: six published C++ heuristics, a one-hour MILP reference and the Iterated Greedy
+  <b>2015 study</b>: six published C++ heuristics, a one-hour exact-solver (MILP) reference and the Iterated Greedy
   written in Excel VBA. Pick one to watch how it moves — the diagram is schematic, nothing is being
-  solved here — and to see what it scored across the 44 MaScLib instances. Six of them go to work on
-  a scenario of your choosing just below.</p>
+  solved here — and to see what it scored across the 44 instances of the standard MaScLib benchmark set from
+  the literature. Six of them go to work on a scenario of your choosing just below.</p>
 
   <div class="arena-grid">
     <nav class="algo-list" id="algoList" aria-label="Choose an algorithm"></nav>
@@ -923,7 +948,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
 
 <section class="section" id="demo-benchmark">
   <p class="kicker"><span class="fig">From one race to the whole benchmark</span></p>
-  <h2 class="section-title">The race builds intuition. The recorded benchmark is the proof.</h2>
+  <h2 class="section-title">The race builds intuition. The recorded benchmark is the evidence.</h2>
   <p class="lede">The race above runs on a single seeded instance, live in your browser. The real test is the
   standard <b>MaScLib</b> benchmark — 44 instances from the 2015 study, each with a published best-known cost.
   Scored against every one of them, the modern engine holds up:</p>
@@ -949,9 +974,11 @@ footer code{font-family:var(--mono);color:var(--maple)}
   <div class="movement-head">
     <p class="m-kick">Run · your turn</p>
     <h2 class="m-title">Run the real engine, on real problems.</h2>
-    <p class="m-lede">The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.</p>
+    <p class="m-lede">Iterated Greedy is a metaheuristic — a recipe for searching, not a fixed formula — and this is the recipe, running. The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.</p>
   </div>
-  <div class="m-studio"><iframe class="studio-frame" src="studio-app.html" title="Interactive Iterated Greedy Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe></div>
+  <div class="m-studio"><iframe class="studio-frame" src="studio-app.html" title="Interactive Iterated Greedy Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
+    <p class="studio-cap">A full app lives in this frame — on phones, scroll inside it.</p>
+  </div>
 </section>
 
 <section class="movement" id="m-future">
@@ -970,7 +997,7 @@ footer code{font-family:var(--mono);color:var(--maple)}
 
     <h3 class="f-head">Open directions, runnable</h3>
     <p class="f-lede">The two experimental rows above ship as a companion notebook instead of as assertions. It detects the runtime it lands on, re-verifies exact pricing against the CPU engine before reporting any timing, and recomputes every number on each run — including the ones that do not favour it.</p>
-    <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a></div></div><div class="f-card"><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key. Fifteen campaigns across three models reproduce the recorded outcome — a training gain that becomes a loss once the instances change — and rank inverse to model capability, so the ceiling is not the proposer.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
+    <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a></div></div><div class="f-card"><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
 
     <h3 class="f-head">Use IG at the depth you need</h3>
     <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.</p>
@@ -1158,16 +1185,17 @@ function fmtBig(n){
   return mant.toFixed(2) + '×10' + supExp(exp);
 }
 function fmtTime(sec){ // adaptive: µs → s → min → h → years → 10^x years × universe
+  var pt = (typeof window !== 'undefined' && window.__lang === 'pt');
   if(sec < 1e-3){ var us = sec * 1e6; return (us < 10 ? us.toFixed(2) : Math.round(us)) + ' µs'; }
   if(sec < 1){ var ms = sec * 1000; return (ms < 10 ? ms.toFixed(1) : Math.round(ms)) + ' ms'; }
-  if(sec < 90) return (sec < 10 ? sec.toFixed(2) : Math.round(sec)) + ' seconds';
-  var min = sec / 60; if(min < 90) return min.toFixed(1) + ' minutes';
-  var h = min / 60; if(h < 48) return h.toFixed(1) + ' hours';
+  if(sec < 90) return (sec < 10 ? sec.toFixed(2) : Math.round(sec)) + (pt ? ' segundos' : ' seconds');
+  var min = sec / 60; if(min < 90) return min.toFixed(1) + (pt ? ' minutos' : ' minutes');
+  var h = min / 60; if(h < 48) return h.toFixed(1) + (pt ? ' horas' : ' hours');
   var y = sec / SEC_PER_YEAR;
-  if(y < 1e4) return fmtInt(y) + ' years';
+  if(y < 1e4) return fmtInt(y) + (pt ? ' anos' : ' years');
   var vs = y / UNIVERSE_YEARS;
-  var vsTxt = vs >= 2 ? ' — ≈ ' + (vs < 100 ? vs.toPrecision(2) : fmtBig(vs)) + '× the age of the universe' : '';
-  return fmtBig(y) + ' years' + vsTxt;
+  var vsTxt = vs >= 2 ? ' — ≈ ' + (vs < 100 ? vs.toPrecision(2) : fmtBig(vs)) + (pt ? '× a idade do universo' : '× the age of the universe') : '';
+  return fmtBig(y) + (pt ? ' anos' : ' years') + vsTxt;
 }
 
 /* ============================================================
@@ -1459,44 +1487,6 @@ function chipEl(job, opts){
 }
 var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
 
-/* ============================================================
-   §1 — concepts grid (data-driven so copy stays in one place)
-   ============================================================ */
-var CONCEPTS = [
-  ['Order changes cost', 'The same five jobs sequenced two ways can differ 2–3× in total cost: sequence-dependent setups and weighted tardiness are order-sensitive.',
-   'Two animated timelines whose wait / setup / process / due / late segments reveal as the evaluator runs; all 120 orders ranked exactly, with a verdict.', 'Paired live Gantts + an exact 120-order ranking sweep (Fig. 01).'],
-  ['Factorial explosion', 'n! orders outgrow any enumeration budget; counting ordered subsets with rejection multiplies n! by ≈ e.',
-   'An animated log-scale ruler with live counters and universe-age analogies as n grows.', 'Slider-driven tweened counters + log-scale multiplication bar (Fig. 02).'],
-  ['Greedy construction', 'Best-insertion builds a plan job by job, each placed at its cheapest position under the full objective.',
-   'Inside the live film: jobs insert one by one at their cheapest position, with cost readout and captions.', 'FLIP chip choreography with a live insertion sweep (Fig. 03).'],
-  ['Destroy & rebuild loop', 'Remove a few jobs, re-insert each at its cheapest position, repeat — the loop escapes local optima.',
-   'Inside the live film: protected plan vs working copy; operator figures remove and return jobs through a pending tray.', 'Staged beats — lift-out, trial sweep, fly-in — on one central clock (Fig. 03).'],
-  ['Rejection / break-even', 'A job stays outside when every insertion position costs more than its rejection cost.',
-   'A dynamic break-even deadline recomputed from real costs; jobs stay in the \'outside the machine\' zone when every insertion is pricier than rejecting.', 'Per-position totals on the trial track + a flight to the Outside zone with the break-even note (Fig. 03).'],
-  ['Objective decomposition', 'Total = setup cost + processing + weighted tardiness + rejection penalties; every trial is scored on the complete sum.',
-   'A live objective sheet — setup + delay + outside = total — with protected-vs-candidate Δ each iteration.', 'A live two-row sheet — protected vs candidate — with a Δ pill (Fig. 03).'],
-  ['Convergence', 'The incumbent cost falls in steps; most late iterations fail to improve and that is fine.',
-   'A live attempts/incumbent chart drawn during the film, plus a scrolling event log.', 'A live canvas chart: incumbent line + every evaluated candidate dot (Fig. 03).'],
-  ['Algorithm race', 'Six strategies under an equal evaluation budget show what the destroy–rebuild loop actually buys.',
-   'A live JS race of six strategies under an equal evaluation budget, plus recorded 2015 benchmark tables.', 'Progressive cost-vs-evaluations canvas race with a live legend (Fig. 04).'],
-  ['Scenario lenses', 'CNC factory, GPU/AI server, kitchen, surgery — the same mathematics in four costumes.',
-   'One engine with swappable scenario lenses — CNC factory, GPU, kitchen, surgery — relabelling the same mathematics.', 'One engine, swapped labels & palette — CSS custom properties as “lenses” (§6 notes).']
-];
-(function renderConcepts(){
-  var grid = $('#conceptGrid');
-  if(!grid) return;
-  var nums = ['①','②','③','④','⑤','⑥','⑦','⑧','⑨'];
-  CONCEPTS.forEach(function(c, i){
-    var card = el('div', 'card');
-    card.appendChild(el('span', 'num', nums[i]));
-    card.appendChild(el('h3', null, c[0]));
-    card.appendChild(el('p', null, c[1]));
-    var now = el('p', 'now'); now.appendChild(el('b', null, 'Now on the page: ')); now.appendChild(document.createTextNode(c[2]));
-    var fit = el('p', 'fit'); fit.appendChild(el('b', null, 'Best-in-class fit: ')); fit.appendChild(document.createTextNode(c[3]));
-    card.appendChild(now); card.appendChild(fit);
-    grid.appendChild(card);
-  });
-})();
 
 /* ============================================================
    Demo 1 — “Order changes time. Time changes cost.”
@@ -1504,12 +1494,13 @@ var CONCEPTS = [
    an animated sweep over all 120 permutations ranks A and B.
    ============================================================ */
 (function demo1(){
-  var railAEl = $('#railA'), railBEl = $('#railB');
+  var railAEl = $('#railA'), railBEl = $('#railB'), railCEl = $('#railC');
   if(!railAEl || !railBEl) return;
+  var railEls = { A:railAEl, B:railBEl, C:railCEl };
   var orderA = [0, 1, 2, 3, 4];      // the intuitive order (job id order)
   var orderB = [1, 4, 3, 0, 2];      // the family-grouped order
   var rng = mulberry32(0x5eed1);     // deterministic shuffle sequence
-  var U = 13, PADL = 6, BARY = 6, BARH = 20; // px per time unit & geometry
+  var U = 13, PADL = 6, BARY = 18, BARH = 20; // px per time unit & geometry
 
   /* --- fixed dataset table --- */
   var tbody = $('#d1data');
@@ -1545,7 +1536,7 @@ var CONCEPTS = [
   function renderGantt(svg, order, animate){
     var ev = evaluate(DEMO1, order);
     var horizon = FIXED_HZ;
-    var W = Math.ceil(horizon * U + PADL * 2), H = 82;
+    var W = Math.ceil(horizon * U + PADL * 2), H = 90;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.textContent = '';
     /* per-svg hatch pattern for idle waits */
@@ -1572,9 +1563,15 @@ var CONCEPTS = [
       /* processing segment (family colour) */
       var rp = svgEl('rect', { x:PADL + t.start * U, y:BARY, width:job.p * U, height:BARH, fill:FAMILY_CSS[job.fam], rx:2 });
       g.appendChild(rp); animated.push({ node:rp, w:job.p * U });
-      var lbl = svgEl('text', { x:PADL + (t.start + job.p / 2) * U, y:BARY + BARH / 2 + 3.5, 'text-anchor':'middle', 'font-size':10, 'font-weight':700, fill:'#fdf8ef', 'font-family':'inherit' });
-      lbl.textContent = 'J' + (job.id + 1);
-      g.appendChild(lbl); animated.push({ node:lbl, w:0, fadeOnly:true });
+      /* tardiness overlay ∝ late time — CLIPPED to this job's own bar
+         [max(due,start) → end] so it never washes over a neighbour's bar.
+         Drawn BEFORE the job-id label so the white label stays legible. */
+      var ovStart = Math.max(job.due, t.start);
+      if(t.end > ovStart){
+        var ow = (t.end - ovStart) * U;
+        var rt = svgEl('rect', { x:PADL + ovStart * U, y:BARY, width:ow, height:BARH, fill:'#a8432e', opacity:0.38 });
+        g.appendChild(rt); animated.push({ node:rt, w:ow });
+      }
       /* due-date marker (red tick) */
       var dx = PADL + job.due * U;
       var tick = svgEl('line', { x1:dx, y1:BARY + BARH + 2, x2:dx, y2:BARY + BARH + 9, stroke:'#a8432e', 'stroke-width':1.5 });
@@ -1582,16 +1579,26 @@ var CONCEPTS = [
       var dlbl = svgEl('text', { x:dx, y:BARY + BARH + 18, 'text-anchor':'middle', 'font-size':7.5, fill:'#a8432e' });
       dlbl.textContent = 'd' + (job.id + 1) + '=' + job.due;
       g.appendChild(dlbl); animated.push({ node:dlbl, w:0, fadeOnly:true });
-      /* tardiness overlay ∝ late time */
-      if(t.end > job.due){
-        var rt = svgEl('rect', { x:dx, y:BARY, width:(t.end - job.due) * U, height:BARH, fill:'#a8432e', opacity:0.38 });
-        g.appendChild(rt); animated.push({ node:rt, w:(t.end - job.due) * U });
+      /* "+late" label ABOVE the bar, anchored to the clipped overlay (never over other bars) */
+      if(t.end > ovStart){
         var late = job.w * (t.end - job.due);
-        var tlbl = svgEl('text', { x:dx + (t.end - job.due) * U / 2, y:BARY + BARH + 27, 'text-anchor':'middle', 'font-size':7.5, 'font-weight':700, fill:'#a8432e' });
+        var tlbl = svgEl('text', { x:PADL + (ovStart + (t.end - ovStart) / 2) * U, y:BARY - 2, 'text-anchor':'middle', 'font-size':7.5, 'font-weight':700, fill:'#a8432e', 'paint-order':'stroke', stroke:'#fbf8f1', 'stroke-width':2.5 });
         tlbl.textContent = '+' + late;
         g.appendChild(tlbl); animated.push({ node:tlbl, w:0, fadeOnly:true });
       }
+      /* job-id label LAST so it sits on top of any tardiness overlay */
+      var lbl = svgEl('text', { x:PADL + (t.start + job.p / 2) * U, y:BARY + BARH / 2 + 3.5, 'text-anchor':'middle', 'font-size':10, 'font-weight':700, fill:'#fdf8ef', 'font-family':'inherit', 'paint-order':'stroke', stroke:'rgba(42,38,32,.28)', 'stroke-width':2 });
+      lbl.textContent = 'J' + (job.id + 1);
+      g.appendChild(lbl); animated.push({ node:lbl, w:0, fadeOnly:true });
     });
+    /* explicit end-of-timeline marker at the last job's end */
+    if(ev.timeline.length){
+      var lastEnd = ev.timeline[ev.timeline.length - 1].end, ex = PADL + lastEnd * U;
+      g.appendChild(svgEl('line', { x1:ex, y1:BARY - 8, x2:ex, y2:BARY + BARH, stroke:'#b0562f', 'stroke-width':1.5 }));
+      var elbl = svgEl('text', { x:ex - 3, y:BARY - 10, 'text-anchor':'end', 'font-size':7, 'font-weight':700, fill:'#b0562f', 'paint-order':'stroke', stroke:'#fbf8f1', 'stroke-width':2.5 });
+      elbl.textContent = (window.__lang === 'pt' ? 'termina em t=' : 'ends at t=') + Math.round(lastEnd);
+      g.appendChild(elbl);
+    }
     /* time axis, ticks every 5 units */
     var axisY = BARY + BARH + 34;
     g.appendChild(svgEl('line', { x1:PADL, y1:axisY, x2:W - PADL, y2:axisY, stroke:'#d8cdb6', 'stroke-width':1 }));
@@ -1617,12 +1624,48 @@ var CONCEPTS = [
     return ev;
   }
 
+  /* cost-composition bar: orange setup + red delay segments on ONE shared scale
+     across every visible rail — so the bar's length IS the stated total
+     (Σ = setup + delay; processing is identical per order and stays out). */
+  var lastEv = {}; /* prefix -> last evaluation, for shared-scale rescaling */
+  function renderCostComp(prefix, ev, maxTotal){
+    var box = $('#cc' + prefix);
+    if(!box) return;
+    box.textContent = '';
+    var setup = ev.setup, delay = ev.tard, tot = setup + delay;
+    if(tot > 0 && maxTotal > 0){
+      var fill = el('span', 'cc-fill');
+      fill.style.width = (tot / maxTotal * 100) + '%';
+      [['cc-setup', setup], ['cc-delay', delay]].forEach(function(sg){
+        if(sg[1] <= 0) return;
+        var s = el('span', 'cc-seg ' + sg[0]);
+        s.style.width = (sg[1] / tot * 100) + '%';
+        s.title = sg[1];
+        fill.appendChild(s);
+      });
+      var tot1 = el('span', 'cc-total', 'Σ ' + tot); /* pinned at the bar's end */
+      fill.appendChild(tot1);
+      box.appendChild(fill);
+    }
+  }
+  function renderAllCostComps(){
+    var max = 0;
+    ['A', 'B', 'C'].forEach(function(p){
+      var ev = lastEv[p];
+      if(!ev) return;
+      if(p === 'C' && $('#railBlockC').hidden) return;
+      max = Math.max(max, ev.setup + ev.tard);
+    });
+    ['A', 'B', 'C'].forEach(function(p){ if(lastEv[p]) renderCostComp(p, lastEv[p], max); });
+  }
   function updateRail(order, svg, prefix, animate){
-    renderChips(prefix === 'A' ? railAEl : railBEl, order);
+    renderChips(railEls[prefix] || railBEl, order);
     var ev = renderGantt(svg, order, animate);
     $('#ro' + prefix + 'setup').textContent = ev.setup;
     $('#ro' + prefix + 'tard').textContent = ev.tard;
     $('#ro' + prefix + 'total').textContent = 'Σ ' + (ev.setup + ev.tard);
+    lastEv[prefix] = ev;
+    renderAllCostComps();
     return ev;
   }
   function refresh(animate){
@@ -1631,13 +1674,14 @@ var CONCEPTS = [
   }
   $('#shuffleA').addEventListener('click', function(){
     shuffleRng(rng, orderA); updateRail(orderA, $('#ganttA'), 'A', true);
-    setStatus('Rail A shuffled to ' + orderA.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
+    setStatus(L('Rail A shuffled to ', 'Trilho A embaralhado para ') + orderA.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
   });
   $('#shuffleB').addEventListener('click', function(){
     shuffleRng(rng, orderB); updateRail(orderB, $('#ganttB'), 'B', true);
-    setStatus('Rail B shuffled to ' + orderB.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
+    setStatus(L('Rail B shuffled to ', 'Trilho B embaralhado para ') + orderB.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
   });
   function setStatus(html){ $('#d1status').innerHTML = html; }
+  function L(en, pt){ return window.__lang === 'pt' ? pt : en; } /* keyed bilingual picker */
 
   /* --- exact sweep over all 120 permutations, in animation slices --- */
   var sweeping = false;
@@ -1648,7 +1692,7 @@ var CONCEPTS = [
     var perms = permutations([0, 1, 2, 3, 4]);
     var totals = new Array(perms.length), i = 0, best = Infinity, worst = -Infinity, bestPerm = null;
     var prog = $('#evalProg');
-    setStatus('Sweeping… <b>0</b>/120 orders evaluated.');
+    setStatus(L('Sweeping… <b>0</b>/120 orders evaluated.', 'Varrendo… <b>0</b>/120 ordens avaliadas.'));
     function costOf(s){ var e = evaluate(DEMO1, s); return e.setup + e.tard; }
     function slice(){
       var n = 0;
@@ -1660,7 +1704,8 @@ var CONCEPTS = [
         i++; n++;
       }
       prog.style.width = (i / perms.length * 100) + '%';
-      setStatus('Sweeping… <b>' + i + '</b>/120 orders evaluated. Best so far Σ ' + best + ', worst so far Σ ' + worst + '.');
+      setStatus(L('Sweeping… <b>' + i + '</b>/120 orders evaluated. Best so far Σ ' + best + ', worst so far Σ ' + worst + '.',
+        'Varrendo… <b>' + i + '</b>/120 ordens avaliadas. Melhor até agora Σ ' + best + ', pior até agora Σ ' + worst + '.'));
       if(i < perms.length){ requestAnimationFrame(slice); return; }
       /* rank = 1 + number of strictly better orders (ties share the rank) */
       var cA = costOf(orderA), cB = costOf(orderB);
@@ -1671,8 +1716,10 @@ var CONCEPTS = [
         updateRail(bestPerm, $('#ganttC'), 'C', true);
         $('#railCrank').textContent = 'Σ ' + best + ' · rank 1 / 120';
       }
-      setStatus('All <b>120</b> orders evaluated exactly. The <b>best possible order</b> costs Σ <b>' + best + '</b> — shown below. ' +
-        'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>. Same jobs — only the order changed.');
+      setStatus(L('All <b>120</b> orders evaluated exactly. The <b>best possible order</b> costs Σ <b>' + best + '</b> — shown above. ' +
+        'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>. Same jobs — only the order changed.',
+        'Todas as <b>120</b> ordens avaliadas exatamente. A <b>melhor ordem possível</b> custa Σ <b>' + best + '</b> — mostrada acima. ' +
+        'Trilho A (Σ ' + cA + ') em <b>' + rA + '/120</b> · Trilho B (Σ ' + cB + ') em <b>' + rB + '/120</b>. Mesmos jobs — só a ordem mudou.'));
       btn.disabled = false; sweeping = false;
       setTimeout(function(){ prog.style.width = '0%'; }, 900);
     }
@@ -1682,6 +1729,12 @@ var CONCEPTS = [
   /* initial paint (no motion on load) + repaint on resize-independent gate */
   refresh(false);
   makeGate($('#d1figure'), function(active){ if(active) refresh(true); });
+  addEventListener('langchange', function(){ refresh(false); }); /* re-render the bilingual 'ends at t=' marker */
+  /* H5 — right-edge fade on small screens, removed once the user scrolls a gantt */
+  $all('.gantt-wrap').forEach(function(w){
+    w.classList.add('can-fade');
+    w.addEventListener('scroll', function off(){ w.classList.remove('can-fade'); w.removeEventListener('scroll', off); }, { passive:true });
+  });
 })();
 
 /* ============================================================
@@ -1704,7 +1757,7 @@ var CONCEPTS = [
   });
   /* analogies, computed live */
   var analogies = { 5:'faster than one screen refresh', 10:'one frame on a 240 Hz monitor',
-    12:'a blink — already too many to enumerate', 20:'a human lifetime', 28:'≈ 700× the age of the universe' };
+    12:'a blink — already too many to enumerate', 20:'a human lifetime', 28:'—' /* dedup: the 700× universe line now lives in the readout */ };
   var abody = $('#analogyBody');
   [5, 10, 12, 20, 28].forEach(function(n){
     var f = factorial(n), tr = el('tr');
@@ -1724,6 +1777,7 @@ var CONCEPTS = [
     var pct = Math.max(1.2, logOrders / maxLog * 100);
     $('#factBar').style.width = pct + '%';
     $('#factBarLabel').textContent = '10' + supExp(Math.round(logOrders));
+    $('#factBarLabel').classList.toggle('outside', pct < 8); /* H5 */
     $('#barEndLabel').textContent = 'max 30! ≈ 2.65×10' + supExp(32);
     /* multiplier chips: …×(n−2) ×(n−1) ×n */
     var row = $('#multRow');
@@ -1736,6 +1790,11 @@ var CONCEPTS = [
     if(n < 2) row.appendChild(el('span', 'mult-chip last', '×1'));
   }
 
+  function d2status(n){ /* keyed bilingual template with number slots */
+    return window.__lang === 'pt'
+      ? 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> ordens completas; a 10⁹ planos/s, ' + fmtTime(factorial(n) / 1e9) + '.'
+      : 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> complete orders; at 10⁹ plans/sec, ' + fmtTime(factorial(n) / 1e9) + '.';
+  }
   function onSlide(){
     var n = parseInt(slider.value, 10);
     var target = { log:Math.log10(factorial(n)), plans:Math.log10(planCount(n)) };
@@ -1748,11 +1807,12 @@ var CONCEPTS = [
       }});
     }
     cur = target;
-    $('#d2status').innerHTML = 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> complete orders; at 10⁹ plans/sec, ' + fmtTime(factorial(n) / 1e9) + '.';
+    $('#d2status').innerHTML = d2status(n);
   }
   slider.addEventListener('input', onSlide);
   paint(28, cur.log, cur.plans);
-  $('#d2status').innerHTML = 'n = 28 → <b>' + fmtBig(factorial(28)) + '</b> complete orders; at 10⁹ plans/sec, ' + fmtTime(factorial(28) / 1e9) + '.';
+  $('#d2status').innerHTML = d2status(28);
+  addEventListener('langchange', function(){ $('#d2status').innerHTML = d2status(parseInt(slider.value, 10)); });
 })();
 </script>
 
@@ -1793,6 +1853,7 @@ function onWinResize(fn){
   var outsideEl = $('#igOutside'), outsideNote = $('#igOutsideNote'), outsideEmpty = $('#igOutsideEmpty');
   var phaseEl = $('#igPhase'), trialTrack = $('#igTrialTrack'), caret = $('#igCaret'), pill = $('#igPill');
   var logEl = $('#igLog'), chart = $('#igChart'), statusEl = $('#d3status');
+  function L(en, pt){ return window.__lang === 'pt' ? pt : en; } /* keyed bilingual picker */
   var btnPlay = $('#igPlay'), btnStep = $('#igStep'), btnRestart = $('#igRestart'), speedSeg = $('#igSpeed');
 
   /* ---- mutable demo state ---- */
@@ -1803,6 +1864,7 @@ function onWinResize(fn){
 
   /* ---- the one central clock: beat queue + speed multiplier ---- */
   var player = { gen:null, cur:null, t:0, playing:false, speed:1, active:false, running:false, lastTs:0, raf:0, anims:[] };
+  var everPlayed = false; /* D3 — Play pulses only until the very first Play */
   function beat(dur, onStart, onUpdate, onDone){ return { dur:dur, onStart:onStart, onUpdate:onUpdate, onDone:onDone }; }
   function trackAnim(a){
     if(!a) return;
@@ -1871,6 +1933,7 @@ function onWinResize(fn){
   }
   function setPlaying(p){
     if(p && genDone) return;
+    if(p && !everPlayed){ everPlayed = true; btnPlay.classList.remove('pulse'); } /* D3 */
     player.playing = p;
     updatePlayBtn();
     player.anims.forEach(function(a){ try{ p ? a.play() : a.pause(); }catch(e){} });
@@ -1907,6 +1970,13 @@ function onWinResize(fn){
   function chipListOf(rail){ return $all('.chip', rail); }
   function syncOutsideEmpty(){
     outsideEmpty.style.display = S.workRej.length ? 'none' : '';
+  }
+  /* D1 — working-rail idle placeholder (mirrors syncOutsideEmpty): shown while
+     nothing has been inserted yet, removed on the first insertion. */
+  var workEmpty = el('span', 'rail-empty', 'built here — one cheapest insertion at a time');
+  function syncWorkingEmpty(){
+    if(S.workSeq.length){ if(workEmpty.parentNode) workEmpty.remove(); }
+    else if(workEmpty.parentNode !== workingEl) workingEl.appendChild(workEmpty);
   }
   /* fill the protected rail with static (ghost) reference chips */
   function renderProtected(){
@@ -1976,8 +2046,9 @@ function onWinResize(fn){
     var all = incumbent.map(function(p){ return p.cost; }).concat(candidates.map(function(p){ return p.cost; }));
     ctx.font = '9px ui-monospace,Menlo,monospace';
     if(!all.length){
+      /* D2 — idle placeholder (canvas text, so translated inline) */
       ctx.fillStyle = '#a2967f';
-      ctx.fillText('convergence appears after construction', L, T + 14);
+      ctx.fillText(window.__lang === 'pt' ? 'Pressione Play — a curva de custo desenha aqui.' : 'Press Play — the cost curve draws here.', L, T + 14);
       return;
     }
     var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
@@ -2012,23 +2083,32 @@ function onWinResize(fn){
     });
   }
 
-  /* ---- trial track (sweep marker over the working rail) ---- */
+  /* ---- trial track (sweep overlay on the working rail) — ROW-AWARE:
+     the rail wraps into multiple rows, so every gap carries x AND y ---- */
   function gapPositions(){
-    var cs = chipListOf(workingEl), trackR = trialTrack.getBoundingClientRect(), pts = [];
+    var cs = chipListOf(workingEl), pts = [];
     for(var i = 0; i < cs.length; i++){
-      var r = cs[i].getBoundingClientRect();
-      var prevR = i ? cs[i - 1].getBoundingClientRect() : null;
-      pts.push({ pos:i, x: prevR ? (prevR.right + r.left) / 2 - trackR.left : r.left - trackR.left - 5 });
+      var c = cs[i], prev = i ? cs[i - 1] : null, x, y;
+      if(!prev){ x = c.offsetLeft - 5; y = c.offsetTop; }
+      else if(c.offsetTop > prev.offsetTop + 2){ x = prev.offsetLeft + prev.offsetWidth + 4; y = prev.offsetTop; } /* row break — the gap closes the previous row */
+      else { x = (prev.offsetLeft + prev.offsetWidth + c.offsetLeft) / 2; y = c.offsetTop; }
+      pts.push({ pos:i, x:x, y:y });
     }
-    var lastR = cs.length ? cs[cs.length - 1].getBoundingClientRect() : null;
-    pts.push({ pos:cs.length, x: lastR ? lastR.right - trackR.left + 5 : 30 });
+    if(cs.length){ var l = cs[cs.length - 1]; pts.push({ pos:cs.length, x:l.offsetLeft + l.offsetWidth + 4, y:l.offsetTop }); }
+    else pts.push({ pos:0, x:8, y:6 });
     return pts;
   }
-  function showTrial(){ trialTrack.classList.add('on'); $all('.trial-tick', trialTrack).forEach(function(t){ t.remove(); }); }
+  var trialChipH = 25;
+  function showTrial(){
+    var cs = chipListOf(workingEl);
+    if(cs.length) trialChipH = cs[0].offsetHeight;
+    trialTrack.classList.add('on'); $all('.trial-tick', trialTrack).forEach(function(t){ t.remove(); });
+  }
   function hideTrial(){ trialTrack.classList.remove('on'); caret.classList.remove('best'); }
-  function addTick(x){
+  function addTick(x, y){
     var t = el('i', 'trial-tick');
     t.style.left = (x - 1) + 'px';
+    t.style.top = (y + trialChipH + 5) + 'px';
     trialTrack.appendChild(t);
   }
   var insertBar = null;
@@ -2036,10 +2116,16 @@ function onWinResize(fn){
     removeInsertBar();
     var cs = chipListOf(workingEl);
     insertBar = el('i', 'insert-bar');
-    var x;
-    if(posIdx < cs.length) x = cs[posIdx].offsetLeft - 4;
-    else x = cs.length ? cs[cs.length - 1].offsetLeft + cs[cs.length - 1].offsetWidth + 2 : 8;
+    var x, y, h;
+    if(cs.length){
+      var anchor = cs[Math.min(posIdx, cs.length - 1)];
+      x = (posIdx < cs.length) ? anchor.offsetLeft - 4 : anchor.offsetLeft + anchor.offsetWidth + 2;
+      y = anchor.offsetTop - 3; h = anchor.offsetHeight + 6;
+    } else { x = 8; y = 3; h = 30; }
     insertBar.style.left = x + 'px';
+    insertBar.style.top = y + 'px';
+    insertBar.style.height = h + 'px';
+    insertBar.style.bottom = 'auto';
     workingEl.appendChild(insertBar);
   }
   function removeInsertBar(){ if(insertBar && insertBar.parentNode) insertBar.parentNode.removeChild(insertBar); insertBar = null; }
@@ -2079,16 +2165,17 @@ function onWinResize(fn){
         if(idx === lastIdx) return;
         lastIdx = idx;
         var cost = evalInsertion(inst, S.workSeq, jobId, pts[idx].pos); // ← the real trial
-        var tx = pts[idx].x;
-        caret.style.transform = 'translateX(' + tx + 'px)';
+        var tx = pts[idx].x, ty = pts[idx].y;
+        caret.style.transform = 'translate(' + tx + 'px,' + ty + 'px)';
+        caret.style.height = trialChipH + 'px';
         pill.textContent = 'Σ ' + cost;
         /* keep the pill inside the track even at the extreme gaps */
         var pw = (pill.offsetWidth || 44) / 2, tw2 = trialTrack.clientWidth || 200;
         var adj = Math.max(0, pw - tx) - Math.max(0, tx + pw - tw2);
         pill.style.transform = 'translateX(calc(-50% + ' + adj + 'px))';
-        addTick(tx);
+        addTick(tx, ty);
         if(cost < best.cost){
-          best = { cost:cost, pos:pts[idx].pos, x:tx };
+          best = { cost:cost, pos:pts[idx].pos, x:tx, y:ty };
           caret.classList.add('best');
         }
       },
@@ -2098,8 +2185,10 @@ function onWinResize(fn){
            always rest on ALL positions, whatever the frame rate did. */
         var r = bestInsertion(inst, S.workSeq, jobId);
         var bx = pts.length && pts[r.bPos] ? pts[r.bPos].x : best.x;
-        best = { cost:r.bCost, pos:r.bPos, x:bx };
-        caret.style.transform = 'translateX(' + bx + 'px)';
+        var by = pts.length && pts[r.bPos] ? pts[r.bPos].y : (best.y || 0);
+        best = { cost:r.bCost, pos:r.bPos, x:bx, y:by };
+        caret.style.transform = 'translate(' + bx + 'px,' + by + 'px)';
+        caret.style.height = trialChipH + 'px';
         pill.textContent = 'Σ ' + best.cost;
         caret.classList.add('best');
       });
@@ -2109,7 +2198,8 @@ function onWinResize(fn){
       yield flyBeat(jobId, workingEl, best.pos, FLY_DUR, function(){
         S.workSeq.splice(best.pos, 0, jobId);
         S.tray = S.tray.filter(function(x){ return x !== jobId; });
-        log('insert <b>' + jobLabel + '</b> at pos ' + (best.pos + 1) + '/' + nPos + ' — Σ ' + best.cost + ' (reject would be ' + base + ')');
+        syncWorkingEmpty();
+        log(L('insert <b>', 'inserir <b>') + jobLabel + L('</b> at pos ', '</b> na pos ') + (best.pos + 1) + '/' + nPos + ' — Σ ' + best.cost + L(' (reject ', ' (rejeitar ') + base + ')');
       });
       yield beat(120, null, null, function(){ removeInsertBar(); hideTrial(); });
     }else{
@@ -2121,7 +2211,7 @@ function onWinResize(fn){
         S.workRej.push(jobId);
         S.tray = S.tray.filter(function(x){ return x !== jobId; });
         syncOutsideEmpty();
-        log('<span class="no">reject</span> <b>' + jobLabel + '</b> — break-even: ' + best.cost + ' &gt; ' + base);
+        log('<span class="no">' + L('reject', 'rejeitar') + '</span> <b>' + jobLabel + '</b> — break-even: ' + best.cost + ' &gt; ' + base);
       });
       yield beat(120, null, null, function(){ hideTrial(); });
     }
@@ -2131,10 +2221,10 @@ function onWinResize(fn){
   function* igScript(){
     /* ===== phase 1 · greedy construction (EDD order, best insertion) ===== */
     var edd = inst.jobs.slice().sort(function(a, b){ return a.due - b.due || a.id - b.id; }).map(function(j){ return j.id; });
-    setPhase('Constructing', 'greedy best-insertion, earliest due date first');
-    log('construction — EDD order ' + edd.map(function(i){ return 'J' + (i + 1); }).join(' '));
+    setPhase(L('Constructing', 'Construindo'), L('greedy best-insertion, earliest due date first', 'inserção gulosa do melhor, data de entrega mais cedo primeiro'));
+    log(L('construction — EDD order ', 'construção — ordem EDD ') + edd.map(function(i){ return 'J' + (i + 1); }).join(' '));
     for(var c = 0; c < edd.length; c++){
-      setPhase('Constructing', 'measuring insertions for J' + (edd[c] + 1));
+      setPhase(L('Constructing', 'Construindo'), L('measuring insertions for J', 'medindo inserções para J') + (edd[c] + 1));
       yield* sweepAndPlace(edd[c]);
     }
     /* commit construction to the protected rail */
@@ -2151,8 +2241,9 @@ function onWinResize(fn){
         try{ trackAnim(protectedEl.animate([{ opacity:0.25 }, { opacity:1 }], { duration:560 })); }catch(e){}
       }
     }, null, null);
-    log('<span class="ok">construction committed</span> — Σ ' + ev0.total + ' (setup+proc ' + (ev0.setup + ev0.proc) + ' · delay ' + ev0.tard + ' · outside ' + ev0.rej + ')');
-    statusEl.innerHTML = 'Construction complete: Σ <b>' + ev0.total + '</b>. The destroy–rebuild loop starts.';
+    log('<span class="ok">' + L('construction committed', 'construção confirmada') + '</span> — Σ ' + ev0.total + ' (setup+proc ' + (ev0.setup + ev0.proc) + L(' · delay ', ' · atraso ') + ev0.tard + L(' · outside ', ' · fora ') + ev0.rej + ')');
+    statusEl.innerHTML = L('Construction complete: Σ <b>' + ev0.total + '</b>. The destroy–rebuild loop starts.',
+      'Construção concluída: Σ <b>' + ev0.total + '</b>. O laço destruir–reconstruir começa.');
 
     /* ===== phase 2 · iterated greedy loop ===== */
     var stale = 0;
@@ -2160,8 +2251,8 @@ function onWinResize(fn){
       iter++;
       /* --- destroy: lift DESTROY_N random jobs into the tray --- */
       var d = destroyJobs(inst, S.protSeq, destroyRng, DESTROY_N);
-      setPhase('Destroying', 'iteration ' + iter + ' — lifting out ' + d.victims.map(function(v){ return 'J' + (v + 1); }).join(', '));
-      log('<b>it ' + iter + '</b> — destroy ' + d.victims.map(function(v){ return 'J' + (v + 1); }).join(' '));
+      setPhase(L('Destroying', 'Destruindo'), L('iteration', 'iteração') + ' ' + iter + L(' — lifting out ', ' — retirando ') + d.victims.map(function(v){ return 'J' + (v + 1); }).join(', '));
+      log('<b>' + L('it', 'it') + ' ' + iter + '</b> — ' + L('destroy', 'destruir') + ' ' + d.victims.map(function(v){ return 'J' + (v + 1); }).join(' '));
       S.tray = d.victims.slice();
       for(var v = 0; v < d.victims.length; v++){
         yield flyBeat(d.victims[v], trayEl, null, 380, (function(id){
@@ -2172,11 +2263,11 @@ function onWinResize(fn){
          (iterate over a copy: S.tray shrinks as jobs are placed) --- */
       var pending = S.tray.slice();
       for(var p = 0; p < pending.length; p++){
-        setPhase('Measuring insertions for J' + (pending[p] + 1), 'iteration ' + iter + ' — every position, full objective');
+        setPhase(L('Measuring insertions for J', 'Medindo inserções para J') + (pending[p] + 1), L('iteration', 'iteração') + ' ' + iter + L(' — every position, full objective', ' — cada posição, objetivo completo'));
         yield* sweepAndPlace(pending[p]);
       }
       /* --- swap pass: rejected ↔ scheduled (first improvement) --- */
-      setPhase('Swapping', 'iteration ' + iter + ' — try outside jobs against the sequence');
+      setPhase(L('Swapping', 'Trocando'), L('iteration', 'iteração') + ' ' + iter + L(' — try outside jobs against the sequence', ' — teste jobs de fora contra a sequência'));
       var swapBase = evaluate(inst, S.workSeq).total, found = null, trials = 0;
       if(S.workRej.length){
         for(var sr = 0; sr < S.workRej.length && !found; sr++){
@@ -2188,10 +2279,10 @@ function onWinResize(fn){
         }
       }
       if(!S.workRej.length){
-        log('swap pass — outside empty, skipped');
+        log(L('swap pass — outside empty, skipped', 'passo de troca — nada fora, pulado'));
         yield beat(220, null, null, null);
       }else if(!found){
-        log('swap pass — no improving swap (' + trials + ' trials)');
+        log(L('swap pass — no improving swap (', 'passo de troca — nenhuma troca melhora (') + trials + L(' trials)', ' tentativas)'));
         yield beat(320, null, null, null);
       }else{
         var outJob = S.workSeq[found.i], inJob = found.r, newCost = evaluate(inst,
@@ -2211,7 +2302,7 @@ function onWinResize(fn){
           outsideNote.textContent = ''; // the break-even note referred to the old outside set
         });
         yield flyBeat(outJob, outsideEl, null, FLY_DUR, null);
-        log('swap — <b>J' + (inJob + 1) + '</b> in for <b>J' + (outJob + 1) + '</b> (Σ ' + swapBase + ' → ' + newCost + ', ' + trials + ' trials)');
+        log(L('swap — <b>J', 'troca — <b>J') + (inJob + 1) + L('</b> in for <b>J', '</b> por <b>J') + (outJob + 1) + '</b> (Σ ' + swapBase + ' → ' + newCost + ', ' + trials + L(' trials)', ' tentativas)'));
       }
       /* --- decide: accept or revert --- */
       var candEv = evaluate(inst, S.workSeq);
@@ -2220,7 +2311,7 @@ function onWinResize(fn){
       candidates.push({ iter:iter, cost:candEv.total, accepted:delta < 0 });
       drawChart();
       if(delta < 0){
-        setPhase('Accepting', 'iteration ' + iter + ' — Δ ' + delta + ' improves the reference');
+        setPhase(L('Accepting', 'Aceitando'), L('iteration', 'iteração') + ' ' + iter + ' — Δ ' + delta + L(' improves the reference', ' melhora a referência'));
         showDelta(delta, 'candidate wins');
         yield beat(600, function(){
           S.protSeq = S.workSeq.slice();
@@ -2232,11 +2323,12 @@ function onWinResize(fn){
           drawChart();
           if(!REDUCED){ try{ trackAnim(protectedEl.animate([{ opacity:0.3 }, { opacity:1 }], { duration:600 })); }catch(e){} }
         }, null, null);
-        log('<span class="ok">accept</span> it ' + iter + ' — Σ ' + candEv.total + ' (Δ ' + delta + ')');
-        statusEl.innerHTML = 'Iteration ' + iter + ': candidate Σ ' + candEv.total + ' <b>accepted</b> (Δ ' + delta + ').';
+        log('<span class="ok">' + L('accept', 'aceito') + '</span> ' + L('it', 'it') + ' ' + iter + ' — Σ ' + candEv.total + ' (Δ ' + delta + ')');
+        statusEl.innerHTML = L('Iteration ' + iter + ': candidate Σ ' + candEv.total + ' <b>accepted</b> (Δ ' + delta + ').',
+          'Iteração ' + iter + ': candidato Σ ' + candEv.total + ' <b>aceito</b> (Δ ' + delta + ').');
         stale = 0;
       }else{
-        setPhase('Reverting', 'iteration ' + iter + ' — Δ +' + delta + ', working copy snaps back');
+        setPhase(L('Reverting', 'Revertendo'), L('iteration', 'iteração') + ' ' + iter + ' — Δ +' + delta + L(', working copy snaps back', ', cópia de trabalho desfeita'));
         showDelta(delta, 'no improvement');
         yield beat(520, function(){
           flipAll(function(){
@@ -2248,18 +2340,23 @@ function onWinResize(fn){
           }, 500);
           outsideNote.textContent = '';
         }, null, null);
-        log('<span class="no">revert</span> it ' + iter + ' — Σ ' + candEv.total + ' (Δ +' + delta + ')');
-        statusEl.innerHTML = 'Iteration ' + iter + ': candidate Σ ' + candEv.total + ' rejected (Δ +' + delta + ') — snapped back.';
+        log('<span class="no">' + L('revert', 'desfeito') + '</span> ' + L('it', 'it') + ' ' + iter + ' — Σ ' + candEv.total + ' (Δ +' + delta + ')');
+        statusEl.innerHTML = L('Iteration ' + iter + ': candidate Σ ' + candEv.total + ' rejected (Δ +' + delta + ') — snapped back.',
+          'Iteração ' + iter + ': candidato Σ ' + candEv.total + ' rejeitado (Δ +' + delta + ') — desfeito.');
         stale++;
       }
     }
     /* ===== done: converged or iteration cap ===== */
-    var why = stale >= STALE_MAX ? 'no improvement in ' + STALE_MAX + ' iterations' : 'iteration cap (' + MAX_ITER + ')';
-    setPhase('Converged', why + ' — final Σ ' + incumbentCost);
-    showDelta(0, 'converged at Σ ' + incumbentCost);
-    log('<b>done</b> — ' + why + '; incumbent Σ <b>' + incumbentCost + '</b> (construction was ' + incumbent[0].cost + ')');
-    statusEl.innerHTML = 'Converged: ' + why + '. Final incumbent Σ <b>' + incumbentCost + '</b> — the loop shaved ' +
-      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% off greedy construction. Press Restart to run it again.';
+    var why = stale >= STALE_MAX
+      ? L('no improvement in ' + STALE_MAX + ' iterations', 'sem melhora em ' + STALE_MAX + ' iterações')
+      : L('iteration cap (' + MAX_ITER + ')', 'limite de iterações (' + MAX_ITER + ')');
+    setPhase(L('Converged', 'Convergiu'), why + ' — final Σ ' + incumbentCost);
+    showDelta(0, L('converged at Σ ' + incumbentCost, 'convergiu em Σ ' + incumbentCost));
+    log('<b>' + L('done', 'fim') + '</b> — ' + why + '; incumbent Σ <b>' + incumbentCost + '</b> (' + L('construction was', 'construção era') + ' ' + incumbent[0].cost + ')');
+    statusEl.innerHTML = L('Converged: ' + why + '. Final incumbent Σ <b>' + incumbentCost + '</b> — the loop shaved ' +
+      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% off greedy construction. Press Restart to run it again.',
+      'Convergiu: ' + why + '. Incumbente final Σ <b>' + incumbentCost + '</b> — o laço cortou ' +
+      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% da construção gulosa. Pressione Reiniciar para rodar de novo.');
     hideTrial();
   }
 
@@ -2305,13 +2402,14 @@ function onWinResize(fn){
     S.tray.forEach(function(id){ trayEl.appendChild(chips[id]); });
     outsideNote.textContent = '';
     syncOutsideEmpty();
+    syncWorkingEmpty();
     ['#shCsetup', '#shCdelay', '#shCout', '#shCtot'].forEach(function(s){ $(s).textContent = '–'; });
     ['#shPsetup', '#shPdelay', '#shPout', '#shPtot'].forEach(function(s){ $(s).textContent = '–'; });
     var pillEl = $('#igDelta');
     pillEl.className = 'delta-pill'; pillEl.textContent = 'Δ vs protected —';
     logEl.textContent = '';
-    log('seeded instance ready — 12 jobs · 4 families · mulberry32(0xce29767d)');
-    setPhase('Idle', 'press Play or Step');
+    log(L('seeded instance ready — 12 jobs · 4 families · mulberry32(0xce29767d)', 'instância com seed pronta — 12 jobs · 4 famílias · mulberry32(0xce29767d)'));
+    setPhase(L('Idle', 'Parado'), L('press Play or Step', 'pressione Play ou Passo'));
     statusEl.textContent = '';
     hideTrial();
     removeInsertBar();
@@ -2348,220 +2446,59 @@ function onWinResize(fn){
      ============================================================ -->
 <script>
 'use strict';
-/* ============================================================
-   Demo 5 — technique lab: the SAME Gantt morph implemented by
-   three genuinely separate renderers (DOM / SVG attrs / Canvas).
-   ============================================================ */
-(function demo5(){
-  var section = $('#demo-lab'); if(!section) return;
-  var chipsRow = $('#labChips'), statusEl = $('#d5status');
-  var labRng = mulberry32(0x1ab);
-  var order = [0, 1, 2, 3, 4];
-  var LOGICAL_W = 300, BAR_H = 22, BAR_Y = 8, H = 64;
 
-  /* one shared layout calculation — each renderer only draws it */
-  function computeLayout(ord){
-    var ev = evaluate(DEMO1, ord);
-    var horizon = ev.timeline.length ? ev.timeline[ev.timeline.length - 1].end * 1.05 + 1 : 10;
-    var scale = LOGICAL_W / horizon, segs = [];
-    ev.timeline.forEach(function(t){
-      var job = DEMO1.jobs[t.id];
-      var xPrev = t.start - t.idle - t.st;
-      if(t.st > 0) segs.push({ x:xPrev * scale, w:t.st * scale, kind:'setup', label:'' });
-      if(t.idle > 0.001) segs.push({ x:(xPrev + t.st) * scale, w:t.idle * scale, kind:'idle', label:'' });
-      segs.push({ x:t.start * scale, w:job.p * scale, kind:'proc', fam:job.fam, label:'J' + (job.id + 1) });
-      if(t.end > job.due) segs.push({ x:job.due * scale, w:(t.end - job.due) * scale, kind:'tard', label:'' });
-    });
-    return segs;
-  }
-  var COLORS = { setup:'#ad7644', idle:'#e9e1d2', tard:'rgba(168,67,46,.45)', proc:['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'] };
-
-  function renderChips(){
-    chipsRow.textContent = '';
-    order.forEach(function(id){ chipsRow.appendChild(chipEl(DEMO1.jobs[id])); });
-  }
-
-  /* ---- renderer (a): DOM nodes + CSS transitions on left/width ---- */
-  var labDom = (function(){
-    var stage = $('#labDom'), pool = [];
-    function render(segs){
-      var px = stage.clientWidth || 280;
-      segs.forEach(function(s, i){
-        var d = pool[i];
-        if(!d){
-          d = el('div', 'gseg');
-          d.style.transition = REDUCED ? 'none' : 'left .55s cubic-bezier(.2,.7,.25,1), width .55s cubic-bezier(.2,.7,.25,1), background-color .55s';
-          d.style.font = '700 10px/22px -apple-system,"Segoe UI",Roboto,sans-serif';
-          d.style.color = '#fdf8ef'; d.style.textAlign = 'center'; d.style.overflow = 'hidden';
-          stage.appendChild(d); pool[i] = d;
-        }
-        d.style.display = '';
-        d.style.top = BAR_Y + 'px'; d.style.height = BAR_H + 'px';
-        var u = px / LOGICAL_W;
-        d.style.left = (s.x * u) + 'px';
-        d.style.width = Math.max(1, s.w * u) + 'px';
-        d.style.background = s.kind === 'proc' ? COLORS.proc[s.fam] : COLORS[s.kind];
-        d.style.border = s.kind === 'idle' ? '1px dashed #cfc2a6' : '0';
-        d.textContent = s.label || '';
-      });
-      for(var i = segs.length; i < pool.length; i++) pool[i].style.display = 'none';
-    }
-    return { render:render };
-  })();
-
-  /* ---- renderer (b): SVG rects + JS-driven attribute tweens ---- */
-  var labSvg = (function(){
-    var svg = $('#labSvg');
-    svg.setAttribute('viewBox', '0 0 ' + LOGICAL_W + ' ' + H);
-    var pool = [];
-    function render(segs){
-      segs.forEach(function(s, i){
-        var node = pool[i];
-        if(!node){
-          node = { rect:svgEl('rect', { y:BAR_Y, height:BAR_H, rx:2 }), text:svgEl('text', { y:BAR_Y + BAR_H / 2 + 3.5, 'text-anchor':'middle', 'font-size':9, 'font-weight':700, fill:'#fdf8ef' }) };
-          svg.appendChild(node.rect); svg.appendChild(node.text);
-          pool[i] = node;
-        }
-        node.rect.style.display = ''; node.text.style.display = '';
-        var fill = s.kind === 'proc' ? COLORS.proc[s.fam] : COLORS[s.kind];
-        node.rect.setAttribute('fill', fill);
-        if(s.kind === 'idle'){ node.rect.setAttribute('stroke', '#cfc2a6'); node.rect.setAttribute('stroke-dasharray', '3 2'); node.rect.setAttribute('stroke-width', 0.7); }
-        else node.rect.removeAttribute('stroke');
-        var fromX = parseFloat(node.rect.getAttribute('x') || s.x), fromW = parseFloat(node.rect.getAttribute('width') || s.w);
-        var label = s.label || '';
-        /* the point of this renderer: attributes are interpolated by JS, not CSS */
-        tween({ dur:550, update:function(e){
-          var cx = fromX + (s.x - fromX) * e, cw = Math.max(0.2, fromW + (s.w - fromW) * e);
-          node.rect.setAttribute('x', cx);
-          node.rect.setAttribute('width', cw);
-          node.text.setAttribute('x', cx + cw / 2);
-          node.text.textContent = cw > 14 ? label : '';
-        }});
-      });
-      for(var i = segs.length; i < pool.length; i++){ pool[i].rect.style.display = 'none'; pool[i].text.style.display = 'none'; }
-    }
-    return { render:render };
-  })();
-
-  /* ---- renderer (c): one canvas, full redraw every frame ---- */
-  var labCanvas = (function(){
-    var cv = $('#labCanvas');
-    var prev = null, target = null, anim = null;
-    function draw(segs){
-      var dpr = fitCanvas(cv), ctx = cv.getContext('2d');
-      if(!ctx) return;
-      var W = cv.width / dpr, Hpx = cv.height / dpr;
-      ctx.clearRect(0, 0, W, Hpx);
-      var u = W / LOGICAL_W;
-      segs.forEach(function(s){
-        var x = s.x * u, w = Math.max(0.5, s.w * u);
-        ctx.fillStyle = s.kind === 'proc' ? COLORS.proc[s.fam] : COLORS[s.kind];
-        ctx.fillRect(x, BAR_Y, w, BAR_H);
-        if(s.kind === 'idle'){
-          ctx.strokeStyle = '#cfc2a6'; ctx.lineWidth = 1;
-          /* manual hatch — canvas has no pattern shorthand here */
-          for(var hx = x - BAR_H; hx < x + w; hx += 5){
-            ctx.beginPath();
-            ctx.moveTo(Math.max(x, hx), BAR_Y + BAR_H - Math.max(0, x - hx));
-            ctx.lineTo(Math.min(x + w, hx + BAR_H), BAR_Y + Math.max(0, hx + BAR_H - (x + w)));
-            ctx.stroke();
-          }
-          ctx.strokeRect(x + 0.5, BAR_Y + 0.5, w - 1, BAR_H - 1);
-        }
-        if(s.label && w > 16){
-          ctx.fillStyle = '#fdf8ef'; ctx.font = '700 10px sans-serif'; ctx.textAlign = 'center';
-          ctx.fillText(s.label, x + w / 2, BAR_Y + BAR_H / 2 + 3.5);
-        }
-      });
-      /* frame tick */
-      ctx.fillStyle = '#9a8f7a'; ctx.font = '9px sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText('canvas 2d · full redraw ' + (anim ? '(animating)' : '(static)'), 2, Hpx - 6);
-    }
-    function lerpSegs(a, b, e){
-      var out = [], i;
-      for(i = 0; i < b.length; i++){
-        var from = (a && a[i]) || b[i];
-        out.push({ x:from.x + (b[i].x - from.x) * e, w:from.w + (b[i].w - from.w) * e, kind:b[i].kind, fam:b[i].fam, label:b[i].label });
-      }
-      return out;
-    }
-    function render(segs){
-      if(anim) anim.cancel();
-      if(REDUCED){ prev = segs; draw(segs); return; }
-      var from = prev, to = segs;
-      anim = tween({ dur:550, update:function(e){ draw(lerpSegs(from, to, e)); },
-        done:function(){ prev = to; anim = null; draw(to); } });
-    }
-    return { render:render };
-  })();
-
-  function renderAll(){
-    renderChips();
-    var segs = computeLayout(order);
-    labDom.render(segs);
-    labSvg.render(segs);
-    labCanvas.render(segs);
-  }
-  $('#labShuffle').addEventListener('click', function(){
-    shuffleRng(labRng, order);
-    renderAll();
-    statusEl.innerHTML = 'Order shuffled to <b>' + order.map(function(i){ return 'J' + (i + 1); }).join(' ') + '</b> — all three renderers morph in sync.';
-  });
-  makeGate(section, function(active){ if(active) renderAll(); });
-  onWinResize(function(){ labDom.render(computeLayout(order)); });
-  renderAll();
-})();
-
-/* ============================================================
-   Tool matrix — data-driven rows (verified facts, July 2026)
-   ============================================================ */
-(function matrix(){
-  var body = $('#matrixBody'); if(!body) return;
-  var MIT = '<span class="lic-mit">MIT</span>';
-  var ROWS = [
-    ['GSAP', 'v3.15.0 · Apr 2026', 'JS animation library', 'live DOM / SVG, zero build', 'Standard No-Charge — free incl. commercial since v3.13 (all plugins); <b>not</b> MIT; Webflow acquired GreenSock (Oct 2024)', '<span class="star">★</span> Live step-by-step choreography in a vanilla single-file page; Flip + ScrollTrigger', 'The accelerator for this page: IG-loop beats, chip FLIP, scroll cues'],
-    ['Anime.js', 'v4.5.0 · Jun 2026', 'JS animation library', 'live DOM', MIT, 'v4 rewrite: timelines, springs, scroll-linked, ~10 KB core, createLayout FLIP', 'MIT-pure runner-up to GSAP — same choreography jobs'],
-    ['D3.js', 'v7.9.0', 'data-visualisation library', 'live SVG / Canvas', 'ISC', 'Data-join graphics — factorial counters, convergence charts', 'Charts for demos 2–4; pair with GSAP for choreography'],
-    ['Motion (ex-Framer Motion)', 'v12.42.2 · Jun 2026', 'React-first + vanilla API', 'live DOM', MIT, 'Best layout/FLIP animation if the page were React', 'Only via a React rewrite — skip for a single-file page'],
-    ['Svelte 5 transitions', '5.56.x', 'framework', 'live DOM', MIT, 'Built-in transitions, animate:flip, spring/tweened', 'Excellent inside Svelte only — a full rewrite here'],
-    ['Manim Community', 'v0.20.1 · Feb 2026', 'Python scene library', 'rendered video (MP4)', MIT, '<span class="star">★</span> Rendered math/algorithm exposition (3Blue1Brown-style); LLM-assisted authoring is now mainstream', 'The factorial ruler and the IG loop as a narrated video'],
-    ['Motion Canvas', 'v3.17.2 · Dec 2024', 'TypeScript storyboards + visual editor', 'rendered video', MIT, 'Generator-function scenes, JS-native Manim alternative', 'Strong if you stay in TS — public development quiet since late 2024'],
-    ['Remotion', 'v4.0.x · Jul 2026', 'React video framework', 'rendered video + interactive &lt;Player&gt;', 'Source-available: free for individuals &amp; orgs ≤ 3 people, paid Company License above; v5 announced, not released', '<span class="star">★</span> Polished marketing/social clips; data-driven video; renders locally, on Lambda, or in-browser WebCodecs', 'Social cuts of the race and the ruler'],
-    ['Observable Framework + Plot', 'v1.13.4 · Mar 2026', 'build-time site generator', 'static site with live JS', 'ISC', '<span class="star">★</span> Data-centric interactive explorable articles', 'Best-in-class for explorables — but a different architecture from one self-contained file'],
-    ['Rive', 'canvas runtime v2.38.5 · Jul 2026', 'runtime + editor', 'live interactive .riv', 'Runtimes MIT; editor freemium (free tier 3 files; from ~$9/seat/mo)', '<span class="star">★</span> Designer-authored mascots/operators; Data Binding (GA Apr 2025) wires live algorithm state to any property; exports video', 'A reactive “machine operator” mascot beside the demos'],
-    ['Lottie / dotLottie', 'lottie-web v5.13.0 · dotlottie-web v0.78.x', 'players + .lottie bundles', 'live vector playback', MIT + ' (lottie-web); dotLottie: Rust/WASM ThorVG renderer, theming + state machines', 'Decorative vector micro-animation', 'Weak for algorithm-driven choreography — polish only'],
-    ['Three.js / react-three-fiber', 'r185.1 · Jul 2026 · r3f v9.6.x', 'WebGL/WebGPU 3D', 'live 3D', MIT, 'WebGPURenderer + TSL now the default (~95% WebGPU coverage, WebGL2 auto-fallback)', 'Overkill for Gantt charts — the pick when real 3D is needed'],
-    ['p5.js', 'v2.3.0 · May 2026 (1.x EOL Mar 2026)', 'creative-coding sketchbook', 'live canvas', 'LGPL', 'Gentlest learning curve for quick interactive sims', 'No timeline/tween choreography — prototypes only'],
-    ['Theatre.js', 'v0.7.2 · May 2024', 'animation tooling', 'live DOM / Three.js', MIT, 'Timeline editor for programmatic motion', '<span class="flag">risky bet in 2026</span> development has gone private']
-  ];
-  ROWS.forEach(function(r){
-    var tr = el('tr');
-    var td = el('td', 'tname');
-    td.innerHTML = r[0] + '<span class="ver">' + r[1] + '</span>';
-    tr.appendChild(td);
-    for(var i = 2; i < 6; i++){
-      var c = el('td');
-      c.innerHTML = r[i];
-      tr.appendChild(c);
-    }
-    body.appendChild(tr);
-  });
-})();
 
 /* ============================================================
    Nav scroll-spy — highlight the anchor of the visible section
    ============================================================ */
-(function scrollSpy(){
+(function wayfinding(){
   var links = $all('#navList a');
+  var head = document.querySelector('.site-head');
+  var root = document.documentElement;
+
+  /* B1 — JS-driven scroll offset: --sm = header height + 10 (load/resize/langchange) */
+  function setOffset(){
+    if(head) root.style.setProperty('--sm', (Math.round(head.getBoundingClientRect().height) + 10) + 'px');
+  }
+  setOffset();
+  addEventListener('resize', setOffset, { passive:true });
+  addEventListener('langchange', setOffset);
+
+  /* B3 — 2px terracotta reading-progress hairline (rAF-throttled passive scroll) */
+  var prog = $('#readProgress'), ticking = false;
+  function paintProg(){
+    ticking = false;
+    if(!prog) return;
+    var max = root.scrollHeight - innerHeight;
+    var p = max > 0 ? Math.min(1, Math.max(0, (window.scrollY || root.scrollTop) / max)) : 0;
+    prog.style.width = (p * 100).toFixed(2) + '%';
+  }
+  addEventListener('scroll', function(){ if(!ticking){ ticking = true; requestAnimationFrame(paintProg); } }, { passive:true });
+  paintProg();
+
+  /* H3 — hide the hero scroll cue after the first scroll (once) */
+  (function(){
+    var cue = document.getElementById('scrollCue');
+    if(!cue) return;
+    var off = function(){ cue.classList.add('hide'); removeEventListener('scroll', off); };
+    addEventListener('scroll', off, { passive:true });
+  })();
+
+  /* B2 — scroll-spy over every main section, mapped onto the 5 nav anchors */
   if(!links.length || !('IntersectionObserver' in window)) return;
+  var NAV_FOR = {
+    'm-story':'m-story','demo-order':'m-story','demo-factorial':'m-story','demo-ig':'m-story',
+    'm-compare':'m-compare','demo-race':'m-compare','demo-benchmark':'m-compare',
+    'm-arena':'m-arena','m-run':'m-run','m-future':'m-future'
+  };
   var map = {}, visible = {};
   links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
-  var sections = $all('section.section');
+  var sections = $all('main > section');
   function refresh(){
     /* activate the first visible section in document order */
     var activeId = null;
     for(var i = 0; i < sections.length; i++){
-      if(visible[sections[i].id]){ activeId = sections[i].id; break; }
+      if(visible[sections[i].id]){ activeId = NAV_FOR[sections[i].id]; break; }
     }
     links.forEach(function(a){ a.classList.remove('active'); });
     if(activeId && map[activeId]) map[activeId].classList.add('active');
@@ -2572,15 +2509,37 @@ function onWinResize(fn){
   }, { rootMargin:'-20% 0px -60% 0px' });
   sections.forEach(function(s){ spy.observe(s); });
 })();
+
+/* ============================================================
+   A3 — legacy URL mapping at boot (preserves ?view=compare / #r= share links)
+   ============================================================ */
+(function legacyView(){
+  function go(id){
+    var t = document.getElementById(id);
+    if(!t) return;
+    setTimeout(function(){ t.scrollIntoView({ block:'start' }); }, 90);
+  }
+  var view = null;
+  try { view = new URLSearchParams(location.search).get('view'); } catch(e){}
+  var hash = location.hash || '';
+  if(/^#r=\d+\./i.test(hash))                       go('demo-race'); /* shared race link (seed set elsewhere) */
+  else if(view === 'compare')                        go('demo-race');
+  else if(view === 'studio' || /^#p=\d+/i.test(hash)) go('m-run');
+  else if(view === 'story')                          go('demo-ig');
+})();
 </script>
 <script>
-/* Report content height to the hosting STORY tab so the iframe can grow to fit */
+/* I2 — grow the studio iframe to fit its content (same-origin studio-height messages) */
 (function(){
-  function postH(){ try{ parent.postMessage({ igStoryH: document.documentElement.scrollHeight }, '*'); }catch(e){} }
-  window.addEventListener('load', postH);
-  if (window.ResizeObserver) new ResizeObserver(postH).observe(document.body);
-  window.addEventListener('resize', postH);
-  setTimeout(postH, 400); setTimeout(postH, 1200);
+  var frame = document.querySelector('.studio-frame');
+  if(!frame) return;
+  window.addEventListener('message', function(ev){
+    if(ev.source !== frame.contentWindow) return;      // only our own studio iframe
+    var d = ev.data;
+    if(!d || d.type !== 'studio-height') return;
+    var h = Math.max(620, Math.ceil(+d.height || 0));  // never collapse below 620px
+    if(h) frame.style.height = h + 'px';
+  });
 })();
 </script>
 
@@ -2601,9 +2560,9 @@ function onWinResize(fn){
   var HTML_PT = {
     "#m-arena .lede":
       'Antes de rodar qualquer coisa, conhe\u00e7a os competidores. Estes s\u00e3o os m\u00e9todos do ' +
-      '<b>estudo de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia MILP de uma hora e o ' +
+      '<b>estudo de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia exata (MILP) de uma hora e o ' +
       'Iterated Greedy escrito em Excel VBA. Escolha um para ver como ele se move \u2014 o diagrama \u00e9 ' +
-      'esquem\u00e1tico, nada est\u00e1 sendo resolvido aqui \u2014 e quanto ele pontuou nas 44 inst\u00e2ncias MaScLib. ' +
+      'esquem\u00e1tico, nada est\u00e1 sendo resolvido aqui \u2014 e quanto ele pontuou nas 44 inst\u00e2ncias do conjunto padr\u00e3o de benchmark MaScLib da literatura. ' +
       'Seis deles v\u00e3o trabalhar num cen\u00e1rio da sua escolha logo abaixo.',
     "#m-story h2": 'A ordem muda o tempo. <em>O tempo muda o custo.</em>',
     "#demo-order .lede":
@@ -2617,8 +2576,10 @@ function onWinResize(fn){
       'que você precisa chutar — e chutar bem.',
     "#demo-ig .lede":
       'Um motor Iterated Greedy real rodando nesta página sobre um problema fixo de 12 jobs e 4 famílias ' +
-      '(<b>mulberry32, seed 0xce29767d</b>). Nada é pré-gravado: cada posição de inserção é reavaliada ' +
-      'contra o objetivo completo enquanto você assiste. Observe os cinco tempos — <b>construir</b> pela ' +
+      '(<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b> (guloso), porque cada movimento pega a inserção ' +
+      'mais barata; <b>iterated</b> (iterado), porque ele faz loop — construir, quebrar, reconstruir. Nada é ' +
+      'pré-gravado: cada posição de inserção é reavaliada contra o objetivo completo enquanto você assiste — ' +
+      'e às vezes um job sai mais barato recusar do que encaixar. Observe os cinco tempos — <b>construir</b> pela ' +
       'melhor inserção, <b>destruir</b> três jobs, <b>medir cada inserção</b> no trilho de teste, ' +
       '<b>rejeitar no empate</b> quando nenhuma posição vence o custo de rejeição, <b>aceitar ou reverter</b>.',
     "#m-compare .m-title": 'A adivinhação realmente <em>compensa?</em>',
@@ -2644,8 +2605,38 @@ function onWinResize(fn){
     /* header + nav */
     "Story": "História",
     "Compare": "Comparar",
+    "Methods": "Métodos",
+    "Skip to the first demo": "Pular para a primeira demo",
+    "↓ it starts with five jobs": "↓ começa com cinco trabalhos",
     "Run": "Executar",
     "Future": "Futuro",
+    /* added figures / captions */
+    "Time runs left to right; the bill sits below it on one shared scale — orange setups + red delays, and the bar's length is the total. The clock stops at the last job's end (t); the bill stops at Σ.": "O tempo corre da esquerda para a direita; a conta está abaixo dele numa escala só — setups laranja + atrasos vermelhos, e o comprimento da barra é o total. O relógio para no fim do último job (t); a conta para no Σ.",
+    "A full app lives in this frame — on phones, scroll inside it.": "Um app completo vive neste quadro — em celulares, role dentro dele.",
+    "Idle — press Play or Step.": "Parado — pressione Play ou Passo.",
+    "Idle — press Play or Step": "Parado — pressione Play ou Passo",
+    "Ranks are provisional until the budget is spent": "As posições são provisórias até o orçamento se esgotar",
+    "— constructive methods stop early; iterative ones keep searching, so watch who is still climbing. Click a method to hide or show it.": "— métodos construtivos param cedo; os iterativos continuam buscando, então observe quem ainda está subindo. Clique em um método para ocultá-lo ou exibi-lo.",
+    "new best-knowns": "novos recordes",
+    "/ 44 instances": "/ 44 instâncias",
+    "Shuffle all three": "Embaralhar os três",
+    "PHASE": "FASE",
+    "Measuring": "Medindo",
+    "Swapping": "Trocando",
+    "Reverting": "Revertendo",
+    "setup+p": "setup+p",
+    "outside": "fora",
+    "Σ total": "Σ total",
+    "Candidate": "Candidato",
+    "Protected": "Protegido",
+    "Plan": "Plano",
+    "— appears once construction commits —": "— aparece quando a construção é confirmada —",
+    "built here — one cheapest insertion at a time": "construído aqui — uma inserção mais barata de cada vez",
+    "≈ 700× the age of the universe": "≈ 700× a idade do universo",
+    "faster than one screen refresh": "mais rápido que uma atualização de tela",
+    "one frame on a 240 Hz monitor": "um quadro em um monitor de 240 Hz",
+    "a blink — already too many to enumerate": "um piscar — já demais para enumerar",
+    "a human lifetime": "uma vida humana",
     "— single-machine scheduling": "— sequenciamento em máquina única",
     "An interactive explanation — the same jobs, a better order, and how a small algorithm finds it.":
       "Uma explicação interativa — os mesmos jobs, uma ordem melhor, e como um algoritmo simples a encontra.",
@@ -2692,8 +2683,8 @@ function onWinResize(fn){
     "bars are log₁₀ scale — each added job multiplies the count":
       "as barras estão em escala log₁₀ — cada job a mais multiplica a contagem",
     "Drag the slider — change the number of jobs": "Arraste o controle — mude o número de jobs",
-    "Complete orders — n!": "Ordens completas — n!",
-    "Candidate plans incl. rejection — Σ n!/(n−k)!": "Planos candidatos incl. rejeição — Σ n!/(n−k)!",
+    "Complete orders —": "Ordens completas —",
+    "Candidate plans incl. rejection —": "Planos candidatos incl. rejeição —",
     "Time to enumerate orders at 10⁹ plans/sec": "Tempo para enumerar as ordens a 10⁹ planos/s",
     "orders n! · log₁₀ scale": "ordens n! · escala log₁₀",
     "each job multiplies:": "cada job multiplica:",
@@ -2721,11 +2712,9 @@ function onWinResize(fn){
     "the candidate being built": "a candidata sendo construída",
     "Pending tray": "Bandeja pendente",
     "jobs waiting to be re-inserted": "jobs esperando para serem reinseridos",
-    "Idle — press Play or Step.": "Ocioso — aperte Play ou Passo.",
     "Objective sheet": "Planilha do objetivo",
     "setup&proc + delay + outside = total": "setup&proc + atraso + fora = total",
     "delay": "atraso",
-    "outside": "fora",
     "convergence — incumbent line + every evaluated candidate (filled = accepted)":
       "convergência — linha da titular + toda candidata avaliada (preenchida = aceita)",
     /* discrete demo-3 phase words (best-effort; sentences with numbers stay EN) */
@@ -2747,8 +2736,8 @@ function onWinResize(fn){
     "IG + swap-with-rejected": "IG + troca com rejeitados",
     "Random-restart descent": "Descida com reinício aleatório",
     "From one race to the whole benchmark": "De uma corrida ao benchmark inteiro",
-    "The race builds intuition. The recorded benchmark is the proof.":
-      "A corrida cria a intuição. O benchmark registrado é a prova.",
+    "The race builds intuition. The recorded benchmark is the evidence.":
+      "A corrida cria a intuição. O benchmark registrado é a evidência.",
     "Best-known values matched or beaten": "Melhores-conhecidos igualados ou superados",
     "Improved below the 2015 record": "Melhorados abaixo do recorde de 2015",
     "Independent correctness checks": "Verificações independentes de correção",
@@ -2759,8 +2748,8 @@ function onWinResize(fn){
     /* run */
     "Run · your turn": "Executar · sua vez",
     "Run the real engine, on real problems.": "Rode o motor de verdade, em problemas reais.",
-    "The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.":
-      "O mesmo motor validado, no seu navegador — escolha um cenário e um problema, escolha uma seed ou várias, e veja a busca acontecer. Sem instalação.",
+    "Iterated Greedy is a metaheuristic — a recipe for searching, not a fixed formula — and this is the recipe, running. The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.":
+      "Iterated Greedy é uma metaheurística — uma receita para buscar, não uma fórmula fixa — e esta é a receita, rodando. O mesmo motor validado, no seu navegador — escolha um cenário e um problema, escolha uma seed ou várias, e veja a busca acontecer. Sem instalação.",
     /* future */
     "Future · where it goes": "Futuro · para onde vai",
     "A tested baseline — and what comes next.": "Uma base testada — e o que vem a seguir.",
@@ -2797,7 +2786,7 @@ function onWinResize(fn){
     "Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.": "Milhares de buscas independentes avançam em passo único como um só programa de tensores. Enquanto o passo é limitado pelo custo de lançamento de kernels, a largura sai quase de graça — e deixa de sair conforme a instância cresce, que é o limite honesto da ideia. Roda em CPU com números idênticos quando não há GPU.",
     "Read the fleet": "Ler a frota",
     "B · Discovery": "B · Descoberta",
-    "An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key. Fifteen campaigns across three models reproduce the recorded outcome — a training gain that becomes a loss once the instances change — and rank inverse to model capability, so the ceiling is not the proposer.": "Um laço evolutivo propõe operadores de remoção e reavalia o vencedor em sementes novas e instâncias reservadas. O backend offline dispensa chave de API. Quinze campanhas em três modelos reproduzem o resultado registrado — um ganho no treino que vira derrota quando as instâncias mudam — e se ordenam de forma inversa à capacidade do modelo, então o teto não está em quem propõe.",
+    "An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.": "Um laço evolutivo propõe operadores de remoção e reavalia o vencedor em sementes novas e instâncias reservadas. O backend offline dispensa chave de API e reproduz o resultado registrado: um ganho saudável no treino que vira derrota para a remoção aleatória uniforme quando a divisão é honesta.",
     "Read the factory": "Ler a fábrica",
     "Training improvements did not generalize to held-out seeds and instances.": "Melhorias no treino não se generalizaram para sementes e instâncias reservadas.",
     "Question": "Pergunta",
@@ -2964,7 +2953,15 @@ function onWinResize(fn){
     "generation": "geração",
     "diversified": "diversificado",
     "destroy → rebuild": "destruir → reconstruir",
+    "destroy - rebuild - swap": "destruir - reconstruir - trocar",
+    "constructing (EDD)": "construindo (EDD)",
+    "stuck in a local minimum": "preso em um mínimo local",
+    "breeding population": "reproduzindo população",
+    "budget exhausted": "orçamento esgotado",
     "local optimum": "ótimo local",
+    "budget": "orçamento",
+    "evaluations": "avaliações",
+    "evals": "avaliações",
     "Share": "Compartilhar",
     "✓ copied": "✓ copiado"
   };
@@ -2973,10 +2970,21 @@ function onWinResize(fn){
   catch (e) { window.__lang = "en"; }
 
   var current = "en";
+  var META_DESC = {
+    en: "Iterated Greedy, explained interactively: the same jobs, a better order, and how a small algorithm finds it — live in one page.",
+    pt: "Iterated Greedy explicado interativamente: os mesmos jobs, uma ordem melhor, e como um algoritmo simples a encontra — ao vivo em uma página."
+  };
+  var DOC_TITLE = {
+    en: "Iterated Greedy — an interactive explanation",
+    pt: "Iterated Greedy — uma explicação interativa"
+  };
   function apply(lang) {
     current = lang;
     window.__lang = lang === "pt" ? "pt" : "en";
     document.documentElement.lang = lang === "pt" ? "pt-BR" : "en";
+    document.title = DOC_TITLE[lang] || DOC_TITLE.en;
+    var md = document.querySelector('meta[name="description"]');
+    if (md) md.setAttribute("content", META_DESC[lang] || META_DESC.en);
     applyHtml(lang);
     walk(lang);
     /* studio iframe follows the page language (reload with ?lang) */
@@ -3318,30 +3326,99 @@ function onWinResize(fn){
     },
     ama(ctx, W, H, p) { ANIM._amaBase(ctx, W, H, p, false); },
     amasp(ctx, W, H, p) { ANIM._amaBase(ctx, W, H, p, true); },
-    ig(ctx, W, H, p) {
-      const F = famC(), x0 = 24, y = 48, seq = [0, 2, 1, 3, 2, 0];
-      const out = [1, 4]; // destroyed
-      const pd = seg(p, 0.05, 0.3), pr1 = seg(p, 0.4, 0.6), pr2 = seg(p, 0.65, 0.85);
-      seq.forEach((c, i) => {
-        const k = out.indexOf(i);
-        if (k < 0) {
-          let xx = slotX(i, x0);
-          if (i > out[0]) xx -= pd * (BW + GAP) * (i > out[1] ? 2 : 1) * 0; // keeps gaps visible
-          blockM(ctx, xx, y, F[c], { a: 0.9 });
-        } else {
-          const pr = k === 0 ? pr1 : pr2;
-          const tx = slotX(k === 0 ? 2 : 4, x0) + BW / 2 - 2, ty = y; // returns at a better position
-          const sx = slotX(i, x0), sy = y, my = 112;
-          let xx, yy;
-          if (pr === 0) { xx = sx + (slotX(k * 2, 24) + 40 - sx) * pd; yy = sy + (my - sy) * pd; }
-          else { const bx = slotX(k * 2, 24) + 40; xx = bx + (tx - bx) * pr; yy = my + (ty - my) * pr - Math.sin(pr * Math.PI) * 18; }
-          blockM(ctx, xx, yy, F[c], { a: 0.9, dash: pr === 0 && pd === 1 });
-        }
+    ig(ctx, W, H, p, t) {
+      /* One labeled iteration: 1·destroy 2 jobs to the pool (gaps close) →
+         2·measure EVERY gap (caret + schematic Σ, best marked) → reinsert →
+         3·keep if better — accepts on even loops, reverts on odd ones. */
+      const F = famC(), muted = cssVar('--muted');
+      const cols = [0, 2, 1, 3, 2, 0];                       // family per job J1..J6
+      const x0 = 34, y = 54, poolX0 = 420, poolY = 104;
+      const orig = i => slotX(i, x0);                        // original slot x
+      const surv = { 0: 0, 2: 1, 3: 2, 5: 3 };               // compacted slots after destroy
+      const loop = Math.floor(((t || 0) - animT0) / 6000);
+      const accept = RM ? true : (loop % 2 === 0);
+      const pd = seg(p, .10, .32), pmA = seg(p, .40, .62), pa = seg(p, .62, .72),
+            pmB = seg(p, .74, .84), pb = seg(p, .86, .92), dec = seg(p, .90, 1),
+            rv = accept ? 0 : seg(p, .93, 1);
+      const lerp = (a, b, q) => a + (b - a) * q;
+      const arc = q => Math.sin(q * Math.PI) * 16;
+      /* per-job x/y through the beats */
+      const pos = [];
+      [0, 2, 3, 5].forEach(i => {                            // survivors
+        let x = lerp(orig(i), slotX(surv[i], x0), pd);       // close the gaps
+        if (i >= 3) x = lerp(x, slotX(surv[i] + 1, x0), pa); // J2's return pushes right
+        if (i === 5) x = lerp(x, slotX(5, x0), seg(p, .80, .86)); // J6 steps aside BEFORE J5 flies in
+        pos[i] = { x, yy: y };
       });
-      ctx.fillStyle = cssVar('--muted'); ctx.font = '10.5px system-ui'; ctx.textBaseline = 'middle';
+      const fly = (i, poolK, insertQ, gapSlot) => {          // destroyed jobs
+        const px = slotX(poolK, poolX0);
+        if (insertQ === 0) { pos[i] = { x: lerp(orig(i), px, pd), yy: lerp(y, poolY, pd) - arc(pd) }; }
+        else { pos[i] = { x: lerp(px, slotX(gapSlot, x0), insertQ), yy: lerp(poolY, y, insertQ) - arc(insertQ) }; }
+      };
+      fly(1, 0, pa, 2);                                      // J2 returns at gap 2
+      fly(4, 1, pb, 4);                                      // J5 returns at gap 4
+      if (rv > 0) for (let i = 0; i < 6; i++) pos[i] = { x: lerp(pos[i].x, orig(i), rv), yy: lerp(pos[i].yy, y, rv) };
+      /* pool zone */
+      ctx.save(); ctx.setLineDash([4, 3]); ctx.strokeStyle = muted; ctx.lineWidth = 1.2;
+      rrect(ctx, poolX0 - 14, poolY - 12, 2 * (BW + GAP) + 16, BH + 22, 6); ctx.stroke(); ctx.restore();
+      ctx.fillStyle = muted; ctx.font = '10px system-ui'; ctx.textBaseline = 'middle';
+      /* legend straddling the pool border — off the flight path */
+      const plbl = arenaText('destroyed pool', 'pouso das destruídas'), plw = ctx.measureText(plbl).width;
+      ctx.fillStyle = cssVar('--page'); ctx.fillRect(poolX0 - 8, poolY - 17, plw + 12, 10);
+      ctx.fillStyle = muted; ctx.fillText(plbl, poolX0 - 2, poolY - 12);
+      /* gap caret + Σ while measuring */
+      const gapsFor = n => { const g = [x0 - 5]; for (let k = 0; k < n; k++) g.push(slotX(k, x0) + BW + 5); return g; };
+      const sweep = (q, nGaps, costs, bestGap) => {
+        if (q <= 0) return;
+        const g = gapsFor(nGaps), idx = Math.min(nGaps, Math.floor(q * (nGaps + 1)));
+        for (let k = 0; k < idx; k++) { ctx.fillStyle = '#c4b795'; ctx.fillRect(g[k] - 1, y - 4, 2, BH + 8); }
+        const cx = g[idx];
+        ctx.strokeStyle = cssVar('--terra'); ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(cx, y - 8); ctx.lineTo(cx, y + BH + 8); ctx.stroke();
+        ctx.fillStyle = cssVar('--ink'); ctx.font = '700 9.5px ui-monospace, monospace';
+        ctx.fillText('Σ ' + costs[idx], Math.min(cx + 5, W - 46), y - 14);
+        if (q >= 1) {
+          ctx.strokeStyle = cssVar('--brass'); ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.moveTo(g[bestGap], y - 8); ctx.lineTo(g[bestGap], y + BH + 8); ctx.stroke();
+          pill(ctx, Math.min(g[bestGap] + 5, W - 92), y + BH + 12, arenaText('best gap', 'melhor vão'), cssVar('--brass'));
+        }
+      };
+      if (pmA > 0 && pa === 0) sweep(pmA, 4, [286, 262, 249, 271, 293], 2);
+      if (pmB > 0 && pb === 0) sweep(pmB, 5, [246, 241, 244, 239, 229, 248], 4);
+      /* blocks with job labels */
+      ctx.textAlign = 'center';
+      for (let i = 0; i < 6; i++) {
+        const dim = (i === 1 && pa === 0 && pd > 0) || (i === 4 && pb === 0 && pd > 0);
+        blockM(ctx, pos[i].x, pos[i].yy, F[cols[i]], { a: dim ? 0.75 : 0.95 });
+        ctx.font = '700 10px system-ui'; ctx.fillStyle = 'rgba(253,248,239,.95)';
+        ctx.strokeStyle = 'rgba(42,38,32,.3)'; ctx.lineWidth = 2.5;
+        ctx.strokeText('J' + (i + 1), pos[i].x + BW / 2, pos[i].yy + BH / 2 + 1);
+        ctx.fillText('J' + (i + 1), pos[i].x + BW / 2, pos[i].yy + BH / 2 + 1);
+      }
+      ctx.textAlign = 'left';
+      /* decide */
+      if (p >= .90) {
+        ctx.save(); ctx.globalAlpha = dec;
+        if (accept) {
+          ctx.strokeStyle = cssVar('--good'); ctx.lineWidth = 2;
+          rrect(ctx, x0 - 8, y - 8, 6 * (BW + GAP) + 10, BH + 16, 8); ctx.stroke();
+          pill(ctx, W - 250, 10, arenaText('candidate 229 < protected 243 — keep ✓', 'candidato 229 < titular 243 — fica ✓'), cssVar('--good'));
+        } else {
+          pill(ctx, W - 250, 10, arenaText('Δ +6 vs protected — revert', 'Δ +6 vs titular — reverte'), cssVar('--late'));
+        }
+        ctx.restore();
+      }
+      /* beat chip, top-left */
+      const beat =
+        p < .10 ? arenaText('one iteration of the loop', 'uma iteração do laço') :
+        p < .40 ? arenaText('1 · destroy d = 2 jobs', '1 · destruir d = 2 tarefas') :
+        p < .72 ? arenaText('2 · measure every gap — reinsert at the best', '2 · medir cada vão — reinserir no melhor') :
+        p < .90 ? arenaText('2 · again, second job', '2 · de novo, segunda tarefa') :
+        accept ? arenaText('3 · keep if better — accepted ✓', '3 · manter se melhorar — aceita ✓')
+               : arenaText('3 · keep if better — reverted', '3 · manter se melhorar — revertida');
+      pill(ctx, 10, 10, beat, cssVar('--ink'));
+      ctx.fillStyle = muted; ctx.font = '10.5px system-ui'; ctx.textBaseline = 'middle';
       ctx.fillText(arenaText('destroy d → reinsert at best position → keep if better', 'destruir d → reinserir na melhor posição → manter se melhorar'), 24, 144);
-      if (p >= 0.3 && p < 0.4) pill(ctx, W - 120, 20, arenaText('destroyed 2', '2 removidas'), cssVar('--serious'));
-      if (p >= 0.85) pill(ctx, W - 150, 20, arenaText('dynamic d̄ⱼ · accepted ✓', 'd̄ⱼ dinâmico · aceita ✓'), cssVar('--good'));
     },
   };
 
@@ -3350,7 +3427,7 @@ function onWinResize(fn){
     const ctx = mini.c.getContext('2d');
     ctx.clearRect(0, 0, mini.w, mini.h);
     const dur = 6000;
-    const STILL = { greedy: 0.95, descent: 0.9, tabu: 0.9, tabudiv: 0.82, ama: 0.9, amasp: 0.9, ig: 0.9, pl: 0.9 };
+    const STILL = { greedy: 0.95, descent: 0.9, tabu: 0.9, tabudiv: 0.82, ama: 0.9, amasp: 0.9, ig: 0.95, pl: 0.9 };
     const p = RM ? (STILL[sel] != null ? STILL[sel] : 0.9) : ((t - animT0) % dur) / dur;
     const s = Math.min(1, mini.w / 560); // 560px virtual stage on narrow screens
     ctx.save();
@@ -4262,7 +4339,7 @@ function onWinResize(fn){
       li.innerHTML = `
         <span class="st-rank" id="st-rank-${r.id}">–</span>
         <span class="st-dot" style="background:var(${r.colorVar})"></span>
-        <span class="st-name">${r.name}<small id="st-status-${r.id}">…</small></span>
+        <span class="st-name">${r.name}<span class="st-sep" aria-hidden="true"> · </span><small id="st-status-${r.id}"></small></span>
         <span class="st-cost"><span id="st-cost-${r.id}">–</span><small id="st-evals-${r.id}"></small></span>`;
       li.addEventListener('click', () => {
         r.off = !r.off;
@@ -4332,7 +4409,7 @@ function onWinResize(fn){
       ctx.fillStyle = cssVar('--muted'); ctx.fillText(fmt.format(Math.round(c)), padL - 6, Y(c));
     }
     ctx.textAlign = 'left';
-    ctx.fillText(__t('cost evaluations →'), padL, H - 8);
+    if (W >= 420) ctx.fillText(__t('cost evaluations →'), padL, H - 8); /* H5 — drop x-caption on narrow canvases */
     // linhas
     const ends = [];
     for (const r of racers) {

@@ -18,6 +18,10 @@ import {
   summarizeRunComparison,
 } from "./analytics/statistics.js";
 import { normalizeUiLocale, translator } from "./i18n.js";
+import { createRaceEvaluator } from "./race/evaluate.js";
+import { createRaceStrategies } from "./race/strategies.js";
+import { createSpaceBuilder } from "./race/space.js";
+import { createRaceView } from "./race/view.js";
 import {
   FAMILY_COLORS,
   attachCanvasTooltip,
@@ -32,8 +36,9 @@ const DEFAULTS = Object.freeze({
   language: "en",
   scenario: "factory",
   instance: "STC_NCOS_31",
-  mode: "single",
+  mode: "race",
   iterationBudget: 10_000,
+  raceBudget: 250_000,
   seed: 16,
   runs: 30,
   d: 2,
@@ -86,6 +91,25 @@ function clampInteger(value, minimum, maximum, fallback) {
   return Number.isSafeInteger(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback;
 }
 
+/** Sensible per-method evaluation budget for the race, by instance size. */
+/** Method roster shown before the first race (mirrors createRaceStrategies). */
+const RACE_ROSTER = Object.freeze([
+  { id: "ig", name: "Iterated Greedy", colorVar: "--race-ig" },
+  { id: "greedy", name: "Greedy", colorVar: "--race-greedy" },
+  { id: "descent", name: "Descent", colorVar: "--race-descent" },
+  { id: "tabu", name: "Tabu", colorVar: "--race-tabu" },
+  { id: "tabudiv", name: "TabuDiv", colorVar: "--race-tabudiv" },
+  { id: "ama", name: "AMA (memetic)", colorVar: "--race-ama" },
+]);
+
+function raceBudgetDefault(n) {
+  if (n >= 400) return 100_000;
+  if (n >= 180) return 150_000;
+  if (n >= 100) return 200_000;
+  if (n >= 40) return 250_000;
+  return 350_000;
+}
+
 function formatSeedRange(runs) {
   if (!runs?.length) return "—";
   const seeds = runs.map((run) => run.seed);
@@ -103,6 +127,7 @@ class IGStudioApp {
       instanceId: this.options.instance,
       mode: this.options.mode,
       iterationBudget: this.options.iterationBudget,
+      raceBudget: this.options.raceBudget,
       seed: this.options.seed,
       runs: this.options.runs,
       d: this.options.d,
@@ -113,6 +138,8 @@ class IGStudioApp {
       liveCheckpoints: [],
       singleResult: null,
       comparisonResult: null,
+      race: null,
+      raceResult: null,
       selectedRunSeed: null,
       scheduleFilter: "all",
       scheduleQuery: "",
@@ -124,6 +151,7 @@ class IGStudioApp {
       rawCatalog: null,
     };
     this.client = null;
+    this.raceView = createRaceView(this);
     this.chartCleanups = [];
     this.renderTimer = 0;
     this.renderNeedsFull = false;
@@ -238,6 +266,7 @@ class IGStudioApp {
   async selectInstance(instanceId, { render = true } = {}) {
     if (!this.state.rawCatalog?.[instanceId]) throw new Error(`Missing embedded instance: ${instanceId}`);
     if (this.state.status === "running" || this.state.status === "paused") await this.client.reset();
+    await this.teardownRace({ keepResult: false });
     await this.client.selectInstance(instanceId);
     this.state.instanceId = instanceId;
     this.state.instance = parseMasclib(this.state.rawCatalog[instanceId].csv, instanceId);
@@ -257,7 +286,20 @@ class IGStudioApp {
     }
   }
 
+  /** Stop the race loop and drop the live race; keeps no timers behind. */
+  async teardownRace({ keepResult = true } = {}) {
+    const race = this.state.race;
+    if (!race) return;
+    this.raceView.stop();
+    this.state.race = null;
+    if (race.enginePhase === "pilot" || race.enginePhase === "main") {
+      try { await this.client?.reset(); } catch { /* engine already idle */ }
+    }
+    if (!keepResult) this.state.raceResult = null;
+  }
+
   activeRun() {
+    if (this.state.mode === "race") return this.state.raceResult;
     if (this.state.mode === "single") return this.state.singleResult;
     const runs = this.state.comparisonResult?.runs || [];
     if (!runs.length) return null;
@@ -276,6 +318,7 @@ class IGStudioApp {
   }
 
   async startRun() {
+    if (this.state.mode === "race") return this.startRace({ force: false });
     if (!this.client || !this.state.instance || ["running", "paused"].includes(this.state.status)) return;
     const controlValue = (selector, fallback) => this.container.querySelector(selector)?.value ?? fallback;
     this.state.iterationBudget = clampInteger(controlValue("#budget-input", this.state.iterationBudget), 1, 1_000_000_000, 10_000);
@@ -321,7 +364,140 @@ class IGStudioApp {
     }
   }
 
+  /**
+   * Start (or restart) the method race on the current instance. Purely
+   * client-side: six ported strategies share the race evaluator; the WASM
+   * engine only runs a calibrated reference trace in the background.
+   */
+  async startRace({ force = true } = {}) {
+    if (!this.state.instance) return;
+    if (!force && ["running", "paused"].includes(this.state.status)) return;
+    const controlValue = (selector, fallback) => this.container.querySelector(selector)?.value ?? fallback;
+    this.state.raceBudget = clampInteger(controlValue("#race-budget-input", this.state.raceBudget), 1_000, 100_000_000, raceBudgetDefault(this.state.instance.n));
+    this.state.seed = clampInteger(controlValue("#seed-input", this.state.seed), 0, 0xffff_ffff, 1);
+    const speed = this.state.race?.speed ?? 1;
+    await this.teardownRace({ keepResult: false });
+    const evaluator = createRaceEvaluator(this.state.instance);
+    this.state.race = {
+      evaluator,
+      racers: createRaceStrategies({ evaluator, seed: this.state.seed }),
+      seed: this.state.seed,
+      budget: this.state.raceBudget,
+      spaceBuilder: createSpaceBuilder(evaluator, this.state.seed),
+      space: null,
+      playing: true,
+      speed,
+      done: false,
+      winner: null,
+      maxEvals: 0,
+      enginePhase: "off",
+      engineTrace: [],
+      hover: null,
+      focus: null,
+      selLeaf: null,
+    };
+    this.state.raceResult = null;
+    this.state.status = "running";
+    this.state.error = null;
+    this.render();
+    this.raceView.start();
+    this.startEngineReference(this.state.race);
+  }
+
+  /** Engine reference: calibrate iterations→evaluations with a pilot run,
+   * then run the WASM IG once to trace best-cost over evaluations. */
+  async startEngineReference(race) {
+    try {
+      race.enginePhase = "pilot";
+      await this.client.reset();
+      if (this.state.race !== race) return;
+      await this.client.configure({
+        seed: race.seed,
+        iterationBudget: 24,
+        checkpointEvery: 4,
+        progressIntervalMs: 0,
+        d: this.state.d,
+        accept: this.state.accept,
+        permute: this.state.permute,
+      });
+      if (this.state.race !== race) return;
+      await this.client.start();
+    } catch {
+      if (this.state.race === race) race.enginePhase = "off";
+    }
+  }
+
+  async onEngineRefComplete(result) {
+    const race = this.state.race;
+    if (!race || race.enginePhase === "off") return;
+    if (race.enginePhase === "pilot") {
+      try {
+        const iterations = Math.max(1, result.iterations || 1);
+        const evalsPerIteration = Math.max(1, (result.evaluations || iterations) / iterations);
+        const budgetIterations = clampInteger(Math.ceil((race.budget * 1.08) / evalsPerIteration), 30, 1_000_000_000, 2_000);
+        race.enginePhase = "main";
+        await this.client.reset();
+        if (this.state.race !== race) return;
+        await this.client.configure({
+          seed: race.seed,
+          iterationBudget: budgetIterations,
+          checkpointEvery: Math.max(1, Math.floor(budgetIterations / 170)),
+          progressIntervalMs: 150,
+          d: this.state.d,
+          accept: this.state.accept,
+          permute: this.state.permute,
+        });
+        if (this.state.race !== race) return;
+        await this.client.start();
+      } catch {
+        if (this.state.race === race) race.enginePhase = "off";
+      }
+      return;
+    }
+    if (this.state.race !== race) return;
+    race.enginePhase = "done";
+    if (Array.isArray(result.checkpoints) && result.checkpoints.length > 1) {
+      race.engineTrace = result.checkpoints.map((point) => ({
+        e: point.evaluations ?? point.evals,
+        c: point.bestCost ?? point.cost,
+      }));
+    }
+  }
+
+  onRaceFinished() {
+    const race = this.state.race;
+    if (!race) return;
+    if (race.winner?.bestSol) {
+      this.state.raceResult = {
+        instance: this.state.instanceId,
+        seed: race.seed,
+        iterations: null,
+        evaluations: race.winner.evals,
+        cost: race.winner.bestCost,
+        bestCost: race.winner.bestCost,
+        order: race.evaluator.toEngineOrder(race.winner.bestSol.order),
+        checkpoints: [],
+      };
+      this.assertClosure(this.state.raceResult);
+    }
+    this.state.status = "complete";
+    if (race.enginePhase === "pilot" || race.enginePhase === "main") {
+      this.client?.pause().catch(() => {});
+    }
+    this.render();
+  }
+
   onProgress(progress) {
+    if (this.state.mode === "race") {
+      const race = this.state.race;
+      if (race && race.enginePhase === "main" && Number.isFinite(progress.evaluations)) {
+        const last = race.engineTrace.at(-1);
+        if (!last || last.e !== progress.evaluations) {
+          race.engineTrace.push({ e: progress.evaluations, c: progress.bestCost });
+        }
+      }
+      return;
+    }
     this.state.progress = progress;
     this.state.status = "running";
     let needsFullRender = false;
@@ -358,6 +534,10 @@ class IGStudioApp {
   }
 
   onSingleComplete(result) {
+    if (this.state.mode === "race") {
+      this.onEngineRefComplete(result);
+      return;
+    }
     this.state.singleResult = result;
     this.state.progress = { ...result, mode: "single", iterationBudget: this.state.iterationBudget };
     this.state.status = "complete";
@@ -440,6 +620,17 @@ class IGStudioApp {
   }
 
   async reset() {
+    if (this.state.mode === "race") {
+      this.raceView.stop();
+      const hadEngine = this.state.race && this.state.race.enginePhase !== "off" && this.state.race.enginePhase !== "done";
+      this.state.race = null;
+      this.state.raceResult = null;
+      this.state.status = "ready";
+      this.state.error = null;
+      if (hadEngine) { try { await this.client.reset(); } catch { /* engine already idle */ } }
+      this.render();
+      return;
+    }
     try {
       await this.client.reset();
       this.state.status = "ready";
@@ -454,6 +645,11 @@ class IGStudioApp {
   }
 
   progressRatio() {
+    if (this.state.mode === "race") {
+      const race = this.state.race;
+      if (!race) return this.state.raceResult ? 1 : 0;
+      return race.done ? 1 : Math.min(1, (race.maxEvals || 0) / Math.max(1, race.budget));
+    }
     const progress = this.state.progress;
     if (!progress) return this.state.status === "complete" ? 1 : 0;
     const within = Math.min(1, (progress.iterations || 0) / Math.max(1, this.state.iterationBudget));
@@ -510,15 +706,17 @@ class IGStudioApp {
     const instanceLabel = this.instanceDisplayLabel(selectedMapping);
     const instanceNote = selectedMapping?.interpretation?.note || this.t("misc.fixedCatalogNote");
     const running = ["running", "paused"].includes(this.state.status);
-    const compactRail = this.state.page !== "overview" || this.state.mode === "comparison" || Boolean(this.state.singleResult || this.state.comparisonResult);
+    const compactRail = this.state.page !== "overview" || this.state.mode === "comparison" || this.state.mode === "race" || Boolean(this.state.singleResult || this.state.comparisonResult || this.state.raceResult);
     const statusText = this.statusText();
-    const hasOverviewResult = this.state.mode === "comparison" ? Boolean(this.state.comparisonResult) : Boolean(this.state.singleResult);
+    const hasOverviewResult = this.state.mode === "comparison" ? Boolean(this.state.comparisonResult) : this.state.mode === "race" ? Boolean(this.state.raceResult || this.state.race) : Boolean(this.state.singleResult);
     const mobileTitle = hasOverviewResult
-      ? (this.state.mode === "comparison" ? this.t("overview.compareTitle") : this.t("overview.singleTitle"))
+      ? (this.state.mode === "comparison" ? this.t("overview.compareTitle") : this.state.mode === "race" ? this.t("race.title") : this.t("overview.singleTitle"))
       : this.t("overview.initialTitle");
     const modeSummary = this.state.mode === "comparison"
       ? `${this.t("controls.compare")} · ${this.state.runs} · ${this.fmt(this.state.iterationBudget)} ${this.t("controls.perSeed")}`
-      : `${this.t("controls.oneRun")} · ${this.fmt(this.state.iterationBudget)} · seed ${this.state.seed}`;
+      : this.state.mode === "race"
+        ? `${this.t("controls.race")} · ${this.fmt(this.state.raceBudget)} ${this.t("controls.perMethod")}`
+        : `${this.t("controls.oneRun")} · ${this.fmt(this.state.iterationBudget)} · seed ${this.state.seed}`;
     return `<aside class="control-rail ${compactRail ? "is-compact" : ""}" aria-label="${escapeHtml(this.t("a11y.controls"))}">
       ${this.state.page === "overview" ? this.renderScenarioSelector() : ""}
       ${this.state.page === "overview" ? `<header class="mobile-rail-intro"><h1>${escapeHtml(mobileTitle)}</h1></header>` : ""}
@@ -527,7 +725,7 @@ class IGStudioApp {
       <div class="selected-instance-story"><strong>${escapeHtml(instanceLabel)}</strong><span>${escapeHtml(instanceNote)}</span></div>
       <nav class="rail-modes" aria-label="${escapeHtml(this.t("a11y.primary"))}">
         <button class="rail-mode" data-page="overview" aria-current="${this.state.page === "overview" ? "page" : "false"}">${escapeHtml(this.t("nav.overview"))}</button>
-        <button class="rail-mode" data-page="schedule" aria-current="${this.state.page === "schedule" ? "page" : "false"}"${(this.state.singleResult || this.state.comparisonResult) ? "" : " disabled"}>${escapeHtml(this.t("nav.schedule"))}</button>
+        <button class="rail-mode" data-page="schedule" aria-current="${this.state.page === "schedule" ? "page" : "false"}"${(this.state.singleResult || this.state.comparisonResult || this.state.raceResult) ? "" : " disabled"}>${escapeHtml(this.t("nav.schedule"))}</button>
       </nav>
       <details class="model-disclosure">
         <summary>${escapeHtml(this.t("actions.simplify"))}</summary>
@@ -543,16 +741,22 @@ class IGStudioApp {
         </label>
         <div class="field mode-field"><span class="field-label">${escapeHtml(this.t("controls.runMode"))}</span>
           <div class="segmented" role="group">
+            <button data-mode="race" aria-pressed="${this.state.mode === "race"}" ${running ? "disabled" : ""}>${escapeHtml(this.t("controls.race"))}</button>
             <button data-mode="single" aria-pressed="${this.state.mode === "single"}" ${running ? "disabled" : ""}>${escapeHtml(this.t("controls.oneRun"))}</button>
             <button data-mode="comparison" aria-pressed="${this.state.mode === "comparison"}" ${running ? "disabled" : ""}>${escapeHtml(this.t("controls.compare"))}</button>
           </div>
         </div>
-        <label class="field"><span>${escapeHtml(this.t("controls.budget"))}</span>
+        ${this.state.mode === "race"
+          ? `<label class="field"><span>${escapeHtml(this.t("controls.raceBudget"))}</span>
+          <div class="field-inline"><input id="race-budget-input" type="number" min="1000" max="100000000" step="1000" value="${this.state.raceBudget}" ${running ? "disabled" : ""}><span class="field-suffix">${escapeHtml(this.t("controls.perMethod"))}</span></div>
+        </label>`
+          : `<label class="field"><span>${escapeHtml(this.t("controls.budget"))}</span>
           <div class="field-inline"><input id="budget-input" type="number" min="1" max="1000000000" step="100" value="${this.state.iterationBudget}" ${running ? "disabled" : ""}><span class="field-suffix">${this.state.mode === "comparison" ? escapeHtml(this.t("controls.perSeed")) : ""}</span></div>
-        </label>
-        ${this.state.mode === "single" ? `<label class="field"><span>${escapeHtml(this.t("controls.seed"))}</span><input id="seed-input" type="number" min="0" max="4294967295" step="1" value="${this.state.seed}" ${running ? "disabled" : ""}></label>`
-          : `<label class="field"><span>${escapeHtml(this.t("controls.runs"))}</span><input id="runs-input" type="number" min="2" max="64" step="1" value="${this.state.runs}" ${running ? "disabled" : ""}></label>
-             <label class="field"><span>${escapeHtml(this.t("controls.seed"))}</span><input id="seed-input" type="number" min="0" max="4294967232" step="1" value="${this.state.seed}" ${running ? "disabled" : ""}></label>`}
+        </label>`}
+        ${this.state.mode === "comparison"
+          ? `<label class="field"><span>${escapeHtml(this.t("controls.runs"))}</span><input id="runs-input" type="number" min="2" max="64" step="1" value="${this.state.runs}" ${running ? "disabled" : ""}></label>
+             <label class="field"><span>${escapeHtml(this.t("controls.seed"))}</span><input id="seed-input" type="number" min="0" max="4294967232" step="1" value="${this.state.seed}" ${running ? "disabled" : ""}></label>`
+          : `<label class="field"><span>${escapeHtml(this.t("controls.seed"))}</span><input id="seed-input" type="number" min="0" max="4294967295" step="1" value="${this.state.seed}" ${running ? "disabled" : ""}></label>`}
         <details class="advanced"><summary>${escapeHtml(this.t("actions.settings"))}</summary><div class="advanced-grid">
           <label class="field"><span>${escapeHtml(this.t("controls.destruction"))}</span><input id="d-input" type="number" min="1" max="${this.state.instance?.n || 500}" value="${this.state.d}" ${running ? "disabled" : ""}></label>
           <label class="field"><span>${escapeHtml(this.t("controls.acceptance"))}</span><select id="accept-select" ${running ? "disabled" : ""}><option value="current" ${this.state.accept === "current" ? "selected" : ""}>${escapeHtml(this.t("controls.current"))}</option><option value="best" ${this.state.accept === "best" ? "selected" : ""}>${escapeHtml(this.t("controls.best"))}</option></select></label>
@@ -560,7 +764,7 @@ class IGStudioApp {
         </div></details>
         </div>
         <div class="run-dock">
-          <button class="primary-action" data-action="run" ${running || this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.state.mode === "comparison" ? this.t("actions.runSeeds", { count: this.state.runs }) : this.t("actions.run"))}</button>
+          <button class="primary-action" data-action="run" ${running || this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.state.mode === "comparison" ? this.t("actions.runSeeds", { count: this.state.runs }) : this.state.mode === "race" ? this.t("actions.runRace") : this.t("actions.run"))}</button>
           <div class="transport">
             <button class="secondary-action" data-action="pause" ${!running ? "disabled" : ""}>${escapeHtml(this.state.status === "paused" ? this.t("actions.resume") : this.t("actions.pause"))}</button>
             <button class="secondary-action" data-action="reset" ${this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.t("actions.reset"))}</button>
@@ -594,6 +798,7 @@ class IGStudioApp {
     if (this.state.page === "schedule") return this.renderSchedulePage();
     if (this.state.page === "instance") return this.renderInstancePage();
     if (this.state.page === "method") return this.renderMethodPage();
+    if (this.state.mode === "race") return this.renderRacePage();
     return this.renderOverviewPage();
   }
 
@@ -674,6 +879,130 @@ class IGStudioApp {
       ${selectedEvaluation ? `<section class="selected-schedule"><div class="selected-run-head"><div><h2>${escapeHtml(this.t("overview.resourceSchedule", { resource: this.scenario().vocabulary.resource }))} · seed ${selected.seed}</h2><span class="section-note">${escapeHtml(this.t("overview.best"))} ${this.fmt(selected.bestCost)}</span></div>${this.renderRunPicker()}</div><div class="chart-frame gantt-frame"><div class="gantt-scroll"><canvas id="selected-gantt" data-height="178"></canvas></div><div class="chart-tooltip" hidden></div></div></section>` : ""}`;
   }
 
+  raceStatusLabel(status) {
+    const key = status?.key || "preparing";
+    return this.t(`race.status.${key}`, { count: status?.arg });
+  }
+
+  renderRacePage() {
+    const instance = this.state.instance;
+    const head = `<header class="page-head with-scenario"><div class="page-head-main"><h1>${escapeHtml(this.t("race.title"))}</h1><p>${escapeHtml(this.t("race.sub"))}</p></div><span class="page-scenario-tag">${escapeHtml(this.scenario().name)}</span></header>`;
+    if (!instance) return `${head}${this.renderEmptyState()}`;
+    const race = this.state.race;
+    const scenario = this.scenario();
+    const metadata = this.metadata();
+    const summary = instanceSummary(instance);
+    const mapping = this.scenarioInstance();
+    const reference = this.referenceCost();
+    const playing = Boolean(race?.playing);
+    const running = Boolean(race && !race.done);
+    const done = Boolean(race?.done);
+    const speed = race?.speed ?? 1;
+    const instanceLabel = this.instanceDisplayLabel(mapping);
+    const instanceNote = mapping?.interpretation?.note || this.t("misc.fixedCatalogNote");
+    const setupCosts = instance.setupCost.flat().filter((value) => value > 0);
+    const rangeOf = (values) => {
+      const finite = values.filter(Number.isFinite);
+      return finite.length ? `${this.fmt(Math.min(...finite))}–${this.fmt(Math.max(...finite))}` : "—";
+    };
+    const facts = [
+      [this.t("overview.selectedInstance"), `${instanceLabel} · ${this.state.instanceId}`],
+      [this.t("overview.workItems"), `${summary.jobs} × ${scenario.vocabulary.job}`],
+      [this.t("instance.families"), String(summary.families)],
+      [this.t("overview.changeovers"), metadata?.hasSequenceDependentSetups ? this.t("overview.changeoversYes") : this.t("overview.changeoversNo")],
+      [this.t("overview.targetWindow"), `${this.fmt(summary.due.min)}–${this.fmt(summary.due.max)} ${this.t("misc.timeUnits")}`],
+      [this.t("overview.reference"), reference ? this.fmt(reference) : this.t("misc.noReference")],
+    ];
+    const variables = [
+      [scenario.vocabulary.releaseTime, `${rangeOf(instance.jobs.map((job) => job.releaseTime))} ${this.t("misc.timeUnits")}`],
+      [scenario.vocabulary.processingTime, `${rangeOf(instance.jobs.map((job) => job.processingTime))} ${this.t("misc.timeUnits")}`],
+      [scenario.vocabulary.dueDate, `${rangeOf(instance.jobs.map((job) => job.due))} ${this.t("misc.timeUnits")}`],
+      [scenario.vocabulary.hardDeadline, summary.hardDeadline.min == null ? "—" : `${rangeOf(instance.jobs.map((job) => job.hardDeadline))} ${this.t("misc.timeUnits")}`],
+      [scenario.vocabulary.setupCost, setupCosts.length ? rangeOf(setupCosts) : "0"],
+      [scenario.vocabulary.executionCost, rangeOf(instance.jobs.map((job) => job.processingCost))],
+      [scenario.vocabulary.tardinessWeight, rangeOf(instance.jobs.map((job) => job.weight))],
+      [scenario.vocabulary.rejectionCost, rangeOf(instance.jobs.map((job) => job.rejectionCost))],
+    ];
+    const roster = race?.racers || RACE_ROSTER;
+    const standing = race ? race.racers.slice().sort((a, b) => a.bestCost - b.bestCost) : [];
+    const playLabel = playing ? this.t("actions.pause") : running ? this.t("actions.resume") : this.t("race.play");
+    const standingsRows = roster.map((racer) => {
+      const rank = race ? standing.indexOf(racer) : -1;
+      const hasCost = race && Number.isFinite(racer.bestCost);
+      return `<li id="race-st-${racer.id}" data-racer="${racer.id}" class="${racer.off ? "off" : ""}${rank === 0 && hasCost && !racer.off ? " leader" : ""}" style="order:${rank >= 0 ? rank : 0}" role="button" tabindex="0" aria-pressed="${racer.off ? "false" : "true"}" title="${escapeHtml(this.t("race.toggleMethod"))}">
+        <span class="st-rank" data-st="rank">${hasCost ? `#${rank + 1}` : "–"}</span>
+        <span class="st-dot" style="background:var(${racer.colorVar})"></span>
+        <span class="st-name">${escapeHtml(racer.name)}<small data-st="status">${race ? escapeHtml(this.raceStatusLabel(racer.status)) : "…"}</small></span>
+        <span class="st-cost"><span data-st="cost">${hasCost ? escapeHtml(this.fmt(racer.bestCost)) : "–"}</span><small data-st="evals">${race ? `${escapeHtml(this.fmt(racer.evals))} ${escapeHtml(this.t("race.evals"))}` : ""}</small></span>
+      </li>`;
+    }).join("");
+    const leader = standing[0];
+    const leaderNote = leader && Number.isFinite(leader.bestCost)
+      ? this.t("race.leaderNote", { method: `<strong>${escapeHtml(leader.name)}</strong>`, cost: escapeHtml(this.fmt(leader.bestCost)) })
+      : "";
+    const maxE = race?.maxEvals || 0;
+    const budgetPct = race ? Math.min(100, (100 * maxE) / Math.max(1, race.budget)) : 0;
+    const budgetLabel = race
+      ? `${this.t("race.budgetUsed")} ${this.fmt(maxE)} / ${this.fmt(race.budget)} ${this.t("race.evalsPerMethod")}`
+      : `${this.t("race.budgetUsed")} 0 / ${this.fmt(this.state.raceBudget)} ${this.t("race.evalsPerMethod")}`;
+    const spaceSupported = race ? race.spaceBuilder.supported : instance.n <= 400;
+    const finalGrid = done ? this.renderRaceFinalGrid(race, reference) : "";
+    return `${head}
+      <section class="race-brief">
+        <div class="race-brief-main">
+          <dl class="problem-facts race-facts">${facts.map(([label, value]) => `<div><dt>${escapeHtml(label)}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl>
+          <p class="race-instance-note"><strong>${escapeHtml(instanceLabel)}</strong> — ${escapeHtml(instanceNote)}</p>
+          <details class="race-variables"><summary>${escapeHtml(this.t("race.variablesTitle"))}</summary><dl>${variables.map(([label, value]) => `<div><dt>${escapeHtml(sentenceLabel(label))}</dt><dd>${escapeHtml(value)}</dd></div>`).join("")}</dl></details>
+        </div>
+        <div class="race-transport">
+          <button class="primary-action" data-action="race-play" ${!race && this.state.status !== "ready" ? "disabled" : ""}>${escapeHtml(playLabel)}</button>
+          <button class="secondary-action" data-action="race-new" ${this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.t("race.newRace"))}</button>
+          <div class="race-speed" role="group" aria-label="${escapeHtml(this.t("race.speed"))}"><span>${escapeHtml(this.t("race.speed"))}</span>${[1, 2, 4].map((value) => `<button data-rspeed="${value}" aria-pressed="${speed === value}">${value}×</button>`).join("")}</div>
+          <div class="race-budget" aria-hidden="true"><div class="race-budget-track"><div class="race-budget-fill" id="race-budget-fill" style="width:${budgetPct.toFixed(2)}%"></div></div><small id="race-budget-label">${escapeHtml(budgetLabel)}</small></div>
+        </div>
+      </section>
+      <div class="race-grid">
+        <section class="analysis-panel race-standings-panel">
+          <div class="section-title-row"><h2>${escapeHtml(this.t("race.standings"))}</h2><span class="section-note">${escapeHtml(this.t("race.standingsNote"))}</span></div>
+          <ol class="race-standings" id="race-standings">${standingsRows}</ol>
+          <p class="race-leader-note" id="race-leader-note">${leaderNote}</p>
+        </section>
+        <section class="analysis-panel race-convergence-panel">
+          <div class="section-title-row"><h2>${escapeHtml(this.t("race.convergenceTitle"))}</h2><span class="section-note">${escapeHtml(this.t("overview.lower"))}</span></div>
+          <div class="chart-frame race-chart-frame"><canvas id="race-canvas" data-height="290" aria-label="${escapeHtml(this.t("race.convergenceTitle"))}"></canvas><div class="chart-tooltip" hidden></div></div>
+          <div class="stat-legend"><span><i class="legend-dash"></i>${escapeHtml(this.t("race.engineRef"))}</span>${reference ? `<span><i class="legend-dash amber"></i>${escapeHtml(this.t("race.referenceBest"))}</span>` : ""}<span class="axis-label">${escapeHtml(this.t("overview.evaluationsAxis"))} →</span></div>
+        </section>
+      </div>
+      <section class="analysis-panel race-space-panel">
+        <div class="section-title-row"><h2>${escapeHtml(this.t("race.spaceTitle"))}</h2><span class="section-note" id="race-space-progress">${race?.spaceBuilder && !race.spaceBuilder.done ? escapeHtml(this.t("race.spaceSampling", { pct: Math.round(race.spaceBuilder.progress * 100) })) : ""}</span></div>
+        ${spaceSupported
+          ? `<div class="chart-frame race-space-frame"><canvas id="space-canvas" data-height="440" aria-label="${escapeHtml(this.t("race.spaceTitle"))}"></canvas><div class="chart-tooltip" hidden></div></div><p class="race-space-note" id="race-space-note">${race?.selLeaf ? "" : escapeHtml(this.t("race.spaceCaption"))}</p>`
+          : `<p class="race-space-note" id="race-space-note">${escapeHtml(this.t("race.spaceUnavailable", { jobs: instance.n }))}</p>`}
+      </section>
+      ${finalGrid}`;
+  }
+
+  renderRaceFinalGrid(race, reference) {
+    const sorted = race.racers.slice().sort((a, b) => a.bestCost - b.bestCost);
+    const rows = sorted.map((racer, index) => {
+      const gap = reference && Number.isFinite(racer.bestCost) ? gapToReference(racer.bestCost, reference) : null;
+      const isWinner = racer === race.winner;
+      return `<tr class="${isWinner ? "is-winner" : ""}">
+        <td>${index + 1}</td>
+        <td><span class="st-dot" style="background:var(${racer.colorVar})"></span> ${escapeHtml(racer.name)}${isWinner ? ` <span class="race-winner-badge">${escapeHtml(this.t("race.winner"))}</span>` : ""}</td>
+        <td>${escapeHtml(this.fmt(racer.bestCost))}</td>
+        <td>${gap == null ? "—" : escapeHtml(this.pct(gap))}</td>
+        <td>${escapeHtml(this.fmt(racer.evals))}</td>
+        <td>${escapeHtml(this.raceStatusLabel(racer.status))}</td>
+      </tr>`;
+    }).join("");
+    return `<section class="analysis-panel race-final">
+      <div class="section-title-row"><h2>${escapeHtml(this.t("race.finalTitle"))}</h2><span class="section-note">${escapeHtml(this.t("race.finalSub", { budget: this.fmt(race.budget) }))}</span></div>
+      <div class="data-table-wrap"><table class="data-table race-final-table"><thead><tr><th>#</th><th>${escapeHtml(this.t("race.method"))}</th><th>${escapeHtml(this.t("race.cost"))}</th><th>${escapeHtml(this.t("race.gap"))}</th><th>${escapeHtml(this.t("overview.evaluations"))}</th><th>${escapeHtml(this.t("race.statusHeader"))}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="run-actions"><button class="outline-action" data-page="schedule">${escapeHtml(this.t("race.inspectWinner"))}${icons.chevron}</button></div>
+    </section>`;
+  }
+
   renderRunPicker() {
     const runs = [...(this.state.comparisonResult?.runs || [])].sort((left, right) => left.seed - right.seed);
     if (!runs.length) return "";
@@ -710,6 +1039,7 @@ class IGStudioApp {
 
   renderExperimentGuide() {
     return `<section class="experiment-guide"><div class="section-title-row"><h2>${escapeHtml(this.t("overview.experimentTitle"))}</h2><span class="section-note">${escapeHtml(this.t("overview.fairComparison"))}</span></div><div class="experiment-options">
+      <button class="experiment-option" data-mode="race" aria-pressed="${this.state.mode === "race"}"><strong>${escapeHtml(this.t("controls.race"))}</strong><span>${escapeHtml(this.t("race.guideText"))}</span></button>
       <button class="experiment-option" data-mode="single" aria-pressed="${this.state.mode === "single"}"><strong>${escapeHtml(this.t("overview.oneRunGuideTitle"))}</strong><span>${escapeHtml(this.t("overview.oneRunGuide"))}</span></button>
       <button class="experiment-option" data-mode="comparison" aria-pressed="${this.state.mode === "comparison"}"><strong>${escapeHtml(this.t("overview.compareGuideTitle"))}</strong><span>${escapeHtml(this.t("overview.compareGuide"))}</span></button>
     </div></section>`;
@@ -888,6 +1218,7 @@ class IGStudioApp {
       if (key === "runs" || key === "iterationBudget") this.render();
     });
     bindNumber("#budget-input", "iterationBudget", 1, 1_000_000_000);
+    bindNumber("#race-budget-input", "raceBudget", 1_000, 100_000_000);
     bindNumber("#seed-input", "seed", 0, 0xffff_ffff);
     bindNumber("#runs-input", "runs", 2, 64);
     bindNumber("#d-input", "d", 1, this.state.instance?.n || 500);
@@ -896,6 +1227,17 @@ class IGStudioApp {
     this.container.querySelector('[data-action="run"]')?.addEventListener("click", () => this.startRun());
     this.container.querySelector('[data-action="pause"]')?.addEventListener("click", () => this.pauseResume());
     this.container.querySelector('[data-action="reset"]')?.addEventListener("click", () => this.reset());
+    this.container.querySelector('[data-action="race-play"]')?.addEventListener("click", () => {
+      const race = this.state.race;
+      if (race && !race.done) this.pauseResume();
+      else this.startRace({ force: true });
+    });
+    this.container.querySelector('[data-action="race-new"]')?.addEventListener("click", () => this.startRace({ force: true }));
+    this.container.querySelectorAll("[data-rspeed]").forEach((button) => button.addEventListener("click", () => {
+      const speed = clampInteger(button.dataset.rspeed, 1, 4, 1);
+      if (this.state.race) this.state.race.speed = speed;
+      this.container.querySelectorAll("[data-rspeed]").forEach((other) => other.setAttribute("aria-pressed", String(other === button)));
+    }));
     this.container.querySelectorAll('[data-action="language"]').forEach((button) => button.addEventListener("click", () => {
       this.state.mobileMenu = false;
       this.setLanguage(this.state.locale === "en" ? "pt-BR" : "en");
@@ -918,6 +1260,10 @@ class IGStudioApp {
   drawCharts() {
     this.chartCleanups.forEach((cleanup) => cleanup());
     this.chartCleanups = [];
+    if (this.state.page === "overview" && this.state.mode === "race") {
+      this.raceView.redraw();
+      return;
+    }
     if (this.state.page === "overview") this.drawOverviewCharts();
     else if (this.state.page === "instance") this.drawInstanceCharts();
   }
@@ -988,6 +1334,7 @@ class IGStudioApp {
       instance: this.state.instanceId,
       mode: this.state.mode,
       iterationBudget: this.state.iterationBudget,
+      raceBudget: this.state.raceBudget,
       seed: this.state.seed,
       runs: this.state.runs,
       d: this.state.d,
@@ -1009,6 +1356,7 @@ class IGStudioApp {
     removeEventListener("resize", this.boundResize);
     clearTimeout(this.renderTimer);
     clearTimeout(this.resizeTimer);
+    this.raceView.dispose();
     this.chartCleanups.forEach((cleanup) => cleanup());
     if (this.client) await this.client.dispose();
     this.container.replaceChildren();
@@ -1038,3 +1386,18 @@ addEventListener("message", (event) => {
   if (event.data?.type !== "ig-studio:set-language") return;
   globalThis.__igStudio?.setLanguage(event.data.language);
 });
+
+// Autogrow bridge: when embedded, keep the parent iframe height in sync with
+// the document so the race page never clips (the homepage listens for
+// "studio-height").
+if (parent !== globalThis && typeof ResizeObserver === "function") {
+  let lastPostedHeight = 0;
+  const postStudioHeight = () => {
+    const height = document.documentElement.scrollHeight;
+    if (height === lastPostedHeight) return;
+    lastPostedHeight = height;
+    parent.postMessage({ type: "studio-height", height }, "*");
+  };
+  new ResizeObserver(postStudioHeight).observe(document.documentElement);
+  postStudioHeight();
+}
