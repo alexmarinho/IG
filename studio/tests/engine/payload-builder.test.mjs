@@ -21,9 +21,9 @@ test('payload builder embeds the WASM and compressed fixed catalog without touch
       `--out=${output}`,
     ], { cwd: root });
     const report = JSON.parse(stdout.trim());
-    assert.equal(report.catalogEntries, 53);
+    assert.equal(report.catalogEntries, 62);
     assert.ok(report.wasmBytes > 80_000);
-    assert.ok(report.catalogGzipBytes < 80_000);
+    assert.ok(report.catalogGzipBytes < 200_000);
 
     const { IG_ENGINE_PAYLOAD } = await import(`${pathToFileURL(output).href}?test=1`);
     assert.ok(IG_ENGINE_PAYLOAD.wasmBase64.length > 100_000);
@@ -35,11 +35,13 @@ test('payload builder embeds the WASM and compressed fixed catalog without touch
       catalogGzipBase64: IG_ENGINE_PAYLOAD.catalogGzipBase64,
     });
     assert.equal(initialized.ok, true, initialized.error && initialized.error.message);
-    assert.equal(initialized.result.catalog.length, 53);
+    assert.equal(initialized.result.catalog.length, 62);
     const selected = await harness.command('select-instance', { name: 'GPU_HEAVY_120' });
     assert.equal(selected.result.instance.n, 120);
     const surgery = await harness.command('select-instance', { name: 'SURGERY_BLOCK_90' });
     assert.equal(surgery.result.instance.n, 90);
+    const printFarm = await harness.command('select-instance', { name: '3DPRINT_FARM_90' });
+    assert.equal(printFarm.result.instance.n, 90);
   } finally {
     await rm(directory, { recursive: true, force: true });
   }
