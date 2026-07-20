@@ -28,6 +28,15 @@ export const SCENE_ASSET_FILES = Object.freeze({
   ai: "ai-server.webp",
   kitchen: "restaurant-kitchen.webp",
   surgery: "surgery-center.webp",
+  print3d: "print3d.webp",
+  coffee: "coffee.webp",
+  bakery: "bakery.webp",
+  dental: "dental.webp",
+  laser: "laser.webp",
+  laundry: "laundry.webp",
+  studio: "studio.webp",
+  lab: "lab.webp",
+  brewery: "brewery.webp",
 });
 export const MAX_SCENE_ASSET_BYTES = 256 * 1024;
 
@@ -195,12 +204,12 @@ async function validateCatalogAndPayload() {
 
   const payloadIds = Object.keys(packedCatalog).sort();
   const publicIds = catalogModule.INSTANCE_CATALOG.map(({ id }) => id).sort();
-  invariant(payloadIds.length === 53,
-    `Fixed catalog must contain 53 bundled instances; found ${payloadIds.length}`);
+  invariant(payloadIds.length === 80,
+    `Fixed catalog must contain 80 bundled instances; found ${payloadIds.length}`);
   invariant(JSON.stringify(payloadIds) === JSON.stringify(publicIds),
     "Public instance catalog and embedded solver catalog do not match");
-  invariant(catalogModule.SCENARIO_CATALOG.length === 4,
-    "Studio must expose exactly four fixed scenario interpretations");
+  invariant(catalogModule.SCENARIO_CATALOG.length === 13,
+    "Studio must expose exactly thirteen fixed scenario interpretations");
 
   const expectedAssetFiles = Object.values(SCENE_ASSET_FILES).sort();
   const presentAssetFiles = (await readdir(sceneAssetRoot))
