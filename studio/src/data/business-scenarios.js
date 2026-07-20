@@ -1,0 +1,413 @@
+/**
+ * Small-business scenarios: coffee roastery and craft brewery.
+ * (Seeds committed, see masclib-domains.)
+ *
+ * Data-only module split from catalog.js to keep each source file small and
+ * reviewable. Pure literals — no imports, no engine logic. Consumed by
+ * catalog.js, which composes the public INSTANCE/SCENARIO catalogs.
+ *
+ * Content contract v2: every locale carries `vocabulary` (12 keys) plus
+ * `vocabularyUnits`, `vocabularyHelp` and `familyNames` (ordered by CSV
+ * SETUP_STATE 0..5). The top-level `orderId` maps job index n to the
+ * human-facing order code `${prefix}${offset + n}`.
+ */
+
+/* ---- Deepened small-business seeded domain workloads ---- */
+export const BUSINESS_DOMAIN_ROWS = [
+  ["COFFEE_S_45", 45, "coffee", "two-day-roast-plan"],
+  ["COFFEE_M_90", 90, "coffee", "three-day-roast-plan"],
+  ["COFFEE_L_180", 180, "coffee", "five-day-roast-plan"],
+  ["BREWERY_S_45", 45, "brewery", "eleven-day-brew-schedule"],
+  ["BREWERY_M_90", 90, "brewery", "twenty-three-day-brew-schedule"],
+  ["BREWERY_L_180", 180, "brewery", "forty-five-day-brew-schedule"],
+];
+
+const coffeeMappings = [
+  {
+    instanceId: "COFFEE_S_45",
+    runDefaults: { singleBudget: 150_000, comparisonBudget: 15_000, comparisonRuns: 10, d: 2 },
+    content: {
+      en: { label: "Two-day roast plan", note: "A packed roasting week squeezed into two 12-hour drum days: forty-five lots across six profiles — a quick ~3s run; the deep clean around decaf is the visible trade-off." },
+      "pt-BR": { label: "Plano de torra de dois dias", note: "Uma semana cheia espremida em dois dias de tambor de 12 horas: quarenta e cinco lotes em seis perfis — rodada rápida de ~3 s; a faxina em torno do descafeinado é o trade-off visível." },
+    },
+  },
+  {
+    instanceId: "COFFEE_M_90",
+    runDefaults: { singleBudget: 640_000, comparisonBudget: 64_000, comparisonRuns: 10, d: 2 },
+    content: {
+      en: { label: "Four-day roast plan", note: "The owner's real queue: about ninety lots where subscription ship dates compete with profile batching — the full ~15s run." },
+      "pt-BR": { label: "Plano de torra de quatro dias", note: "A fila real do dono: cerca de noventa lotes em que as datas de envio da assinatura competem com o agrupamento por perfil — rodada completa de ~15 s." },
+    },
+  },
+  {
+    instanceId: "COFFEE_L_180",
+    runDefaults: { singleBudget: 620_000, comparisonBudget: 62_000, comparisonRuns: 10, d: 2 },
+    content: {
+      en: { label: "Eight-day roast plan", note: "Peak month on the drum: one hundred eighty lots — the ~30s reference run, where wholesale weeks, subscriptions and standing cafe orders fight for every hour." },
+      "pt-BR": { label: "Plano de torra de oito dias", note: "O mês de pico no tambor: cento e oitenta lotes — a rodada de referência de ~30 s, em que atacado, assinaturas e pedidos fixos de cafeteria disputam cada hora." },
+    },
+  },
+];
+
+const coffeeScenario = {
+  id: "coffee",
+  visual: { assetKey: "coffee", objectPosition: "50% 50%" },
+  orderId: { prefix: "PED-", offset: 2401 },
+  recommendedDefaultInstance: "COFFEE_M_90",
+  instanceMappings: coffeeMappings,
+  datasetRelationship: "native-seeded-domain-workload",
+  content: {
+    en: {
+      name: "Coffee roastery",
+      visualAlt: "A single drum roaster with green-coffee sacks for six profiles — filter light, espresso medium, dark blend, decaf, micro-lot and natural experimental — and roasted batches cooling on a tray.",
+      visualCaption: "One drum · every profile means a temperature adjustment, and decaf demands a deep clean.",
+      shortDescription: "Single-roaster batch sequencing with profile changeovers, late shipment and co-roasting.",
+      description: "You run a microroastery built around one drum roaster and a queue of about ninety lots: subscriptions, partner cafes and the end-of-month wholesale round. A roasting day has 12 hours, and every profile change means purging and cleaning the drum — decaf is the troublemaker, demanding a full clean before and a sweep after so no flavor carries into the next lot. Whatever does not fit the week you buy roasted from another roaster to keep the ship date.",
+      decisions: [
+        "Which lots to roast this week — and which to buy ready from another roaster.",
+        "In what order to roast: when a profile change is worth it and when holding a lot one day beats the clean-out.",
+        "Where to slot decaf, which locks the queue with cleaning before and after.",
+        "When paying the co-roaster beats paying the late-shipment penalty.",
+      ],
+      vocabulary: {
+        resource: "drum roaster",
+        job: "roast lot",
+        family: "roast profile and origin family",
+        processingTime: "roast time",
+        releaseTime: "order confirmed on",
+        dueDate: "promised ship date",
+        hardDeadline: "ship cutoff (lose the customer)",
+        setupTime: "profile changeover (setup)",
+        setupCost: "setup cost",
+        executionCost: "roast cost",
+        tardinessWeight: "late-shipment penalty",
+        rejectionCost: "buy-it-roasted price",
+      },
+      vocabularyUnits: {
+        resource: "",
+        job: "",
+        family: "",
+        processingTime: "min",
+        releaseTime: "dia",
+        dueDate: "dia",
+        hardDeadline: "dia",
+        setupTime: "min",
+        setupCost: "R$",
+        executionCost: "R$",
+        tardinessWeight: "R$/dia",
+        rejectionCost: "R$",
+      },
+      vocabularyHelp: {
+        resource: "Your single drum roaster: every lot passes through it, one at a time, across a 12-hour roasting day. It is the heart — and the bottleneck — of the roastery.",
+        job: "One lot to roast: an order from the shop, the subscription or a partner cafe, with a fixed profile and a ship date. In the app each lot carries its own code (PED-2401, PED-2402, …).",
+        family: "The lot's profile: filter light, espresso medium, dark blend, decaf, micro-lot or natural experimental. Roasting same-profile lots back to back avoids purging and cleaning the drum.",
+        processingTime: "Drum minutes the lot occupies, from charge to drop: in this queue, 13 to 26 minutes depending on profile and roast degree.",
+        releaseTime: "The day the order was confirmed and the green coffee staged. Before that, the lot cannot enter the drum.",
+        dueDate: "The ship date you promised — subscribers count the days to fresh coffee. Missing it triggers the late penalty.",
+        hardDeadline: "The real limit: the promise plus some slack, never past the end of the horizon. Past the ship date you pay a penalty; past the limit the lot goes stale in the shelf and the customer cancels.",
+        setupTime: "Idle minutes between profiles: purge the drum, adjust temperature and, for decaf, run the full clean against flavor carryover.",
+        setupCost: "What the changeover costs: an idle drum, reheating energy and labor minutes. The decaf deep clean is the priciest in the house.",
+        executionCost: "The cost of roasting the lot: gas, electricity and drum time, proportional to the profile's roast minutes.",
+        tardinessWeight: "How much each day of delay on this lot takes from your cash — wholesale and subscriptions weigh differently. The file stores the value per minute; the app shows it per day (12-hour roasting day).",
+        rejectionCost: "What it costs to buy this lot ready from another roaster to ship on time. The optimizer compares that price with roasting late and paying the penalty.",
+      },
+      familyNames: [
+        { key: "filter-light", name: "Filter light", blurb: "Quick light roasts for pour-overs; the everyday workhorse." },
+        { key: "espresso-medium", name: "Espresso medium", blurb: "The house volume: cafe-partner espresso on a stable medium profile." },
+        { key: "dark-blend", name: "Dark blend", blurb: "The wholesale blend at a dark degree; in and out of the drum at the normal rate." },
+        { key: "decaf", name: "Decaf", blurb: "Flavor carryover risk: full clean before (+10 min) and sweep after (+6) — the priciest setup in the house." },
+        { key: "micro-lot", name: "Micro-lot", blurb: "Traceable specialty beans: a careful profile on entry, ~5 extra minutes of adjustment." },
+        { key: "natural-experimental", name: "Natural experimental", blurb: "Funky fermentation lots: profile still being dialed in, roasted in small batches." },
+      ],
+      objective: {
+        summary: "Maximize the week's margin: roast as many lots as possible on time while spending the least on clean-outs, penalties and lots bought outside. The model minimizes total cost — every real saved is profit preserved.",
+        terms: {
+          setup: "profile changeovers",
+          execution: "roasting",
+          tardiness: "late shipment",
+          rejection: "co-roaster buying",
+        },
+      },
+      simplifications: [
+        "The model schedules one drum roaster with capacity one; cooling trays, grinders, and packaging are outside this model.",
+        "Each lot roasts in one fixed profile; profile development, cupping, and green-bean inventory are not modeled.",
+        "The co-roaster is one numeric outside option; no specific partner contract is chosen.",
+      ],
+      disclosure: "The three bundled roastery instances are reproducible seeded workloads created for this scheduling interpretation; they are not orders from a real roastery.",
+    },
+    "pt-BR": {
+      name: "Torrefação de café",
+      visualAlt: "Um único tambor de torra com sacos de café verde para seis perfis — claro para filtrado, médio para espresso, blend escuro, descafeinado, micro-lote e natural experimental — e lotes torrados resfriando em uma bandeja.",
+      visualCaption: "Um tambor · cada perfil exige ajuste de temperatura, e o descafeinado pede limpeza profunda.",
+      shortDescription: "Sequenciamento de lotes em um torrador com trocas de perfil, atraso de envio e compra de outro torrefador.",
+      description: "Você toca uma microtorrefação com um único tambor e uma fila de cerca de noventa lotes: assinaturas, cafeterias parceiras e a rodada de atacado do fim do mês. O dia de torra tem 12 horas, e cada troca de perfil exige purgar e limpar o tambor — o descafeinado é o chato da fila, pedindo limpeza completa antes e varredura depois para não contaminar o lote seguinte. O que não couber na semana você compra torrado de outro torrefador para não furar a data de envio.",
+      decisions: [
+        "Quais lotes torrar nesta semana — e quais comprar prontos de outro torrefador.",
+        "Em que ordem torrar: quando vale trocar de perfil e quando vale segurar um lote um dia para evitar a limpeza.",
+        "Onde encaixar o descafeinado, que trava a fila com faxina antes e depois.",
+        "Quando pagar outro torrefador sai mais barato que a multa do atraso.",
+      ],
+      vocabulary: {
+        resource: "tambor de torra",
+        job: "lote de torra",
+        family: "família de perfil de torra e origem",
+        processingTime: "tempo de torra",
+        releaseTime: "pedido confirmado em",
+        dueDate: "envio prometido",
+        hardDeadline: "envio limite (perde o cliente)",
+        setupTime: "troca de perfil (setup)",
+        setupCost: "custo de setup",
+        executionCost: "custo de torra",
+        tardinessWeight: "multa por atraso",
+        rejectionCost: "preço de comprar torrado",
+      },
+      vocabularyUnits: {
+        resource: "",
+        job: "",
+        family: "",
+        processingTime: "min",
+        releaseTime: "dia",
+        dueDate: "dia",
+        hardDeadline: "dia",
+        setupTime: "min",
+        setupCost: "R$",
+        executionCost: "R$",
+        tardinessWeight: "R$/dia",
+        rejectionCost: "R$",
+      },
+      vocabularyHelp: {
+        resource: "Seu único tambor de torra: todos os lotes passam por ele, um de cada vez, num dia de torra de 12 horas. É o coração — e o gargalo — da torrefação.",
+        job: "Um lote para torrar: um pedido da loja, da assinatura ou da cafeteria parceira, com perfil definido e data de envio. No app, cada lote aparece com código próprio (PED-2401, PED-2402, …).",
+        family: "O perfil do lote: filtrado claro, espresso médio, blend escuro, descafeinado, micro-lote ou natural experimental. Torrar lotes do mesmo perfil em sequência evita purga e limpeza do tambor.",
+        processingTime: "Minutos de tambor que o lote ocupa, da carga à descarga: nesta fila, de 13 a 26 minutos conforme o perfil e o ponto de torra.",
+        releaseTime: "O dia em que o pedido foi confirmado e o café verde separado. Antes disso o lote não pode entrar no tambor.",
+        dueDate: "A data de envio que você prometeu — assinante conta os dias para receber o café fresquinho. Passar dela dispara a multa por atraso.",
+        hardDeadline: "O limite real: a promessa mais uma folga, sem passar do fim do horizonte. Depois do envio prometido você paga multa; depois do limite, o lote encalha na prateleira e o cliente cancela.",
+        setupTime: "Minutos parados entre perfis: purgar o tambor, ajustar a temperatura e, no descafeinado, fazer a limpeza completa contra contaminação de sabor.",
+        setupCost: "O que a troca custa: tambor parado, energia de reaquecimento e minutos de mão de obra. A faxina do descafeinado é a mais cara da casa.",
+        executionCost: "Custo de torrar o lote: gás, energia e tempo de tambor, proporcional aos minutos do perfil.",
+        tardinessWeight: "Quanto cada dia de atraso desse lote tira do seu caixa — atacado e assinatura pesam diferente. No arquivo o valor vem por minuto; o app mostra por dia (dia de torra de 12 h).",
+        rejectionCost: "Quanto custa comprar esse lote pronto de outro torrefador para entregar no prazo. O otimizador compara esse preço com torrar atrasado e pagar multa.",
+      },
+      familyNames: [
+        { key: "filter-light", name: "Filtrado claro", blurb: "Torra clara e rápida para métodos filtrados; o cavalo de batalha do dia a dia." },
+        { key: "espresso-medium", name: "Espresso médio", blurb: "O volume da casa: espresso das cafeterias parceiras em perfil médio estável." },
+        { key: "dark-blend", name: "Blend escuro", blurb: "O blend do atacado em ponto escuro; entra e sai do tambor na faixa normal." },
+        { key: "decaf", name: "Descafeinado", blurb: "Risco de contaminação de sabor: limpeza completa antes (+10 min) e varredura depois (+6) — o setup mais caro da casa." },
+        { key: "micro-lot", name: "Micro-lote", blurb: "Grãos especiais rastreados: pedem perfil cuidadoso na entrada, ~5 min a mais de ajuste." },
+        { key: "natural-experimental", name: "Natural experimental", blurb: "Lotes de fermentação diferente: perfil ainda em ajuste, torrado em pequenas bateladas." },
+      ],
+      objective: {
+        summary: "Maximizar a margem da semana: torrar o máximo de lotes no prazo, gastando o mínimo em limpezas, multas e lotes comprados fora. O modelo minimiza o custo total — cada real poupado é lucro preservado.",
+        terms: {
+          setup: "trocas de perfil",
+          execution: "torra",
+          tardiness: "envio atrasado",
+          rejection: "compra de outro torrefador",
+        },
+      },
+      simplifications: [
+        "O modelo programa um tambor de torra de capacidade unitária; bandejas de resfriamento, moagem e empacotamento ficam fora do modelo.",
+        "Cada lote torra em um perfil fixo; desenvolvimento de perfil, cupping e estoque de café verde não são modelados.",
+        "A compra de outro torrefador é uma alternativa externa numérica; nenhum contrato específico é escolhido.",
+      ],
+      disclosure: "As três instâncias de torrefação incluídas são cargas reproduzíveis geradas com seeds para esta interpretação de scheduling; não são pedidos de uma torrefação real.",
+    },
+  },
+};
+
+const breweryMappings = [
+  {
+    instanceId: "BREWERY_S_45",
+    runDefaults: { singleBudget: 110_000, comparisonBudget: 11_000, comparisonRuns: 10, d: 2 },
+    content: {
+      en: { label: "Eleven-day brew schedule", note: "A packed brew cycle: forty-five batches across six styles — a quick ~3s run; the heavy sanitization after each sour is the visible trade-off." },
+      "pt-BR": { label: "Cronograma de onze dias", note: "Um ciclo cheio de brassagem: quarenta e cinco bateladas em seis estilos — rodada rápida de ~3 s; a sanitização pesada depois de cada sour é o trade-off visível." },
+    },
+  },
+  {
+    instanceId: "BREWERY_M_90",
+    runDefaults: { singleBudget: 80_000, comparisonBudget: 8_000, comparisonRuns: 10, d: 2 },
+    content: {
+      en: { label: "Three-week brew schedule", note: "The owner's real plan: about ninety batches where fermenter windows compete with style batching — the full ~15s run." },
+      "pt-BR": { label: "Cronograma de três semanas", note: "O plano real do dono: cerca de noventa bateladas em que as janelas de fermentador competem com o agrupamento por estilo — rodada completa de ~15 s." },
+    },
+  },
+  {
+    instanceId: "BREWERY_L_180",
+    runDefaults: { singleBudget: 43_000, comparisonBudget: 4_300, comparisonRuns: 10, d: 2 },
+    content: {
+      en: { label: "Five-week brew schedule", note: "Peak season in the brewhouse: one hundred eighty batches — the ~30s reference run, where tank windows, scheduled releases and seasonal contracts fight for every hour." },
+      "pt-BR": { label: "Cronograma de cinco semanas", note: "A alta temporada na sala de brassagem: cento e oitenta bateladas — a rodada de referência de ~30 s, em que janelas de tanque, lançamentos programados e contratos sazonais disputam cada hora." },
+    },
+  },
+];
+
+const breweryScenario = {
+  id: "brewery",
+  visual: { assetKey: "brewery", objectPosition: "50% 50%" },
+  orderId: { prefix: "LOTE-", offset: 101 },
+  recommendedDefaultInstance: "BREWERY_M_90",
+  instanceMappings: breweryMappings,
+  datasetRelationship: "native-seeded-domain-workload",
+  content: {
+    en: {
+      name: "Craft brewery",
+      visualAlt: "A single brewhouse with mash tun, kettle and fermenters, surrounded by malt sacks and recipe boards for pilsner, IPA, stout, sour, wheat and lager.",
+      visualCaption: "One brewhouse · every style wants its own CIP, and sours demand extra sanitization.",
+      shortDescription: "Single-brewhouse batch sequencing with CIP, fermenter windows and contract brewing.",
+      description: "Your brewery runs one brewhouse around the clock, with a queue of about ninety batches waiting to fill the fermenters. Every style change means a CIP and a fresh sanitization of the kettle — and after a sour the deep clean is heavy, because wild yeast contaminates the next batch. Each batch has a fermenter window waiting: miss the window and the tank sits blocked while the penalty runs. Whatever does not fit the cycle you send to be brewed at the partner brewery.",
+      decisions: [
+        "Which batches to brew this cycle — and which to send to the partner brewery.",
+        "In what order to brew: when another CIP is worth it and when waiting for the tank window beats the changeover.",
+        "Where to slot the sour, which demands heavy sanitization once it leaves the kettle.",
+        "When contract brewing beats the blocked-tank penalty.",
+      ],
+      vocabulary: {
+        resource: "brewhouse",
+        job: "brew batch",
+        family: "beer style family",
+        processingTime: "brew time",
+        releaseTime: "ingredients staged on",
+        dueDate: "fermenter window",
+        hardDeadline: "knockout cutoff (lose the tank)",
+        setupTime: "CIP and sanitization (setup)",
+        setupCost: "setup cost",
+        executionCost: "brew cost",
+        tardinessWeight: "blocked-tank penalty",
+        rejectionCost: "contract-brewing price",
+      },
+      vocabularyUnits: {
+        resource: "",
+        job: "",
+        family: "",
+        processingTime: "h",
+        releaseTime: "dia",
+        dueDate: "dia",
+        hardDeadline: "dia",
+        setupTime: "min",
+        setupCost: "R$",
+        executionCost: "R$",
+        tardinessWeight: "R$/dia",
+        rejectionCost: "R$",
+      },
+      vocabularyHelp: {
+        resource: "Your single brewhouse: mashing, boiling and whirlpool all share the same kettle, 24 hours a day. Fermenters you have plenty — the kettle, only one.",
+        job: "One batch to brew: a closed recipe, a fixed style and a reserved fermenter waiting for the wort. In the app each batch carries its own code (LOTE-101, LOTE-102, …).",
+        family: "The batch's style: pilsner, IPA, stout, sour, wheat or lager. Brewing the same style back to back avoids the full CIP of a changeover.",
+        processingTime: "Kettle hours the batch occupies, from mash-in to whirlpool: in this queue, from 4 to just over 6 hours depending on the recipe.",
+        releaseTime: "The day malt, hops and water were staged and the previous tank freed space. Before that, the batch cannot enter the kettle.",
+        dueDate: "The window in which the reserved fermenter sits free and at the right temperature for the wort. Missing the window blocks the tank — and the penalty runs per day.",
+        hardDeadline: "The real limit: the fermenter window plus some slack, never past the end of the horizon. Past the window you pay a penalty; past the limit you lose the tank and the sale.",
+        setupTime: "Idle kettle minutes between styles: chemical CIP, rinse and sanitization. After a sour, the heavy sanitization adds ~35 minutes.",
+        setupCost: "What the changeover costs: CIP chemicals, water, steam and a kettle that is not producing. The post-sour deep clean is the priciest of the cycle.",
+        executionCost: "The cost of brewing the batch: malt, hops, energy and gas, proportional to the recipe's kettle hours.",
+        tardinessWeight: "What a blocked tank or a late keg delivery to the bar costs per day. The file stores the value per minute; the app shows it per day.",
+        rejectionCost: "What it costs to have this recipe brewed at the partner brewery and delivered under your label. The optimizer compares that price with brewing late and paying the penalty.",
+      },
+      familyNames: [
+        { key: "pilsner", name: "Pilsner", blurb: "The taproom's light volume driver: high demand, CIP at the normal rate." },
+        { key: "ipa", name: "IPA", blurb: "Heavy dry-hop: hop preparation adds ~6 minutes to the changeover." },
+        { key: "stout", name: "Stout", blurb: "Roasty and dense, the winter favorite; swaps at the normal rate." },
+        { key: "sour", name: "Sour", blurb: "Wild yeast contaminates the next batch: heavy sanitization AFTER it leaves the kettle, +35 minutes." },
+        { key: "wheat", name: "Wheat", blurb: "Hazy and refreshing; in and out with a standard CIP." },
+        { key: "lager", name: "Lager", blurb: "Cold, week-long fermentation ties up the tank — but the kettle swaps at the normal rate." },
+      ],
+      objective: {
+        summary: "Maximize the cycle's margin: brew as many batches as possible inside their tank windows while spending the least on CIPs, penalties and contract brewing. The model minimizes total cost — every real saved is profit preserved.",
+        terms: {
+          setup: "CIP and sanitization",
+          execution: "brewing",
+          tardiness: "missed tank window",
+          rejection: "contract brewing",
+        },
+      },
+      simplifications: [
+        "The model schedules one brewhouse with capacity one; fermentation, cellaring, and packaging are outside this model.",
+        "Each batch brews in one fixed style recipe; recipe development and quality control are not modeled.",
+        "Contract brewing is one numeric outside option; no specific partner brewery is chosen.",
+      ],
+      disclosure: "The three bundled brewery instances are reproducible seeded workloads created for this scheduling interpretation; they are not batches from a real brewery.",
+    },
+    "pt-BR": {
+      name: "Cervejaria artesanal",
+      visualAlt: "Uma única sala de brassagem com tina de mostura, panela de fervura e fermentadores, cercada por sacos de malte e pranchetas de receita para pilsner, IPA, stout, sour, wheat e lager.",
+      visualCaption: "Uma sala de brassagem · cada estilo pede seu CIP, e as sours exigem sanitização extra.",
+      shortDescription: "Sequenciamento de bateladas em uma sala de brassagem com CIP, janelas de fermentador e brassagem terceirizada.",
+      description: "Sua cervejaria roda uma única sala de brassagem 24 horas por dia, com uma fila de cerca de noventa bateladas esperando para encher os fermentadores. Cada troca de estilo exige CIP e nova sanitização da panela — e depois de uma sour a faxina é pesada, porque levedura selvagem contamina a batelada seguinte. Cada batelada tem a janela do fermentador esperando: perdeu a janela, o tanque fica bloqueado e a multa corre. O que não couber no ciclo você manda brasar na cervejaria parceira.",
+      decisions: [
+        "Quais bateladas brasar neste ciclo — e quais mandar para a cervejaria parceira.",
+        "Em que ordem brasar: quando vale mais um CIP e quando vale esperar a janela do tanque para evitar a troca.",
+        "Onde encaixar a sour, que exige sanitização pesada depois de sair da panela.",
+        "Quando a brassagem terceirizada sai mais barata que a multa de tanque bloqueado.",
+      ],
+      vocabulary: {
+        resource: "sala de brassagem",
+        job: "batelada",
+        family: "família de estilo",
+        processingTime: "tempo de brassagem",
+        releaseTime: "insumos preparados em",
+        dueDate: "janela do fermentador",
+        hardDeadline: "fervura limite (perde o tanque)",
+        setupTime: "CIP e sanitização (setup)",
+        setupCost: "custo de setup",
+        executionCost: "custo de brassagem",
+        tardinessWeight: "multa por atraso",
+        rejectionCost: "preço de brasar fora",
+      },
+      vocabularyUnits: {
+        resource: "",
+        job: "",
+        family: "",
+        processingTime: "h",
+        releaseTime: "dia",
+        dueDate: "dia",
+        hardDeadline: "dia",
+        setupTime: "min",
+        setupCost: "R$",
+        executionCost: "R$",
+        tardinessWeight: "R$/dia",
+        rejectionCost: "R$",
+      },
+      vocabularyHelp: {
+        resource: "Sua única sala de brassagem: mostura, fervura e whirlpool passam pela mesma panela, 24 horas por dia. Fermentador tem de sobra — panela, só uma.",
+        job: "Uma batelada para brasar: receita fechada, estilo definido e um fermentador reservado esperando o mosto. No app, cada batelada aparece com código próprio (LOTE-101, LOTE-102, …).",
+        family: "O estilo da batelada: pilsner, IPA, stout, sour, wheat ou lager. Brasar o mesmo estilo em sequência evita o CIP completo da troca.",
+        processingTime: "Horas de panela que a batelada ocupa, da mostura ao whirlpool: nesta fila, de 4 a pouco mais de 6 horas conforme a receita.",
+        releaseTime: "O dia em que malte, lúpulo e água ficaram preparados e o tanque anterior liberou espaço. Antes disso a batelada não pode entrar na panela.",
+        dueDate: "A janela em que o fermentador reservado está livre e na temperatura certa para receber o mosto. Perder a janela bloqueia o tanque — e a multa corre por dia.",
+        hardDeadline: "O limite real: a janela do fermentador mais uma folga, sem passar do fim do horizonte. Depois da janela você paga multa; depois do limite, perde o tanque e a venda.",
+        setupTime: "Minutos de panela parada entre estilos: CIP com químico, enxágue e sanitização. Depois de uma sour, a sanitização pesada adiciona ~35 minutos.",
+        setupCost: "O que a troca custa: químicos de CIP, água, vapor e a panela sem produzir. A faxina pós-sour é a mais cara do ciclo.",
+        executionCost: "Custo de brasar a batelada: malte, lúpulo, energia e gás, proporcional às horas de panela da receita.",
+        tardinessWeight: "Quanto custa por dia um tanque bloqueado ou uma entrega de chope atrasada para o bar. No arquivo o valor vem por minuto; o app mostra por dia.",
+        rejectionCost: "Quanto custa mandar brasar essa receita na cervejaria parceira e entregar com o seu rótulo. O otimizador compara esse preço com brasar atrasado e pagar multa.",
+      },
+      familyNames: [
+        { key: "pilsner", name: "Pilsner", blurb: "A leve que gira o torneiro: volume alto, CIP na faixa normal." },
+        { key: "ipa", name: "IPA", blurb: "Dry-hop carregado: o preparo do lúpulo adiciona ~6 min na troca." },
+        { key: "stout", name: "Stout", blurb: "Torrada e densa, a queridinha do inverno; troca na faixa normal." },
+        { key: "sour", name: "Sour", blurb: "Levedura selvagem contamina a próxima batelada: sanitização pesada DEPOIS de sair da panela, +35 min." },
+        { key: "wheat", name: "Wheat (trigo)", blurb: "Turbida e refrescante; entra e sai com CIP padrão." },
+        { key: "lager", name: "Lager", blurb: "Fermentação fria de semanas amarra o tanque — mas a panela troca na faixa normal." },
+      ],
+      objective: {
+        summary: "Maximizar a margem do ciclo: brasar o máximo de bateladas dentro das janelas de tanque, gastando o mínimo em CIPs, multas e brassagem terceirizada. O modelo minimiza o custo total — cada real poupado é lucro preservado.",
+        terms: {
+          setup: "CIP e sanitização",
+          execution: "brassagem",
+          tardiness: "janela de tanque perdida",
+          rejection: "brassagem terceirizada",
+        },
+      },
+      simplifications: [
+        "O modelo programa uma sala de brassagem de capacidade unitária; fermentação, maturação e envase ficam fora do modelo.",
+        "Cada batelada segue uma receita fixa de estilo; desenvolvimento de receita e controle de qualidade não são modelados.",
+        "A brassagem terceirizada é uma alternativa externa numérica; nenhuma cervejaria parceira específica é escolhida.",
+      ],
+      disclosure: "As três instâncias de cervejaria incluídas são cargas reproduzíveis geradas com seeds para esta interpretação de scheduling; não são bateladas de uma cervejaria real.",
+    },
+  },
+};
+
+export const businessScenarios = [coffeeScenario, breweryScenario];
