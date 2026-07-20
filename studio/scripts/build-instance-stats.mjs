@@ -22,6 +22,14 @@ const histogram = (values, bins = 8) => {
   return acc;
 };
 
+/** n! formatted as m.m×10^e — the "more than atoms in the universe" wow-metric. */
+const possibilities = (x) => {
+  let log10 = 0;
+  for (let i = 2; i <= x; i++) log10 += Math.log10(i);
+  const exp = Math.floor(log10);
+  return `${Math.pow(10, log10 - exp).toFixed(1)}×10^${exp}`;
+};
+
 const stats = {};
 for (const dir of ["masclib", "masclib-gpu", "masclib-domains"]) {
   for (const file of await csvFiles(path.join(root, dir))) {
@@ -37,7 +45,8 @@ for (const dir of ["masclib", "masclib-gpu", "masclib-domains"]) {
     stats[id] = {
       n,
       families: inst.familyCount,
-      horizon: inst.horizon,
+      horizon: inst.window,
+      maxDue: Math.max(...jobs.map((j) => j.due)),
       procMean: Math.round(sumProc / n),
       procBins: histogram(jobs.map((j) => j.processingTime)),
       releaseMean: Math.round(jobs.reduce((a, j) => a + j.releaseTime, 0) / n),
@@ -47,7 +56,8 @@ for (const dir of ["masclib", "masclib-gpu", "masclib-domains"]) {
       setupMax: Math.max(...setups.map((s) => s.time)),
       tightPct: Math.round((100 * jobs.filter((j) => j.due < j.releaseTime + j.processingTime).length) / n),
       rejRatio: Math.round((jobs.reduce((a, j) => a + j.rejectionCost / Math.max(1e-9, j.processingCost), 0) / n) * 10) / 10,
-      loadRatio: Math.round((100 * sumProc) / Math.max(1, inst.horizon)) / 100,
+      loadRatio: Math.round((100 * sumProc) / Math.max(1, inst.window)) / 100,
+      possibilities: possibilities(n),
     };
   }
 }
