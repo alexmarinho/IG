@@ -4,6 +4,7 @@ export const INSTANCE_STATS = Object.freeze({
   "n": 8,
   "families": 1,
   "horizon": 1000,
+  "maxDue": 900,
   "procMean": 79,
   "procBins": [
    1,
@@ -22,12 +23,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 1.5,
-  "loadRatio": 0.64
+  "loadRatio": 0.64,
+  "possibilities": "4.0×10^4"
  },
  "NCOS_01a": {
   "n": 8,
   "families": 1,
   "horizon": 1000,
+  "maxDue": 900,
   "procMean": 79,
   "procBins": [
    1,
@@ -46,12 +49,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 1.5,
-  "loadRatio": 0.64
+  "loadRatio": 0.64,
+  "possibilities": "4.0×10^4"
  },
  "NCOS_02": {
   "n": 10,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 800,
   "procMean": 84,
   "procBins": [
    3,
@@ -70,12 +75,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 10,
   "rejRatio": 11.6,
-  "loadRatio": 0.04
+  "loadRatio": 0.04,
+  "possibilities": "3.6×10^6"
  },
  "NCOS_02a": {
   "n": 10,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 800,
   "procMean": 84,
   "procBins": [
    3,
@@ -94,12 +101,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 10,
   "rejRatio": 2.4,
-  "loadRatio": 0.04
+  "loadRatio": 0.04,
+  "possibilities": "3.6×10^6"
  },
  "NCOS_03": {
   "n": 10,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 750,
   "procMean": 66,
   "procBins": [
    4,
@@ -118,12 +127,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 10,
   "rejRatio": 28.5,
-  "loadRatio": 0.03
+  "loadRatio": 0.03,
+  "possibilities": "3.6×10^6"
  },
  "NCOS_03a": {
   "n": 10,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 750,
   "procMean": 66,
   "procBins": [
    4,
@@ -142,12 +153,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 10,
   "rejRatio": 3.6,
-  "loadRatio": 0.03
+  "loadRatio": 0.03,
+  "possibilities": "3.6×10^6"
  },
  "NCOS_04": {
   "n": 10,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 514,
   "procMean": 52,
   "procBins": [
    3,
@@ -166,12 +179,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 5,
-  "loadRatio": 0.13
+  "loadRatio": 0.13,
+  "possibilities": "3.6×10^6"
  },
  "NCOS_04a": {
   "n": 10,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 514,
   "procMean": 52,
   "procBins": [
    3,
@@ -190,12 +205,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 5,
-  "loadRatio": 0.13
+  "loadRatio": 0.13,
+  "possibilities": "3.6×10^6"
  },
  "NCOS_05": {
   "n": 15,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 1076,
   "procMean": 54,
   "procBins": [
    2,
@@ -214,12 +231,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 9,
-  "loadRatio": 0.2
+  "loadRatio": 0.2,
+  "possibilities": "1.3×10^12"
  },
  "NCOS_05a": {
   "n": 15,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 1076,
   "procMean": 54,
   "procBins": [
    2,
@@ -238,12 +257,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 9,
-  "loadRatio": 0.2
+  "loadRatio": 0.2,
+  "possibilities": "1.3×10^12"
  },
  "NCOS_11": {
   "n": 20,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 1076,
   "procMean": 54,
   "procBins": [
    2,
@@ -262,12 +283,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 9,
-  "loadRatio": 0.27
+  "loadRatio": 0.27,
+  "possibilities": "2.4×10^18"
  },
  "NCOS_11a": {
   "n": 20,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 1076,
   "procMean": 54,
   "procBins": [
    2,
@@ -286,12 +309,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 9,
-  "loadRatio": 0.27
+  "loadRatio": 0.27,
+  "possibilities": "2.4×10^18"
  },
  "NCOS_12": {
   "n": 24,
   "families": 1,
   "horizon": 2000,
+  "maxDue": 512,
   "procMean": 43,
   "procBins": [
    3,
@@ -310,12 +335,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 6.7,
-  "loadRatio": 0.51
+  "loadRatio": 0.51,
+  "possibilities": "6.2×10^23"
  },
  "NCOS_12a": {
   "n": 24,
   "families": 1,
   "horizon": 2000,
+  "maxDue": 512,
   "procMean": 43,
   "procBins": [
    3,
@@ -334,12 +361,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 3.4,
-  "loadRatio": 0.51
+  "loadRatio": 0.51,
+  "possibilities": "6.2×10^23"
  },
  "NCOS_13": {
   "n": 24,
   "families": 1,
   "horizon": 2000,
+  "maxDue": 704,
   "procMean": 43,
   "procBins": [
    3,
@@ -358,12 +387,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 3.8,
-  "loadRatio": 0.51
+  "loadRatio": 0.51,
+  "possibilities": "6.2×10^23"
  },
  "NCOS_13a": {
   "n": 24,
   "families": 1,
   "horizon": 2000,
+  "maxDue": 704,
   "procMean": 43,
   "procBins": [
    3,
@@ -382,12 +413,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 3.4,
-  "loadRatio": 0.51
+  "loadRatio": 0.51,
+  "possibilities": "6.2×10^23"
  },
  "NCOS_14": {
   "n": 25,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 2100,
   "procMean": 84,
   "procBins": [
    7,
@@ -406,12 +439,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 16.9,
-  "loadRatio": 0.11
+  "loadRatio": 0.11,
+  "possibilities": "1.6×10^25"
  },
  "NCOS_14a": {
   "n": 25,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 1840,
   "procMean": 76,
   "procBins": [
    6,
@@ -430,12 +465,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 4,
   "rejRatio": 5.1,
-  "loadRatio": 0.1
+  "loadRatio": 0.1,
+  "possibilities": "1.6×10^25"
  },
  "NCOS_15": {
   "n": 30,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 1753,
   "procMean": 60,
   "procBins": [
    4,
@@ -454,12 +491,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 9,
-  "loadRatio": 0.45
+  "loadRatio": 0.45,
+  "possibilities": "2.7×10^32"
  },
  "NCOS_15a": {
   "n": 30,
   "families": 1,
   "horizon": 4000,
+  "maxDue": 1753,
   "procMean": 60,
   "procBins": [
    4,
@@ -478,12 +517,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 9,
-  "loadRatio": 0.45
+  "loadRatio": 0.45,
+  "possibilities": "2.7×10^32"
  },
  "NCOS_31": {
   "n": 75,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 5520,
   "procMean": 87,
   "procBins": [
    58,
@@ -502,12 +543,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 8.8,
-  "loadRatio": 0.32
+  "loadRatio": 0.32,
+  "possibilities": "2.5×10^109"
  },
  "NCOS_31a": {
   "n": 75,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 5520,
   "procMean": 87,
   "procBins": [
    58,
@@ -526,12 +569,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 4.6,
-  "loadRatio": 0.32
+  "loadRatio": 0.32,
+  "possibilities": "2.5×10^109"
  },
  "NCOS_32": {
   "n": 75,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 6300,
   "procMean": 84,
   "procBins": [
    24,
@@ -550,12 +595,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 11.5,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "2.5×10^109"
  },
  "NCOS_32a": {
   "n": 75,
   "families": 1,
   "horizon": 20000,
+  "maxDue": 6300,
   "procMean": 84,
   "procBins": [
    24,
@@ -574,12 +621,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 11.5,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "2.5×10^109"
  },
  "NCOS_41": {
   "n": 90,
   "families": 1,
   "horizon": 1500,
+  "maxDue": 439,
   "procMean": 5,
   "procBins": [
    24,
@@ -598,12 +647,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 20.4,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "1.5×10^138"
  },
  "NCOS_41a": {
   "n": 90,
   "families": 1,
   "horizon": 1500,
+  "maxDue": 439,
   "procMean": 5,
   "procBins": [
    24,
@@ -622,12 +673,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 10.2,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "1.5×10^138"
  },
  "NCOS_51": {
   "n": 200,
   "families": 1,
   "horizon": 40000,
+  "maxDue": 21500,
   "procMean": 81,
   "procBins": [
    93,
@@ -646,12 +699,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 17.7,
-  "loadRatio": 0.4
+  "loadRatio": 0.4,
+  "possibilities": "7.9×10^374"
  },
  "NCOS_51a": {
   "n": 200,
   "families": 1,
   "horizon": 40000,
+  "maxDue": 21500,
   "procMean": 81,
   "procBins": [
    93,
@@ -670,12 +725,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 17.7,
-  "loadRatio": 0.4
+  "loadRatio": 0.4,
+  "possibilities": "7.9×10^374"
  },
  "NCOS_61": {
   "n": 500,
   "families": 1,
   "horizon": 40000,
+  "maxDue": 16000,
   "procMean": 39,
   "procBins": [
    30,
@@ -694,12 +751,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 88.2,
-  "loadRatio": 0.49
+  "loadRatio": 0.49,
+  "possibilities": "1.2×10^1134"
  },
  "NCOS_61a": {
   "n": 500,
   "families": 1,
   "horizon": 40000,
+  "maxDue": 16000,
   "procMean": 39,
   "procBins": [
    30,
@@ -718,12 +777,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": null,
   "tightPct": 0,
   "rejRatio": 88.2,
-  "loadRatio": 0.49
+  "loadRatio": 0.49,
+  "possibilities": "1.2×10^1134"
  },
  "STC_NCOS_01": {
   "n": 8,
   "families": 8,
   "horizon": 2000,
+  "maxDue": 1700,
   "procMean": 80,
   "procBins": [
    3,
@@ -742,12 +803,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 520,
   "tightPct": 0,
   "rejRatio": 3.7,
-  "loadRatio": 0.32
+  "loadRatio": 0.32,
+  "possibilities": "4.0×10^4"
  },
  "STC_NCOS_01a": {
   "n": 8,
   "families": 8,
   "horizon": 2000,
+  "maxDue": 1700,
   "procMean": 80,
   "procBins": [
    3,
@@ -766,12 +829,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 520,
   "tightPct": 0,
   "rejRatio": 1,
-  "loadRatio": 0.32
+  "loadRatio": 0.32,
+  "possibilities": "4.0×10^4"
  },
  "STC_NCOS_15": {
   "n": 30,
   "families": 3,
   "horizon": 800,
+  "maxDue": 158,
   "procMean": 6,
   "procBins": [
    5,
@@ -790,12 +855,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 100,
   "tightPct": 0,
   "rejRatio": 12.9,
-  "loadRatio": 0.24
+  "loadRatio": 0.24,
+  "possibilities": "2.7×10^32"
  },
  "STC_NCOS_15a": {
   "n": 30,
   "families": 3,
   "horizon": 800,
+  "maxDue": 158,
   "procMean": 6,
   "procBins": [
    5,
@@ -814,12 +881,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 100,
   "tightPct": 0,
   "rejRatio": 6.5,
-  "loadRatio": 0.24
+  "loadRatio": 0.24,
+  "possibilities": "2.7×10^32"
  },
  "STC_NCOS_31": {
   "n": 75,
   "families": 10,
   "horizon": 100000,
+  "maxDue": 10290,
   "procMean": 87,
   "procBins": [
    58,
@@ -838,12 +907,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 0,
   "tightPct": 0,
   "rejRatio": 19.6,
-  "loadRatio": 0.07
+  "loadRatio": 0.07,
+  "possibilities": "2.5×10^109"
  },
  "STC_NCOS_31a": {
   "n": 75,
   "families": 10,
   "horizon": 100000,
+  "maxDue": 10290,
   "procMean": 87,
   "procBins": [
    58,
@@ -862,12 +933,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 0,
   "tightPct": 0,
   "rejRatio": 9.4,
-  "loadRatio": 0.07
+  "loadRatio": 0.07,
+  "possibilities": "2.5×10^109"
  },
  "STC_NCOS_32": {
   "n": 75,
   "families": 4,
   "horizon": 20000,
+  "maxDue": 6300,
   "procMean": 84,
   "procBins": [
    24,
@@ -886,12 +959,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 10,
   "tightPct": 0,
   "rejRatio": 16.5,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "2.5×10^109"
  },
  "STC_NCOS_32a": {
   "n": 75,
   "families": 4,
   "horizon": 20000,
+  "maxDue": 6300,
   "procMean": 84,
   "procBins": [
    24,
@@ -910,12 +985,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 10,
   "tightPct": 0,
   "rejRatio": 16.5,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "2.5×10^109"
  },
  "STC_NCOS_41": {
   "n": 90,
   "families": 3,
   "horizon": 1500,
+  "maxDue": 439,
   "procMean": 5,
   "procBins": [
    24,
@@ -934,12 +1011,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 100,
   "tightPct": 0,
   "rejRatio": 20.4,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "1.5×10^138"
  },
  "STC_NCOS_41a": {
   "n": 90,
   "families": 3,
   "horizon": 1500,
+  "maxDue": 439,
   "procMean": 5,
   "procBins": [
    24,
@@ -958,12 +1037,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 100,
   "tightPct": 0,
   "rejRatio": 10.2,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "1.5×10^138"
  },
  "STC_NCOS_51": {
   "n": 200,
   "families": 3,
   "horizon": 40000,
+  "maxDue": 21500,
   "procMean": 81,
   "procBins": [
    93,
@@ -982,12 +1063,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 2000,
   "tightPct": 0,
   "rejRatio": 35.4,
-  "loadRatio": 0.4
+  "loadRatio": 0.4,
+  "possibilities": "7.9×10^374"
  },
  "STC_NCOS_51a": {
   "n": 200,
   "families": 3,
   "horizon": 40000,
+  "maxDue": 21500,
   "procMean": 81,
   "procBins": [
    93,
@@ -1006,12 +1089,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 2000,
   "tightPct": 0,
   "rejRatio": 35.4,
-  "loadRatio": 0.4
+  "loadRatio": 0.4,
+  "possibilities": "7.9×10^374"
  },
  "STC_NCOS_61": {
   "n": 500,
   "families": 2,
   "horizon": 40000,
+  "maxDue": 16000,
   "procMean": 39,
   "procBins": [
    30,
@@ -1030,12 +1115,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 860,
   "tightPct": 0,
   "rejRatio": 118.2,
-  "loadRatio": 0.49
+  "loadRatio": 0.49,
+  "possibilities": "1.2×10^1134"
  },
  "STC_NCOS_61a": {
   "n": 500,
   "families": 2,
   "horizon": 40000,
+  "maxDue": 16000,
   "procMean": 39,
   "procBins": [
    30,
@@ -1054,12 +1141,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 860,
   "tightPct": 0,
   "rejRatio": 118.2,
-  "loadRatio": 0.49
+  "loadRatio": 0.49,
+  "possibilities": "1.2×10^1134"
  },
  "GPU_CALM_40": {
   "n": 40,
   "families": 5,
   "horizon": 1800,
+  "maxDue": 1604,
   "procMean": 9,
   "procBins": [
    11,
@@ -1078,12 +1167,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 32,
   "tightPct": 3,
   "rejRatio": 25.1,
-  "loadRatio": 0.2
+  "loadRatio": 0.2,
+  "possibilities": "8.2×10^47"
  },
  "GPU_HEAVY_120": {
   "n": 120,
   "families": 5,
   "horizon": 3600,
+  "maxDue": 2898,
   "procMean": 9,
   "procBins": [
    39,
@@ -1102,12 +1193,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 32,
   "tightPct": 3,
   "rejRatio": 30,
-  "loadRatio": 0.31
+  "loadRatio": 0.31,
+  "possibilities": "6.7×10^198"
  },
  "GPU_RUSH_60": {
   "n": 60,
   "families": 5,
-  "horizon": 1894,
+  "horizon": 1500,
+  "maxDue": 1894,
   "procMean": 8,
   "procBins": [
    22,
@@ -1126,372 +1219,248 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 32,
   "tightPct": 2,
   "rejRatio": 32.1,
-  "loadRatio": 0.25
+  "loadRatio": 0.32,
+  "possibilities": "8.3×10^81"
  },
  "3DPRINT_FARM_180": {
   "n": 180,
   "families": 6,
-  "horizon": 19820,
-  "procMean": 187,
+  "horizon": 23040,
+  "maxDue": 17494,
+  "procMean": 156,
   "procBins": [
-   18,
-   27,
-   28,
-   26,
-   27,
-   28,
-   24,
-   2
+   34,
+   32,
+   32,
+   31,
+   22,
+   16,
+   12,
+   1
   ],
-  "releaseMean": 6119,
-  "dueMean": 7583,
+  "releaseMean": 5921,
+  "dueMean": 7365,
   "weightMean": 2,
   "setupMean": 21,
   "setupMax": 53,
-  "tightPct": 3,
-  "rejRatio": 6.6,
-  "loadRatio": 1.7
+  "tightPct": 1,
+  "rejRatio": 7.3,
+  "loadRatio": 1.22,
+  "possibilities": "2.0×10^329"
  },
  "3DPRINT_FARM_45": {
   "n": 45,
   "families": 6,
-  "horizon": 5984,
-  "procMean": 168,
+  "horizon": 5760,
+  "maxDue": 5997,
+  "procMean": 166,
   "procBins": [
-   9,
-   8,
+   7,
+   7,
+   5,
+   5,
+   7,
    5,
    4,
-   4,
-   3,
-   5,
-   7
+   5
   ],
-  "releaseMean": 1561,
-  "dueMean": 2969,
-  "weightMean": 2.2,
+  "releaseMean": 1374,
+  "dueMean": 2954,
+  "weightMean": 2,
   "setupMean": 21,
   "setupMax": 53,
-  "tightPct": 4,
-  "rejRatio": 7.6,
-  "loadRatio": 1.26
+  "tightPct": 0,
+  "rejRatio": 7.3,
+  "loadRatio": 1.3,
+  "possibilities": "1.2×10^56"
  },
  "3DPRINT_FARM_90": {
   "n": 90,
   "families": 6,
   "horizon": 11520,
-  "procMean": 181,
+  "maxDue": 9803,
+  "procMean": 161,
   "procBins": [
+   13,
    11,
+   20,
    12,
-   11,
+   9,
    12,
-   15,
-   10,
-   12,
-   7
+   8,
+   5
   ],
-  "releaseMean": 3282,
-  "dueMean": 4651,
-  "weightMean": 2.1,
+  "releaseMean": 3011,
+  "dueMean": 4536,
+  "weightMean": 1.9,
   "setupMean": 21,
   "setupMax": 53,
-  "tightPct": 2,
-  "rejRatio": 7,
-  "loadRatio": 1.41
- },
- "BAKERY_L_180": {
-  "n": 180,
-  "families": 6,
-  "horizon": 7005,
-  "procMean": 30,
-  "procBins": [
-   22,
-   46,
-   33,
-   21,
-   20,
-   21,
-   13,
-   4
-  ],
-  "releaseMean": 2378,
-  "dueMean": 2924,
-  "weightMean": 5.2,
-  "setupMean": 8,
-  "setupMax": 21,
-  "tightPct": 0,
-  "rejRatio": 13.7,
-  "loadRatio": 0.77
- },
- "BAKERY_M_90": {
-  "n": 90,
-  "families": 6,
-  "horizon": 4219,
-  "procMean": 30,
-  "procBins": [
-   14,
-   25,
-   15,
-   9,
-   9,
-   3,
-   7,
-   8
-  ],
-  "releaseMean": 1167,
-  "dueMean": 1718,
-  "weightMean": 5,
-  "setupMean": 8,
-  "setupMax": 21,
-  "tightPct": 0,
-  "rejRatio": 13.7,
-  "loadRatio": 0.63
- },
- "BAKERY_S_45": {
-  "n": 45,
-  "families": 6,
-  "horizon": 2880,
-  "procMean": 30,
-  "procBins": [
-   7,
-   12,
-   6,
-   5,
-   5,
-   3,
-   3,
-   4
-  ],
-  "releaseMean": 770,
-  "dueMean": 1379,
-  "weightMean": 4.7,
-  "setupMean": 8,
-  "setupMax": 21,
-  "tightPct": 0,
-  "rejRatio": 14.5,
-  "loadRatio": 0.47
+  "tightPct": 4,
+  "rejRatio": 7.4,
+  "loadRatio": 1.26,
+  "possibilities": "1.5×10^138"
  },
  "BREWERY_L_180": {
   "n": 180,
   "families": 6,
-  "horizon": 54263,
-  "procMean": 300,
+  "horizon": 63360,
+  "maxDue": 49600,
+  "procMean": 292,
   "procBins": [
-   18,
-   26,
-   34,
-   37,
-   22,
-   27,
-   11,
-   5
+   17,
+   35,
+   32,
+   25,
+   23,
+   24,
+   12,
+   12
   ],
-  "releaseMean": 16629,
-  "dueMean": 20382,
+  "releaseMean": 15990,
+  "dueMean": 19744,
   "weightMean": 2.8,
   "setupMean": 47,
   "setupMax": 100,
   "tightPct": 0,
-  "rejRatio": 8,
-  "loadRatio": 0.99
+  "rejRatio": 7.9,
+  "loadRatio": 0.83,
+  "possibilities": "2.0×10^329"
  },
  "BREWERY_M_90": {
   "n": 90,
   "families": 6,
-  "horizon": 31625,
-  "procMean": 300,
+  "horizon": 31680,
+  "maxDue": 27956,
+  "procMean": 285,
   "procBins": [
-   9,
-   11,
+   20,
+   20,
    17,
-   13,
-   19,
-   10,
+   16,
    7,
-   4
+   5,
+   3,
+   2
   ],
-  "releaseMean": 8585,
-  "dueMean": 12168,
-  "weightMean": 2.8,
+  "releaseMean": 8229,
+  "dueMean": 12105,
+  "weightMean": 2.9,
   "setupMean": 47,
   "setupMax": 100,
   "tightPct": 0,
-  "rejRatio": 7.9,
-  "loadRatio": 0.85
+  "rejRatio": 8.4,
+  "loadRatio": 0.81,
+  "possibilities": "1.5×10^138"
  },
  "BREWERY_S_45": {
   "n": 45,
   "families": 6,
-  "horizon": 16472,
-  "procMean": 293,
+  "horizon": 15840,
+  "maxDue": 16655,
+  "procMean": 292,
   "procBins": [
+   5,
    9,
-   7,
-   8,
-   7,
-   8,
-   4,
-   1,
+   13,
+   5,
+   5,
+   5,
+   2,
    1
   ],
-  "releaseMean": 3341,
-  "dueMean": 7403,
-  "weightMean": 2.5,
+  "releaseMean": 3675,
+  "dueMean": 7248,
+  "weightMean": 3.2,
   "setupMean": 47,
   "setupMax": 100,
   "tightPct": 0,
-  "rejRatio": 7.9,
-  "loadRatio": 0.8
+  "rejRatio": 8.5,
+  "loadRatio": 0.83,
+  "possibilities": "1.2×10^56"
  },
  "COFFEE_L_180": {
   "n": 180,
   "families": 6,
-  "horizon": 8169,
-  "procMean": 19,
+  "horizon": 5760,
+  "maxDue": 7360,
+  "procMean": 18,
   "procBins": [
-   11,
-   51,
-   12,
-   29,
-   34,
-   14,
+   7,
+   26,
+   46,
+   24,
+   42,
    17,
-   12
+   11,
+   7
   ],
-  "releaseMean": 2214,
-  "dueMean": 3912,
-  "weightMean": 4.9,
+  "releaseMean": 2049,
+  "dueMean": 3711,
+  "weightMean": 5.2,
   "setupMean": 9,
   "setupMax": 20,
   "tightPct": 0,
-  "rejRatio": 24.5,
-  "loadRatio": 0.42
+  "rejRatio": 24.8,
+  "loadRatio": 0.57,
+  "possibilities": "2.0×10^329"
  },
  "COFFEE_M_90": {
   "n": 90,
   "families": 6,
-  "horizon": 5852,
-  "procMean": 19,
+  "horizon": 2880,
+  "maxDue": 5131,
+  "procMean": 18,
   "procBins": [
-   11,
-   17,
-   6,
-   19,
+   12,
+   16,
    17,
    12,
-   5,
-   3
+   20,
+   1,
+   7,
+   5
   ],
-  "releaseMean": 1327,
-  "dueMean": 3031,
-  "weightMean": 4.9,
+  "releaseMean": 930,
+  "dueMean": 2615,
+  "weightMean": 5.3,
   "setupMean": 9,
   "setupMax": 20,
   "tightPct": 0,
-  "rejRatio": 24.1,
-  "loadRatio": 0.29
+  "rejRatio": 23.9,
+  "loadRatio": 0.57,
+  "possibilities": "1.5×10^138"
  },
  "COFFEE_S_45": {
   "n": 45,
   "families": 6,
-  "horizon": 4794,
+  "horizon": 1440,
+  "maxDue": 4059,
   "procMean": 19,
   "procBins": [
-   2,
+   4,
+   9,
    3,
-   5,
-   10,
-   8,
+   9,
    7,
-   7,
-   3
+   6,
+   6,
+   1
   ],
-  "releaseMean": 1014,
-  "dueMean": 2701,
-  "weightMean": 5,
+  "releaseMean": 497,
+  "dueMean": 2020,
+  "weightMean": 5.4,
   "setupMean": 9,
   "setupMax": 20,
   "tightPct": 0,
-  "rejRatio": 24.1,
-  "loadRatio": 0.18
- },
- "DENTAL_L_180": {
-  "n": 180,
-  "families": 6,
-  "horizon": 12137,
-  "procMean": 40,
-  "procBins": [
-   29,
-   39,
-   39,
-   27,
-   22,
-   17,
-   4,
-   3
-  ],
-  "releaseMean": 3202,
-  "dueMean": 5409,
-  "weightMean": 3.8,
-  "setupMean": 17,
-  "setupMax": 42,
-  "tightPct": 0,
-  "rejRatio": 15.3,
-  "loadRatio": 0.6
- },
- "DENTAL_M_90": {
-  "n": 90,
-  "families": 6,
-  "horizon": 8221,
-  "procMean": 42,
-  "procBins": [
-   15,
-   20,
-   16,
-   11,
-   14,
-   12,
-   1,
-   1
-  ],
-  "releaseMean": 1415,
-  "dueMean": 3526,
-  "weightMean": 4.1,
-  "setupMean": 17,
-  "setupMax": 42,
-  "tightPct": 0,
-  "rejRatio": 15.1,
-  "loadRatio": 0.46
- },
- "DENTAL_S_45": {
-  "n": 45,
-  "families": 6,
-  "horizon": 6270,
-  "procMean": 43,
-  "procBins": [
-   5,
-   3,
-   11,
-   12,
-   3,
-   5,
-   4,
-   2
-  ],
-  "releaseMean": 730,
-  "dueMean": 2737,
-  "weightMean": 4.2,
-  "setupMean": 17,
-  "setupMax": 42,
-  "tightPct": 0,
-  "rejRatio": 12.3,
-  "loadRatio": 0.31
+  "rejRatio": 25.6,
+  "loadRatio": 0.59,
+  "possibilities": "1.2×10^56"
  },
  "KITCHEN_SERVICE_120": {
   "n": 120,
   "families": 6,
-  "horizon": 570,
+  "horizon": 720,
+  "maxDue": 430,
   "procMean": 6,
   "procBins": [
    20,
@@ -1510,12 +1479,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 15,
   "tightPct": 0,
   "rejRatio": 28.3,
-  "loadRatio": 1.32
+  "loadRatio": 1.04,
+  "possibilities": "6.7×10^198"
  },
  "KITCHEN_SERVICE_240": {
   "n": 240,
   "families": 6,
-  "horizon": 946,
+  "horizon": 1320,
+  "maxDue": 806,
   "procMean": 6,
   "procBins": [
    47,
@@ -1534,12 +1505,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 15,
   "tightPct": 0,
   "rejRatio": 29.7,
-  "loadRatio": 1.5
+  "loadRatio": 1.08,
+  "possibilities": "4.1×10^468"
  },
  "KITCHEN_SERVICE_60": {
   "n": 60,
   "families": 6,
   "horizon": 360,
+  "maxDue": 247,
   "procMean": 6,
   "procBins": [
    8,
@@ -1558,300 +1531,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 15,
   "tightPct": 0,
   "rejRatio": 25.7,
-  "loadRatio": 1.01
- },
- "LAB_L_180": {
-  "n": 180,
-  "families": 6,
-  "horizon": 7944,
-  "procMean": 27,
-  "procBins": [
-   35,
-   50,
-   34,
-   28,
-   12,
-   13,
-   3,
-   5
-  ],
-  "releaseMean": 2704,
-  "dueMean": 3453,
-  "weightMean": 4.1,
-  "setupMean": 19,
-  "setupMax": 40,
-  "tightPct": 0,
-  "rejRatio": 23.3,
-  "loadRatio": 0.6
- },
- "LAB_M_90": {
-  "n": 90,
-  "families": 6,
-  "horizon": 4320,
-  "procMean": 28,
-  "procBins": [
-   13,
-   22,
-   17,
-   9,
-   13,
-   4,
-   8,
-   4
-  ],
-  "releaseMean": 1375,
-  "dueMean": 2210,
-  "weightMean": 3.7,
-  "setupMean": 19,
-  "setupMax": 40,
-  "tightPct": 0,
-  "rejRatio": 21.3,
-  "loadRatio": 0.59
- },
- "LAB_S_45": {
-  "n": 45,
-  "families": 6,
-  "horizon": 3379,
-  "procMean": 26,
-  "procBins": [
-   6,
-   15,
-   6,
-   2,
-   7,
-   3,
-   3,
-   3
-  ],
-  "releaseMean": 1097,
-  "dueMean": 1875,
-  "weightMean": 3.9,
-  "setupMean": 19,
-  "setupMax": 40,
-  "tightPct": 0,
-  "rejRatio": 24.6,
-  "loadRatio": 0.34
- },
- "LASER_L_180": {
-  "n": 180,
-  "families": 6,
-  "horizon": 7928,
-  "procMean": 21,
-  "procBins": [
-   22,
-   49,
-   33,
-   40,
-   19,
-   10,
-   2,
-   5
-  ],
-  "releaseMean": 1994,
-  "dueMean": 3457,
-  "weightMean": 3.1,
-  "setupMean": 11,
-  "setupMax": 25,
-  "tightPct": 0,
-  "rejRatio": 23.1,
-  "loadRatio": 0.47
- },
- "LASER_M_90": {
-  "n": 90,
-  "families": 6,
-  "horizon": 5678,
-  "procMean": 24,
-  "procBins": [
-   5,
-   19,
-   11,
-   20,
-   20,
-   5,
-   6,
-   4
-  ],
-  "releaseMean": 982,
-  "dueMean": 2389,
-  "weightMean": 3.1,
-  "setupMean": 11,
-  "setupMax": 25,
-  "tightPct": 0,
-  "rejRatio": 19.2,
-  "loadRatio": 0.39
- },
- "LASER_S_45": {
-  "n": 45,
-  "families": 6,
-  "horizon": 4987,
-  "procMean": 22,
-  "procBins": [
-   2,
-   9,
-   8,
-   5,
-   11,
-   5,
-   2,
-   3
-  ],
-  "releaseMean": 791,
-  "dueMean": 1954,
-  "weightMean": 3.9,
-  "setupMean": 11,
-  "setupMax": 25,
-  "tightPct": 0,
-  "rejRatio": 22.7,
-  "loadRatio": 0.2
- },
- "LAUNDRY_L_180": {
-  "n": 180,
-  "families": 6,
-  "horizon": 12111,
-  "procMean": 42,
-  "procBins": [
-   24,
-   32,
-   43,
-   23,
-   34,
-   12,
-   7,
-   5
-  ],
-  "releaseMean": 3388,
-  "dueMean": 5128,
-  "weightMean": 3.1,
-  "setupMean": 15,
-  "setupMax": 40,
-  "tightPct": 0,
-  "rejRatio": 10,
-  "loadRatio": 0.62
- },
- "LAUNDRY_M_90": {
-  "n": 90,
-  "families": 6,
-  "horizon": 8372,
-  "procMean": 41,
-  "procBins": [
-   6,
-   20,
-   15,
-   14,
-   19,
-   6,
-   5,
-   5
-  ],
-  "releaseMean": 1734,
-  "dueMean": 3165,
-  "weightMean": 3.4,
-  "setupMean": 15,
-  "setupMax": 40,
-  "tightPct": 0,
-  "rejRatio": 10.2,
-  "loadRatio": 0.44
- },
- "LAUNDRY_S_45": {
-  "n": 45,
-  "families": 6,
-  "horizon": 6134,
-  "procMean": 41,
-  "procBins": [
-   7,
-   8,
-   13,
-   8,
-   3,
-   4,
-   0,
-   2
-  ],
-  "releaseMean": 859,
-  "dueMean": 2372,
-  "weightMean": 3.2,
-  "setupMean": 15,
-  "setupMax": 40,
-  "tightPct": 0,
-  "rejRatio": 10.8,
-  "loadRatio": 0.3
- },
- "STUDIO_L_180": {
-  "n": 180,
-  "families": 6,
-  "horizon": 18322,
-  "procMean": 80,
-  "procBins": [
-   30,
-   27,
-   35,
-   38,
-   12,
-   23,
-   11,
-   4
-  ],
-  "releaseMean": 4658,
-  "dueMean": 6736,
-  "weightMean": 3.1,
-  "setupMean": 27,
-  "setupMax": 53,
-  "tightPct": 0,
-  "rejRatio": 6,
-  "loadRatio": 0.78
- },
- "STUDIO_M_90": {
-  "n": 90,
-  "families": 6,
-  "horizon": 10434,
-  "procMean": 81,
-  "procBins": [
-   6,
-   18,
-   20,
-   17,
-   12,
-   9,
-   4,
-   4
-  ],
-  "releaseMean": 3026,
-  "dueMean": 4953,
-  "weightMean": 3.1,
-  "setupMean": 27,
-  "setupMax": 53,
-  "tightPct": 0,
-  "rejRatio": 6.1,
-  "loadRatio": 0.7
- },
- "STUDIO_S_45": {
-  "n": 45,
-  "families": 6,
-  "horizon": 8305,
-  "procMean": 80,
-  "procBins": [
-   5,
-   5,
-   10,
-   10,
-   6,
-   1,
-   3,
-   5
-  ],
-  "releaseMean": 1629,
-  "dueMean": 3630,
-  "weightMean": 3,
-  "setupMean": 27,
-  "setupMax": 53,
-  "tightPct": 0,
-  "rejRatio": 6.2,
-  "loadRatio": 0.44
+  "loadRatio": 1.01,
+  "possibilities": "8.3×10^81"
  },
  "SURGERY_BLOCK_180": {
   "n": 180,
   "families": 7,
-  "horizon": 15573,
+  "horizon": 14400,
+  "maxDue": 15573,
   "procMean": 109,
   "procBins": [
    33,
@@ -1870,12 +1557,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 74,
   "tightPct": 0,
   "rejRatio": 10.1,
-  "loadRatio": 1.26
+  "loadRatio": 1.36,
+  "possibilities": "2.0×10^329"
  },
  "SURGERY_BLOCK_40": {
   "n": 40,
   "families": 7,
-  "horizon": 4745,
+  "horizon": 3600,
+  "maxDue": 4745,
   "procMean": 102,
   "procBins": [
    9,
@@ -1894,12 +1583,14 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 74,
   "tightPct": 0,
   "rejRatio": 9.9,
-  "loadRatio": 0.86
+  "loadRatio": 1.14,
+  "possibilities": "8.2×10^47"
  },
  "SURGERY_BLOCK_90": {
   "n": 90,
   "families": 7,
-  "horizon": 8288,
+  "horizon": 7200,
+  "maxDue": 8288,
   "procMean": 106,
   "procBins": [
    10,
@@ -1918,6 +1609,7 @@ export const INSTANCE_STATS = Object.freeze({
   "setupMax": 74,
   "tightPct": 1,
   "rejRatio": 10.6,
-  "loadRatio": 1.15
+  "loadRatio": 1.32,
+  "possibilities": "1.5×10^138"
  }
 });
