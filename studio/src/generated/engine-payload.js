@@ -19,6 +19,12 @@ import wasm16 from "./payload-parts/wasm-16.js";
 import wasm17 from "./payload-parts/wasm-17.js";
 import wasm18 from "./payload-parts/wasm-18.js";
 import wasm19 from "./payload-parts/wasm-19.js";
+import wasm20 from "./payload-parts/wasm-20.js";
+import wasm21 from "./payload-parts/wasm-21.js";
+import wasm22 from "./payload-parts/wasm-22.js";
+import wasm23 from "./payload-parts/wasm-23.js";
+import wasm24 from "./payload-parts/wasm-24.js";
+import wasm25 from "./payload-parts/wasm-25.js";
 import catalog0 from "./payload-parts/catalog-00.js";
 import catalog1 from "./payload-parts/catalog-01.js";
 import catalog2 from "./payload-parts/catalog-02.js";
@@ -42,6 +48,6 @@ import catalog19 from "./payload-parts/catalog-19.js";
 import catalog20 from "./payload-parts/catalog-20.js";
 
 export const IG_ENGINE_PAYLOAD = Object.freeze({
-  wasmBase64: [wasm0, wasm1, wasm2, wasm3, wasm4, wasm5, wasm6, wasm7, wasm8, wasm9, wasm10, wasm11, wasm12, wasm13, wasm14, wasm15, wasm16, wasm17, wasm18, wasm19].join(""),
+  wasmBase64: [wasm0, wasm1, wasm2, wasm3, wasm4, wasm5, wasm6, wasm7, wasm8, wasm9, wasm10, wasm11, wasm12, wasm13, wasm14, wasm15, wasm16, wasm17, wasm18, wasm19, wasm20, wasm21, wasm22, wasm23, wasm24, wasm25].join(""),
   catalogGzipBase64: [catalog0, catalog1, catalog2, catalog3, catalog4, catalog5, catalog6, catalog7, catalog8, catalog9, catalog10, catalog11, catalog12, catalog13, catalog14, catalog15, catalog16, catalog17, catalog18, catalog19, catalog20].join(""),
 });
