@@ -4779,13 +4779,23 @@ function onWinResize(fn){
     return evals;
   }
 
+  /* FNV-1a over the id's characters. The seed used id.length, so 'descent' and
+     'tabudiv' — both seven characters — drew the identical stream and were not
+     independent runs. The Studio's copy of this racer was fixed in 7eff5f8;
+     this figure carries its own implementation and still had the collision. */
+  function hashRacerId(id) {
+    let h = 0x811c9dc5;
+    for (let i = 0; i < id.length; i += 1) { h ^= id.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+    return h >>> 0;
+  }
+
   /* ---- racers ---- */
   function baseRacer(id, name, colorVar) {
     return {
       id, name, colorVar, evals: 0, done: false, status: 'preparing',
       cur: { order: [], rejected: inst.jobs.map(j => j.id) },
       bestCost: Infinity, hist: [], credit: 0, bestVec: null,
-      rng: mulberry32(0xBEEF ^ id.length * 2654435761 ^ raceSeed),
+      rng: mulberry32((0xBEEF ^ hashRacerId(id) ^ raceSeed) >>> 0),
       note(cost, sol) {
         if (cost < this.bestCost - 1e-9) {
           this.bestCost = cost;
