@@ -17,11 +17,13 @@
 pub mod ctx;
 pub mod descent;
 pub mod greedy;
+pub mod tabu;
 
 pub use ctx::Ctx;
 
 use descent::DescentState;
 use greedy::GreedyState;
+use tabu::TabuState;
 
 use crate::eval::State;
 use crate::instance::Instance;
@@ -183,6 +185,9 @@ impl Common {
 pub(crate) enum Body {
     Greedy(GreedyState),
     Descent(DescentState),
+    /// Both "tabu" and "tabudiv": one search, one file, the `div` flag is the
+    /// whole difference (a periodic diversification kick every 45 iterations).
+    Tabu(TabuState),
     /// NOT YET PORTED. Each remaining method lands here as its own variant;
     /// until then a placeholder racer that spends nothing and reports itself
     /// finished, so the race can terminate. This variant disappears once all
@@ -204,6 +209,10 @@ impl Racer {
                 Body::Greedy(GreedyState::new(inst))
             }
             Method::Descent => Body::Descent(DescentState::new(inst, &mut common)),
+            Method::Tabu | Method::TabuDiv => {
+                common.phase_arg = tabu::TENURE;
+                Body::Tabu(TabuState::new(inst, method == Method::TabuDiv, &mut common))
+            }
             _ => Body::Pending,
         };
         Racer { common, body }
@@ -228,6 +237,7 @@ impl Racer {
         match body {
             Body::Greedy(s) => s.advance(&mut ctx),
             Body::Descent(s) => s.advance(&mut ctx),
+            Body::Tabu(s) => s.advance(&mut ctx),
             Body::Pending => ctx.finish(ST_PREPARING),
         }
         ctx.close()
@@ -239,6 +249,7 @@ impl Racer {
         match &self.body {
             Body::Greedy(s) => s.incumbent(),
             Body::Descent(s) => s.incumbent(),
+            Body::Tabu(s) => s.cur(),
             Body::Pending => &self.common.best,
         }
     }
