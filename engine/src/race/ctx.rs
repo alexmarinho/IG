@@ -79,6 +79,19 @@ impl<'a> Ctx<'a> {
         self.charge(k);
     }
 
+    /// `k` evaluations already counted by a sub-engine that owns its own
+    /// counter — today, `solver::Run`, whose `evaluations` field is incremented
+    /// inside `State::best_insertion` where no `Ctx` can reach. The IG racer
+    /// settles the delta after every iteration, so nothing is estimated: the
+    /// unit is the same unit, counted by the same code, in the same place.
+    ///
+    /// Deliberately not spelled `charge_skipped`: that name is a claim about
+    /// pruning and this is not one.
+    #[inline]
+    pub fn charge_engine(&mut self, k: u64) {
+        self.charge(k);
+    }
+
     /// Best feasible insertion of `job`, charging exactly what the exhaustive
     /// scan over all `order.len() + 1` positions costs — `State::best_insertion`
     /// already credits the positions its cutoff skipped, which is the precedent

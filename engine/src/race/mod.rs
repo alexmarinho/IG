@@ -18,6 +18,7 @@ pub mod ama;
 pub mod ctx;
 pub mod descent;
 pub mod greedy;
+pub mod ig;
 pub mod tabu;
 
 pub use ctx::Ctx;
@@ -25,6 +26,7 @@ pub use ctx::Ctx;
 use ama::AmaState;
 use descent::DescentState;
 use greedy::GreedyState;
+use ig::IgState;
 use tabu::TabuState;
 
 use crate::eval::State;
@@ -191,11 +193,8 @@ pub(crate) enum Body {
     /// whole difference (a periodic diversification kick every 45 iterations).
     Tabu(TabuState),
     Ama(AmaState),
-    /// NOT YET PORTED. Each remaining method lands here as its own variant;
-    /// until then a placeholder racer that spends nothing and reports itself
-    /// finished, so the race can terminate. This variant disappears once all
-    /// six are in.
-    Pending,
+    /// The engine itself, wrapped — not a port. See `ig.rs`.
+    Ig(IgState),
 }
 
 pub struct Racer {
@@ -204,7 +203,7 @@ pub struct Racer {
 }
 
 impl Racer {
-    pub fn new(inst: &Instance, method: Method, race_seed: u32, budget: u64, _ig: IgConfig) -> Racer {
+    pub fn new(inst: &Instance, method: Method, race_seed: u32, budget: u64, ig: IgConfig) -> Racer {
         let mut common = Common::new(inst, method, race_seed, budget);
         let body = match method {
             Method::Greedy => {
@@ -217,7 +216,7 @@ impl Racer {
                 Body::Tabu(TabuState::new(inst, method == Method::TabuDiv, &mut common))
             }
             Method::Ama => Body::Ama(AmaState::new(inst, &mut common)),
-            _ => Body::Pending,
+            Method::Ig => Body::Ig(IgState::new(race_seed, ig, &mut common)),
         };
         Racer { common, body }
     }
@@ -243,7 +242,7 @@ impl Racer {
             Body::Descent(s) => s.advance(&mut ctx),
             Body::Tabu(s) => s.advance(&mut ctx),
             Body::Ama(s) => s.advance(&mut ctx),
-            Body::Pending => ctx.finish(ST_PREPARING),
+            Body::Ig(s) => s.advance(&mut ctx),
         }
         ctx.close()
     }
@@ -256,7 +255,7 @@ impl Racer {
             Body::Descent(s) => s.incumbent(),
             Body::Tabu(s) => s.cur(),
             Body::Ama(s) => s.incumbent(&self.common),
-            Body::Pending => &self.common.best,
+            Body::Ig(s) => s.incumbent(&self.common),
         }
     }
 }
