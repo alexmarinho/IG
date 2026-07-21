@@ -45,6 +45,9 @@ import { createRaceView } from "./race/view.js";
 
 const DEFAULTS = Object.freeze({
   language: "en",
+  view: "app",
+  page: null,
+  autorun: false,
   scenario: "factory",
   instance: "STC_NCOS_31",
   mode: "single",
@@ -76,6 +79,39 @@ function clampInteger(value, minimum, maximum, fallback) {
   return Number.isSafeInteger(parsed) ? Math.min(maximum, Math.max(minimum, parsed)) : fallback;
 }
 
+/**
+ * Query-string options, shared by both entry points: the homepage embed
+ * (?view=run&lang=) and the deep links out of the figure into the full app
+ * (?page=&scenario=&instance=&mode=&seed=&budget=&d=&accept=&permute=&run=1).
+ * Only keys actually present are returned — an `undefined` here would beat
+ * DEFAULTS in the object spread at the mount site.
+ */
+export function readQueryOptions(search = globalThis.location?.search || "") {
+  const query = new URLSearchParams(search);
+  const options = {};
+  const put = (key, value) => { if (value !== undefined) options[key] = value; };
+  const text = (key) => (query.get(key) ? query.get(key) : undefined);
+  const oneOf = (key, allowed) => (allowed.includes(query.get(key)) ? query.get(key) : undefined);
+  const number = (key) => {
+    const parsed = Number(text(key));
+    return text(key) !== undefined && Number.isFinite(parsed) ? parsed : undefined;
+  };
+  put("view", query.get("view") === "run" ? "run" : undefined);
+  put("language", text("lang"));
+  put("page", oneOf("page", ["levels", "overview", "schedule", "instance", "method"]));
+  put("autorun", query.get("run") === "1" ? true : undefined);
+  put("scenario", text("scenario"));
+  put("instance", text("instance"));
+  put("mode", oneOf("mode", ["single", "comparison", "race"]));
+  put("seed", number("seed"));
+  put("iterationBudget", number("budget"));
+  put("raceBudget", number("raceBudget"));
+  put("d", number("d"));
+  put("accept", oneOf("accept", ["current", "best"]));
+  put("permute", query.has("permute") ? query.get("permute") !== "0" : undefined);
+  return options;
+}
+
 /** Default per-method evaluation budget for the race, scaled by job count. */
 function raceBudgetDefault(n) {
   if (n >= 400) return 100_000;
@@ -89,9 +125,13 @@ class IGStudioApp {
   constructor(container, options = {}) {
     this.container = container;
     this.options = { ...DEFAULTS, ...options };
+    // The hosted block stamps this in <head> to avoid a flash; repeat it for
+    // the dev entry point, which has no hosted block. Idempotent.
+    if (document.documentElement?.dataset) document.documentElement.dataset.igView = this.options.view;
     this.state = {
       locale: normalizeUiLocale(this.options.language),
-      page: "levels",
+      // Figure mode is one page by construction: the run and its result.
+      page: this.options.page || (this.options.view === "run" ? "overview" : "levels"),
       scenarioId: this.options.scenario,
       instanceId: this.options.instance,
       previousView: null,
@@ -159,6 +199,11 @@ class IGStudioApp {
       this.render();
     } catch (error) {
       this.onError(error);
+    }
+    this.installHeightReporter();
+    if (this.options.autorun && this.state.status === "ready") {
+      // A deep link lands on a populated page, not an empty state.
+      this.startRun({ reveal: false });
     }
     return this;
   }
@@ -420,18 +465,70 @@ class IGStudioApp {
    * way to tell where the answer would appear. Overview covers single and
    * comparison runs, and falls through to the race page in race mode.
    */
-  showRun() {
+  /**
+   * Figure mode reports its document height to the host so the iframe can be
+   * sized to its content: one page scroll, no nested viewport.
+   *
+   * Observed on documentElement, not on .studio-shell or .workspace — render()
+   * replaces container.innerHTML wholesale, so an observer on those dies
+   * silently after the first navigation. Coalesced with a timer rather than
+   * rAF: rAF never fires while document.hidden, which would freeze the frame
+   * at its fallback height in any background tab.
+   */
+  installHeightReporter() {
+    if (this.options.view !== "run" || parent === globalThis) return;
+    if (typeof ResizeObserver !== "function") return;
+    const state = { pending: 0, measured: 0, posted: 0, posts: 0, windowStart: 0 };
+    this.heightState = state;
+    const flush = () => {
+      state.pending = 0;
+      const height = state.measured;
+      if (!Number.isFinite(height) || height <= 0) return;
+      if (Math.abs(height - state.posted) < 2) return;     // dead band, mirrored by the host
+      const now = Date.now();
+      if (now - state.windowStart > 500) { state.windowStart = now; state.posts = 0; }
+      state.posts += 1;
+      // Runaway latch: a height that only ever grows, a dozen times in half a
+      // second, is a resize feedback loop. Freeze on the last value and make
+      // the failure visible instead of spinning.
+      if (state.posts > 12 && height > state.posted) {
+        console.warn("[ig-studio] height reporter latched: suspected resize loop at", height);
+        this.heightObserver?.disconnect();
+        setTimeout(() => this.heightObserver?.observe(document.documentElement), 2000);
+        state.posts = 0;
+        return;
+      }
+      state.posted = height;
+      parent.postMessage({ type: "ig-studio:height", view: "run", height }, "*");
+    };
+    const schedule = (height) => {
+      state.measured = Math.ceil(height);
+      if (!state.pending) state.pending = setTimeout(flush, 0);
+    };
+    this.heightObserver = new ResizeObserver((entries) => {
+      const entry = entries[entries.length - 1];
+      const box = entry.borderBoxSize?.[0];                 // no forced reflow
+      schedule(box ? box.blockSize : entry.target.getBoundingClientRect().height);
+    });
+    this.heightObserver.observe(document.documentElement);
+    // A late webfont swap can change the box without the observer firing in a
+    // hidden document; ask once when the fonts settle.
+    document.fonts?.ready?.then(() => schedule(document.documentElement.getBoundingClientRect().height));
+  }
+
+  showRun({ reveal = true } = {}) {
+    if (!reveal) return;
     if (this.state.page !== "overview") this.state.page = "overview";
     // On a phone the rail stacks above the workspace and fills the first
     // screen, so the run the reader just started would draw entirely below the
     // fold. The caller renders straight after this, so defer past that task —
     // a timer rather than rAF, which a backgrounded tab would never fire.
-    if (globalThis.matchMedia?.("(max-width: 760px)").matches) {
+    if (this.options.view !== "run" && globalThis.matchMedia?.("(max-width: 760px)").matches) {
       setTimeout(() => this.container.querySelector(".workspace")?.scrollIntoView({ block: "start" }), 0);
     }
   }
 
-  async startRun() {
+  async startRun({ reveal = true } = {}) {
     if (this.state.mode === "race") return this.startRace({ force: false });
     if (!this.client || !this.state.instance || ["running", "paused"].includes(this.state.status)) return;
     const controlValue = (selector, fallback) => this.container.querySelector(selector)?.value ?? fallback;
@@ -448,7 +545,7 @@ class IGStudioApp {
     this.state.liveCheckpoints = [];
     if (this.state.mode === "single") this.state.singleResult = null;
     else { this.state.comparisonResult = null; this.state.selectedRunSeed = null; }
-    this.showRun();
+    this.showRun({ reveal });
     this.render();
     try {
       const checkpointEvery = Math.max(1, Math.ceil(this.state.iterationBudget / 50));
@@ -984,7 +1081,7 @@ export function mountIGStudio(container, options = {}) {
 globalThis.mountIGStudio = mountIGStudio;
 const root = document.querySelector("#ig-studio");
 if (root) {
-  globalThis.__igStudio = mountIGStudio(root, globalThis.IG_STUDIO_CONFIG || {});
+  globalThis.__igStudio = mountIGStudio(root, { ...(globalThis.IG_STUDIO_CONFIG || {}), ...readQueryOptions() });
   globalThis.__igStudio.ready.then(() => {
     if (parent !== globalThis) parent.postMessage({ type: "ig-studio:ready" }, "*");
   });
