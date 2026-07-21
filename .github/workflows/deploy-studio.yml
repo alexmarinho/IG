@@ -1,0 +1,44 @@
+name: deploy-studio
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/deploy-studio.yml"
+      - "masclib*/**"
+      - "studio/**"
+      - "engine/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build WASM engine
+        run: cargo build --release --target wasm32-unknown-unknown --manifest-path engine/Cargo.toml
+      - name: Regenerate engine payload from current instances
+        run: node studio/scripts/build-engine-payload.mjs --out=studio/src/generated/engine-payload.js
+      - name: Studio check + build
+        run: |
+          npm --prefix studio run check
+          npm --prefix studio run build
+      - name: Publish to docs/
+        run: |
+          # make-hosted-embed keeps the +1137-byte hosted-shell block (hides the
+          # in-app chrome, sticky Prepare/Results, ?lang wiring) the homepage
+          # iframe depends on. A plain copy of dist/ would drop it.
+          node studio/scripts/make-hosted-embed.mjs
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/studio-app.html studio/src/generated/
+          git diff --cached --quiet || git commit -m "studio: rebuild published app [skip ci]"
+          git push

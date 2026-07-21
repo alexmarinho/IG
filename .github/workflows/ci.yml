@@ -37,6 +37,9 @@ jobs:
 
       - name: Studio tests and standalone build
         run: |
+          # Regenerate the engine payload from the current CSVs + the WASM built
+          # above so tests/check always run against the live instance set.
+          node studio/scripts/build-engine-payload.mjs --out=studio/src/generated/engine-payload.js
           npm --prefix studio test
           npm --prefix studio run check
           npm --prefix studio run build

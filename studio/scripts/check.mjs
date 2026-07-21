@@ -21,15 +21,35 @@ const entryPath = path.join(sourceRoot, "app.js");
 const payloadPath = path.join(sourceRoot, "generated", "engine-payload.js");
 const sourceHtmlPath = path.join(studioRoot, "index.html");
 const packagePath = path.join(studioRoot, "package.json");
-const sceneAssetRoot = path.join(studioRoot, "assets", "scenarios");
+const generatedSceneAssetRoot = path.join(sourceRoot, "generated", "scene-assets");
 
+/** assetKey -> fallback .webp filename; the committed generated module is canonical. */
 export const SCENE_ASSET_FILES = Object.freeze({
   factory: "factory-cnc.webp",
-  ai: "ai-server.webp",
-  kitchen: "restaurant-kitchen.webp",
-  surgery: "surgery-center.webp",
+  print3d: "print3d.webp",
+  coffee: "coffee.webp",
+  brewery: "brewery.webp",
 });
 export const MAX_SCENE_ASSET_BYTES = 256 * 1024;
+
+/**
+ * Stylesheet parts concatenated — in this exact cascade order — by index.html
+ * (dev) and scripts/build.mjs (dist inline). Each file must stay push-friendly
+ * (well under 40 KB); the legacy monolithic src/styles.css must not return.
+ */
+export const STYLE_PARTS = Object.freeze([
+  "base.css",
+  "rail.css",
+  "overview.css",
+  "instance.css",
+  "responsive.css",
+  "levels.css",
+  "explorer.css",
+  "analysis.css",
+  "race.css",
+]);
+export const stylesRoot = path.join(sourceRoot, "styles");
+export const MAX_STYLE_PART_BYTES = 40 * 1024;
 
 const RELATIVE_SPECIFIER = /^\.{1,2}\//;
 const WEB_OR_DATA_SPECIFIER = /^(?:https?:|data:|blob:|\/\/)/i;
@@ -139,10 +159,29 @@ async function browserModuleGraph(entry) {
   return visited;
 }
 
+async function readStylesheetParts() {
+  const parts = [];
+  for (const part of STYLE_PARTS) {
+    const absolute = path.join(stylesRoot, part);
+    await assertExists(absolute, "Stylesheet part");
+    const source = await readFile(absolute, "utf8");
+    invariant(Buffer.byteLength(source) <= MAX_STYLE_PART_BYTES,
+      `Stylesheet part ${part} exceeds ${MAX_STYLE_PART_BYTES} bytes — split it further`);
+    parts.push(source);
+  }
+  return parts;
+}
+
 async function validateOfflineContract(browserFiles) {
   const source = (await Promise.all([...browserFiles].map((filename) => readFile(filename, "utf8")))).join("\n");
   const html = await readFile(sourceHtmlPath, "utf8");
-  const css = await readFile(path.join(sourceRoot, "styles.css"), "utf8");
+  const css = (await readStylesheetParts()).join("\n");
+  try {
+    await access(path.join(sourceRoot, "styles.css"));
+    throw new Error("Legacy src/styles.css is back — keep the split parts in src/styles/");
+  } catch (error) {
+    if (error.code !== "ENOENT") throw error;
+  }
   const forbiddenRuntimeApis = [
     ["fetch", /\bfetch\s*\(/],
     ["XMLHttpRequest", /\bXMLHttpRequest\b/],
@@ -167,8 +206,15 @@ async function validateOfflineContract(browserFiles) {
     "Stylesheet must not import or load any runtime asset");
   invariant(!/<(?:script|link)\b[^>]*(?:src|href)\s*=\s*["'](?:https?:)?\/\//i.test(html),
     "Source HTML references an external runtime asset");
-  invariant(/<link\s+rel=["']stylesheet["']\s+href=["']\.\/src\/styles\.css["']/.test(html),
-    "Source HTML must load the local Studio stylesheet");
+  const linkOrder = STYLE_PARTS.map((part) => html.indexOf(`href="./src/styles/${part}"`));
+  for (const [index, part] of STYLE_PARTS.entries()) {
+    invariant(linkOrder[index] !== -1,
+      `Source HTML must load the local Studio stylesheet part ./src/styles/${part}`);
+  }
+  invariant(linkOrder.every((position, index) => index === 0 || position > linkOrder[index - 1]),
+    "Source HTML must load the Studio stylesheet parts in cascade order");
+  invariant(!/href=["']\.\/src\/styles\.css["']/.test(html),
+    "Source HTML must not load the legacy monolithic stylesheet");
   invariant(/<script\s+type=["']module["']\s+src=["']\.\/src\/app\.js["']/.test(html),
     "Source HTML must load the local Studio entry module");
 }
@@ -195,20 +241,22 @@ async function validateCatalogAndPayload() {
 
   const payloadIds = Object.keys(packedCatalog).sort();
   const publicIds = catalogModule.INSTANCE_CATALOG.map(({ id }) => id).sort();
-  invariant(payloadIds.length === 53,
-    `Fixed catalog must contain 53 bundled instances; found ${payloadIds.length}`);
+  invariant(payloadIds.length === 62,
+    `Fixed catalog must contain 62 bundled instances; found ${payloadIds.length}`);
   invariant(JSON.stringify(payloadIds) === JSON.stringify(publicIds),
     "Public instance catalog and embedded solver catalog do not match");
   invariant(catalogModule.SCENARIO_CATALOG.length === 4,
     "Studio must expose exactly four fixed scenario interpretations");
 
-  const expectedAssetFiles = Object.values(SCENE_ASSET_FILES).sort();
-  const presentAssetFiles = (await readdir(sceneAssetRoot))
-    .filter((filename) => path.extname(filename).toLowerCase() === ".webp")
-    .sort();
-  invariant(JSON.stringify(presentAssetFiles) === JSON.stringify(expectedAssetFiles),
-    `Scenario asset pack must contain exactly: ${expectedAssetFiles.join(", ")}`);
-
+  // Scene artwork travels as committed generated modules (data URIs), not as
+  // runtime files: verify the modules exist and export valid WebP data URIs.
+  for (const assetKey of Object.keys(SCENE_ASSET_FILES)) {
+    await assertExists(path.join(generatedSceneAssetRoot, `${assetKey}.js`),
+      `Generated scene asset for ${assetKey}`);
+  }
+  const { SCENE_ASSET_DATA } = await import(
+    `${pathToFileURL(path.join(generatedSceneAssetRoot, "index.js")).href}?check=${Date.now()}`
+  );
   const assetKeys = [];
   let sceneAssetBytes = 0;
 
@@ -240,8 +288,14 @@ async function validateCatalogAndPayload() {
   invariant(new Set(assetKeys).size === Object.keys(SCENE_ASSET_FILES).length,
     "Each Studio scenario must use one distinct visual asset");
 
-  for (const [assetKey, filename] of Object.entries(SCENE_ASSET_FILES)) {
-    const bytes = await readFile(path.join(sceneAssetRoot, filename));
+  invariant(JSON.stringify(Object.keys(SCENE_ASSET_DATA).sort())
+    === JSON.stringify(Object.keys(SCENE_ASSET_FILES).sort()),
+  "Generated scene-asset index must export exactly the scenario asset keys");
+  for (const assetKey of Object.keys(SCENE_ASSET_FILES)) {
+    const dataUri = SCENE_ASSET_DATA[assetKey];
+    invariant(typeof dataUri === "string" && dataUri.startsWith("data:image/webp;base64,"),
+      `Generated scene asset ${assetKey} is not a WebP data URI`);
+    const bytes = Buffer.from(dataUri.slice("data:image/webp;base64,".length), "base64");
     invariant(bytes.length > 12, `Scenario asset ${assetKey} is empty`);
     invariant(bytes.subarray(0, 4).toString("ascii") === "RIFF"
       && bytes.subarray(8, 12).toString("ascii") === "WEBP",

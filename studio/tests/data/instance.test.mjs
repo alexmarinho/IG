@@ -14,7 +14,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", ".
 const rawCatalog = JSON.parse(gunzipSync(Buffer.from(IG_ENGINE_PAYLOAD.catalogGzipBase64, "base64")));
 
 test("every embedded fixed instance parses into the advertised job count", () => {
-  assert.equal(Object.keys(rawCatalog).length, 53);
+  assert.equal(Object.keys(rawCatalog).length, 62);
   for (const [id, entry] of Object.entries(rawCatalog)) {
     const instance = parseMasclib(entry.csv, id);
     assert.equal(instance.n, INSTANCE_BY_ID[id].jobCount, id);

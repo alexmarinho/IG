@@ -1,3 +1,7 @@
+import { FAMILY_COLORS } from "../views/shared.js";
+
+export { FAMILY_COLORS };
+
 const COLORS = {
   grid: "rgba(34,84,163,.16)",
   axis: "#62645e",
@@ -12,11 +16,6 @@ const COLORS = {
   setup: "#8d8c83",
   background: "#fbf9f2",
 };
-
-export const FAMILY_COLORS = Object.freeze([
-  "#2254a3", "#1f7a6d", "#d5481b", "#963d38", "#b17a12",
-  "#507b43", "#2f718f", "#a05c2f", "#6e7097", "#4e6662",
-]);
 
 function canvasSize(canvas, minimumWidth = 0) {
   const dpr = Math.min(2, globalThis.devicePixelRatio || 1);

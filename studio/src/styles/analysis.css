@@ -1,0 +1,119 @@
+/* IG Studio stylesheet — part 8/8: analysis.css. Final-analysis panel: baseline bars, structural bullets, not-obvious callout.
+ * Split of the former styles.css; concatenated in fixed order by scripts/build.mjs
+ * (see STYLE_PARTS in scripts/check.mjs). Keep the cascade order intact. */
+
+/* ---------------------------------------------------------------------------
+ * Final analysis (schedule page, single seed): baseline bars + callouts.
+ * ------------------------------------------------------------------------- */
+
+.final-analysis {
+  margin-top: 26px;
+  padding: 18px 20px 16px;
+  border: 1px solid var(--ink);
+  background: var(--paper-bright);
+  box-shadow: 3px 3px 0 rgba(23, 25, 24, .14);
+}
+
+.final-analysis .section-title-row { margin-bottom: 14px; }
+
+.baseline-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.baseline-row {
+  display: grid;
+  grid-template-columns: minmax(130px, 190px) minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+}
+
+.baseline-label {
+  overflow: hidden;
+  color: var(--ink-soft);
+  font: 650 11px/1.25 var(--font-ui);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.baseline-track {
+  position: relative;
+  height: 14px;
+  border: 1px solid var(--rule);
+  background: rgba(34, 84, 163, .05);
+}
+
+.baseline-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--cobalt);
+  opacity: .78;
+}
+
+.baseline-row.is-optimizer .baseline-bar { background: var(--signal); opacity: 1; }
+.baseline-row.is-optimizer .baseline-label { color: var(--ink); font-weight: 800; }
+
+.baseline-cost {
+  color: var(--ink);
+  font: 750 11px/1 var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.baseline-delta {
+  color: var(--quiet);
+  font: 650 9.5px/1 var(--font-mono);
+  white-space: nowrap;
+}
+
+.baseline-note {
+  grid-column: 1 / -1;
+  color: var(--danger);
+  font: 650 10px/1.3 var(--font-ui);
+}
+
+.analysis-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 0 0 0 18px;
+  color: var(--ink-soft);
+  font: 400 12px/1.5 var(--font-ui);
+}
+
+.analysis-bullets li::marker { color: var(--cobalt); }
+
+.not-obvious {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--signal);
+  background: rgba(223, 67, 15, .06);
+}
+
+.not-obvious h3 {
+  margin: 0 0 7px;
+  color: var(--signal-dark);
+  font: 800 10px/1 var(--font-mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.not-obvious ul {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0 0 0 16px;
+  color: var(--ink-soft);
+  font: 400 12px/1.5 var(--font-ui);
+}
+
+@media (max-width: 719px) {
+  .baseline-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .baseline-label { grid-column: 1 / -1; }
+  .baseline-track { grid-column: 1 / -1; }
+  .baseline-delta { justify-self: end; }
+}

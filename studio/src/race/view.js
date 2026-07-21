@@ -11,7 +11,7 @@ import {
   prerenderSpace,
   spaceY,
 } from "./space.js";
-import { FAMILY_COLORS } from "../visuals/charts.js";
+import { FAMILY_COLORS } from "../views/shared.js";
 
 const REDUCED_MOTION = typeof matchMedia === "function"
   && matchMedia("(prefers-reduced-motion: reduce)").matches;

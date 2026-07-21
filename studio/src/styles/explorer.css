@@ -1,0 +1,154 @@
+/* IG Studio stylesheet — part 7/8: explorer.css. Order explorer + help toggles/popovers (problem-data page).
+ * Split of the former styles.css; concatenated in fixed order by scripts/build.mjs
+ * (see STYLE_PARTS in scripts/check.mjs). Keep the cascade order intact. */
+
+/* ---------------------------------------------------------------------------
+ * "?" help toggles and popovers (metric cards + explorer column headers).
+ * ------------------------------------------------------------------------- */
+
+.help-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.help-dot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid var(--cobalt);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--cobalt);
+  font: 800 8.5px/1 var(--font-mono);
+  cursor: help;
+}
+
+.help-dot:hover,
+.help-dot[aria-expanded="true"] { background: var(--cobalt); color: var(--paper-bright); }
+
+.help-dot:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 1px; }
+
+.help-pop {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: -8px;
+  z-index: 30;
+  width: max-content;
+  max-width: 238px;
+  padding: 9px 11px;
+  border: 1px solid var(--ink);
+  background: var(--paper-bright);
+  box-shadow: 3px 3px 0 rgba(23, 25, 24, .22);
+  color: var(--ink-soft);
+  font: 400 11px/1.45 var(--font-ui);
+  letter-spacing: 0;
+  text-align: left;
+  text-transform: none;
+  white-space: normal;
+}
+
+.instance-metric { position: relative; }
+
+.instance-metric .help-pop { font-family: var(--font-ui); }
+
+/* ---------------------------------------------------------------------------
+ * Order explorer (problem data): sortable, humanized job table.
+ * ------------------------------------------------------------------------- */
+
+.explorer-wrap { max-height: min(70vh, 720px); }
+
+.explorer-table { min-width: 1080px; }
+
+.explorer-table th:nth-child(n + 3),
+.explorer-table td:nth-child(n + 3) { text-align: right; }
+
+.explorer-table th:first-child,
+.explorer-table th:nth-child(2),
+.explorer-table td:first-child,
+.explorer-table td:nth-child(2) { text-align: left; }
+
+.th-inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+}
+
+.explorer-table td:first-child .th-inner,
+.explorer-table th:first-child .th-inner,
+.explorer-table th:nth-child(2) .th-inner { justify-content: flex-start; }
+
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+
+.th-sort:hover { color: var(--signal); }
+
+.th-sort:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+
+.sort-marker {
+  font-style: normal;
+  font-size: 7px;
+}
+
+.explorer-unit {
+  color: var(--quiet);
+  font-weight: 650;
+  text-transform: none;
+}
+
+.family-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+
+.family-tag i {
+  display: inline-block;
+  width: 8px;
+  height: 14px;
+  border: 1px solid rgba(23, 25, 24, .35);
+  background: var(--family);
+}
+
+.explorer-flag {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 5px;
+  border: 1px solid var(--ochre);
+  background: rgba(177, 122, 18, .1);
+  color: var(--ochre);
+  font: 750 8px/1.2 var(--font-mono);
+  letter-spacing: .03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.instance-lead {
+  max-width: 72ch;
+  margin: 0 0 18px;
+  color: var(--ink-soft);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+

@@ -53,6 +53,7 @@ export function parseMasclib(text, fallbackName = "instance") {
         processingCost: number("MODE_COST"),
         processingTime: number("PROCESSING_TIME"),
         releaseTime: number("START_MIN"),
+        startMax: number("START_MAX", 0),
         hardDeadline: number("END_MAX", Number.POSITIVE_INFINITY),
         rejectionCost: number("UNPERFORMED_COST"),
       });
@@ -88,6 +89,9 @@ export function parseMasclib(text, fallbackName = "instance") {
     ...jobs.flatMap((job) => [job.releaseTime, job.due, job.hardDeadline, job.releaseTime + job.processingTime])
       .filter(Number.isFinite),
   );
+  // Scheduling window: every job must end by START_MAX + processing, so the
+  // largest such value is the real planning horizon (due dates may lie beyond).
+  const window = Math.max(1, ...jobs.map((job) => job.startMax + job.processingTime));
 
   return Object.freeze({
     name,
@@ -101,6 +105,7 @@ export function parseMasclib(text, fallbackName = "instance") {
     setupTime,
     setupCost,
     horizon,
+    window,
   });
 }
 

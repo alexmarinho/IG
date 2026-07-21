@@ -891,6 +891,9 @@ footer a{color:var(--terra-ink)}
             <option value="setups">High setup costs</option>
             <option value="tight">Tight due dates</option>
             <option value="reject">Low outside-processing cost</option>
+            <option value="print3d">3D print farm</option>
+            <option value="coffee">Coffee roastery</option>
+            <option value="brewery">Craft brewery</option>
           </select>
         </label>
         <label class="lab-field">Field size
@@ -2870,6 +2873,9 @@ function onWinResize(fn){
     "High setup costs": "Custos de setup altos",
     "Tight due dates": "Prazos apertados",
     "Low outside-processing cost": "Custo de rejeição baixo",
+    "3D print farm": "Fazenda de impressão 3D",
+    "Coffee roastery": "Torrefação de café",
+    "Craft brewery": "Cervejaria artesanal",
     "Field size": "Tamanho do campo",
     "16 jobs — small": "16 jobs — pequeno",
     "28 jobs — medium": "28 jobs — médio",
@@ -3654,6 +3660,15 @@ function onWinResize(fn){
     setups:   { fams: 6, dueLo: 1.5, dueHi: 3.0, dueAdd: 60, rejLo: 2.8, rejHi: 5.0, rejBase: 80, suLo: 18, suHi: 45, scLo: 3, scHi: 6 },
     tight:    { fams: 4, dueLo: 1.0, dueHi: 1.6, dueAdd: 15, rejLo: 2.8, rejHi: 5.0, rejBase: 80, suLo: 8, suHi: 22, scLo: 1.5, scHi: 3 },
     reject:   { fams: 4, dueLo: 1.1, dueHi: 1.8, dueAdd: 20, rejLo: 1.2, rejHi: 2.2, rejBase: 25, suLo: 8, suHi: 22, scLo: 1.5, scHi: 3 },
+    /* calibrated from masclib-domains/3DPRINT_FARM_90.csv: setups p5–p95 14–46,
+       (due−rel)/p median ≈9.5, rejection purely proportional at 3.1–17.4 ×p */
+    print3d:  { fams: 6, dueLo: 3, dueHi: 17, dueAdd: 120, rejLo: 3.1, rejHi: 17.4, rejBase: 0, suLo: 14, suHi: 46, scLo: 2.8, scHi: 3.7 },
+    /* calibrated from masclib-domains/COFFEE_M_90.csv: small batches, very loose
+       windows ((due−rel)/p p5–p95 34–202), expensive rejection 21–60 ×p */
+    coffee:   { fams: 6, dueLo: 34, dueHi: 200, dueAdd: 90, rejLo: 21, rejHi: 60, rejBase: 0, suLo: 6, suHi: 20, scLo: 3.0, scHi: 4.7 },
+    /* calibrated from masclib-domains/BREWERY_M_90.csv: long brews, heavy
+       tank changeovers p5–p95 42–91, moderate rejection 5.1–12.3 ×p */
+    brewery:  { fams: 6, dueLo: 4, dueHi: 22, dueAdd: 180, rejLo: 5.1, rejHi: 12.3, rejBase: 0, suLo: 42, suHi: 91, scLo: 2.0, scHi: 2.6 },
   };
   function genInstance(n, seed, tKey) {
     const T = TERRAINS[tKey] || TERRAINS.balanced;
