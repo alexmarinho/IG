@@ -1175,9 +1175,8 @@ footer a{color:var(--terra-ink)}
       <div class="lab-card">
         <h3>Current results</h3>
         <ol class="standings" id="standings"></ol>
-        <p class="lab-hint"><strong>Ranks are provisional until the budget is spent</strong> — constructive
-        methods stop early; iterative ones keep searching, so watch who is still climbing. Click a method to
-        hide or show it.</p>
+        <p class="lab-hint"><strong>Ranks are provisional until the budget is spent.</strong> Constructive
+        methods stop early; iterative ones keep searching. Click a method to hide or show it.</p>
       </div>
     </aside>
 
@@ -2920,6 +2919,10 @@ function onWinResize(fn){
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
   var EN2PT = {
+    "The current engine reproduces the 2015 study. The work below extends the search and the model, one change at a time.": 'O motor atual reproduz o estudo de 2015. O trabalho abaixo estende a busca e o modelo, uma mudança por vez.',
+    "Ranks are provisional until the budget is spent.": 'As posições são provisórias até o orçamento se esgotar.',
+    "Constructive methods stop early; iterative ones keep searching. Click a method to hide or show it.": 'Métodos construtivos param cedo; os iterativos continuam buscando. Clique num método para mostrar ou esconder.',
+    "cost evaluations →": 'avaliações de custo →',
     "A machine runs one job at a time. Changing from one product family to another costs a setup, every order has a promised date, and finishing late costs money. The order the jobs run in decides the bill. This page builds that problem from five jobs, shows why testing every option stops working almost immediately, and then runs the algorithm that searches instead.": 'Uma máquina faz uma tarefa por vez. Trocar de família de produto custa um setup, cada pedido tem uma data prometida e terminar atrasado custa dinheiro. A ordem em que as tarefas rodam decide a conta. Esta página monta esse problema com cinco tarefas, mostra por que testar todas as opções deixa de funcionar quase imediatamente, e então roda o algoritmo que busca no lugar disso.',
     "Five jobs have 120 possible orders, and the figure above priced every one of them. Twelve jobs have 479 million, which a billion-per-second machine still finishes in half a second. Double that to twenty-four and the answer is not one second more: 6.2×10²³ orders, about 20 million years.": 'Cinco tarefas têm 120 ordens possíveis, e a figura acima precificou todas elas. Doze tarefas têm 479 milhões, o que uma máquina de um bilhão por segundo ainda resolve em meio segundo. Dobre para vinte e quatro e a resposta não é um segundo a mais: são 6,2×10²³ ordens, cerca de 20 milhões de anos.',
     "The cost of an order": 'O custo de uma ordem',
