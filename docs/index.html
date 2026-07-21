@@ -530,6 +530,42 @@ footer a{color:var(--terra-ink)}
 @media (prefers-reduced-motion:reduce){
   .bar-fill,.progress-fill,button.btn{transition:none !important}
 }
+/* --- online order acceptance (future) --- */
+.oa{margin:18px 0 6px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--card)}
+.oa-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
+.oa-t{font:700 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+.oa-ctl{display:flex;gap:7px}
+.oa-ctl button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:700 11.5px/1 var(--sans);border-radius:6px;padding:7px 12px;cursor:pointer}
+.oa-ctl button:hover{border-color:var(--terra);color:var(--terra)}
+.oa canvas{display:block;width:100%;height:auto}
+.oa-beat{padding:11px 14px;font-size:13.5px;min-height:42px;border-top:1px solid var(--rule);color:var(--ink)}
+.oa-tag{display:inline-block;font:700 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;padding:3px 7px;border-radius:5px;margin-right:8px;vertical-align:1px}
+.oa-tag.a{background:var(--f3-bg);color:var(--sage)}
+.oa-tag.r{background:#f3dcd7;color:var(--red)}
+.oa-sc{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);border-top:1px solid var(--rule)}
+.oa-s{background:var(--card);padding:12px 14px}
+.oa-s .l{font:700 9.5px/1 var(--sans);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-soft)}
+.oa-s .v{font:600 23px/1 var(--mono);font-variant-numeric:tabular-nums;margin-top:5px}
+.oa-s.hi .v{color:var(--terra)}
+.oa-s .n{font-size:11.5px;color:var(--ink-soft);margin-top:3px}
+.oa-lg{display:flex;flex-wrap:wrap;gap:13px;padding:11px 14px;border-top:1px solid var(--rule);font-size:11.5px;color:var(--ink-soft)}
+.oa-lg>span{display:inline-flex;align-items:center;gap:6px}
+.oa-lg i{width:14px;height:11px;border-radius:2px;display:inline-block}
+.oa-lg i.st{background:repeating-linear-gradient(45deg,var(--brass) 0 3px,transparent 3px 6px);border:1px solid var(--brass)}
+.oa-lg i.nw{width:2px;height:13px;background:var(--terra)}
+.oa-read{margin:14px 0 4px;display:flex;flex-direction:column}
+.oa-read a{display:flex;gap:12px;align-items:baseline;padding:11px 2px;text-decoration:none;color:inherit;border-bottom:1px solid var(--rule)}
+.oa-read a:hover{background:rgba(201,161,72,.09)}
+.oa-read .y{font:600 12px/1 var(--mono);color:var(--ink-soft);min-width:38px}
+.oa-read .x{flex:1}
+.oa-read .x b{font:600 15px/1.3 var(--serif);display:block}
+.oa-read .x small{color:var(--ink-soft);font-size:12.5px}
+.oa-read .g{font:700 9px/1.3 var(--sans);letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;border-radius:5px;white-space:nowrap}
+.oa-read .g.o{background:var(--f3-bg);color:var(--sage)}
+.oa-read .g.p{background:var(--f2-bg);color:var(--steel)}
+.oa-read .g.b{background:var(--card);color:var(--ink-soft);border:1px solid var(--rule)}
+@media(max-width:560px){.oa-sc{grid-template-columns:1fr}}
+
 </style>
 <style id="ig-story-proto">
   /* Single-scroll notebook: drop the explorer-only meta sections; keep the four demos */
@@ -993,6 +1029,35 @@ footer a{color:var(--terra-ink)}
   <div class="m-placeholder">
     <h3 class="f-head">Current evidence</h3>
     <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models.</p></div></div>
+
+    <h3 class="f-head">The next problem</h3>
+    <p class="f-lede">The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.</p>
+    <div class="oa">
+      <div class="oa-top"><span class="oa-t">Live · online order acceptance</span>
+        <div class="oa-ctl"><button id="oaPlay" type="button">Pause</button><button id="oaStep" type="button">Step</button><button id="oaReset" type="button">Restart</button></div>
+      </div>
+      <canvas id="oaCv" width="900" height="300" role="img" aria-label="Animated illustration of online order acceptance on a single machine"></canvas>
+      <div class="oa-beat" id="oaBeat" aria-live="polite"></div>
+      <div class="oa-sc">
+        <div class="oa-s hi"><div class="l">Reoptimizing policy · profit</div><div class="v" id="oaA">0</div><div class="n">replans the whole schedule at every arrival</div></div>
+        <div class="oa-s"><div class="l">Myopic greedy · profit</div><div class="v" id="oaB">0</div><div class="n">accepts anything that fits right now</div></div>
+      </div>
+      <div class="oa-lg">
+        <span><i style="background:var(--f1)"></i><i style="background:var(--f2)"></i><i style="background:var(--f3)"></i> job families</span>
+        <span><i class="st"></i> sequence-dependent setup</span>
+        <span><i class="nw"></i> now</span>
+        <span><i style="background:var(--red);opacity:.55"></i> rejected order (lost forever)</span>
+      </div>
+    </div>
+    <p class="f-lede" id="oa-why">The greedy policy takes every order it can fit and later has no room for the profitable ones. The reoptimizing policy sometimes <b>rejects a cheap order to protect capacity</b>, then lands a valuable one that arrives afterward. That trade — made under uncertainty, once, with no take-backs — is where a fast exact evaluator earns its keep: it can replan the entire committed schedule at every single arrival while the decision window is still open.</p>
+    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>One incumbent</strong><span class="f-chip meas">Open</span></div><p>Online acceptance with rejection has essentially one direct paper — theory-first, with no fast reoptimizing engine and no setups.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Make-to-order reality</strong><span class="f-chip dim">Applied</span></div><p>Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Reoptimize per arrival</strong><span class="f-chip dim">Fit</span></div><p>Millions of exact evaluations per second turn "replan everything before you answer" from too-slow into the natural move.</p></div></div>
+    <div class="oa-read">
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054825000565" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Online order acceptance and scheduling in a single machine environment</b><small>Competitive-ratio bounds and online algorithms — theory-first, without a reoptimizing engine or setups.</small></span><span class="g o">Open slot</span></a>
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054820301349" target="_blank" rel="noopener"><span class="y">2020</span><span class="x"><b>Distributionally robust scheduling with job selection and sequence-dependent setups</b><small>The closest marriage of robustness, acceptance and setups under uncertain processing times.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0377221721007141" target="_blank" rel="noopener"><span class="y">2022</span><span class="x"><b>A matheuristic for generalized order acceptance and scheduling</b><small>State of the art on the static problem, with exact models that push the proven-optimal boundary.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://www.sciencedirect.com/science/article/pii/S0377221721004707" target="_blank" rel="noopener"><span class="y">2022</span><span class="x"><b>Metaheuristics “In the Large”</b><small>Verified reference implementations and honest protocols — the bar a new result should clear.</small></span><span class="g b">Method</span></a>
+    </div>
+    <p class="f-lede" id="oa-caveat" style="font-size:13.5px">A thin literature is ambiguous: it can mean “open and wanted” or “empty because nobody cares.” The evidence here is that the slot is empty, not that the community is asking for it — that ambiguity is the real risk of this direction, and it is named on purpose.</p>
 
     <h3 class="f-head">Research sequence</h3>
     <p class="f-lede">The next step is not to add complexity. It is to prove where the current method is strong, then extend one assumption at a time.</p>
@@ -2561,6 +2626,8 @@ function onWinResize(fn){
 
   /* --- 1. innerHTML overrides: elements with mid-sentence emphasis --- */
   var HTML_PT = {
+    "#oa-why": 'A pol\u00edtica gulosa pega todo pedido que couber e depois n\u00e3o tem espa\u00e7o para os lucrativos. A reotimizadora \u00e0s vezes <b>recusa um pedido barato para proteger capacidade</b>, e ent\u00e3o captura um valioso que chega em seguida. Esse trade \u2014 feito sob incerteza, uma vez, sem volta \u2014 \u00e9 onde um avaliador exato r\u00e1pido se paga: ele replaneja o cronograma comprometido inteiro a cada chegada, enquanto a janela de decis\u00e3o ainda est\u00e1 aberta.',
+
     "#m-arena .lede":
       'Antes de rodar qualquer coisa, conhe\u00e7a os competidores. Estes s\u00e3o os m\u00e9todos do ' +
       '<b>estudo de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia exata (MILP) de uma hora e o ' +
@@ -2605,6 +2672,43 @@ function onWinResize(fn){
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
   var EN2PT = {
+    /* online order acceptance (future) */
+    "The next problem": "O próximo problema",
+    "The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.": "O benchmark estático está praticamente fechado — métodos exatos hoje provam otimalidade nele, então uma metaheurística só pode empatar. O problema aberto fica um passo antes e mais perto de um chão de fábrica real: pedidos chegam ao longo do tempo, cada tempo de processamento e prazo é só uma estimativa, e cada aceitar-ou-recusar é comprometido na hora, antes de o futuro ser conhecido.",
+    "Live · online order acceptance": "Ao vivo · aceitação online de pedidos",
+    "Pause": "Pausar",
+    "Step": "Passo",
+    "Restart": "Reiniciar",
+    "Reoptimizing policy · profit": "Política reotimizadora · lucro",
+    "replans the whole schedule at every arrival": "replaneja o cronograma inteiro a cada chegada",
+    "Myopic greedy · profit": "Guloso míope · lucro",
+    "accepts anything that fits right now": "aceita tudo que couber agora",
+    "job families": "famílias de trabalho",
+    "sequence-dependent setup": "setup dependente da sequência",
+    "now": "agora",
+    "rejected order (lost forever)": "pedido recusado (perdido para sempre)",
+    "One incumbent": "Um incumbente",
+    "Online acceptance with rejection has essentially one direct paper — theory-first, with no fast reoptimizing engine and no setups.": "Aceitação online com rejeição tem essencialmente um artigo direto — teórico, sem motor reotimizador rápido e sem setups.",
+    "Make-to-order reality": "Realidade sob encomenda",
+    "Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.": "Cotar aceitar-ou-recusar no instante em que o pedido chega, sob tempos incertos, é o que oficinas sob encomenda fazem de fato — e aqui a eficiência é medível no dia a dia.",
+    "Reoptimize per arrival": "Reotimizar por chegada",
+    "Millions of exact evaluations per second turn \"replan everything before you answer\" from too-slow into the natural move.": "Milhões de avaliações exatas por segundo tornam \"replaneje tudo antes de responder\" de lento-demais em jogada natural.",
+    "Open": "Aberto",
+    "Applied": "Aplicado",
+    "Fit": "Encaixe",
+    "Online order acceptance and scheduling in a single machine environment": "Aceitação e sequenciamento online de pedidos em ambiente de máquina única",
+    "Competitive-ratio bounds and online algorithms — theory-first, without a reoptimizing engine or setups.": "Cotas de razão competitiva e algoritmos online — teórico, sem motor reotimizador nem setups.",
+    "Open slot": "Vaga aberta",
+    "Distributionally robust scheduling with job selection and sequence-dependent setups": "Scheduling distribucionalmente robusto com seleção de trabalhos e setups dependentes da sequência",
+    "The closest marriage of robustness, acceptance and setups under uncertain processing times.": "O casamento mais próximo de robustez, aceitação e setups sob tempos de processamento incertos.",
+    "Peer-reviewed": "Revisado por pares",
+    "A matheuristic for generalized order acceptance and scheduling": "Uma matheurística para aceitação e sequenciamento generalizados de pedidos",
+    "State of the art on the static problem, with exact models that push the proven-optimal boundary.": "Estado da arte no problema estático, com modelos exatos que empurram a fronteira do provado-ótimo.",
+    "Metaheuristics “In the Large”": "Metaheurísticas “In the Large”",
+    "Verified reference implementations and honest protocols — the bar a new result should clear.": "Implementações-referência verificadas e protocolos honestos — a barra que um novo resultado deve passar.",
+    "Method": "Método",
+    "A thin literature is ambiguous: it can mean “open and wanted” or “empty because nobody cares.” The evidence here is that the slot is empty, not that the community is asking for it — that ambiguity is the real risk of this direction, and it is named on purpose.": "Literatura rala é ambígua: pode significar “aberto e desejado” ou “vazio porque ninguém liga”. A evidência aqui é que a vaga está vazia, não que a comunidade a peça — essa ambiguidade é o risco real desta direção, e está nomeada de propósito.",
+
     /* header + nav */
     "Story": "História",
     "Compare": "Comparar",
@@ -2941,6 +3045,20 @@ function onWinResize(fn){
      `langchange` event. Set the language up front so the arena renders correctly
      on its very first paint, before this module's DOMContentLoaded boot runs. */
   var DYN_PT = {
+    /* online order acceptance */
+    "MACHINE SCHEDULE (reoptimizing policy)": "CRONOGRAMA DA MÁQUINA (política reotimizadora)",
+    "ARRIVALS (time runs →)": "CHEGADAS (o tempo corre →)",
+    "accept": "aceita",
+    "reject": "recusa",
+    "Play": "Tocar",
+    "Pause": "Pausar",
+    "Order 1 — solid value, plenty of room. Both policies accept.": "Pedido 1 — bom valor, espaço de sobra. Ambas as políticas aceitam.",
+    "Order 2 — same family, no setup needed. Both accept.": "Pedido 2 — mesma família, sem setup. Ambas aceitam.",
+    "Order 3 — a family switch costs a setup gap, but it still pays. Both accept.": "Pedido 3 — troca de família custa um setup, mas ainda compensa. Ambas aceitam.",
+    "Order 4 — cheap, and a second setup. Greedy grabs it and pulls ahead; the planner rejects to protect capacity.": "Pedido 4 — barato, e mais um setup. O guloso pega e assume a frente; o planejador recusa para proteger capacidade.",
+    "Order 5 — back to family B. Both still accept; greedy is now nearly full.": "Pedido 5 — de volta à família B. Ambas ainda aceitam; o guloso já está quase cheio.",
+    "Order 6 — the valuable one. The planner kept room and lands it; greedy filled up on cheap orders and must reject. The lead flips.": "Pedido 6 — o valioso. O planejador guardou espaço e o captura; o guloso se encheu de pedidos baratos e precisa recusar. A liderança vira.",
+
     "No setups \u2014 30 NCOS instances": "Sem setups \u2014 30 inst\u00e2ncias NCOS",
     "With setups \u2014 14 STC instances": "Com setups \u2014 14 inst\u00e2ncias STC",
     "No setups (NCOS)": "Sem setups (NCOS)",
@@ -4572,6 +4690,94 @@ function onWinResize(fn){
 
   requestAnimationFrame(tick);
   window.__raceDraw = (n) => { if (!started) newRace(); for (const r of racers) if (!r.done) r.step(Math.min(n || 0, Math.max(0, cap() - r.evals))); drawAll(performance.now()); return racers.map(r => r.id + ':' + (isFinite(r.bestCost) ? Math.round(r.bestCost) : '-')).join(' '); };
+})();
+</script>
+
+<script>
+/* Online order acceptance — scripted illustration. Deterministic; the two
+   policies are simulated, not hand-waved: the planner packs its accepted set,
+   the greedy takes anything that still fits. Labels go through window.__t. */
+(function(){"use strict";
+  var cv=document.getElementById("oaCv"); if(!cv) return;
+  var ctx=cv.getContext("2d"),beat=document.getElementById("oaBeat");
+  var T=function(k){return (window.__t?window.__t(k):k);};
+  var O=[
+    {id:1,t:0.4,v:22,p:3,fam:0,dec:"A",w:"Order 1 — solid value, plenty of room. Both policies accept."},
+    {id:2,t:1.3,v:14,p:2,fam:0,dec:"A",w:"Order 2 — same family, no setup needed. Both accept."},
+    {id:3,t:2.2,v:10,p:2,fam:1,dec:"A",w:"Order 3 — a family switch costs a setup gap, but it still pays. Both accept."},
+    {id:4,t:3.1,v:8, p:2,fam:2,dec:"R",w:"Order 4 — cheap, and a second setup. Greedy grabs it and pulls ahead; the planner rejects to protect capacity."},
+    {id:5,t:4.0,v:12,p:2,fam:1,dec:"A",w:"Order 5 — back to family B. Both still accept; greedy is now nearly full."},
+    {id:6,t:4.9,v:36,p:3,fam:1,dec:"A",w:"Order 6 — the valuable one. The planner kept room and lands it; greedy filled up on cheap orders and must reject. The lead flips."}
+  ];
+  var CAP=13,SETUP=0.6,MAXT=O[O.length-1].t+1.2,DUR=8.2;
+  function pack(list){var t=0,f=-1,out=[];for(var i=0;i<list.length;i++){var o=list[i];
+    var s=(f>=0&&o.fam!==f)?SETUP:0,st=t+s,fi=st+o.p; if(fi>CAP) continue;
+    out.push({o:o,su:s,st:st,fi:fi}); t=fi; f=o.fam;} return out;}
+  var PLAN=pack(O.filter(function(o){return o.dec==="A";})),GRE=pack(O);
+  var cs=function(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();};
+  var fc=function(f){return cs(f===0?"--f1":f===1?"--f2":"--f3");};
+  var fb=function(f){return cs(f===0?"--f1-bg":f===1?"--f2-bg":"--f3-bg");};
+  function rr(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  var W=900,H=300,_w=W,_h=H;
+  function fit(){var d=Math.min(window.devicePixelRatio||1,2),c=cv.clientWidth||W;
+    cv.width=Math.round(c*d);cv.height=Math.round(c*(H/W)*d);ctx.setTransform(d,0,0,d,0,0);_w=c;_h=c*(H/W);}
+  var clock=0,playing=true,last=null,seen=-1;
+  var reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if(reduce){playing=false;clock=DUR*0.82;}
+  function now(){return (clock/DUR)*MAXT;}
+  function draw(){fit();var w=_w,h=_h,n=now();ctx.clearRect(0,0,w,h);
+    var pl=18,pr=18,ax=w-pl-pr,top=34,ly=96,lh=42;
+    var px=function(v){return pl+(v/CAP)*ax;},qx=function(v){return pl+(v/MAXT)*ax;};
+    ctx.fillStyle=cs("--paper");rr(pl-8,top-22,ax+16,lh+58,9);ctx.fill();
+    ctx.font="700 9.5px "+cs("--sans");ctx.fillStyle=cs("--ink-soft");ctx.textBaseline="alphabetic";
+    ctx.fillText(T("MACHINE SCHEDULE (reoptimizing policy)"),pl,top-9);
+    ctx.strokeStyle=cs("--rule");ctx.lineWidth=1;ctx.font="10px "+cs("--mono");
+    for(var g=0;g<=CAP;g+=2){var gx=px(g);ctx.globalAlpha=.65;ctx.beginPath();ctx.moveTo(gx,top);ctx.lineTo(gx,ly+lh+6);ctx.stroke();ctx.globalAlpha=1;
+      ctx.fillStyle=cs("--ink-soft");ctx.fillText(g,gx-3,ly+lh+19);}
+    PLAN.forEach(function(b){ if(b.o.t>n) return; var ap=Math.min(1,(n-b.o.t)/0.5);
+      var x0=px(b.st),x1=px(b.fi);
+      if(b.su>0){var s0=px(b.st-b.su);ctx.save();ctx.globalAlpha=.9*ap;
+        rr(s0,ly,x0-s0,lh,4);ctx.fillStyle=fb(b.o.fam);ctx.fill();ctx.clip();
+        ctx.strokeStyle=cs("--brass");ctx.lineWidth=1.3;
+        for(var hx=s0-lh;hx<x0;hx+=6){ctx.beginPath();ctx.moveTo(hx,ly+lh);ctx.lineTo(hx+lh,ly);ctx.stroke();}
+        ctx.restore();}
+      ctx.save();ctx.globalAlpha=ap;ctx.fillStyle=fc(b.o.fam);rr(x0+1,ly,Math.max(2,x1-x0-2),lh,5);ctx.fill();
+      if(x1-x0>26){ctx.fillStyle="#fff";ctx.textBaseline="middle";ctx.font="700 11px "+cs("--sans");
+        ctx.fillText("#"+b.o.id,x0+6,ly+lh/2-6);ctx.font="10px "+cs("--mono");ctx.globalAlpha=.92*ap;
+        ctx.fillText("$"+b.o.v,x0+6,ly+lh/2+8);}
+      ctx.restore();});
+    var qy=ly+lh+46;
+    ctx.font="700 9.5px "+cs("--sans");ctx.fillStyle=cs("--ink-soft");ctx.textBaseline="alphabetic";
+    ctx.fillText(T("ARRIVALS (time runs →)"),pl,qy-13);
+    ctx.strokeStyle=cs("--rule");ctx.beginPath();ctx.moveTo(pl,qy+18);ctx.lineTo(pl+ax,qy+18);ctx.stroke();
+    O.forEach(function(o){var ox=qx(o.t),ar=o.t<=n,cur=ar&&Math.abs(o.t-n)<0.28,rj=o.dec==="R"&&ar;
+      ctx.globalAlpha=ar?1:.3;ctx.fillStyle=rj?cs("--red"):fc(o.fam);
+      ctx.beginPath();ctx.arc(ox,qy+18,cur?8:5.5,0,7);ctx.fill();
+      if(rj){ctx.strokeStyle=cs("--paper");ctx.lineWidth=1.8;ctx.beginPath();
+        ctx.moveTo(ox-3.5,qy+14.5);ctx.lineTo(ox+3.5,qy+21.5);ctx.moveTo(ox+3.5,qy+14.5);ctx.lineTo(ox-3.5,qy+21.5);ctx.stroke();}
+      ctx.fillStyle=ar?cs("--ink"):cs("--ink-soft");ctx.font=(cur?"700 ":"")+"10px "+cs("--mono");
+      ctx.textAlign="center";ctx.fillText("$"+o.v,ox,qy+5);ctx.textAlign="left";ctx.globalAlpha=1;});
+    var nx=qx(Math.min(MAXT,n));ctx.strokeStyle=cs("--terra");ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(nx,qy-5);ctx.lineTo(nx,qy+28);ctx.stroke();
+    ctx.fillStyle=cs("--terra");ctx.beginPath();ctx.moveTo(nx-4,qy-7);ctx.lineTo(nx+4,qy-7);ctx.lineTo(nx,qy-1);ctx.fill();}
+  function render(){var n=now(),k=-1;
+    for(var i=0;i<O.length;i++){if(O[i].t<=n)k=i;}
+    if(k!==seen||beat.dataset.lang!==(window.__lang||"en")){seen=k;beat.dataset.lang=window.__lang||"en";
+      beat.innerHTML = k<0?"":'<span class="oa-tag '+(O[k].dec==="A"?"a":"r")+'">'+
+        T(O[k].dec==="A"?"accept":"reject")+"</span>"+T(O[k].w);}
+    var a=0,b=0;PLAN.forEach(function(x){if(x.o.t<=n)a+=x.o.v;});GRE.forEach(function(x){if(x.o.t<=n)b+=x.o.v;});
+    document.getElementById("oaA").textContent=a;document.getElementById("oaB").textContent=b;
+    draw(); if(clock>DUR+1.4){clock=0;seen=-1;}}
+  function loop(ts){if(last==null)last=ts;var dt=Math.min(.05,(ts-last)/1000);last=ts;
+    if(playing)clock+=dt; render(); requestAnimationFrame(loop);}
+  var pb=document.getElementById("oaPlay");
+  pb.onclick=function(){playing=!playing;pb.textContent=T(playing?"Pause":"Play");};
+  document.getElementById("oaStep").onclick=function(){playing=false;pb.textContent=T("Play");clock+=DUR/(O.length+1);};
+  document.getElementById("oaReset").onclick=function(){clock=0;seen=-1;};
+  if(reduce)pb.textContent=T("Play");
+  window.addEventListener("resize",draw);
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
