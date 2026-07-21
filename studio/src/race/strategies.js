@@ -19,6 +19,22 @@
  */
 import { solFeatures } from "./evaluate.js";
 
+/**
+ * FNV-1a over the id's characters. The previous seed used `id.length`, so
+ * "descent" and "tabudiv" — both seven characters — drew the identical random
+ * stream and were not independent runs of the race. Verified before the fix:
+ * equal cost on all twelve seeds at 50k and 200k evaluations, diverging only
+ * after TabuDiv's first diversification.
+ */
+export function hashId(id) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < id.length; i += 1) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
 export function mulberry32(a) {
   return function rng() {
     a |= 0; a = (a + 0x6D2B79F5) | 0;
@@ -145,7 +161,7 @@ export function createRaceStrategies({ evaluator, seed }) {
       id, name, colorVar, evals: 0, done: false, status: { key: "preparing" },
       cur: { order: [], rejected: inst.jobs.map((j) => j.id) },
       bestCost: Infinity, hist: [], credit: 0, bestVec: null, bestSol: null,
-      rng: mulberry32((0xBEEF ^ (id.length * 2654435761) ^ raceSeed) >>> 0),
+      rng: mulberry32((0xBEEF ^ hashId(id) ^ raceSeed) >>> 0),
       note(cost, sol) {
         if (cost < this.bestCost - 1e-9) {
           this.bestCost = cost;
