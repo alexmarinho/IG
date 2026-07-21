@@ -15,8 +15,11 @@
 //! every `Racer`, so the snapshot path never dispatches at all.
 
 pub mod ctx;
+pub mod greedy;
 
 pub use ctx::Ctx;
+
+use greedy::GreedyState;
 
 use crate::eval::State;
 use crate::instance::Instance;
@@ -157,10 +160,11 @@ impl Common {
 // Racer
 // ---------------------------------------------------------------------------
 pub(crate) enum Body {
-    /// NOT YET PORTED. Each method lands here as its own variant
-    /// (`Greedy(GreedyState)`, `Descent(DescentState)`, ...); until then a
-    /// placeholder racer that spends nothing and reports itself finished, so
-    /// the race can terminate. This variant disappears once all six are in.
+    Greedy(GreedyState),
+    /// NOT YET PORTED. Each remaining method lands here as its own variant
+    /// (`Descent(DescentState)`, ...); until then a placeholder racer that
+    /// spends nothing and reports itself finished, so the race can terminate.
+    /// This variant disappears once all six are in.
     Pending,
 }
 
@@ -171,8 +175,12 @@ pub struct Racer {
 
 impl Racer {
     pub fn new(inst: &Instance, method: Method, race_seed: u32, budget: u64, _ig: IgConfig) -> Racer {
-        let common = Common::new(inst, method, race_seed, budget);
+        let mut common = Common::new(inst, method, race_seed, budget);
         let body = match method {
+            Method::Greedy => {
+                common.status_key = greedy::STATUS_INITIAL;
+                Body::Greedy(GreedyState::new(inst))
+            }
             _ => Body::Pending,
         };
         Racer { common, body }
@@ -195,6 +203,7 @@ impl Racer {
         let Racer { common, body } = self;
         let mut ctx = Ctx::open(inst, common, slice);
         match body {
+            Body::Greedy(s) => s.advance(&mut ctx),
             Body::Pending => ctx.finish(ST_PREPARING),
         }
         ctx.close()
@@ -204,6 +213,7 @@ impl Racer {
     /// match, once per snapshot — the scalar block above never dispatches.
     pub fn incumbent(&self) -> &State {
         match &self.body {
+            Body::Greedy(s) => s.incumbent(),
             Body::Pending => &self.common.best,
         }
     }
