@@ -117,7 +117,7 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .standings .st-cost small{display:block;font:500 10px/1.2 var(--mono);color:var(--ink-soft);opacity:.8}
 .standings li.leader{background:#fbf3e6;box-shadow:inset 0 0 0 1px var(--brass)}
 .lab-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin-top:9px}
-.lab-stage{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:96px;border:1px dashed var(--rule);border-radius:8px;background:#f7f2e7;padding:8px}
+.lab-stage{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:96px}
 .lab-inst{font:500 11px var(--mono);color:var(--ink-soft)}
 .btn.tiny{padding:4px 9px;font-size:11px}
 /* ---- Arena: per-method explainer + recorded 2015 benchmark ---- */
@@ -235,7 +235,6 @@ h2.section-title{font:600 27px/1.2 var(--serif);margin-bottom:10px}
 h2.section-title .no{color:var(--brass-ink);font-weight:400;margin-right:8px}
 p.lede{max-width:72ch;color:var(--ink-soft);margin-bottom:18px}
 p.lede b, p.lede strong{color:var(--ink)}
-.rule{height:1px;background:var(--rule);margin:26px 0 0}
 
 
 /* ---------- demo figure blocks ---------- */
@@ -260,14 +259,7 @@ button.btn:hover{border-color:var(--terra);color:var(--terra)}
 button.btn:disabled{opacity:.45;cursor:not-allowed}
 button.btn.primary{background:var(--terra);border-color:var(--terra);color:#fdf8ef}
 button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
-/* D3 — gentle pulse on Play until the first run (motion gated off for reduced-motion) */
-@media (prefers-reduced-motion:no-preference){
-  button.btn.pulse{animation:playPulse 1.6s ease-in-out infinite}
-}
-@keyframes playPulse{
-  0%,100%{box-shadow:0 0 0 0 rgba(176,86,47,.45)}
-  50%{box-shadow:0 0 0 9px rgba(176,86,47,0)}
-}
+
 .seg{display:inline-flex;border:1px solid #cfc4ac;border-radius:7px;overflow:hidden}
 .seg button{
   font:600 12px/1 var(--sans);color:var(--ink-soft);background:transparent;
@@ -329,6 +321,7 @@ svg.gantt{display:block;width:100%;min-width:520px;height:auto}
    rails — the bar's length IS the total (processing omitted, identical per order) */
 .costcomp{display:flex;align-items:center;height:9px;border-radius:3px;
   background:#efe7d7;border:1px solid var(--rule);margin-top:6px;max-width:520px}
+@media (max-width:640px){.costcomp{max-width:calc(100% - 40px)}}
 .costcomp .cc-fill{position:relative;display:flex;flex:none;height:100%;border-radius:3px 0 0 3px}
 .costcomp .cc-seg{display:block;height:100%;flex:none}
 .costcomp .cc-proc{background:var(--steel)}
@@ -372,9 +365,7 @@ table.data .famcell{font-weight:700;text-align:center}
 .fact.hot .val{color:var(--terra-ink)}
 .slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 6px;padding:13px 16px;background:var(--f4-bg);border:1px solid var(--brass);border-radius:9px}
 .slider-prompt{display:flex;align-items:center;gap:7px;font:700 12.5px/1.2 var(--sans);letter-spacing:.02em;color:var(--terra-ink);text-transform:none;white-space:nowrap}
-.slider-prompt .hand{font-size:15px;animation:nudge 1.6s ease-in-out infinite}
-@keyframes nudge{0%,100%{transform:translateX(0)}50%{transform:translateX(4px)}}
-@media (prefers-reduced-motion:reduce){.slider-prompt .hand{animation:none}}
+
 input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cursor:pointer;flex:1 1 200px}
 .slider-val{font:800 20px/1 var(--mono);color:var(--terra);min-width:78px;text-align:right}
 .bar-zone{margin:16px 0 4px}
@@ -457,10 +448,12 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
 }
 .ig-phase .ph-no{color:var(--ink-soft);font-family:var(--mono);font-size:11px;margin-right:8px}
 /* objective sheet */
+.sheet-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sheet{
   width:100%;border-collapse:collapse;font-size:12px;margin-top:2px;
 }
 .sheet th,.sheet td{border:1px solid var(--rule);padding:5px 8px;text-align:right}
+@media (max-width:640px){.sheet th,.sheet td{padding:4px 5px}}
 .sheet th{background:#f2ebdd;color:var(--ink-soft);font-weight:600;font-size:10.5px;letter-spacing:.06em;text-transform:uppercase}
 .sheet td:first-child,.sheet th:first-child{text-align:left;font-weight:600}
 .sheet td{font-family:var(--mono);font-size:11.5px}
@@ -571,33 +564,31 @@ footer a{color:var(--terra-ink)}
   /* Single-scroll notebook: drop the explorer-only meta sections; keep the four demos */
   .site-head .badge { display: none; }
   /* Movements flow one after another in a single scroll */
-  section.movement { padding: 0; scroll-margin-top: var(--sm, 104px); border-top: 1px solid var(--rule); }
-  section.movement:first-of-type { border-top: 0; }
-  .movement-head { max-width: 1120px; margin: 0 auto; padding: 40px 20px 2px; }
+  section.movement { padding: 0; scroll-margin-top: var(--sm, 118px); border-top: 1px solid var(--rule); }
+  .movement-head { max-width: 1120px; margin: 0 auto; padding: 44px 20px 2px; }
   .movement-head .m-kick { font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--brass-ink); margin-bottom: 10px; }
   .movement-head h2.m-title { font: 600 clamp(26px,2.9vw,38px)/1.12 var(--serif); letter-spacing: .2px; margin-bottom: 10px; }
   .movement-head h2.m-title em { font-style: normal; color: var(--terra); }
   .movement-head .m-lede { max-width: 66ch; color: var(--ink-soft); font-size: 15.5px; line-height: 1.55; }
   .m-placeholder { max-width: 1120px; margin: 8px auto 0; padding: 0 20px 44px; }
-  .m-placeholder .card { background: var(--card); border: 1px dashed #cfc4ac; border-radius: 10px; padding: 22px; color: var(--ink-soft); }
   .m-code { background: #2a2620; color: #f0e9dc; border-radius: 10px; padding: 18px 20px; font: 500 13px/1.7 var(--mono); overflow-x: auto; white-space: pre; }
   .m-code .cmt { color: #b0a58f; }
   .m-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .m-links a { display: inline-block; padding: 10px 15px; border: 1px solid #cfc4ac; border-radius: 7px; background: var(--card); color: var(--terra); text-decoration: none; font: 700 12px/1 var(--sans); }
   .m-links a:hover { background: var(--terra); border-color: var(--terra); color: #fdf8ef; }
-  /* No side padding: the iframe spans the column so the Studio's own 20px rail
-     padding lands the text on the same line as the notebook's prose. */
-  .m-studio { max-width: 1120px; margin: 10px auto 0; padding: 0 0 44px; }
-  .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 1px solid var(--rule); border-radius: 12px; background: var(--card); }
-  .studio-cap { max-width: 1120px; margin: 8px 2px 0; font-size: 11.5px; color: var(--ink-soft); font-style: italic; }
-  /* On phones the Studio is a full app — reclaim the page's side gutters so it
-     isn't squeezed into a narrow column, and give it a touch more height. */
+  /* The Studio sits in figure.demo like every other interactive block. Side
+     padding is dropped so the embedded app keeps the full column width. */
+  #studioFigure { padding: 18px 0 0; overflow: hidden; }
+  #studioFigure .fig-cap { padding: 0 18px; }
+  #studioFigure .fig-cap a { color: var(--terra); text-decoration: none; border-bottom: 1px solid currentColor; }
+  .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 0; border-top: 1px solid var(--rule); background: var(--card); }
   @media (max-width: 760px) {
-    .m-studio { margin-left: -20px; margin-right: -20px; padding: 0 8px 30px; }
-    .studio-frame { height: 86vh; min-height: 560px; border-radius: 9px; }
+    #studioFigure { padding: 14px 0 0; }
+    #studioFigure .fig-cap { padding: 0 12px; }
+    .studio-frame { height: min(72vh, calc(100vh - var(--sm) - 28px)); min-height: 420px; }
   }
   /* Hero intro block */
-  .ig-hero { max-width: 1120px; margin: 0 auto; padding: 40px 20px 8px; }
+  .ig-hero { max-width: 1120px; margin: 0 auto; padding: 44px 20px 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
   .ig-hero h2 { font: 600 clamp(30px, 3.4vw, 46px)/1.08 var(--serif); letter-spacing: .2px; max-width: 20ch; margin-bottom: 16px; }
   .ig-hero h2 em { font-style: normal; color: var(--terra); }
@@ -639,13 +630,12 @@ footer a{color:var(--terra-ink)}
         <a class="gh-link" href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
       </div>
     </div>
-    <p class="subtitle">An interactive explanation — the same jobs, a better order, and how a small algorithm finds it.</p>
+    <p class="subtitle">Interactive explanation with runnable demonstrations and benchmark results.</p>
   </div>
   <nav class="anchor-nav" aria-label="Sections">
     <ul id="navList">
       <li><a href="#m-story" class="active">Story</a></li>
       <li><a href="#m-compare">Compare</a></li>
-      <li><a href="#m-arena">Methods</a></li>
       <li><a href="#m-run">Run</a></li>
       <li><a href="#m-future">Future</a></li>
     </ul>
@@ -656,10 +646,8 @@ footer a{color:var(--terra-ink)}
 <main>
 <section class="ig-hero" id="m-story">
   <p class="kick">Story · why order matters</p>
-  <h2>Order changes time. <em>Time changes cost.</em></h2>
-  <p class="bridge">A best order does exist — but there are more of them than you could ever check. So the game isn't to try them all; it's to guess well and improve fast.</p>
-  <p class="scroll-cue" id="scrollCue">↓ it starts with five jobs</p>
-</section>
+  <h2>The order of the jobs <em>determines the total cost.</em></h2>
+  <p class="bridge">An optimal order exists, but there are too many orders to enumerate. Iterated Greedy builds one order and improves it by iteration.</p>
 
 </section>
 <!-- ============================================================
@@ -669,11 +657,10 @@ footer a{color:var(--terra-ink)}
      2 · Live demo 1 — Order changes time. Time changes cost.
      ============================================================ -->
 <section class="section" id="demo-order">
-  <p class="kicker"><span class="fig">See it for yourself</span></p>
-  <h2 class="section-title">The same five jobs, two orders — and two very different bills.</h2>
-  <p class="lede">Send five jobs through one machine in one order, then another. The machine prices each
-  order exactly — the waiting, the changeovers between families and the penalty for finishing late all
-  fold into a single number. <b>Shuffle either order and watch the total move.</b></p>
+  <p class="kicker"><span class="fig">Order and cost</span></p>
+  <h2 class="section-title">The same five jobs in two orders.</h2>
+  <p class="lede">The cost of an order is the sum of the setups between families and the weighted
+  tardiness. Waiting for a release date delays every later job.</p>
 
   <details class="data-fold">
     <summary>The exact numbers behind these jobs</summary>
@@ -686,7 +673,7 @@ footer a{color:var(--terra-ink)}
 
   <figure class="demo" id="d1figure">
     <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 01a</span> <span class="fig-name">Two rails, two orders</span></span>
+      <span><span class="fig-no">Fig. 01a</span> <span class="fig-name">Timeline and cost for each order</span></span>
       <span>processing cost (Σp = 25) is identical for every order — omitted from totals</span>
     </figcaption>
     <p class="gantt-legend" aria-hidden="true">
@@ -699,7 +686,7 @@ footer a{color:var(--terra-ink)}
 
     <div class="rail-block" id="railBlockA">
       <div class="rail-head">
-        <span class="rail-title">Rail A <span class="tag">the intuitive order</span></span>
+        <span class="rail-title">Rail A <span class="tag" id="tagA">job order J1–J5</span></span>
         <button class="btn" id="shuffleA" type="button">Shuffle A</button>
       </div>
       <div class="chips-row" id="railA" aria-label="Order A"></div>
@@ -714,7 +701,7 @@ footer a{color:var(--terra-ink)}
 
     <div class="rail-block" id="railBlockB">
       <div class="rail-head">
-        <span class="rail-title">Rail B <span class="tag">the family-grouped order</span></span>
+        <span class="rail-title">Rail B <span class="tag" id="tagB">grouped by family</span></span>
         <button class="btn" id="shuffleB" type="button">Shuffle B</button>
       </div>
       <div class="chips-row" id="railB" aria-label="Order B"></div>
@@ -742,11 +729,11 @@ footer a{color:var(--terra-ink)}
       <div class="costcomp" id="ccC" aria-hidden="true"></div>
     </div>
 
-    <p class="costcomp-cap">Time runs left to right; the bill sits below it on one shared scale — orange setups + red delays, and the bar's length is the total. The clock stops at the last job's end (t); the bill stops at Σ.</p>
+    <p class="costcomp-cap">Time runs left to right and each timeline ends at t. The bar below it shows setup plus weighted tardiness on a scale shared by all rails, and its length is the total Σ.</p>
 
     <div class="controls">
       <button class="btn primary" id="eval120" type="button">Evaluate all 120 orders</button>
-      <span class="ctl-label">sweeps every permutation, exactly</span>
+
     </div>
     <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="evalProg"></div></div>
     <p class="status-line" id="d1status" aria-live="polite"></p>
@@ -757,27 +744,23 @@ footer a{color:var(--terra-ink)}
      3 · Live demo 2 — Factorial explosion
      ============================================================ -->
 <section class="section" id="demo-factorial">
-  <p class="kicker"><span class="fig">The catch</span></p>
-  <h2 class="section-title">So why not just try every order?</h2>
-  <p class="lede">Because there are too many. Drag the number of jobs and watch the count of possible
-  orders run away from you: even at a <i>billion</i> plans checked every second, trying them all
-  outlasts the age of the universe long before you reach a real 28-job problem. That is why you have
-  to guess — and guess well.</p>
+  <p class="kicker"><span class="fig">Enumeration</span></p>
+  <h2 class="section-title">The time needed to enumerate every order.</h2>
+  <p class="lede">Enumerating a 28-job instance at 10⁹ orders per second takes longer than the age of the universe.</p>
 
   <figure class="demo">
     <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 02</span> <span class="fig-name">Enumeration budget vs n</span></span>
-      <span>bars are log₁₀ scale — each added job multiplies the count</span>
+      <span><span class="fig-no">Fig. 02</span> <span class="fig-name">Orders (n!) vs n</span></span>
     </figcaption>
     <div class="slider-row">
-      <label class="slider-prompt" for="nSlider"><span class="hand">⇢</span> Drag the slider — change the number of jobs</label>
+      <label class="slider-prompt" for="nSlider">number of jobs</label>
       <input type="range" id="nSlider" min="3" max="30" step="1" value="28">
       <span class="slider-val" id="nVal">n = 28</span>
     </div>
     <div class="fact-grid">
       <div class="fact"><div class="lbl">Complete orders — <span class="math">n!</span></div><div class="val" id="fOrders">–</div></div>
       <div class="fact"><div class="lbl">Candidate plans incl. rejection — <span class="math">Σ n!/(n−k)!</span></div><div class="val" id="fPlans">–</div></div>
-      <div class="fact hot"><div class="lbl">Time to enumerate orders at 10⁹ plans/sec</div><div class="val" id="fTime">–</div></div>
+      <div class="fact hot"><div class="lbl">Time to enumerate all orders at 10⁹ orders/s</div><div class="val" id="fTime">–</div></div>
     </div>
     <div class="bar-zone" aria-hidden="true">
       <div class="bar-legend"><span>orders n! · log₁₀ scale</span><span id="barEndLabel"></span></div>
@@ -788,8 +771,8 @@ footer a{color:var(--terra-ink)}
       <div class="mult-row" id="multRow"><span>each job multiplies:</span></div>
     </div>
     <table class="data" aria-label="Analogies">
-      <caption>What the numbers mean — computed live, not hardcoded</caption>
-      <thead><tr><th>n</th><th>orders n!</th><th>enumerate at 10⁹/s</th><th>analogy</th></tr></thead>
+      <caption>Enumeration time at selected values of n</caption>
+      <thead><tr><th>n</th><th>orders n!</th><th>enumerate at 10⁹ orders/s</th><th>analogy</th></tr></thead>
       <tbody id="analogyBody"></tbody>
     </table>
     <p class="status-line" id="d2status" aria-live="polite"></p>
@@ -801,12 +784,11 @@ footer a{color:var(--terra-ink)}
      ============================================================ -->
 <section class="section" id="demo-ig">
   <p class="kicker"><span class="fig">The method</span></p>
-  <h2 class="section-title">So you guess — then destroy, rebuild, and keep what's better.</h2>
-  <p class="lede">A real Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance
-  (<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b>, because every move grabs the cheapest insertion;
-  <b>iterated</b>, because it loops — build, break, rebuild. Nothing is pre-recorded: every insertion position
-  is re-evaluated against the complete objective while you watch — and sometimes a job is cheaper to refuse
-  than to squeeze in. Watch for the five beats —
+  <h2 class="section-title">The destroy–rebuild loop.</h2>
+  <p class="lede">An Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance
+  (<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b>, because every move takes the cheapest insertion;
+  <b>iterated</b>, because the destroy–rebuild cycle repeats. Every insertion position is re-evaluated
+  against the complete objective. The five steps:
   <b>construct</b> by best insertion, <b>destroy</b> three jobs, <b>measure every insertion</b> on the trial
   track, <b>reject at break-even</b> when no position beats the rejection cost, <b>accept or revert</b>.</p>
 
@@ -816,7 +798,7 @@ footer a{color:var(--terra-ink)}
     </figcaption>
 
     <div class="controls" role="group" aria-label="Playback controls">
-      <button class="btn primary pulse" id="igPlay" type="button">Play</button>
+      <button class="btn primary" id="igPlay" type="button">Play</button>
       <button class="btn" id="igStep" type="button">Step</button>
       <span class="ctl-label">speed</span>
       <span class="seg" id="igSpeed" role="group" aria-label="Speed">
@@ -829,9 +811,9 @@ footer a{color:var(--terra-ink)}
       <div class="ig-left">
         <p class="ig-rail-label">Protected plan <span class="hint">the reference — never touched mid-iteration</span></p>
         <div class="ig-rail protected" id="igProtected" aria-label="Protected plan"></div>
-        <p class="ig-rail-label" style="margin-top:10px">Outside — rejected jobs <span class="hint">penalty per job instead of scheduling it</span></p>
+        <p class="ig-rail-label" style="margin-top:10px">Rejected jobs <span class="hint">cost of processing the job outside instead of scheduling it</span></p>
         <div class="ig-outside" id="igOutside" aria-label="Rejected jobs">
-          <span class="outside-title">Outside</span>
+          <span class="outside-title">Rejected</span>
           <span class="rail-empty" id="igOutsideEmpty">none — every job is scheduled</span>
           <p class="ig-outside-note" id="igOutsideNote"></p>
         </div>
@@ -845,21 +827,23 @@ footer a{color:var(--terra-ink)}
         <p class="ig-rail-label">Pending tray <span class="hint">jobs waiting to be re-inserted</span></p>
         <div class="ig-rail tray" id="igTray" aria-label="Pending tray"></div>
 
-        <p class="ig-phase" id="igPhase">Idle — press Play or Step.</p>
+        <p class="ig-phase" id="igPhase">Idle</p>
       </div>
 
       <div class="ig-right">
-        <p class="ig-rail-label" style="margin-top:0">Objective sheet <span class="hint">setup&amp;proc + delay + outside = total</span></p>
-        <table class="sheet" aria-label="Objective decomposition">
-          <thead><tr><th>Plan</th><th>setup+p</th><th>delay</th><th>outside</th><th>Σ total</th></tr></thead>
-          <tbody>
-            <tr><td>Protected</td><td id="shPsetup">–</td><td id="shPdelay">–</td><td id="shPout">–</td><td id="shPtot">–</td></tr>
-            <tr class="cand"><td>Candidate</td><td id="shCsetup">–</td><td id="shCdelay">–</td><td id="shCout">–</td><td id="shCtot">–</td></tr>
-          </tbody>
-        </table>
+        <p class="ig-rail-label" style="margin-top:0">Objective sheet <span class="hint">setup+proc + tardiness + rejection = total</span></p>
+        <div class="sheet-wrap">
+          <table class="sheet" aria-label="Objective decomposition">
+            <thead><tr><th>Plan</th><th>setup+proc</th><th>tardiness</th><th>rejection</th><th>Σ total</th></tr></thead>
+            <tbody>
+              <tr><td>Protected</td><td id="shPsetup">–</td><td id="shPdelay">–</td><td id="shPout">–</td><td id="shPtot">–</td></tr>
+              <tr class="cand"><td>Candidate</td><td id="shCsetup">–</td><td id="shCdelay">–</td><td id="shCout">–</td><td id="shCtot">–</td></tr>
+            </tbody>
+          </table>
+        </div>
         <span class="delta-pill" id="igDelta">Δ vs protected —</span>
         <canvas class="chart" id="igChart" aria-label="Convergence chart: cost vs iteration"></canvas>
-        <p class="chart-cap">convergence — incumbent line + every evaluated candidate (filled = accepted)</p>
+        <p class="chart-cap">cost by iteration; line = incumbent, dots = evaluated candidates (filled = accepted)</p>
         <div class="log" id="igLog" aria-label="Event log"></div>
       </div>
     </div>
@@ -872,19 +856,17 @@ footer a{color:var(--terra-ink)}
      ============================================================ -->
 <section class="movement" id="m-compare">
   <div class="movement-head">
-    <p class="m-kick">Compare · does it work?</p>
-    <h2 class="m-title">Does the guessing actually <em>pay off?</em></h2>
-    <p class="m-lede">First meet the methods that compete — what each one is really doing when it searches. Then put six of them to work on a scenario you choose, under a single shared evaluation budget, and watch who reaches the lowest cost.</p>
+    <p class="m-kick">Compare · results</p>
+    <h2 class="m-title">Iterated Greedy compared with <em>the other seven methods.</em></h2>
   </div>
 </section>
 <section class="section" id="m-arena">
-  <p class="kicker"><span class="fig">Meet the methods</span></p>
-  <h2 class="section-title">Eight ways to search — and what each one actually does.</h2>
-  <p class="lede">Before you run anything, meet the competitors. These are the methods from the
-  <b>2015 study</b>: six published C++ heuristics, a one-hour exact-solver (MILP) reference and the Iterated Greedy
-  written in Excel VBA. Pick one to watch how it moves — the diagram is schematic, nothing is being
-  solved here — and to see what it scored across the 44 instances of the standard MaScLib benchmark set from
-  the literature. Six of them go to work on a scenario of your choosing just below.</p>
+  <p class="kicker"><span class="fig">Methods</span></p>
+  <h2 class="section-title">The eight methods of the 2015 study.</h2>
+  <p class="lede">Six published C++ heuristics, one exact reference (MILP) with a one-hour limit and the
+  Iterated Greedy written in Excel VBA. Selecting a method shows a schematic animation of how it moves and
+  its score across the 44 instances of the standard <b>MaScLib</b> benchmark. Nothing is solved in the
+  diagram. Six of the eight run in the scenario configured below.</p>
 
   <div class="arena-grid">
     <nav class="algo-list" id="algoList" aria-label="Choose an algorithm"></nav>
@@ -906,33 +888,31 @@ footer a{color:var(--terra-ink)}
 <div class="ar-tip" id="tip" role="tooltip"></div>
 
 <section class="section" id="demo-race">
-  <p class="kicker"><span class="fig">Six strategies, one budget</span></p>
-  <h2 class="section-title">Test a real scenario — and watch every method search it.</h2>
-  <p class="lede">Choose a terrain and a field size, then start. Six compact implementations of the
-  methods explained above run right here on the same generated problem, under the same
-  <b>evaluation budget</b> — a fair fight needs a shared currency, not wall-clock time. The tree
-  underneath plots that very run: where each method is standing in the space of possible orders.</p>
+  <p class="kicker"><span class="fig">In-browser comparison</span></p>
+  <h2 class="section-title">Six methods on a generated instance.</h2>
+  <p class="lede">Compact implementations of the methods above, written for the browser and run under a
+  shared <b>evaluation budget</b>. The budget is counted in complete objective evaluations.</p>
 
   <div class="lab-cockpit" id="m-racelab">
     <aside class="lab-console">
       <div class="lab-card">
         <h3>Comparison controls</h3>
         <div class="lab-actions">
-          <button class="btn primary" id="rcPlay" type="button">&#9654; Start</button>
+          <button class="btn primary" id="rcPlay" type="button">&#9654; Run</button>
           <button class="btn" id="rcNew" type="button">&#8635; Reset</button>
         </div>
-        <label class="lab-field">Terrain
-          <select id="rcTerrain" aria-label="Instance terrain">
+        <label class="lab-field">Scenario
+          <select id="rcTerrain" aria-label="Scenario">
             <option value="balanced" selected>Balanced costs</option>
             <option value="setups">High setup costs</option>
             <option value="tight">Tight due dates</option>
-            <option value="reject">Low outside-processing cost</option>
+            <option value="reject">Low rejection cost</option>
             <option value="print3d">3D print farm</option>
             <option value="coffee">Coffee roastery</option>
             <option value="brewery">Craft brewery</option>
           </select>
         </label>
-        <label class="lab-field">Field size
+        <label class="lab-field">Number of jobs
           <select id="rcN" aria-label="Number of jobs">
             <option value="16">16 jobs — small</option>
             <option value="28" selected>28 jobs — medium</option>
@@ -965,9 +945,9 @@ footer a{color:var(--terra-ink)}
     <div class="lab-stage">
       <figure class="demo">
         <figcaption class="fig-cap">
-          <span><span class="fig-no">Fig. 04</span> <span class="fig-name">Live comparison — cost per evaluation</span></span>
+          <span><span class="fig-no">Fig. 04</span> <span class="fig-name">Best cost vs evaluations</span></span>
           <span class="lab-inst" id="raceInst"></span>
-          <button class="btn tiny" id="btnCopyRace" type="button">Share</button>
+          <button class="btn tiny" id="btnCopyRace" type="button">Copy link</button>
         </figcaption>
         <canvas class="chart" id="cvRace" aria-label="Race cost curves"></canvas>
         <p class="status-line" id="raceNote"></p>
@@ -975,7 +955,7 @@ footer a{color:var(--terra-ink)}
 
       <figure class="demo">
         <figcaption class="fig-cap">
-          <span><span class="fig-no">Fig. 05</span> <span class="fig-name">A sample of the solution space</span></span>
+          <span><span class="fig-no">Fig. 05</span> <span class="fig-name">Sampled solution space</span></span>
           <span>higher is cheaper — branches group related orders</span>
         </figcaption>
         <canvas class="chart" id="cvSpace" aria-label="Solution-space tree"></canvas>
@@ -986,11 +966,10 @@ footer a{color:var(--terra-ink)}
 </section>
 
 <section class="section" id="demo-benchmark">
-  <p class="kicker"><span class="fig">From one race to the whole benchmark</span></p>
-  <h2 class="section-title">The race builds intuition. The recorded benchmark is the evidence.</h2>
-  <p class="lede">The race above runs on a single seeded instance, live in your browser. The real test is the
-  standard <b>MaScLib</b> benchmark — 44 instances from the 2015 study, each with a published best-known cost.
-  Scored against every one of them, the modern engine holds up:</p>
+  <p class="kicker"><span class="fig">Recorded benchmark</span></p>
+  <h2 class="section-title">Results on the 44 MaScLib instances.</h2>
+  <p class="lede">The <b>MaScLib</b> instances come from the 2015 study, each with a published best-known
+  cost. The current engine was scored on all of them:</p>
 
   <div class="fact-grid">
     <div class="fact hot"><div class="lbl">Best-known values matched or beaten</div><div class="val">39 <small>/ 44 instances</small></div></div>
@@ -998,10 +977,10 @@ footer a{color:var(--terra-ink)}
     <div class="fact"><div class="lbl">Independent correctness checks</div><div class="val">3 <small>verification layers</small></div></div>
   </div>
 
-  <p class="lede" style="margin-top:16px">Every candidate is priced two ways that must agree to the last unit —
-  an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python one —
-  and the search must reproduce the 2015 best-known values before any result counts. The five remaining gaps are
-  within 0.34%, save one at 2.44%.</p>
+  <p class="lede" style="margin-top:16px">Each candidate is priced two ways that must agree to the last unit:
+  an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python
+  implementation. The search must reproduce the 2015 best-known values before a result is accepted. Four of the
+  five remaining gaps are within 0.34%; the fifth is 2.44%.</p>
 
   <nav class="m-links" aria-label="Evidence" style="margin-top:14px">
     <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Full results &amp; validation</a>
@@ -1011,13 +990,18 @@ footer a{color:var(--terra-ink)}
 
 <section class="movement" id="m-run">
   <div class="movement-head">
-    <p class="m-kick">Run · your turn</p>
-    <h2 class="m-title">Run the real engine, on real problems.</h2>
-    <p class="m-lede">Iterated Greedy is a metaheuristic — a recipe for searching, not a fixed formula — and this is the recipe, running. The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.</p>
+    <p class="m-kick">Run · IG Studio</p>
+    <h2 class="m-title">The benchmark engine runs in the browser.</h2>
+    <p class="m-lede">Iterated Greedy is a metaheuristic, a general-purpose search procedure. The application below is the engine measured in the benchmark above, compiled to WebAssembly. The scenario, instance and seed set are selected in its own controls.</p>
   </div>
-  <div class="m-studio"><iframe class="studio-frame" src="studio-app.html" title="Interactive Iterated Greedy Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
-    <p class="studio-cap">A full app lives in this frame — on phones, scroll inside it.</p>
-  </div>
+  <figure class="demo" id="studioFigure">
+    <figcaption class="fig-cap">
+      <span><span class="fig-no">Fig. 06</span> <span class="fig-name">IG Studio</span></span>
+      <span>on small screens the frame scrolls internally</span>
+      <a href="studio-app.html" target="_blank" rel="noopener">Open in a tab</a>
+    </figcaption>
+    <iframe class="studio-frame" src="studio-app.html" title="IG Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
+  </figure>
 </section>
 
 <section class="movement" id="m-future">
@@ -1026,21 +1010,21 @@ footer a{color:var(--terra-ink)}
     <h2 class="m-title">A tested baseline — and what comes next.</h2>
     <p class="m-lede">This is a reproducible baseline against the 2015 study; the next steps extend the search and the model, one validated change at a time.</p>
   </div>
-  <div class="m-placeholder">
+  <div class="m-body">
     <h3 class="f-head">Current evidence</h3>
     <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models.</p></div></div>
 
     <h3 class="f-head">The next problem</h3>
     <p class="f-lede">The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.</p>
     <div class="oa">
-      <div class="oa-top"><span class="oa-t">Live · online order acceptance</span>
+      <div class="oa-top"><span class="oa-t">Online order acceptance</span>
         <div class="oa-ctl"><button id="oaPlay" type="button">Pause</button><button id="oaStep" type="button">Step</button><button id="oaReset" type="button">Restart</button></div>
       </div>
       <canvas id="oaCv" width="900" height="300" role="img" aria-label="Animated illustration of online order acceptance on a single machine"></canvas>
       <div class="oa-beat" id="oaBeat" aria-live="polite"></div>
       <div class="oa-sc">
         <div class="oa-s hi"><div class="l">Reoptimizing policy · profit</div><div class="v" id="oaA">0</div><div class="n">replans the whole schedule at every arrival</div></div>
-        <div class="oa-s"><div class="l">Myopic greedy · profit</div><div class="v" id="oaB">0</div><div class="n">accepts anything that fits right now</div></div>
+        <div class="oa-s"><div class="l">Myopic greedy · profit</div><div class="v" id="oaB">0</div><div class="n">accepts every order that still fits</div></div>
       </div>
       <div class="oa-lg">
         <span><i style="background:var(--f1)"></i><i style="background:var(--f2)"></i><i style="background:var(--f3)"></i> job families</span>
@@ -1049,8 +1033,8 @@ footer a{color:var(--terra-ink)}
         <span><i style="background:var(--red);opacity:.55"></i> rejected order (lost forever)</span>
       </div>
     </div>
-    <p class="f-lede" id="oa-why">The greedy policy takes every order it can fit and later has no room for the profitable ones. The reoptimizing policy sometimes <b>rejects a cheap order to protect capacity</b>, then lands a valuable one that arrives afterward. That trade — made under uncertainty, once, with no take-backs — is where a fast exact evaluator earns its keep: it can replan the entire committed schedule at every single arrival while the decision window is still open.</p>
-    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>One incumbent</strong><span class="f-chip meas">Open</span></div><p>Online acceptance with rejection has essentially one direct paper — theory-first, with no fast reoptimizing engine and no setups.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Make-to-order reality</strong><span class="f-chip dim">Applied</span></div><p>Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Reoptimize per arrival</strong><span class="f-chip dim">Fit</span></div><p>Millions of exact evaluations per second turn "replan everything before you answer" from too-slow into the natural move.</p></div></div>
+    <p class="f-lede" id="oa-why">The greedy policy takes every order it can fit and later has no room for the profitable ones. The reoptimizing policy sometimes <b>rejects a cheap order to protect capacity</b>, then accepts a valuable one that arrives afterward. Each decision is final and is taken without knowledge of future arrivals, which requires an exact evaluator fast enough to reprice the schedule inside the decision window.</p>
+    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>One incumbent</strong><span class="f-chip meas">Open</span></div><p>Online acceptance with rejection has essentially one direct paper — theory-first, with no fast reoptimizing engine and no setups.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Make-to-order reality</strong><span class="f-chip dim">Applied</span></div><p>Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Reoptimize per arrival</strong><span class="f-chip dim">Fit</span></div><p>At millions of exact evaluations per second, replanning everything before answering is no longer too slow.</p></div></div>
     <div class="oa-read">
       <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054825000565" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Online order acceptance and scheduling in a single machine environment</b><small>Competitive-ratio bounds and online algorithms — theory-first, without a reoptimizing engine or setups.</small></span><span class="g o">Open slot</span></a>
       <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054820301349" target="_blank" rel="noopener"><span class="y">2020</span><span class="x"><b>Distributionally robust scheduling with job selection and sequence-dependent setups</b><small>The closest marriage of robustness, acceptance and setups under uncertain processing times.</small></span><span class="g p">Peer-reviewed</span></a>
@@ -1060,7 +1044,6 @@ footer a{color:var(--terra-ink)}
     <p class="f-lede" id="oa-caveat" style="font-size:13.5px">A thin literature is ambiguous: it can mean “open and wanted” or “empty because nobody cares.” The evidence here is that the slot is empty, not that the community is asking for it — that ambiguity is the real risk of this direction, and it is named on purpose.</p>
 
     <h3 class="f-head">Research sequence</h3>
-    <p class="f-lede">The next step is not to add complexity. It is to prove where the current method is strong, then extend one assumption at a time.</p>
     <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P0</span><span class="f-it-title">External validation</span><span class="f-next">Next milestone</span><span class="f-sum">Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.</span></summary><dl class="f-fields"><dt>Question</dt><dd>How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?</dd><dt>Change</dt><dd>No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.</dd><dt>Comparator</dt><dd>Published baselines and exact solutions for small cases.</dd><dt>Success criterion</dt><dd>Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.</dd><dt>Evidence</dt><dd>Archived configurations, raw result tables, plots and exact small-case checks.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P1</span><span class="f-it-title">Reactive operators</span><span class="f-sum">Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can operator choice adapt without losing the exploration supplied by random removal?</dd><dt>Change</dt><dd>Add a stochastic operator portfolio with a minimum exploration probability.</dd><dt>Comparator</dt><dd>Random removal, measured adaptive destruction and tuned ALNS/tabu variants.</dd><dt>Success criterion</dt><dd>Better time-to-target and tails without degradation on held-out instances.</dd><dt>Evidence</dt><dd>Operator traces, ablations, paired seeds and distribution-shift tests.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P2</span><span class="f-it-title">Exact repair</span><span class="f-sum">Let IG define a bounded neighbourhood and solve only that repair exactly.</span></summary><dl class="f-fields"><dt>Question</dt><dd>When does exact local repair repay its solver overhead?</dd><dt>Change</dt><dd>Pass a bounded removed-job neighbourhood to an exact repair model.</dd><dt>Comparator</dt><dd>Current lowest-cost reinsertion under the same outer search budget.</dd><dt>Success criterion</dt><dd>Higher improvement per millisecond and lower time-to-target.</dd><dt>Evidence</dt><dd>Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P3</span><span class="f-it-title">Multiple machines</span><span class="f-sum">Add assignment, eligibility and machine-dependent setup in a separate mathematical model.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Which gains survive when jobs also choose a machine?</dd><dt>Change</dt><dd>Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.</dd><dt>Comparator</dt><dd>Open multi-machine OAS data and exact small solutions.</dd><dt>Success criterion</dt><dd>Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.</dd><dt>Evidence</dt><dd>Eligibility tests, model validation and published multi-machine instances.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P4</span><span class="f-it-title">Parallel search</span><span class="f-sum">Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Does parallel breadth improve wall-clock time rather than only evaluation count?</dd><dt>Change</dt><dd>Add deterministic CPU multi-start first, then evaluate GPU replicas.</dd><dt>Comparator</dt><dd>One optimized Rust core with serial-equivalent per-seed results.</dd><dt>Success criterion</dt><dd>Lower time-to-target with reported wall time, energy and deterministic ordering.</dd><dt>Evidence</dt><dd>Replayable seeds, hardware disclosure, anytime curves and energy measurements.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P5</span><span class="f-it-title">Learned discovery</span><span class="f-sum">Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can learned proposals generalize beyond the instances that suggested them?</dd><dt>Change</dt><dd>Sandbox proposed operators while keeping the exact evaluator authoritative.</dd><dt>Comparator</dt><dd>Simple hand-designed baselines under nested train/validation/test splits.</dd><dt>Success criterion</dt><dd>Registered gains on fresh seeds and held-out distributions with a stated failure criterion.</dd><dt>Evidence</dt><dd>Sandboxed code, nested splits, ablations and distribution-shift tests.</dd></dl></details></div>
 
     <h3 class="f-head">Open directions, runnable</h3>
@@ -1069,7 +1052,7 @@ footer a{color:var(--terra-ink)}
 
     <h3 class="f-head">Use IG at the depth you need</h3>
     <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.</p>
-    <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="#m-run">Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Read results</a></div></div></div>
+    <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="studio-app.html" target=_blank rel=noopener>Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Read results</a></div></div></div>
 
     <nav class="m-links" aria-label="Resources" style="margin-top:22px">
     <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
@@ -1742,10 +1725,12 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
   }
   $('#shuffleA').addEventListener('click', function(){
     shuffleRng(rng, orderA); updateRail(orderA, $('#ganttA'), 'A', true);
+    var tagA = $('#tagA'); if(tagA) tagA.remove(); /* the label describes the initial order only */
     setStatus(L('Rail A shuffled to ', 'Trilho A embaralhado para ') + orderA.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
   });
   $('#shuffleB').addEventListener('click', function(){
     shuffleRng(rng, orderB); updateRail(orderB, $('#ganttB'), 'B', true);
+    var tagB = $('#tagB'); if(tagB) tagB.remove();
     setStatus(L('Rail B shuffled to ', 'Trilho B embaralhado para ') + orderB.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
   });
   function setStatus(html){ $('#d1status').innerHTML = html; }
@@ -1784,10 +1769,10 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
         updateRail(bestPerm, $('#ganttC'), 'C', true);
         $('#railCrank').textContent = 'Σ ' + best + ' · rank 1 / 120';
       }
-      setStatus(L('All <b>120</b> orders evaluated exactly. The <b>best possible order</b> costs Σ <b>' + best + '</b> — shown above. ' +
-        'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>. Same jobs — only the order changed.',
-        'Todas as <b>120</b> ordens avaliadas exatamente. A <b>melhor ordem possível</b> custa Σ <b>' + best + '</b> — mostrada acima. ' +
-        'Trilho A (Σ ' + cA + ') em <b>' + rA + '/120</b> · Trilho B (Σ ' + cB + ') em <b>' + rB + '/120</b>. Mesmos jobs — só a ordem mudou.'));
+      setStatus(L('All <b>120</b> orders evaluated exactly. The <b>best possible order</b> costs Σ <b>' + best + '</b>, shown above. ' +
+        'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>.',
+        'Todas as <b>120</b> ordens avaliadas exatamente. A <b>melhor ordem possível</b> custa Σ <b>' + best + '</b>, mostrada acima. ' +
+        'Trilho A (Σ ' + cA + ') em <b>' + rA + '/120</b> · Trilho B (Σ ' + cB + ') em <b>' + rB + '/120</b>.'));
       btn.disabled = false; sweeping = false;
       setTimeout(function(){ prog.style.width = '0%'; }, 900);
     }
@@ -1860,8 +1845,8 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
 
   function d2status(n){ /* keyed bilingual template with number slots */
     return window.__lang === 'pt'
-      ? 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> ordens completas; a 10⁹ planos/s, ' + fmtTime(factorial(n) / 1e9) + '.'
-      : 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> complete orders; at 10⁹ plans/sec, ' + fmtTime(factorial(n) / 1e9) + '.';
+      ? 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> ordens completas; a 10⁹ ordens/s, ' + fmtTime(factorial(n) / 1e9) + '.'
+      : 'n = ' + n + ' → <b>' + fmtBig(factorial(n)) + '</b> complete orders; at 10⁹ orders/s, ' + fmtTime(factorial(n) / 1e9) + '.';
   }
   function onSlide(){
     var n = parseInt(slider.value, 10);
@@ -1932,7 +1917,7 @@ function onWinResize(fn){
 
   /* ---- the one central clock: beat queue + speed multiplier ---- */
   var player = { gen:null, cur:null, t:0, playing:false, speed:1, active:false, running:false, lastTs:0, raf:0, anims:[] };
-  var everPlayed = false; /* D3 — Play pulses only until the very first Play */
+
   function beat(dur, onStart, onUpdate, onDone){ return { dur:dur, onStart:onStart, onUpdate:onUpdate, onDone:onDone }; }
   function trackAnim(a){
     if(!a) return;
@@ -1969,10 +1954,18 @@ function onWinResize(fn){
         if(player.cur.onStart) player.cur.onStart();
       }
       var b = player.cur;
-      if(REDUCED){ // reduced motion: every beat completes instantly
-        if(b.onUpdate) b.onUpdate(1);
-        if(b.onDone) b.onDone();
-        player.cur = null;
+      if(REDUCED){ /* reduced motion: no tweening — each beat snaps to its end
+                      state and then holds for its own duration (250 ms floor),
+                      so the run stays readable instead of collapsing into one frame */
+        var rdur = Math.max(b.dur, 250);
+        if(!b._snapped){ b._snapped = true; if(b.onUpdate) b.onUpdate(1); }
+        var ruse = Math.min(rdur - player.t, dt);
+        player.t += ruse; dt -= ruse;
+        if(player.t >= rdur){
+          if(b.onDone) b.onDone();
+          player.cur = null;
+        }
+        if(dt <= 0) break;
         continue;
       }
       var use = Math.min(b.dur - player.t, dt);
@@ -1997,11 +1990,11 @@ function onWinResize(fn){
     genDone = true;
     player.playing = false;
     updatePlayBtn();
-    btnPlay.disabled = true; btnStep.disabled = true;
+    btnPlay.disabled = true; btnStep.disabled = true; btnRestart.classList.add('primary');
   }
   function setPlaying(p){
     if(p && genDone) return;
-    if(p && !everPlayed){ everPlayed = true; btnPlay.classList.remove('pulse'); } /* D3 */
+
     player.playing = p;
     updatePlayBtn();
     player.anims.forEach(function(a){ try{ p ? a.play() : a.pause(); }catch(e){} });
@@ -2039,18 +2032,12 @@ function onWinResize(fn){
   function syncOutsideEmpty(){
     outsideEmpty.style.display = S.workRej.length ? 'none' : '';
   }
-  /* D1 — working-rail idle placeholder (mirrors syncOutsideEmpty): shown while
-     nothing has been inserted yet, removed on the first insertion. */
-  var workEmpty = el('span', 'rail-empty', 'built here — one cheapest insertion at a time');
-  function syncWorkingEmpty(){
-    if(S.workSeq.length){ if(workEmpty.parentNode) workEmpty.remove(); }
-    else if(workEmpty.parentNode !== workingEl) workingEl.appendChild(workEmpty);
-  }
+
   /* fill the protected rail with static (ghost) reference chips */
   function renderProtected(){
     protectedEl.textContent = '';
     if(!S.protSeq.length){
-      protectedEl.appendChild(el('span', 'rail-empty', '— appears once construction commits —'));
+      protectedEl.appendChild(el('span', 'rail-empty', 'empty until construction commits'));
       return;
     }
     S.protSeq.forEach(function(id){
@@ -2116,7 +2103,7 @@ function onWinResize(fn){
     if(!all.length){
       /* D2 — idle placeholder (canvas text, so translated inline) */
       ctx.fillStyle = '#a2967f';
-      ctx.fillText(window.__lang === 'pt' ? 'Pressione Play — a curva de custo desenha aqui.' : 'Press Play — the cost curve draws here.', L, T + 14);
+      ctx.fillText(window.__lang === 'pt' ? 'A curva de custo é desenhada durante a execução.' : 'The cost curve is drawn during the run.', L, T + 14);
       return;
     }
     var lo = Math.min.apply(null, all), hi = Math.max.apply(null, all);
@@ -2266,20 +2253,19 @@ function onWinResize(fn){
       yield flyBeat(jobId, workingEl, best.pos, FLY_DUR, function(){
         S.workSeq.splice(best.pos, 0, jobId);
         S.tray = S.tray.filter(function(x){ return x !== jobId; });
-        syncWorkingEmpty();
         log(L('insert <b>', 'inserir <b>') + jobLabel + L('</b> at pos ', '</b> na pos ') + (best.pos + 1) + '/' + nPos + ' — Σ ' + best.cost + L(' (reject ', ' (rejeitar ') + base + ')');
       });
       yield beat(120, null, null, function(){ removeInsertBar(); hideTrial(); });
     }else{
       yield beat(520, function(){
-        outsideNote.textContent = jobLabel + ' — break-even: cheapest insertion Σ ' + best.cost + ' > rejecting Σ ' + base + ' → stays outside';
+        outsideNote.textContent = jobLabel + L(' — break-even: cheapest insertion Σ ', ' — ponto de equilíbrio: inserção mais barata Σ ') + best.cost + L(' > rejection Σ ', ' > rejeição Σ ') + base + L(' → stays rejected', ' → fica rejeitado');
         caret.classList.remove('best');
       }, null, null);
       yield flyBeat(jobId, outsideEl, null, FLY_DUR, function(){
         S.workRej.push(jobId);
         S.tray = S.tray.filter(function(x){ return x !== jobId; });
         syncOutsideEmpty();
-        log('<span class="no">' + L('reject', 'rejeitar') + '</span> <b>' + jobLabel + '</b> — break-even: ' + best.cost + ' &gt; ' + base);
+        log('<span class="no">' + L('reject', 'rejeitar') + '</span> <b>' + jobLabel + '</b>' + L(' — break-even: ', ' — ponto de equilíbrio: ') + best.cost + ' &gt; ' + base);
       });
       yield beat(120, null, null, function(){ hideTrial(); });
     }
@@ -2289,7 +2275,7 @@ function onWinResize(fn){
   function* igScript(){
     /* ===== phase 1 · greedy construction (EDD order, best insertion) ===== */
     var edd = inst.jobs.slice().sort(function(a, b){ return a.due - b.due || a.id - b.id; }).map(function(j){ return j.id; });
-    setPhase(L('Constructing', 'Construindo'), L('greedy best-insertion, earliest due date first', 'inserção gulosa do melhor, data de entrega mais cedo primeiro'));
+    setPhase(L('Constructing', 'Construindo'), L('greedy best-insertion, earliest due date first', 'melhor inserção gulosa, prazo mais próximo primeiro (EDD)'));
     log(L('construction — EDD order ', 'construção — ordem EDD ') + edd.map(function(i){ return 'J' + (i + 1); }).join(' '));
     for(var c = 0; c < edd.length; c++){
       setPhase(L('Constructing', 'Construindo'), L('measuring insertions for J', 'medindo inserções para J') + (edd[c] + 1));
@@ -2309,7 +2295,7 @@ function onWinResize(fn){
         try{ trackAnim(protectedEl.animate([{ opacity:0.25 }, { opacity:1 }], { duration:560 })); }catch(e){}
       }
     }, null, null);
-    log('<span class="ok">' + L('construction committed', 'construção confirmada') + '</span> — Σ ' + ev0.total + ' (setup+proc ' + (ev0.setup + ev0.proc) + L(' · delay ', ' · atraso ') + ev0.tard + L(' · outside ', ' · fora ') + ev0.rej + ')');
+    log('<span class="ok">' + L('construction committed', 'construção confirmada') + '</span> — Σ ' + ev0.total + ' (setup+proc ' + (ev0.setup + ev0.proc) + L(' · tardiness ', ' · atraso ') + ev0.tard + L(' · rejection ', ' · rejeição ') + ev0.rej + ')');
     statusEl.innerHTML = L('Construction complete: Σ <b>' + ev0.total + '</b>. The destroy–rebuild loop starts.',
       'Construção concluída: Σ <b>' + ev0.total + '</b>. O laço destruir–reconstruir começa.');
 
@@ -2335,7 +2321,7 @@ function onWinResize(fn){
         yield* sweepAndPlace(pending[p]);
       }
       /* --- swap pass: rejected ↔ scheduled (first improvement) --- */
-      setPhase(L('Swapping', 'Trocando'), L('iteration', 'iteração') + ' ' + iter + L(' — try outside jobs against the sequence', ' — teste jobs de fora contra a sequência'));
+      setPhase(L('Swapping', 'Trocando'), L('iteration', 'iteração') + ' ' + iter + L(' — swaps between rejected and scheduled jobs', ' — trocas entre jobs rejeitados e sequenciados'));
       var swapBase = evaluate(inst, S.workSeq).total, found = null, trials = 0;
       if(S.workRej.length){
         for(var sr = 0; sr < S.workRej.length && !found; sr++){
@@ -2347,7 +2333,7 @@ function onWinResize(fn){
         }
       }
       if(!S.workRej.length){
-        log(L('swap pass — outside empty, skipped', 'passo de troca — nada fora, pulado'));
+        log(L('swap pass — nothing rejected, skipped', 'passo de troca — nada rejeitado, pulado'));
         yield beat(220, null, null, null);
       }else if(!found){
         log(L('swap pass — no improving swap (', 'passo de troca — nenhuma troca melhora (') + trials + L(' trials)', ' tentativas)'));
@@ -2422,9 +2408,9 @@ function onWinResize(fn){
     showDelta(0, L('converged at Σ ' + incumbentCost, 'convergiu em Σ ' + incumbentCost));
     log('<b>' + L('done', 'fim') + '</b> — ' + why + '; incumbent Σ <b>' + incumbentCost + '</b> (' + L('construction was', 'construção era') + ' ' + incumbent[0].cost + ')');
     statusEl.innerHTML = L('Converged: ' + why + '. Final incumbent Σ <b>' + incumbentCost + '</b> — the loop shaved ' +
-      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% off greedy construction. Press Restart to run it again.',
+      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% off greedy construction.',
       'Convergiu: ' + why + '. Incumbente final Σ <b>' + incumbentCost + '</b> — o laço cortou ' +
-      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% da construção gulosa. Pressione Reiniciar para rodar de novo.');
+      Math.round((1 - incumbentCost / incumbent[0].cost) * 100) + '% da construção gulosa.');
     hideTrial();
   }
 
@@ -2454,7 +2440,7 @@ function onWinResize(fn){
     if(player.raf) cancelAnimationFrame(player.raf);
     player.running = false; player.cur = null; player.gen = null;
     genDone = false; iter = 0; incumbent = []; candidates = []; incumbentCost = Infinity;
-    btnPlay.disabled = false; btnStep.disabled = false;
+    btnPlay.disabled = false; btnStep.disabled = false; btnRestart.classList.remove('primary');
     destroyRng = mulberry32((IG_SEED ^ 0x9e3779b9) >>> 0);
     S = { protSeq:[], protRej:[], workSeq:[], workRej:[], tray:[] };
     for(var i = 0; i < N; i++) S.tray.push(i);
@@ -2470,14 +2456,13 @@ function onWinResize(fn){
     S.tray.forEach(function(id){ trayEl.appendChild(chips[id]); });
     outsideNote.textContent = '';
     syncOutsideEmpty();
-    syncWorkingEmpty();
     ['#shCsetup', '#shCdelay', '#shCout', '#shCtot'].forEach(function(s){ $(s).textContent = '–'; });
     ['#shPsetup', '#shPdelay', '#shPout', '#shPtot'].forEach(function(s){ $(s).textContent = '–'; });
     var pillEl = $('#igDelta');
     pillEl.className = 'delta-pill'; pillEl.textContent = 'Δ vs protected —';
     logEl.textContent = '';
     log(L('seeded instance ready — 12 jobs · 4 families · mulberry32(0xce29767d)', 'instância com seed pronta — 12 jobs · 4 famílias · mulberry32(0xce29767d)'));
-    setPhase(L('Idle', 'Parado'), L('press Play or Step', 'pressione Play ou Passo'));
+    setPhase(L('Idle', 'Parado'), null);
     statusEl.textContent = '';
     hideTrial();
     removeInsertBar();
@@ -2504,6 +2489,20 @@ function onWinResize(fn){
       drawChart();
     }
   });
+  /* start the run once, the first time the figure is properly in view. REDUCED
+     opts out; the gate above still pauses offscreen and on tab hide, and its
+     resume path is guarded by player.playing, so a manual Pause holds. */
+  var autoStarted = false;
+  if(!REDUCED && 'IntersectionObserver' in window){
+    var startIO = new IntersectionObserver(function(en){
+      if(!en[0] || !en[0].isIntersecting) return;
+      startIO.disconnect();
+      if(autoStarted || genDone) return;
+      autoStarted = true;
+      setPlaying(true);
+    }, { threshold:0.02, rootMargin:'0px 0px -20% 0px' });
+    startIO.observe(fig);
+  }
   onWinResize(function(){ drawChart(); });
 })();
 </script>
@@ -2544,20 +2543,14 @@ function onWinResize(fn){
   addEventListener('scroll', function(){ if(!ticking){ ticking = true; requestAnimationFrame(paintProg); } }, { passive:true });
   paintProg();
 
-  /* H3 — hide the hero scroll cue after the first scroll (once) */
-  (function(){
-    var cue = document.getElementById('scrollCue');
-    if(!cue) return;
-    var off = function(){ cue.classList.add('hide'); removeEventListener('scroll', off); };
-    addEventListener('scroll', off, { passive:true });
-  })();
+
 
   /* B2 — scroll-spy over every main section, mapped onto the 5 nav anchors */
   if(!links.length || !('IntersectionObserver' in window)) return;
   var NAV_FOR = {
     'm-story':'m-story','demo-order':'m-story','demo-factorial':'m-story','demo-ig':'m-story',
     'm-compare':'m-compare','demo-race':'m-compare','demo-benchmark':'m-compare',
-    'm-arena':'m-arena','m-run':'m-run','m-future':'m-future'
+    'm-arena':'m-compare','m-run':'m-run','m-future':'m-future'
   };
   var map = {}, visible = {};
   links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
@@ -2597,21 +2590,6 @@ function onWinResize(fn){
 })();
 </script>
 <script>
-/* I2 — grow the studio iframe to fit its content (same-origin studio-height messages) */
-(function(){
-  var frame = document.querySelector('.studio-frame');
-  if(!frame) return;
-  window.addEventListener('message', function(ev){
-    if(ev.source !== frame.contentWindow) return;      // only our own studio iframe
-    var d = ev.data;
-    if(!d || d.type !== 'studio-height') return;
-    var h = Math.max(620, Math.ceil(+d.height || 0));  // never collapse below 620px
-    if(h) frame.style.height = h + 'px';
-  });
-})();
-</script>
-
-<script>
 /* ============================================================
    i18n — EN / PT-BR toggle for the notebook.
    Strategy: a bidirectional text-node walker keyed on normalized
@@ -2629,45 +2607,20 @@ function onWinResize(fn){
     "#oa-why": 'A pol\u00edtica gulosa pega todo pedido que couber e depois n\u00e3o tem espa\u00e7o para os lucrativos. A reotimizadora \u00e0s vezes <b>recusa um pedido barato para proteger capacidade</b>, e ent\u00e3o captura um valioso que chega em seguida. Esse trade \u2014 feito sob incerteza, uma vez, sem volta \u2014 \u00e9 onde um avaliador exato r\u00e1pido se paga: ele replaneja o cronograma comprometido inteiro a cada chegada, enquanto a janela de decis\u00e3o ainda est\u00e1 aberta.',
 
     "#m-arena .lede":
-      'Antes de rodar qualquer coisa, conhe\u00e7a os competidores. Estes s\u00e3o os m\u00e9todos do ' +
-      '<b>estudo de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia exata (MILP) de uma hora e o ' +
-      'Iterated Greedy escrito em Excel VBA. Escolha um para ver como ele se move \u2014 o diagrama \u00e9 ' +
-      'esquem\u00e1tico, nada est\u00e1 sendo resolvido aqui \u2014 e quanto ele pontuou nas 44 inst\u00e2ncias do conjunto padr\u00e3o de benchmark MaScLib da literatura. ' +
-      'Seis deles v\u00e3o trabalhar num cen\u00e1rio da sua escolha logo abaixo.',
-    "#m-story h2": 'A ordem muda o tempo. <em>O tempo muda o custo.</em>',
+      'Seis heurísticas em C++ publicadas, uma referência exata (MILP) com limite de uma hora e o Iterated Greedy escrito em Excel VBA. Selecionar um método mostra uma animação esquemática de como ele se move e a sua pontuação nas 44 instâncias do benchmark padrão <b>MaScLib</b>. O diagrama não resolve nada. Seis dos oito rodam no cenário configurado abaixo.',
+    "#m-story h2": 'A ordem das tarefas <em>determina o custo total.</em>',
     "#demo-order .lede":
-      'Passe cinco jobs por uma máquina em uma ordem, depois em outra. A máquina precifica cada ' +
-      'ordem exatamente — a espera, as trocas entre famílias e a multa por terminar atrasado se ' +
-      'somam em um único número. <b>Embaralhe qualquer uma das ordens e veja o total mudar.</b>',
+      'O custo de uma ordem é a soma dos setups entre famílias e do atraso ponderado. A espera por uma data de liberação atrasa todas as tarefas seguintes.',
     "#demo-factorial .lede":
-      'Porque são ordens demais. Arraste o número de jobs e veja a contagem de ordens possíveis ' +
-      'disparar: mesmo checando <i>um bilhão</i> de planos por segundo, testá-las todas dura mais ' +
-      'que a idade do universo muito antes de você chegar a um problema real de 28 jobs. É por isso ' +
-      'que você precisa chutar — e chutar bem.',
+      'Enumerar uma instância de 28 tarefas a 10⁹ ordens por segundo leva mais que a idade do universo.',
     "#demo-ig .lede":
-      'Um motor Iterated Greedy real rodando nesta página sobre um problema fixo de 12 jobs e 4 famílias ' +
-      '(<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b> (guloso), porque cada movimento pega a inserção ' +
-      'mais barata; <b>iterated</b> (iterado), porque ele faz loop — construir, quebrar, reconstruir. Nada é ' +
-      'pré-gravado: cada posição de inserção é reavaliada contra o objetivo completo enquanto você assiste — ' +
-      'e às vezes um job sai mais barato recusar do que encaixar. Observe os cinco tempos — <b>construir</b> pela ' +
-      'melhor inserção, <b>destruir</b> três jobs, <b>medir cada inserção</b> no trilho de teste, ' +
-      '<b>rejeitar no empate</b> quando nenhuma posição vence o custo de rejeição, <b>aceitar ou reverter</b>.',
-    "#m-compare .m-title": 'A adivinhação realmente <em>compensa?</em>',
+      'Um motor Iterated Greedy rodando nesta página sobre um problema fixo de 12 jobs e 4 famílias (<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b> (guloso), porque cada movimento pega a inserção mais barata; <b>iterated</b> (iterado), porque o ciclo destruir–reconstruir se repete. Cada posição de inserção é reavaliada contra o objetivo completo. As cinco etapas: <b>construir</b> pela melhor inserção, <b>destruir</b> três jobs, <b>medir cada inserção</b> no trilho de teste, <b>rejeitar no ponto de equilíbrio</b> quando nenhuma posição vence o custo de rejeição, <b>aceitar ou reverter</b>.',
+    "#m-compare .m-title": 'O Iterated Greedy comparado <em>aos outros sete métodos.</em>',
     "#demo-race .lede":
-      'Seis estratégias de busca sobre o mesmo problema com seed fixa, cada uma com exatamente ' +
-      '<b>3.000 avaliações de plano completo</b>. Uma disputa justa precisa de uma moeda comum: não o ' +
-      'tempo de relógio, mas as avaliações do objetivo. As linhas correm da esquerda para a direita ' +
-      'conforme o orçamento é consumido.',
-    "#m-arena .lede-DISABLED":
-      'A corrida acima s\u00e3o seis estrat\u00e9gias rodando ao vivo no seu navegador. Este \u00e9 o ' +
-      '<b>benchmark registrado de 2015</b>: seis heur\u00edsticas em C++ publicadas, uma refer\u00eancia MILP de ' +
-      'uma hora e o Iterated Greedy escrito em Excel VBA, sobre 44 inst\u00e2ncias MaScLib com cinco ' +
-      'execu\u00e7\u00f5es cada. Escolha um m\u00e9todo para ver como ele busca \u2014 o diagrama \u00e9 esquem\u00e1tico, nada ' +
-      '\u00e9 reexecutado aqui \u2014 e quanto ele pontuou.',
+      'Implementações compactas dos métodos acima, escritas para o navegador e executadas sob um <b>orçamento de avaliações</b> comum. O orçamento é contado em avaliações completas do objetivo.',
     "#demo-benchmark .lede":
-      'A corrida acima roda sobre um único problema com seed fixa, ao vivo no seu navegador. O teste ' +
-      'de verdade é o benchmark padrão <b>MaScLib</b> — 44 problemas do estudo de 2015, cada um com um ' +
-      'melhor-conhecido publicado. Avaliado contra todos eles, o motor moderno se sustenta:'
+      'As instâncias <b>MaScLib</b> vêm do estudo de 2015, cada uma com um custo melhor-conhecido ' +
+      'publicado. O motor atual foi medido em todas elas:'
   };
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
@@ -2675,15 +2628,15 @@ function onWinResize(fn){
     /* online order acceptance (future) */
     "The next problem": "O próximo problema",
     "The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.": "O benchmark estático está praticamente fechado — métodos exatos hoje provam otimalidade nele, então uma metaheurística só pode empatar. O problema aberto fica um passo antes e mais perto de um chão de fábrica real: pedidos chegam ao longo do tempo, cada tempo de processamento e prazo é só uma estimativa, e cada aceitar-ou-recusar é comprometido na hora, antes de o futuro ser conhecido.",
-    "Live · online order acceptance": "Ao vivo · aceitação online de pedidos",
+    "Online order acceptance": 'Aceitação online de pedidos' ,
     "Pause": "Pausar",
     "Step": "Passo",
     "Restart": "Reiniciar",
     "Reoptimizing policy · profit": "Política reotimizadora · lucro",
     "replans the whole schedule at every arrival": "replaneja o cronograma inteiro a cada chegada",
     "Myopic greedy · profit": "Guloso míope · lucro",
-    "accepts anything that fits right now": "aceita tudo que couber agora",
-    "job families": "famílias de trabalho",
+    "accepts every order that still fits": 'aceita todo pedido que ainda couber' ,
+    "job families": "famílias de tarefas",
     "sequence-dependent setup": "setup dependente da sequência",
     "now": "agora",
     "rejected order (lost forever)": "pedido recusado (perdido para sempre)",
@@ -2692,7 +2645,7 @@ function onWinResize(fn){
     "Make-to-order reality": "Realidade sob encomenda",
     "Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.": "Cotar aceitar-ou-recusar no instante em que o pedido chega, sob tempos incertos, é o que oficinas sob encomenda fazem de fato — e aqui a eficiência é medível no dia a dia.",
     "Reoptimize per arrival": "Reotimizar por chegada",
-    "Millions of exact evaluations per second turn \"replan everything before you answer\" from too-slow into the natural move.": "Milhões de avaliações exatas por segundo tornam \"replaneje tudo antes de responder\" de lento-demais em jogada natural.",
+    "At millions of exact evaluations per second, replanning everything before answering is no longer too slow.": "Com milhões de avaliações exatas por segundo, replanejar tudo antes de responder deixa de ser lento demais.",
     "Open": "Aberto",
     "Applied": "Aplicado",
     "Fit": "Encaixe",
@@ -2714,48 +2667,48 @@ function onWinResize(fn){
     "Compare": "Comparar",
     "Methods": "Métodos",
     "Skip to the first demo": "Pular para a primeira demo",
-    "↓ it starts with five jobs": "↓ começa com cinco trabalhos",
     "Run": "Executar",
     "Future": "Futuro",
     /* added figures / captions */
-    "Time runs left to right; the bill sits below it on one shared scale — orange setups + red delays, and the bar's length is the total. The clock stops at the last job's end (t); the bill stops at Σ.": "O tempo corre da esquerda para a direita; a conta está abaixo dele numa escala só — setups laranja + atrasos vermelhos, e o comprimento da barra é o total. O relógio para no fim do último job (t); a conta para no Σ.",
-    "A full app lives in this frame — on phones, scroll inside it.": "Um app completo vive neste quadro — em celulares, role dentro dele.",
-    "Idle — press Play or Step.": "Parado — pressione Play ou Passo.",
-    "Idle — press Play or Step": "Parado — pressione Play ou Passo",
+    "Time runs left to right and each timeline ends at t. The bar below it shows setup plus weighted tardiness on a scale shared by all rails, and its length is the total Σ.": 'O tempo corre da esquerda para a direita e cada linha do tempo termina em t. A barra abaixo mostra setup mais atraso ponderado numa escala comum a todos os trilhos, e seu comprimento é o total Σ.' ,
+    "on small screens the frame scrolls internally": "em telas pequenas a rolagem ocorre dentro do quadro",
+    "Open in a tab": "Abrir em uma aba",
+    "Idle": "Parado",
     "Ranks are provisional until the budget is spent": "As posições são provisórias até o orçamento se esgotar",
-    "— constructive methods stop early; iterative ones keep searching, so watch who is still climbing. Click a method to hide or show it.": "— métodos construtivos param cedo; os iterativos continuam buscando, então observe quem ainda está subindo. Clique em um método para ocultá-lo ou exibi-lo.",
-    "new best-knowns": "novos recordes",
+    "new best-knowns": "novos melhores-conhecidos",
     "/ 44 instances": "/ 44 instâncias",
+    "verification layers": "camadas de verificação",
+    "Job": "Tarefa",
     "Shuffle all three": "Embaralhar os três",
     "PHASE": "FASE",
     "Measuring": "Medindo",
     "Swapping": "Trocando",
     "Reverting": "Revertendo",
-    "setup+p": "setup+p",
-    "outside": "fora",
+    "setup+proc": "setup+proc",
+    "rejection": "rejeição",
     "Σ total": "Σ total",
     "Candidate": "Candidato",
+    "empty until construction commits": "vazio até a construção ser confirmada",
     "Protected": "Protegido",
     "Plan": "Plano",
-    "— appears once construction commits —": "— aparece quando a construção é confirmada —",
-    "built here — one cheapest insertion at a time": "construído aqui — uma inserção mais barata de cada vez",
     "≈ 700× the age of the universe": "≈ 700× a idade do universo",
     "faster than one screen refresh": "mais rápido que uma atualização de tela",
     "one frame on a 240 Hz monitor": "um quadro em um monitor de 240 Hz",
     "a blink — already too many to enumerate": "um piscar — já demais para enumerar",
     "a human lifetime": "uma vida humana",
     "— single-machine scheduling": "— sequenciamento em máquina única",
-    "An interactive explanation — the same jobs, a better order, and how a small algorithm finds it.":
-      "Uma explicação interativa — os mesmos jobs, uma ordem melhor, e como um algoritmo simples a encontra.",
+    "Interactive explanation with runnable demonstrations and benchmark results.":
+      'Explicação interativa com demonstrações executáveis e resultados de benchmark.' ,
     /* story hero */
     "Story · why order matters": "História · por que a ordem importa",
-    "A best order does exist — but there are more of them than you could ever check. So the game isn't to try them all; it's to guess well and improve fast.":
-      "Existe uma ordem ótima — mas há mais ordens possíveis do que você conseguiria testar. Então o jogo não é testar todas; é chutar bem e melhorar rápido.",
+    "An optimal order exists, but there are too many orders to enumerate. Iterated Greedy builds one order and improves it by iteration.":
+      'Existe uma ordem ótima, mas há ordens demais para enumerar. O Iterated Greedy constrói uma ordem e a melhora por iteração.' ,
     /* demo 1 */
-    "See it for yourself": "Veja por si mesmo",
-    "The same five jobs, two orders — and two very different bills.":
-      "Os mesmos cinco jobs, duas ordens — e duas contas bem diferentes.",
-    "The exact numbers behind these jobs": "Os números exatos por trás desses jobs",
+    "Order and cost": 'Ordem e custo' ,
+    "The same five jobs in two orders.":
+      'As mesmas cinco tarefas em duas ordens.' ,
+    "Job": "Tarefa",
+    "The exact numbers behind these jobs": "Os números exatos dessas tarefas",
     "Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)":
       "Conjunto fixo — uma máquina, setup de 3 de tempo / 6 de custo entre famílias diferentes (0 dentro da mesma família)",
     "Family": "Família",
@@ -2763,7 +2716,7 @@ function onWinResize(fn){
     "Processing p": "Processamento p",
     "Due d": "Prazo d",
     "Weight w": "Peso w",
-    "Two rails, two orders": "Dois trilhos, duas ordens",
+    "Timeline and cost for each order": 'Linha do tempo e custo de cada ordem' ,
     "processing cost (Σp = 25) is identical for every order — omitted from totals":
       "o custo de processamento (Σp = 25) é idêntico para toda ordem — omitido dos totais",
     "idle wait for a release date": "espera ociosa por uma data de liberação",
@@ -2772,91 +2725,88 @@ function onWinResize(fn){
     "weighted tardiness": "atraso ponderado",
     "due date": "prazo",
     "Rail A": "Trilho A",
-    "the intuitive order": "a ordem intuitiva",
+    "job order J1–J5": 'ordem J1–J5' ,
     "Shuffle A": "Embaralhar A",
     "Rail B": "Trilho B",
-    "the family-grouped order": "a ordem agrupada por família",
+    "grouped by family": "a ordem agrupada por família",
     "Shuffle B": "Embaralhar B",
     "Best order": "Melhor ordem",
     "found by checking all 120": "encontrada testando todas as 120",
     "setup cost": "custo de setup",
     "tardiness cost": "custo de atraso",
     "Evaluate all 120 orders": "Avaliar todas as 120 ordens",
-    "sweeps every permutation, exactly": "varre todas as permutações, exatamente",
     /* demo 2 */
     "The catch": "A pegadinha",
-    "So why not just try every order?": "Então por que não testar todas as ordens?",
-    "Enumeration budget vs n": "Orçamento de enumeração vs n",
-    "bars are log₁₀ scale — each added job multiplies the count":
+    "The time needed to enumerate every order.": 'O tempo necessário para enumerar todas as ordens.' ,
+    "Orders (n!) vs n": 'Ordens (n!) vs n' ,
+    "orders n! · log₁₀ scale":
       "as barras estão em escala log₁₀ — cada job a mais multiplica a contagem",
-    "Drag the slider — change the number of jobs": "Arraste o controle — mude o número de jobs",
+    "number of jobs": 'número de tarefas' ,
     "Complete orders —": "Ordens completas —",
     "Candidate plans incl. rejection —": "Planos candidatos incl. rejeição —",
-    "Time to enumerate orders at 10⁹ plans/sec": "Tempo para enumerar as ordens a 10⁹ planos/s",
+    "Time to enumerate all orders at 10⁹ orders/s": 'Tempo para enumerar todas as ordens a 10⁹ ordens/s' ,
     "orders n! · log₁₀ scale": "ordens n! · escala log₁₀",
-    "each job multiplies:": "cada job multiplica:",
-    "What the numbers mean — computed live, not hardcoded":
-      "O que os números significam — calculado ao vivo, não fixado no código",
+    "each job multiplies:": "cada tarefa multiplica:",
+    "Enumeration time at selected values of n":
+      'Tempo de enumeração em valores selecionados de n' ,
     "orders n!": "ordens n!",
-    "enumerate at 10⁹/s": "enumerar a 10⁹/s",
+    "enumerate at 10⁹ orders/s": "enumerar a 10⁹/s",
     "analogy": "analogia",
     /* demo 3 */
     "The method": "O método",
-    "So you guess — then destroy, rebuild, and keep what's better.":
-      "Então você chuta — depois destrói, reconstrói e fica com o que for melhor.",
+    "The destroy–rebuild loop.":
+      'O laço destruir–reconstruir.' ,
     "One central clock drives every beat — Play / Pause / Step / Speed all scale the same timeline":
-      "Um relógio central rege cada tempo — Play / Pause / Passo / Velocidade escalam a mesma linha do tempo",
+      "Um relógio central rege cada etapa — Iniciar / Pausar / Passo / Velocidade escalam a mesma linha do tempo",
+    "Play": "Iniciar",
     "Step": "Passo",
     "speed": "velocidade",
     "Restart": "Reiniciar",
     "Protected plan": "Plano protegido",
     "the reference — never touched mid-iteration": "a referência — nunca alterada no meio da iteração",
-    "Outside — rejected jobs": "Fora — jobs rejeitados",
-    "penalty per job instead of scheduling it": "multa por job em vez de sequenciá-lo",
+    "Rejected jobs": 'Jobs rejeitados / custo de processar o job fora em vez de sequenciá-lo' ,
     "Outside": "Fora",
     "none — every job is scheduled": "nenhum — todo job foi sequenciado",
     "Working copy": "Cópia de trabalho",
     "the candidate being built": "a candidata sendo construída",
-    "Pending tray": "Bandeja pendente",
+    "Pending tray": "Bandeja de pendentes",
     "jobs waiting to be re-inserted": "jobs esperando para serem reinseridos",
-    "Objective sheet": "Planilha do objetivo",
-    "setup&proc + delay + outside = total": "setup&proc + atraso + fora = total",
-    "delay": "atraso",
-    "convergence — incumbent line + every evaluated candidate (filled = accepted)":
-      "convergência — linha da titular + toda candidata avaliada (preenchida = aceita)",
+    "Objective sheet": 'setup+proc + atraso + rejeição = total' ,
+    "setup+proc + tardiness + rejection = total": "setup+proc + atraso + rejeição = total",
+    "tardiness": "atraso",
+    "cost by iteration; line = incumbent, dots = evaluated candidates (filled = accepted)":
+      'custo por iteração; linha = incumbente, pontos = candidatas avaliadas (ponto cheio = aceita)' ,
     /* discrete demo-3 phase words (best-effort; sentences with numbers stay EN) */
     "Constructing": "Construindo",
     "Destroying": "Destruindo",
     "Accepting": "Aceitando",
     "Converged": "Convergiu",
     /* compare + benchmark */
-    "Compare · does it work?": "Comparar · será que funciona?",
-    "Six strategies, one budget": "Seis estratégias, um orçamento",
-    "The race, under an equal evaluation budget.": "A corrida, sob um orçamento igual de avaliações.",
-    "Cost vs evaluations consumed — lower is better": "Custo vs avaliações consumidas — menor é melhor",
-    "Run race": "Rodar corrida",
-    "Reset": "Zerar",
-    "budget 3,000 evals each": "orçamento de 3.000 avaliações cada",
+    "Compare · results": 'Comparar · resultados' ,
+    "In-browser comparison": 'Comparação no navegador' ,
+    "▶ Run": "▶ Executar",
+    "⏸ Pause": "⏸ Pausar",
+    "↻ Reset": "↻ Zerar",
     "Random sampling": "Amostragem aleatória",
     "Greedy construction only": "Só construção gulosa",
     "Steepest descent (pairwise swap)": "Descida mais íngreme (troca de pares)",
     "IG + swap-with-rejected": "IG + troca com rejeitados",
     "Random-restart descent": "Descida com reinício aleatório",
-    "From one race to the whole benchmark": "De uma corrida ao benchmark inteiro",
-    "The race builds intuition. The recorded benchmark is the evidence.":
-      "A corrida cria a intuição. O benchmark registrado é a evidência.",
+    "Recorded benchmark": 'Benchmark registrado' ,
+    "Results on the 44 MaScLib instances.":
+      'Resultados nas 44 instâncias do benchmark MaScLib.' ,
     "Best-known values matched or beaten": "Melhores-conhecidos igualados ou superados",
     "Improved below the 2015 record": "Melhorados abaixo do recorde de 2015",
     "Independent correctness checks": "Verificações independentes de correção",
-    "Every candidate is priced two ways that must agree to the last unit — an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python one — and the search must reproduce the 2015 best-known values before any result counts. The five remaining gaps are within 0.34%, save one at 2.44%.":
-      "Toda candidata é precificada de duas formas que precisam concordar até a última unidade — um avaliador incremental contra um oráculo do zero, e o motor Rust contra um Python independente — e a busca precisa reproduzir os melhores-conhecidos de 2015 antes de qualquer resultado contar. As cinco lacunas restantes ficam dentro de 0,34%, exceto uma de 2,44%.",
+    "Each candidate is priced two ways that must agree to the last unit: an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python implementation. The search must reproduce the 2015 best-known values before a result is accepted. Four of the five remaining gaps are within 0.34%; the fifth is 2.44%.":
+      "Cada candidata é avaliada por dois caminhos que devem coincidir até a última unidade: um avaliador incremental contra um oráculo do zero, e o motor Rust contra uma implementação Python independente. A busca precisa reproduzir os melhores-conhecidos de 2015 antes de qualquer resultado ser aceito. Quatro das cinco lacunas restantes ficam dentro de 0,34%; a quinta é de 2,44%.",
     "Full results & validation": "Resultados completos & validação",
     "2015 study (PDF)": "Estudo de 2015 (PDF)",
     /* run */
-    "Run · your turn": "Executar · sua vez",
-    "Run the real engine, on real problems.": "Rode o motor de verdade, em problemas reais.",
-    "Iterated Greedy is a metaheuristic — a recipe for searching, not a fixed formula — and this is the recipe, running. The same validated engine, in your browser — pick a scenario and an instance, choose one seed or many, and watch it search. No installation.":
-      "Iterated Greedy é uma metaheurística — uma receita para buscar, não uma fórmula fixa — e esta é a receita, rodando. O mesmo motor validado, no seu navegador — escolha um cenário e um problema, escolha uma seed ou várias, e veja a busca acontecer. Sem instalação.",
+    "Run · IG Studio": "Executar · IG Studio",
+    "The benchmark engine runs in the browser.": "O motor do benchmark roda no navegador.",
+    "Iterated Greedy is a metaheuristic, a general-purpose search procedure. The application below is the engine measured in the benchmark above, compiled to WebAssembly. The scenario, instance and seed set are selected in its own controls.":
+      "Iterated Greedy é uma metaheurística, ou seja, um procedimento de busca de uso geral. A aplicação abaixo é o motor medido no benchmark acima, compilado para WebAssembly. O cenário, a instância e o conjunto de seeds são selecionados nos controles da própria aplicação.",
     /* future */
     "Future · where it goes": "Futuro · para onde vai",
     "A tested baseline — and what comes next.": "Uma base testada — e o que vem a seguir.",
@@ -2873,7 +2823,6 @@ function onWinResize(fn){
     "Current evidence": "Evidência atual",
     "Research sequence": "Sequência de pesquisa",
     "Use IG at the depth you need": "Use o IG na profundidade que você precisa",
-    "The next step is not to add complexity. It is to prove where the current method is strong, then extend one assumption at a time.": "O próximo passo não é adicionar complexidade. É demonstrar onde o método atual é forte e depois ampliar uma hipótese por vez.",
     "The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.": "A mesma lógica de scheduling testada está disponível como experimento interativo, planilha de BI, notebook científico e código legível. Comece pela interface que responde à sua próxima pergunta.",
     "Implemented": "Implementado",
     "Measured": "Medido",
@@ -2883,10 +2832,9 @@ function onWinResize(fn){
     "Adaptive destruction": "Destruição adaptativa",
     "Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.": "Alcançou os melhores valores registrados em dois casos de estagnação; rampas agressivas prejudicaram casos mais granulares.",
     "GPU replica fleet": "Frota de réplicas em GPU",
-    "Exact pricing verified, but the fleet is still slower than one optimized Rust core; its value is breadth.": "A precificação exata foi verificada, mas a frota permanece mais lenta que um núcleo Rust otimizado; seu valor está na amplitude.",
     "Learned removal operators": "Operadores de remoção aprendidos",
     "Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.": "Precificação exata verificada em uma RTX 3090: 16× mais réplicas custam 22% mais tempo de parede com n=30, mas 4,2× com n=200. Um núcleo Rust otimizado ainda vence em velocidade numa única instância.",
-    "Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models.": "Operadores evoluídos sobrevivem a sementes novas, mas não a instâncias novas: +0,6 pp contra a remoção aleatória no treino, −1,3 pp fora dele, em três modelos.",
+    "Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models.": "Operadores evoluídos sobrevivem a seeds novas, mas não a instâncias novas: +0,6 pp contra a remoção aleatória no treino, −1,3 pp fora dele, em três modelos.",
     "Open directions, runnable": "Direções abertas, executáveis",
     "The two experimental rows above ship as a companion notebook instead of as assertions. It detects the runtime it lands on, re-verifies exact pricing against the CPU engine before reporting any timing, and recomputes every number on each run — including the ones that do not favour it.": "As duas linhas experimentais acima são entregues como um notebook companheiro, e não como afirmações. Ele detecta o ambiente em que roda, reverifica a precificação exata contra o motor de CPU antes de reportar qualquer tempo e recalcula cada número a cada execução — inclusive os que não o favorecem.",
     "A · Breadth": "A · Amplitude",
@@ -2895,7 +2843,6 @@ function onWinResize(fn){
     "B · Discovery": "B · Descoberta",
     "An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.": "Um laço evolutivo propõe operadores de remoção e reavalia o vencedor em sementes novas e instâncias reservadas. O backend offline dispensa chave de API e reproduz o resultado registrado: um ganho saudável no treino que vira derrota para a remoção aleatória uniforme quando a divisão é honesta.",
     "Read the factory": "Ler a fábrica",
-    "Training improvements did not generalize to held-out seeds and instances.": "Melhorias no treino não se generalizaram para sementes e instâncias reservadas.",
     "Question": "Pergunta",
     "Change": "Mudança",
     "Comparator": "Comparador",
@@ -2905,9 +2852,9 @@ function onWinResize(fn){
     "External validation": "Validação externa",
     "Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.": "Congelar o IG canônico e avaliá-lo no OAS/Sparrow antes de alterar a busca.",
     "How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?": "Como o IG canônico se compara às referências públicas OAS/Sparrow sob orçamentos equivalentes?",
-    "No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.": "Nenhuma mudança na busca. Adicionar adaptadores e congelar solver, sementes, orçamentos e protocolo.",
+    "No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.": "Nenhuma mudança na busca. Adicionar adaptadores e congelar solver, seeds, orçamentos e protocolo.",
     "Published baselines and exact solutions for small cases.": "Baselines publicados e soluções exatas para casos pequenos.",
-    "Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.": "Sementes pareadas, orçamentos fixos de tempo e avaliações, curvas anytime, tempo até o alvo e quantis de cauda.",
+    "Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.": "Seeds pareadas, orçamentos fixos de tempo e avaliações, curvas anytime, tempo até o alvo e quantis de cauda.",
     "Archived configurations, raw result tables, plots and exact small-case checks.": "Configurações arquivadas, tabelas brutas, gráficos e checagens exatas em casos pequenos.",
     "Reactive operators": "Operadores reativos",
     "Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.": "Preservar a remoção aleatória e testar um portfólio estocástico que se adapta pela melhoria por unidade de tempo.",
@@ -2915,7 +2862,7 @@ function onWinResize(fn){
     "Add a stochastic operator portfolio with a minimum exploration probability.": "Adicionar um portfólio estocástico com probabilidade mínima de exploração.",
     "Random removal, measured adaptive destruction and tuned ALNS/tabu variants.": "Remoção aleatória, destruição adaptativa medida e variantes ALNS/tabu ajustadas.",
     "Better time-to-target and tails without degradation on held-out instances.": "Melhor tempo até o alvo e melhores caudas sem degradar instâncias reservadas.",
-    "Operator traces, ablations, paired seeds and distribution-shift tests.": "Traços de operadores, ablações, sementes pareadas e testes de mudança de distribuição.",
+    "Operator traces, ablations, paired seeds and distribution-shift tests.": "Traços de operadores, ablações, seeds pareadas e testes de mudança de distribuição.",
     "Exact repair": "Reparo exato",
     "Let IG define a bounded neighbourhood and solve only that repair exactly.": "Deixar o IG delimitar uma vizinhança e resolver exatamente apenas esse reparo.",
     "When does exact local repair repay its solver overhead?": "Quando o reparo local exato compensa o custo adicional do solver?",
@@ -2934,21 +2881,21 @@ function onWinResize(fn){
     "Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.": "Começar por multi-start determinístico em CPU; a GPU deve superar um núcleo Rust otimizado no tempo até o alvo.",
     "Does parallel breadth improve wall-clock time rather than only evaluation count?": "A amplitude paralela melhora o tempo de parede, não apenas a contagem de avaliações?",
     "Add deterministic CPU multi-start first, then evaluate GPU replicas.": "Adicionar primeiro multi-start determinístico em CPU e depois avaliar réplicas em GPU.",
-    "One optimized Rust core with serial-equivalent per-seed results.": "Um núcleo Rust otimizado com resultados serialmente equivalentes por semente.",
+    "One optimized Rust core with serial-equivalent per-seed results.": "Um núcleo Rust otimizado com resultados serialmente equivalentes por seed.",
     "Lower time-to-target with reported wall time, energy and deterministic ordering.": "Menor tempo até o alvo com tempo de parede, energia e ordenação determinística reportados.",
-    "Replayable seeds, hardware disclosure, anytime curves and energy measurements.": "Sementes reproduzíveis, hardware declarado, curvas anytime e medições de energia.",
+    "Replayable seeds, hardware disclosure, anytime curves and energy measurements.": "Seeds reproduzíveis, hardware declarado, curvas anytime e medições de energia.",
     "Learned discovery": "Descoberta aprendida",
     "Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.": "Usar bandits ou LLMs para propor operadores estocásticos e ablações; nunca para precificar programações.",
     "Can learned proposals generalize beyond the instances that suggested them?": "As propostas aprendidas se generalizam além das instâncias que as sugeriram?",
     "Sandbox proposed operators while keeping the exact evaluator authoritative.": "Isolar os operadores propostos e manter o avaliador exato como autoridade.",
     "Simple hand-designed baselines under nested train/validation/test splits.": "Baselines simples projetados manualmente sob divisões aninhadas de treino, validação e teste.",
-    "Registered gains on fresh seeds and held-out distributions with a stated failure criterion.": "Ganhos registrados em sementes novas e distribuições reservadas, com critério de falha declarado.",
+    "Registered gains on fresh seeds and held-out distributions with a stated failure criterion.": "Ganhos registrados em seeds novas e distribuições reservadas, com critério de falha declarado.",
     "Sandboxed code, nested splits, ablations and distribution-shift tests.": "Código isolado, divisões aninhadas, ablações e testes de mudança de distribuição.",
     "01 · Browser": "01 · Navegador",
     "Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.": "Execute uma seed ou compare várias. Inspecione convergência, componentes do objetivo, programações completas e o problema fixo por trás de cada resultado.",
     "Open the Studio": "Abrir o Studio",
     "02 · BI workbook": "02 · Planilha BI",
-    "The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.": "O mesmo solver WebAssembly rodando dentro de uma planilha. Uma cópia privada é necessária uma vez para a autorização do Google, e o Apps Script não suporta múltiplas contas conectadas — entre com uma única conta, ou o painel abre com os controles desativados. O .xlsx para download é apenas um retrato analítico.",
+    "The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.": "O mesmo solver WebAssembly roda dentro de um painel de planilha. Uma cópia privada é necessária uma vez para a autorização do Google, e o Apps Script não suporta múltiplas contas conectadas — entre com uma única conta, ou o painel abre com os controles desativados. O .xlsx para download é apenas um retrato analítico.",
     "Create runnable copy": "Criar cópia executável",
     "View example": "Ver exemplo",
     "Download .xlsx": "Baixar .xlsx",
@@ -2968,32 +2915,30 @@ function onWinResize(fn){
     "Engineering ledger": "Registro de engenharia",
     "Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.": "Benchmarks, verificações exatas, comandos reproduzíveis, resultados mistos e o limite atual de cada implementação.",
     "Read results": "Ler resultados",
-    "Eight ways to search — and what each one actually does.": "Oito formas de buscar — e o que cada uma realmente faz.",
-    "First meet the methods that compete — what each one is really doing when it searches. Then put six of them to work on a scenario you choose, under a single shared evaluation budget, and watch who reaches the lowest cost.": "Primeiro conheça os métodos que competem — o que cada um realmente faz ao buscar. Depois coloque seis deles para trabalhar num cenário à sua escolha, sob um único orçamento de avaliações, e veja quem chega ao menor custo.",
-    "Test a real scenario — and watch every method search it.": "Teste um cenário real — e veja cada método buscar nele.",
+    "The eight methods of the 2015 study.": 'Os oito métodos do estudo de 2015.' ,
+    "Six methods on a generated instance.": 'Seis métodos sobre uma instância gerada.' ,
     "Comparison controls": "Controles da comparação",
-    "Terrain": "Terreno",
+    "Scenario": 'Cenário' ,
     "Balanced costs": "Custos equilibrados",
     "High setup costs": "Custos de setup altos",
     "Tight due dates": "Prazos apertados",
-    "Low outside-processing cost": "Custo de rejeição baixo",
+    "Low rejection cost": "Custo de rejeição baixo",
     "3D print farm": "Fazenda de impressão 3D",
     "Coffee roastery": "Torrefação de café",
     "Craft brewery": "Cervejaria artesanal",
-    "Field size": "Tamanho do campo",
-    "16 jobs — small": "16 jobs — pequeno",
-    "28 jobs — medium": "28 jobs — médio",
-    "44 jobs — large": "44 jobs — grande",
-    "60 jobs — extended": "60 jobs — estendido",
+    "Number of jobs": "Número de tarefas",
+    "16 jobs — small": "16 tarefas — pequeno",
+    "28 jobs — medium": "28 tarefas — médio",
+    "44 jobs — large": "44 tarefas — grande",
+    "60 jobs — extended": "60 tarefas — estendido",
     "Speed": "Velocidade",
     "evaluation budget": "orçamento de avaliações",
     "Current results": "Resultados atuais",
-    "Live comparison — cost per evaluation": "Comparação ao vivo — custo por avaliação",
+    "Best cost vs evaluations": 'Melhor custo vs avaliações' ,
     "Share": "Compartilhar",
-    "A sample of the solution space": "Uma amostra do espa\u00e7o de solu\u00e7\u00f5es",
+    "Sampled solution space": 'Espaço de soluções amostrado' ,
     "higher is cheaper \u2014 branches group related orders": "mais alto \u00e9 mais barato \u2014 os galhos agrupam ordens parecidas",
     "About 400 schedules are sampled and arranged as a tree: branches group related orders, height means lower cost, and the gold leaf is the best sample. Each arrow is one method's best-so-far \u2014 run the race and watch them climb. This samples the space; it does not enumerate it or identify the true optimum.": "Cerca de 400 programa\u00e7\u00f5es s\u00e3o amostradas e organizadas como uma \u00e1rvore: os galhos agrupam ordens parecidas, a altura representa menor custo e a folha dourada \u00e9 a melhor amostra. Cada seta \u00e9 o melhor-at\u00e9-agora de um m\u00e9todo \u2014 rode a corrida e veja-as subir. Isto amostra o espa\u00e7o; n\u00e3o o enumera nem identifica o \u00f3timo verdadeiro.",
-    "Meet the methods": "Conheça os métodos",
     "Eight ways to search — and how each one actually scored.": "Oito formas de buscar — e quanto cada uma realmente pontuou.",
     "Relative error against the recorded best known (%)": "Erro relativo em relação ao melhor conhecido registrado (%)",
     "Overview": "Visão geral",
@@ -3050,7 +2995,7 @@ function onWinResize(fn){
     "ARRIVALS (time runs →)": "CHEGADAS (o tempo corre →)",
     "accept": "aceita",
     "reject": "recusa",
-    "Play": "Tocar",
+    "Play": "Iniciar",
     "Pause": "Pausar",
     "Order 1 — solid value, plenty of room. Both policies accept.": "Pedido 1 — bom valor, espaço de sobra. Ambas as políticas aceitam.",
     "Order 2 — same family, no setup needed. Both accept.": "Pedido 2 — mesma família, sem setup. Ambas aceitam.",
@@ -3086,7 +3031,9 @@ function onWinResize(fn){
     "budget": "orçamento",
     "evaluations": "avaliações",
     "evals": "avaliações",
-    "Share": "Compartilhar",
+    "Copy link": "Copiar link",
+    "▶ Run": "▶ Executar",
+    "⏸ Pause": "⏸ Pausar",
     "✓ copied": "✓ copiado"
   };
   window.__t = function (k) { return (window.__lang === "pt" && DYN_PT[k]) || k; };
@@ -3095,8 +3042,8 @@ function onWinResize(fn){
 
   var current = "en";
   var META_DESC = {
-    en: "Iterated Greedy, explained interactively: the same jobs, a better order, and how a small algorithm finds it — live in one page.",
-    pt: "Iterated Greedy explicado interativamente: os mesmos jobs, uma ordem melhor, e como um algoritmo simples a encontra — ao vivo em uma página."
+    en: "Iterated Greedy for single-machine scheduling: interactive explanation with runnable demonstrations and benchmark results.",
+    pt: "Iterated Greedy para sequenciamento em máquina única: explicação interativa com demonstrações executáveis e resultados de benchmark."
   };
   var DOC_TITLE = {
     en: "Iterated Greedy — an interactive explanation",
@@ -3175,7 +3122,7 @@ function onWinResize(fn){
 
   const ALGOS = [
     { id: 'ig', col: 7, name: 'Iterated Greedy', short: 'IG', full: 'Iterated greedy with dynamic deadline', family: 'iterated greedy', stack: 'Excel VBA · i7 2.3 GHz',
-      desc: 'The featured algorithm: <strong>destroy</strong> d random jobs, <strong>reinsert</strong> every pending job at its best position (NEH-style) and try <strong>swaps</strong> between scheduled and rejected, keeping whatever lowers cost. Its key innovation is the <strong>dynamic deadline d̄ⱼ</strong>: a job is rejected the instant setup + processing + lateness exceed its rejection cost — and since setup depends on position, the deadline moves with the sequence (the break-even in the playground above).',
+      desc: '<strong>Destroy</strong> d random jobs, <strong>reinsert</strong> every pending job at its best position (NEH-style) and try <strong>swaps</strong> between scheduled and rejected, keeping whatever lowers cost. Its key innovation is the <strong>dynamic deadline d̄ⱼ</strong>: a job is rejected the instant setup + processing + lateness exceed its rejection cost — and since setup depends on position, the deadline moves with the sequence (the break-even shown in Fig. 03).',
       note: 'Best average on the 30 NCOS (0.02%) · found the best known in 38/44 instances · beat the literature’s best on NCOS_31 and STC_NCOS_32 · weak spot: 200-job STC (~21%).' },
     { id: 'pl', col: 0, name: 'MILP', full: 'Mixed-Integer Linear Programming', family: 'exact method', stack: 'CPLEX · 1 h per instance',
       desc: 'The exact mathematical model of the problem, given 1 hour of CPU per instance. When it finishes, it <strong>guarantees the optimum</strong> — but combinatorial explosion knocks it down early: from 75 jobs the errors exceed 80%, and on 200+ job instances it returns nothing at all.',
@@ -3184,16 +3131,16 @@ function onWinResize(fn){
       desc: 'The constructive of Thevenin et al.: walks the rejected jobs in random order and inserts each one <strong>at the cheapest position</strong> in the sequence; displaced jobs that break a constraint fall back to rejection. Fast and simple — the starting point of every other algorithm in this arena.',
       note: 'Alone it stays far from optimal (4.6% / 15.6%). It seeds everything else: Descent, Tabu and the AMAs start from it.' },
     { id: 'descent', col: 2, name: 'Descent', full: 'Local search (hill descent)', family: 'local search', stack: 'C++ · i7 2.93 GHz',
-      desc: 'Pure local search from the Greedy solution: explores the <strong>entire neighborhood</strong> — remove, add, reposition and swap jobs — accepting only improving moves. It converges fast… and stops at the first <strong>local minimum</strong>, with no way out.',
+      desc: 'Pure local search from the Greedy solution: explores the <strong>entire neighborhood</strong> — remove, add, reposition and swap jobs — accepting only improving moves. It converges fast and stops at the first <strong>local minimum</strong>.',
       note: 'Improves on Greedy but inherits the flaw: when no neighbor is better, the search is over.' },
     { id: 'tabu', col: 3, name: 'Tabu', full: 'Tabu search', family: 'tabu search', stack: 'C++ · i7 2.93 GHz',
-      desc: 'Descent with memory: recent moves enter a <strong>tabu list</strong> and stay forbidden for a few iterations. That forces the algorithm to accept worse moves and <strong>escape local minima</strong>. The standout of the 2015 paper — solves up to 500-job instances in seconds.',
+      desc: 'Descent with memory: recent moves enter a <strong>tabu list</strong> and stay forbidden for a few iterations. That forces the algorithm to accept worse moves and <strong>escape local minima</strong>. Solves up to 500-job instances in seconds.',
       note: 'The IG’s direct rival: 0.05% average on NCOS and sub-second times (in C++).' },
     { id: 'tabudiv', col: 4, name: 'TabuDiv', full: 'Tabu search + diversification', family: 'tabu search', stack: 'C++ · i7 2.93 GHz',
-      desc: 'Tabu with a scheduled shake-up: every 500 iterations, <strong>the 30% “oldest” jobs</strong> in the sequence are forcibly rejected, shoving the search into fresh regions of the solution space. Also carries special handling for instances with many identical jobs.',
-      note: 'Best of the six on setup instances (1.2% average) — diversification pays exactly where the problem gets hard.' },
+      desc: 'Tabu with a periodic perturbation: every 500 iterations, <strong>the 30% “oldest” jobs</strong> in the sequence are forcibly rejected, shoving the search into fresh regions of the solution space. Also carries special handling for instances with many identical jobs.',
+      note: 'Best of the six on setup instances (1.2% average).' },
     { id: 'ama', col: 5, name: 'AMAᴹᵉᵐ', full: 'Adaptive memetic algorithm', family: 'evolutionary', stack: 'C++ · i7 2.93 GHz',
-      desc: 'Evolutionary: keeps a <strong>population</strong> of solutions, selects the best as parents, breeds children by <strong>recombination</strong> and <strong>mutation</strong>, then intensifies each child with tabu search. Recombining two good sequences inherits good blocks from both — diversification born from genetics, not chance.',
+      desc: 'Evolutionary: keeps a <strong>population</strong> of solutions, selects the best as parents, breeds children by <strong>recombination</strong> and <strong>mutation</strong>, then intensifies each child with tabu search. Recombining two good sequences inherits good blocks from both.',
       note: 'Robust on the big setup instances (1.0% average), at the cost of far more machinery than the IG.' },
     { id: 'amasp', col: 6, name: 'AMAˢᵖ', full: 'Memetic, alternative recombination', family: 'evolutionary', stack: 'C++ · i7 2.93 GHz',
       desc: 'Identical to AMAᴹᵉᵐ except for the parents’ <strong>recombination procedure</strong>. In practice the two memetics tie: 0.08% vs 0.19% on NCOS and ~1% on STC.',
@@ -3203,7 +3150,7 @@ function onWinResize(fn){
   // derived statistics
   const ALGOS_PT = {
     ig: { full: 'Iterated greedy com prazo dinâmico', family: 'iterated greedy',
-      desc: 'O algoritmo em destaque: <strong>destruir</strong> d tarefas aleatórias, <strong>reinserir</strong> cada tarefa pendente na sua melhor posição (estilo NEH) e tentar <strong>trocas</strong> entre agendadas e rejeitadas, mantendo o que reduz custo. Sua inovação central é o <strong>prazo dinâmico d̄ⱼ</strong>: a tarefa é rejeitada no instante em que setup + processamento + atraso superam seu custo de rejeição — e como o setup depende da posição, o prazo se move com a sequência (o ponto de equilíbrio no playground acima).',
+      desc: '<strong>Destruir</strong> d tarefas aleatórias, <strong>reinserir</strong> cada tarefa pendente na sua melhor posição (estilo NEH) e tentar <strong>trocas</strong> entre agendadas e rejeitadas, mantendo o que reduz custo. Sua inovação central é o <strong>prazo dinâmico d̄ⱼ</strong>: a tarefa é rejeitada no instante em que setup + processamento + atraso superam seu custo de rejeição — e como o setup depende da posição, o prazo se move com a sequência (o ponto de equilíbrio mostrado na Fig. 03).',
       note: 'Melhor média nas 30 NCOS (0,02%) · achou o melhor conhecido em 38/44 instâncias · superou o melhor da literatura em NCOS_31 e STC_NCOS_32 · ponto fraco: STC de 200 tarefas (~21%).' },
     pl: { full: 'Programação Linear Inteira Mista', family: 'método exato',
       desc: 'O modelo matemático exato do problema, com 1 hora de CPU por instância. Quando termina, <strong>garante o ótimo</strong> — mas a explosão combinatória o derruba cedo: a partir de 75 tarefas os erros passam de 80%, e em instâncias de 200+ tarefas não retorna nada.',
@@ -3212,16 +3159,16 @@ function onWinResize(fn){
       desc: 'O construtivo de Thevenin et al.: percorre as tarefas rejeitadas em ordem aleatória e insere cada uma <strong>na posição mais barata</strong> da sequência; tarefas deslocadas que quebram restrição voltam à rejeição. Rápido e simples — o ponto de partida de todos os outros algoritmos da arena.',
       note: 'Sozinho fica longe do ótimo (4,6% / 15,6%). Semeia todo o resto: Descent, Tabu e os AMAs partem dele.' },
     descent: { full: 'Busca local (descida)', family: 'busca local',
-      desc: 'Busca local pura a partir da solução Greedy: explora a <strong>vizinhança inteira</strong> — remover, adicionar, reposicionar e trocar tarefas — aceitando só movimentos que melhoram. Converge rápido… e para no primeiro <strong>mínimo local</strong>, sem saída.',
+      desc: 'Busca local pura a partir da solução Greedy: explora a <strong>vizinhança inteira</strong> — remover, adicionar, reposicionar e trocar tarefas — aceitando só movimentos que melhoram. Converge rápido e para no primeiro <strong>mínimo local</strong>.',
       note: 'Melhora o Greedy mas herda a falha: sem vizinho melhor, a busca acabou.' },
     tabu: { full: 'Busca tabu', family: 'busca tabu',
-      desc: 'Descent com memória: movimentos recentes entram numa <strong>lista tabu</strong> e ficam proibidos por algumas iterações. Isso força aceitar movimentos piores e <strong>escapar de mínimos locais</strong>. O destaque do paper de 2015 — resolve instâncias de até 500 tarefas em segundos.',
+      desc: 'Descent com memória: movimentos recentes entram numa <strong>lista tabu</strong> e ficam proibidos por algumas iterações. Isso força aceitar movimentos piores e <strong>escapar de mínimos locais</strong>. Resolve instâncias de até 500 tarefas em segundos.',
       note: 'O rival direto do IG: 0,05% de média nas NCOS e tempos sub-segundo (em C++).' },
     tabudiv: { full: 'Busca tabu + diversificação', family: 'busca tabu',
-      desc: 'Tabu com chacoalhada programada: a cada 500 iterações, <strong>as 30% de tarefas mais “antigas”</strong> da sequência são rejeitadas à força, empurrando a busca para regiões novas do espaço. Também trata instâncias com muitas tarefas idênticas.',
-      note: 'Melhor dos seis nas instâncias com setup (1,2% de média) — a diversificação paga exatamente onde o problema endurece.' },
+      desc: 'Tabu com perturbação periódica: a cada 500 iterações, <strong>as 30% de tarefas mais “antigas”</strong> da sequência são rejeitadas à força, empurrando a busca para regiões novas do espaço. Também trata instâncias com muitas tarefas idênticas.',
+      note: 'Melhor dos seis nas instâncias com setup (1,2% de média).' },
     ama: { full: 'Algoritmo memético adaptativo', family: 'evolutivo',
-      desc: 'Evolutivo: mantém uma <strong>população</strong> de soluções, seleciona as melhores como pais, gera filhos por <strong>recombinação</strong> e <strong>mutação</strong>, e intensifica cada filho com busca tabu. Recombinar duas boas sequências herda bons blocos de ambas — diversificação nascida da genética, não do acaso.',
+      desc: 'Evolutivo: mantém uma <strong>população</strong> de soluções, seleciona as melhores como pais, gera filhos por <strong>recombinação</strong> e <strong>mutação</strong>, e intensifica cada filho com busca tabu. A recombinação de duas boas sequências herda bons blocos de ambas.',
       note: 'Robusto nas grandes instâncias com setup (1,0% de média), ao custo de muito mais maquinário que o IG.' },
     amasp: { full: 'Memético, recombinação alternativa', family: 'evolutivo',
       desc: 'Idêntico ao AMAᴹᵉᵐ exceto pelo <strong>procedimento de recombinação</strong> dos pais. Na prática os dois meméticos empatam: 0,08% vs 0,19% nas NCOS e ~1% nas STC.',
@@ -3526,9 +3473,9 @@ function onWinResize(fn){
         if (accept) {
           ctx.strokeStyle = cssVar('--good'); ctx.lineWidth = 2;
           rrect(ctx, x0 - 8, y - 8, 6 * (BW + GAP) + 10, BH + 16, 8); ctx.stroke();
-          pill(ctx, W - 250, 10, arenaText('candidate 229 < protected 243 — keep ✓', 'candidato 229 < titular 243 — fica ✓'), cssVar('--good'));
+          pill(ctx, W - 250, 10, arenaText('candidate 229 < protected 243 — keep ✓', 'candidato 229 < protegido 243 — fica ✓'), cssVar('--good'));
         } else {
-          pill(ctx, W - 250, 10, arenaText('Δ +6 vs protected — revert', 'Δ +6 vs titular — reverte'), cssVar('--late'));
+          pill(ctx, W - 250, 10, arenaText('Δ +6 vs protected — revert', 'Δ +6 vs protegido — reverte'), cssVar('--late'));
         }
         ctx.restore();
       }
@@ -4669,7 +4616,7 @@ function onWinResize(fn){
   $('btnCopyRace').addEventListener('click', () => {
     navigator.clipboard && navigator.clipboard.writeText(location.href).then(() => {
       $('btnCopyRace').textContent = __t('✓ copied');
-      setTimeout(() => { $('btnCopyRace').textContent = __t('Share'); }, 1400);
+      setTimeout(() => { $('btnCopyRace').textContent = __t('Copy link'); }, 1400);
     });
   });
   $('rcNew').addEventListener('click', newRace);
