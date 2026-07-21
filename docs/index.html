@@ -294,6 +294,8 @@ button.btn.primary:hover{background:#9c4b28;color:#fdf8ef}
 
 /* ---------- demo 1 rails + gantt ---------- */
 .rail-block{margin-top:11px}
+.rail-block.pending{visibility:hidden}
+.rail-block.pending .gantt-wrap{min-height:90px}
 .rail-best{border-left:3px solid var(--sage);padding:10px 12px 4px;background:rgba(122,139,111,.07);border-radius:8px}
 .rail-best .rail-title .tag{color:var(--sage)}
 .rail-rank{margin-left:auto;font:700 12px/1 var(--mono);color:var(--sage)}
@@ -565,7 +567,7 @@ footer a{color:var(--terra-ink)}
   .site-head .badge { display: none; }
   /* Movements flow one after another in a single scroll */
   section.movement { padding: 0; scroll-margin-top: var(--sm, 118px); border-top: 1px solid var(--rule); }
-  .movement-head { max-width: 1120px; margin: 0 auto; padding: 44px 20px 2px; }
+  .movement-head { padding: 44px 0 2px; }
   .movement-head .m-kick { font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--brass-ink); margin-bottom: 10px; }
   .movement-head h2.m-title { font: 600 clamp(26px,2.9vw,38px)/1.12 var(--serif); letter-spacing: .2px; margin-bottom: 10px; }
   .movement-head h2.m-title em { font-style: normal; color: var(--terra); }
@@ -581,14 +583,17 @@ footer a{color:var(--terra-ink)}
   #studioFigure { padding: 18px 0 0; overflow: hidden; }
   #studioFigure .fig-cap { padding: 0 18px; }
   #studioFigure .fig-cap a { color: var(--terra); text-decoration: none; border-bottom: 1px solid currentColor; }
-  .studio-frame { display: block; width: 100%; height: 84vh; min-height: 620px; border: 0; border-top: 1px solid var(--rule); background: var(--card); }
+  /* Bounded by the window, not by a fixed vh: at 84vh the frame's bottom edge
+     and its caption could not be on screen together, which is what made the
+     Studio's own controls read as out of frame. */
+  .studio-frame { display: block; width: 100%; height: min(78vh, calc(100vh - var(--sm) - 28px)); min-height: 520px; border: 0; border-top: 1px solid var(--rule); background: var(--card); }
   @media (max-width: 760px) {
     #studioFigure { padding: 14px 0 0; }
     #studioFigure .fig-cap { padding: 0 12px; }
     .studio-frame { height: min(72vh, calc(100vh - var(--sm) - 28px)); min-height: 420px; }
   }
   /* Hero intro block */
-  .ig-hero { max-width: 1120px; margin: 0 auto; padding: 44px 20px 8px; }
+  .ig-hero { padding: 44px 0 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
   .ig-hero h2 { font: 600 clamp(30px, 3.4vw, 46px)/1.08 var(--serif); letter-spacing: .2px; max-width: 20ch; margin-bottom: 16px; }
   .ig-hero h2 em { font-style: normal; color: var(--terra); }
@@ -687,7 +692,6 @@ footer a{color:var(--terra-ink)}
     <div class="rail-block" id="railBlockA">
       <div class="rail-head">
         <span class="rail-title">Rail A <span class="tag" id="tagA">job order J1–J5</span></span>
-        <button class="btn" id="shuffleA" type="button">Shuffle A</button>
       </div>
       <div class="chips-row" id="railA" aria-label="Order A"></div>
       <div class="gantt-wrap"><svg class="gantt" id="ganttA" role="img" aria-label="Gantt timeline for order A"></svg></div>
@@ -702,7 +706,6 @@ footer a{color:var(--terra-ink)}
     <div class="rail-block" id="railBlockB">
       <div class="rail-head">
         <span class="rail-title">Rail B <span class="tag" id="tagB">grouped by family</span></span>
-        <button class="btn" id="shuffleB" type="button">Shuffle B</button>
       </div>
       <div class="chips-row" id="railB" aria-label="Order B"></div>
       <div class="gantt-wrap"><svg class="gantt" id="ganttB" role="img" aria-label="Gantt timeline for order B"></svg></div>
@@ -714,7 +717,7 @@ footer a{color:var(--terra-ink)}
       <div class="costcomp" id="ccB" aria-hidden="true"></div>
     </div>
 
-    <div class="rail-block rail-best" id="railBlockC" hidden>
+    <div class="rail-block rail-best pending" id="railBlockC">
       <div class="rail-head">
         <span class="rail-title">Best order <span class="tag">found by checking all 120</span></span>
         <span class="rail-rank" id="railCrank"></span>
@@ -731,10 +734,6 @@ footer a{color:var(--terra-ink)}
 
     <p class="costcomp-cap">Time runs left to right and each timeline ends at t. The bar below it shows setup plus weighted tardiness on a scale shared by all rails, and its length is the total Σ.</p>
 
-    <div class="controls">
-      <button class="btn primary" id="eval120" type="button">Evaluate all 120 orders</button>
-
-    </div>
     <div class="progress-track" aria-hidden="true"><div class="progress-fill" id="evalProg"></div></div>
     <p class="status-line" id="d1status" aria-live="polite"></p>
   </figure>
@@ -748,7 +747,7 @@ footer a{color:var(--terra-ink)}
   <h2 class="section-title">The time needed to enumerate every order.</h2>
   <p class="lede">Enumerating a 28-job instance at 10⁹ orders per second takes longer than the age of the universe.</p>
 
-  <figure class="demo">
+  <figure class="demo" id="d2figure">
     <figcaption class="fig-cap">
       <span><span class="fig-no">Fig. 02</span> <span class="fig-name">Orders (n!) vs n</span></span>
     </figcaption>
@@ -988,19 +987,17 @@ footer a{color:var(--terra-ink)}
   </nav>
 </section>
 
-<section class="movement" id="m-run">
-  <div class="movement-head">
-    <p class="m-kick">Run · IG Studio</p>
-    <h2 class="m-title">The benchmark engine runs in the browser.</h2>
-    <p class="m-lede">Iterated Greedy is a metaheuristic, a general-purpose search procedure. The application below is the engine measured in the benchmark above, compiled to WebAssembly. The scenario, instance and seed set are selected in its own controls.</p>
-  </div>
+<section class="section" id="m-run">
+  <p class="kicker"><span class="fig">IG Studio</span></p>
+  <h2 class="section-title">The benchmark engine runs in the browser.</h2>
+  <p class="lede">Iterated Greedy is a metaheuristic, a general-purpose search procedure. The application below is the engine measured in the benchmark above, compiled to WebAssembly. The scenario, instance and seed set are selected in its own controls.</p>
   <figure class="demo" id="studioFigure">
-    <figcaption class="fig-cap">
+  <figcaption class="fig-cap">
       <span><span class="fig-no">Fig. 06</span> <span class="fig-name">IG Studio</span></span>
       <span>on small screens the frame scrolls internally</span>
       <a href="studio-app.html" target="_blank" rel="noopener">Open in a tab</a>
-    </figcaption>
-    <iframe class="studio-frame" src="studio-app.html" title="IG Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
+  </figcaption>
+  <iframe class="studio-frame" src="studio-app.html" title="IG Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
   </figure>
 </section>
 
@@ -1520,11 +1517,23 @@ function makeGate(elem, onChange){
       state.onscreen = !!(en[0] && en[0].isIntersecting);
       recompute();
     }, { threshold:0.02 }).observe(elem);
-  } else { state.onscreen = true; }
+  } else { state.onscreen = true; recompute(); }
   document.addEventListener('visibilitychange', function(){ recompute(); });
-  // kick once so demos render their initial frame even before scrolling
-  state.onscreen = true; recompute();
   return state;
+}
+
+/* --- one-shot entry trigger: fires the first time a figure reaches the fold ---
+   A ratio threshold cannot do this job. #d3figure is taller than a phone
+   viewport, so intersectionRatio never reaches a usable value and a ratio-gated
+   start would never fire on mobile. The rootMargin form fires when the top edge
+   crosses 80% of viewport height, whatever the element's height. */
+function onFirstView(elem, fn){
+  if(!elem) return;
+  if(!('IntersectionObserver' in window)){ fn(); return; }
+  var io = new IntersectionObserver(function(en){
+    if(en[0] && en[0].isIntersecting){ io.disconnect(); fn(); }
+  }, { threshold:0, rootMargin:'0px 0px -20% 0px' });
+  io.observe(elem);
 }
 
 /* --- job chip markup (family-tinted, letter badge, processing length) --- */
@@ -1704,7 +1713,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
     ['A', 'B', 'C'].forEach(function(p){
       var ev = lastEv[p];
       if(!ev) return;
-      if(p === 'C' && $('#railBlockC').hidden) return;
+      if(p === 'C' && $('#railBlockC').classList.contains('pending')) return;
       max = Math.max(max, ev.setup + ev.tard);
     });
     ['A', 'B', 'C'].forEach(function(p){ if(lastEv[p]) renderCostComp(p, lastEv[p], max); });
@@ -1723,25 +1732,14 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
     updateRail(orderA, $('#ganttA'), 'A', animate);
     updateRail(orderB, $('#ganttB'), 'B', animate);
   }
-  $('#shuffleA').addEventListener('click', function(){
-    shuffleRng(rng, orderA); updateRail(orderA, $('#ganttA'), 'A', true);
-    var tagA = $('#tagA'); if(tagA) tagA.remove(); /* the label describes the initial order only */
-    setStatus(L('Rail A shuffled to ', 'Trilho A embaralhado para ') + orderA.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
-  });
-  $('#shuffleB').addEventListener('click', function(){
-    shuffleRng(rng, orderB); updateRail(orderB, $('#ganttB'), 'B', true);
-    var tagB = $('#tagB'); if(tagB) tagB.remove();
-    setStatus(L('Rail B shuffled to ', 'Trilho B embaralhado para ') + orderB.map(function(i){ return 'J' + (i + 1); }).join(' ') + '.');
-  });
   function setStatus(html){ $('#d1status').innerHTML = html; }
   function L(en, pt){ return window.__lang === 'pt' ? pt : en; } /* keyed bilingual picker */
 
   /* --- exact sweep over all 120 permutations, in animation slices --- */
   var sweeping = false;
-  $('#eval120').addEventListener('click', function(){
+  function runSweep(instant){
     if(sweeping) return;
     sweeping = true;
-    var btn = $('#eval120'); btn.disabled = true;
     var perms = permutations([0, 1, 2, 3, 4]);
     var totals = new Array(perms.length), i = 0, best = Infinity, worst = -Infinity, bestPerm = null;
     var prog = $('#evalProg');
@@ -1749,7 +1747,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
     function costOf(s){ var e = evaluate(DEMO1, s); return e.setup + e.tard; }
     function slice(){
       var n = 0;
-      while(i < perms.length && n < (REDUCED ? 120 : 5)){ // ~24 frames at 1×
+      while(i < perms.length && n < ((instant || REDUCED) ? 120 : 5)){ // ~24 frames at 1×
         var c = costOf(perms[i]);
         totals[i] = c;
         if(c < best){ best = c; bestPerm = perms[i].slice(); }
@@ -1765,7 +1763,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
       var rA = 1 + totals.filter(function(c){ return c < cA; }).length;
       var rB = 1 + totals.filter(function(c){ return c < cB; }).length;
       if(bestPerm){
-        $('#railBlockC').hidden = false;
+        $('#railBlockC').classList.remove('pending');
         updateRail(bestPerm, $('#ganttC'), 'C', true);
         $('#railCrank').textContent = 'Σ ' + best + ' · rank 1 / 120';
       }
@@ -1773,15 +1771,23 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
         'Rail A (Σ ' + cA + ') ranks <b>' + rA + '/120</b> · Rail B (Σ ' + cB + ') ranks <b>' + rB + '/120</b>.',
         'Todas as <b>120</b> ordens avaliadas exatamente. A <b>melhor ordem possível</b> custa Σ <b>' + best + '</b>, mostrada acima. ' +
         'Trilho A (Σ ' + cA + ') em <b>' + rA + '/120</b> · Trilho B (Σ ' + cB + ') em <b>' + rB + '/120</b>.'));
-      btn.disabled = false; sweeping = false;
+      sweeping = false;
       setTimeout(function(){ prog.style.width = '0%'; }, 900);
     }
-    requestAnimationFrame(slice);
-  });
+    if(instant){ while(i < perms.length) slice(); } else requestAnimationFrame(slice);
+  }
 
   /* initial paint (no motion on load) + repaint on resize-independent gate */
   refresh(false);
-  makeGate($('#d1figure'), function(active){ if(active) refresh(true); });
+  var d1Played = false;
+  function d1Reveal(){
+    if(d1Played) return; d1Played = true;
+    updateRail(orderA, $('#ganttA'), 'A', true);
+    setTimeout(function(){ updateRail(orderB, $('#ganttB'), 'B', true); }, 1400);
+    setTimeout(function(){ runSweep(false); }, 2900);
+  }
+  if(REDUCED){ d1Played = true; runSweep(true); }
+  else onFirstView($('#d1figure'), d1Reveal);
   addEventListener('langchange', function(){ refresh(false); }); /* re-render the bilingual 'ends at t=' marker */
   /* H5 — right-edge fade on small screens, removed once the user scrolls a gantt */
   $all('.gantt-wrap').forEach(function(w){
@@ -1863,8 +1869,31 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
     $('#d2status').innerHTML = d2status(n);
   }
   slider.addEventListener('input', onSlide);
-  paint(28, cur.log, cur.plans);
-  $('#d2status').innerHTML = d2status(28);
+
+  /* The curve runs itself on arrival: n climbs 3 -> 28 once, and the first
+     touch of the slider takes over. The slider stays because the analogy table
+     stops at n = 28 and it is the only way to reach 29 and 30 -- and the only
+     cheap proof the counts are computed rather than written down. */
+  var ramped = false, rampTw = null;
+  function stopRamp(){ if(rampTw){ rampTw.cancel(); rampTw = null; } ramped = true; }
+  slider.addEventListener('input', stopRamp, { once:true });
+  function rampToN(){
+    if(ramped) return; ramped = true;
+    var fromN = 3, toN = 28;
+    rampTw = tween({ dur:2200, update:function(e){
+      var n = Math.round(fromN + (toN - fromN) * e);
+      slider.value = n;
+      paint(n, Math.log10(factorial(n)), Math.log10(planCount(n)));
+      $('#d2status').innerHTML = d2status(n);
+      if(e >= 1){ cur = { log:Math.log10(factorial(toN)), plans:Math.log10(planCount(toN)) }; rampTw = null; }
+    }});
+  }
+
+  slider.value = 3;
+  paint(3, Math.log10(factorial(3)), Math.log10(planCount(3)));
+  $('#d2status').innerHTML = d2status(3);
+  if(REDUCED){ ramped = true; slider.value = 28; paint(28, cur.log, cur.plans); $('#d2status').innerHTML = d2status(28); }
+  else onFirstView(document.getElementById('d2figure') || slider.closest('figure'), rampToN);
   addEventListener('langchange', function(){ $('#d2status').innerHTML = d2status(parseInt(slider.value, 10)); });
 })();
 </script>
@@ -2726,15 +2755,12 @@ function onWinResize(fn){
     "due date": "prazo",
     "Rail A": "Trilho A",
     "job order J1–J5": 'ordem J1–J5' ,
-    "Shuffle A": "Embaralhar A",
     "Rail B": "Trilho B",
     "grouped by family": "a ordem agrupada por família",
-    "Shuffle B": "Embaralhar B",
     "Best order": "Melhor ordem",
     "found by checking all 120": "encontrada testando todas as 120",
     "setup cost": "custo de setup",
     "tardiness cost": "custo de atraso",
-    "Evaluate all 120 orders": "Avaliar todas as 120 ordens",
     /* demo 2 */
     "The catch": "A pegadinha",
     "The time needed to enumerate every order.": 'O tempo necessário para enumerar todas as ordens.' ,
