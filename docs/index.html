@@ -565,6 +565,8 @@ footer a{color:var(--terra-ink)}
 .oa-read .g.p{background:var(--f2-bg);color:var(--steel)}
 .oa-read .g.b{background:var(--card);color:var(--ink-soft);border:1px solid var(--rule)}
 @media(max-width:560px){.oa-sc{grid-template-columns:1fr}}
+.f-ev a{color:var(--terra);text-decoration:none;border-bottom:1px solid rgba(176,86,47,.38)}
+.f-ev a:hover{border-bottom-color:var(--terra)}
 
 </style>
 <style id="ig-story-proto">
@@ -1028,7 +1030,7 @@ footer a{color:var(--terra-ink)}
   </div>
   <div class="m-placeholder">
     <h3 class="f-head">Current evidence</h3>
-    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models.</p></div></div>
+    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models. <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md#the-llm-heuristic-factory" target="_blank" rel="noopener">See the campaign</a></p></div></div>
 
     <h3 class="f-head">The next problem</h3>
     <p class="f-lede">The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.</p>
@@ -2672,6 +2674,7 @@ function onWinResize(fn){
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
   var EN2PT = {
+    "See the campaign": "Ver a campanha",
     /* online order acceptance (future) */
     "The next problem": "O próximo problema",
     "The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.": "O benchmark estático está praticamente fechado — métodos exatos hoje provam otimalidade nele, então uma metaheurística só pode empatar. O problema aberto fica um passo antes e mais perto de um chão de fábrica real: pedidos chegam ao longo do tempo, cada tempo de processamento e prazo é só uma estimativa, e cada aceitar-ou-recusar é comprometido na hora, antes de o futuro ser conhecido.",
