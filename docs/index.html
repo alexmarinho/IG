@@ -2311,7 +2311,19 @@ function onWinResize(fn){
   }
 
   /* ---- small DOM utilities ---- */
+  /* Autoplay shows the loop once, then hands over. Measured end to end, this
+     figure takes 1 min 58 s at 1x to converge; committing an arriving reader to
+     that is worse than the Play button it replaced. It pauses when iteration 2
+     opens, so construction and one complete destroy-rebuild-decide cycle have
+     been seen. Restart and Play stay live for anyone who wants the rest. */
+  var autoPauseAfterIter = 0;
   function setPhase(title, sub){
+    if(autoPauseAfterIter && iter > autoPauseAfterIter && player.playing){
+      autoPauseAfterIter = 0;
+      setPlaying(false);
+      statusEl.innerHTML = L('Paused after one full iteration. Play continues to convergence.',
+        'Pausado após uma iteração completa. Play continua até a convergência.');
+    }
     phaseEl.innerHTML = '';
     phaseEl.appendChild(el('span', 'ph-no', 'PHASE'));
     phaseEl.appendChild(document.createTextNode(title + (sub ? ' — ' + sub : '')));
@@ -2709,8 +2721,8 @@ function onWinResize(fn){
   }
 
   /* ---- controls ---- */
-  btnPlay.addEventListener('click', function(){ setPlaying(!player.playing); });
-  btnStep.addEventListener('click', function(){ setPlaying(false); stepOnce(); });
+  btnPlay.addEventListener('click', function(){ autoPauseAfterIter = 0; setPlaying(!player.playing); });
+  btnStep.addEventListener('click', function(){ autoPauseAfterIter = 0; setPlaying(false); stepOnce(); });
   btnRestart.addEventListener('click', function(){ reset(); });
   speedSeg.addEventListener('click', function(ev){
     var b = ev.target.closest('button[data-speed]');
@@ -2793,6 +2805,7 @@ function onWinResize(fn){
       startIO.disconnect();
       if(autoStarted || genDone) return;
       autoStarted = true;
+      autoPauseAfterIter = 1;   /* only the automatic start is capped */
       setPlaying(true);
     }, { threshold:0.02, rootMargin:'0px 0px -20% 0px' });
     startIO.observe(fig);
