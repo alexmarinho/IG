@@ -217,7 +217,6 @@
     --card-fade:rgba(255,255,255,0);
   }
   .head-utils,.anchor-nav,.read-progress,.skip-link{display:none!important}
-  .studio-frame{border:1px solid var(--rule)}
 }
 
 /* ============ theme cross-fade — armed only during a switch ============ */
@@ -269,13 +268,17 @@ h1.brand em{font-style:normal;color:var(--terra)}
 
 
 /* ---- Comparison lab: controls, standings, stage ---- */
+/* The 272px console + fluid stage is the cockpit shape, not one lab's identity:
+   it moved from #m-racelab to .lab-cockpit so #m-runlab shares it verbatim. */
+.lab-cockpit{
+  display:grid;grid-template-columns:272px minmax(0,1fr);gap:16px;margin-top:10px;align-items:start;
+}
+@media(max-width:900px){.lab-cockpit{grid-template-columns:1fr}}
 #m-racelab{
   --surface-1:var(--card); --ink-2:var(--ink-soft); --fam-c:var(--brass);
   /* --muted, --baseline, --grid and the six --race-* now live at :root, so the
      series keep their meaning in both themes without a per-theme copy here. */
-  display:grid;grid-template-columns:272px minmax(0,1fr);gap:16px;margin-top:10px;align-items:start;
 }
-@media(max-width:900px){#m-racelab{grid-template-columns:1fr}}
 .lab-console{display:flex;flex-direction:column;gap:12px;min-width:0}
 .lab-card{background:var(--card);border:1px solid var(--rule);border-radius:10px;padding:13px 14px}
 .lab-card h3{font:600 15px/1.2 var(--serif);margin:0 0 10px}
@@ -472,15 +475,16 @@ figcaption.fig-cap{
 figcaption.fig-cap .fig-no{color:var(--terra);font-weight:700}
 figcaption.fig-cap .fig-name{color:var(--ink);letter-spacing:.06em}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 4px}
-button.btn{
+button.btn,a.btn{
   font:600 12.5px/1 var(--sans);color:var(--ink);
   background:var(--card);border:1px solid var(--edge);border-radius:7px;
   padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
 }
-button.btn:hover{border-color:var(--terra);color:var(--terra)}
+button.btn:hover,a.btn:hover{border-color:var(--terra);color:var(--terra)}
+a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 button.btn:disabled{opacity:.45;cursor:not-allowed}
-button.btn.primary{background:var(--terra);border-color:var(--terra);color:var(--on-accent)}
-button.btn.primary:hover{background:var(--terra-ink);color:var(--on-accent)}
+button.btn.primary,a.btn.primary{background:var(--terra);border-color:var(--terra);color:var(--on-accent)}
+button.btn.primary:hover,a.btn.primary:hover{background:var(--terra-ink);color:var(--on-accent)}
 
 .seg{display:inline-flex;border:1px solid var(--edge);border-radius:7px;overflow:hidden}
 .seg button{
@@ -782,6 +786,8 @@ footer a{color:var(--terra-ink)}
 .oa-read .g.p{background:var(--f2-bg);color:var(--steel)}
 .oa-read .g.b{background:var(--card);color:var(--ink-soft);border:1px solid var(--rule)}
 @media(max-width:560px){.oa-sc{grid-template-columns:1fr}}
+.f-ev a{color:var(--terra);text-decoration:none;border-bottom:1px solid rgba(176,86,47,.38)}
+.f-ev a:hover{border-bottom-color:var(--terra)}
 
 </style>
 <style id="ig-story-proto">
@@ -800,20 +806,77 @@ footer a{color:var(--terra-ink)}
   .m-links { display: flex; flex-wrap: wrap; gap: 8px; }
   .m-links a { display: inline-block; padding: 10px 15px; border: 1px solid var(--edge); border-radius: 7px; background: var(--card); color: var(--terra); text-decoration: none; font: 700 12px/1 var(--sans); }
   .m-links a:hover { background: var(--terra); border-color: var(--terra); color: var(--on-accent); }
-  /* The Studio sits in figure.demo like every other interactive block. Side
-     padding is dropped so the embedded app keeps the full column width. */
-  #studioFigure { padding: 18px 0 0; overflow: hidden; }
-  #studioFigure .fig-cap { padding: 0 18px; }
-  #studioFigure .fig-cap a { color: var(--terra); text-decoration: none; border-bottom: 1px solid currentColor; }
-  /* Bounded by the window, not by a fixed vh: at 84vh the frame's bottom edge
-     and its caption could not be on screen together, which is what made the
-     Studio's own controls read as out of frame. */
-  .studio-frame { display: block; width: 100%; height: min(78vh, calc(100vh - var(--sm) - 28px)); min-height: 520px; border: 0; border-top: 1px solid var(--rule); background: var(--card); }
+  /* ---- In-browser run (#m-run) ----
+     Layout and state only. Every colour is a page token and every control is a
+     component the page already has: .btn, .btn.tiny, .seg, .lab-field select,
+     .standings, .fact, figure.demo, .lab-cockpit. The section has ONE vertical
+     scroll: nothing in it is a scrollport. */
+
+  /* Its figures scale with the column they sit in. svg.gantt cannot be reused:
+     its min-width:520px would put a horizontal scrollport inside the section. */
+  svg.run-svg { display: block; width: 100%; height: auto; margin-top: 8px; }
+
+  /* A console field label is uppercase; a value read out beneath it is not. */
+  .lab-field .readouts { text-transform: none; letter-spacing: 0; margin-top: 4px; }
+
+  /* The answer band: the page's own .fact tiles at answer size, lifted one step
+     above the --card surface of the figure.demo they sit on. */
+  .run-answer { margin: 0 0 4px; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); }
+  .run-answer .fact { background: var(--raise); }
+  .run-answer .fact .val { font-size: clamp(23px, 3.1vw, 32px); line-height: 1.08; }
+  .run-answer .fact .val small { font-size: 12.5px; display: block; margin-top: 6px; letter-spacing: .04em; }
+
+  /* A .standings list used as a table: grid columns, page colours, no scrollport. */
+  /* .standings sets display:flex, which outranks the UA rule for [hidden]: the
+     drill-down list needs its own, or it can never be closed. */
+  .run-rows[hidden] { display: none; }
+  .run-rows { margin-top: 6px; }
+  .run-rows li { display: grid; gap: 6px 10px; align-items: baseline; padding: 5px 7px; font-size: 12px; }
+  .run-rows li > span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .run-rows .num { font: 600 11.5px/1.3 var(--mono); text-align: right; color: var(--ink); }
+  .run-rows .dim { color: var(--ink-soft); }
+  .run-rows .key { font-weight: 600; }
+  .run-rows li.run-head { background: transparent; cursor: default; border-radius: 0; border-bottom: 1px solid var(--rule); padding-bottom: 7px; }
+  .run-rows li.run-head:hover { background: transparent; }
+  .run-rows li.run-head > span { font: 700 9.5px/1.3 var(--sans); letter-spacing: .1em; text-transform: uppercase; color: var(--ink-soft); }
+  .run-rows li.sel { background: var(--hi-bg); box-shadow: inset 0 0 0 1px var(--brass); }
+  .run-meth li { grid-template-columns: 22px 12px minmax(0, 1fr) 84px 64px 78px; }
+  .run-methref li { grid-template-columns: 22px 12px minmax(0, 1fr) 84px minmax(0, 1.35fr); }
+  .run-seedrows li { grid-template-columns: 64px 84px 64px minmax(0, 1fr); }
+  .run-stats li { grid-template-columns: minmax(0, 1fr) 100px minmax(0, .9fr); cursor: default; }
+  .run-stats li:hover { background: transparent; }
+  .run-hist { display: inline-flex; align-items: flex-end; align-self: center; gap: 2px; height: 20px; }
+  .run-hist i { width: 8px; background: var(--steel); border-radius: 1px; display: block; }
   @media (max-width: 760px) {
-    #studioFigure { padding: 14px 0 0; }
-    #studioFigure .fig-cap { padding: 0 12px; }
-    .studio-frame { height: min(72vh, calc(100vh - var(--sm) - 28px)); min-height: 420px; }
+    .run-meth li { grid-template-columns: 22px 12px minmax(0, 1fr) 78px; }
+    .run-methref li { grid-template-columns: 22px 12px minmax(0, 1fr) 78px; }
+    .run-seedrows li { grid-template-columns: 64px minmax(0, 1fr); }
+    .run-stats li { grid-template-columns: minmax(0, 1fr) 92px; }
+    .run-rows li > span.drop { display: none; }
   }
+
+  /* Two columns inside a panel, collapsing to one; and the hairline that
+     separates one block of a card from the next. */
+  .run-two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 4px 22px; }
+  @media (max-width: 820px) { .run-two { grid-template-columns: 1fr; } }
+  .run-block { padding-top: 13px; margin-top: 13px; border-top: 1px solid var(--rule); }
+  .run-h { font: 700 10px/1.4 var(--sans); letter-spacing: .09em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 2px; }
+  .run-file { font: 500 11px/1.5 var(--mono); color: var(--ink-soft); margin-bottom: 9px; }
+  #runProblem .lede { margin-bottom: 0; }
+  #runProblem .fact-grid { margin: 13px 0 0; }
+
+  /* The honest note is a statement ON the figure, not a caption under it, so it
+     takes the page's warning surface rather than muted body text. */
+  .run-note { background: var(--warn-bg); border: 1px solid var(--warn-edge); border-radius: 9px; padding: 10px 13px; margin: 6px 0 2px; font: 500 11.5px/1.55 var(--sans); color: var(--ink-soft); }
+  .run-note b { color: var(--ink); font-weight: 700; }
+  .run-note a { color: var(--terra-ink); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+  /* One colour key for the four cost terms, read by the legend, the readouts and
+     the decomposition tracks. */
+  .run-legend { display: flex; flex-wrap: wrap; gap: 5px 16px; font-size: 11px; color: var(--ink-soft); margin: 6px 0 2px; }
+  .run-legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .run-sw { width: 13px; height: 9px; border-radius: 2px; display: inline-block; flex: none; margin-right: 5px; vertical-align: middle; }
+  .run-legend .run-sw { margin-right: 0; }
   /* Hero intro block */
   .ig-hero { padding: 44px 0 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
@@ -891,7 +954,7 @@ footer a{color:var(--terra-ink)}
     <li><a href="#demo-factorial"><span class="rm-n">02</span><span class="rm-t">Why not test them all</span><span class="rm-d">the count outruns the clock</span></a></li>
     <li><a href="#demo-ig"><span class="rm-n">03</span><span class="rm-t">The method</span><span class="rm-d">destroy, rebuild, keep what is better</span></a></li>
     <li><a href="#m-arena"><span class="rm-n">04</span><span class="rm-t">The other methods</span><span class="rm-d">eight of them, and the recorded scores</span></a></li>
-    <li><a href="#m-run"><span class="rm-n">05</span><span class="rm-t">Run it</span><span class="rm-d">the same engine, in the browser</span></a></li>
+    <li><a href="#m-run"><span class="rm-n">05</span><span class="rm-t">Run it</span><span class="rm-d">the problem, in four worlds</span></a></li>
   </ol>
 </section>
 <!-- ============================================================
@@ -1227,17 +1290,194 @@ footer a{color:var(--terra-ink)}
 </section>
 
 <section class="section" id="m-run">
-  <p class="kicker"><span class="fig">IG Studio</span></p>
-  <h2 class="section-title">The benchmark engine runs in the browser.</h2>
-  <p class="lede">Iterated Greedy is a metaheuristic, a general-purpose search procedure. The application below is the engine measured in the benchmark above, compiled to WebAssembly. The scenario, instance and seed set are selected in its own controls.</p>
-  <figure class="demo" id="studioFigure">
-  <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 06</span> <span class="fig-name">IG Studio</span></span>
-      <span>on small screens the frame scrolls internally</span>
-      <a href="studio-app.html" target="_blank" rel="noopener">Open in a tab</a>
-  </figcaption>
-  <iframe class="studio-frame" src="studio-app.html" title="IG Studio" loading="lazy" sandbox="allow-scripts allow-same-origin allow-downloads allow-popups"></iframe>
-  </figure>
+  <p class="kicker"><span class="fig">In-browser run</span></p>
+  <h2 class="section-title">One engine, four worlds, one queue at a time.</h2>
+  <p class="lede">The engine schedules one resource that does one thing at a time. Changing family costs
+  idle time and money, every order has a release, a promise and a cutoff, and what does not fit leaves at
+  a price. The four worlds below are that model with a different queue. Only the <b>CNC factory</b>
+  carries published records: those are the MaScLib files scored above.</p>
+
+  <!-- 1 · THE PROBLEM — every number here is read from the repository, before any control is touched -->
+  <div class="lab-card" id="runProblem">
+    <h3>The problem</h3>
+    <p class="run-file" id="runFile"></p>
+    <p class="lede" id="runStory"></p>
+    <div class="fact-grid" id="runFacts"></div>
+
+    <div class="run-block">
+      <p class="run-h">The four worlds, side by side</p>
+      <svg class="run-svg" id="runWorldsSvg" role="img" aria-labelledby="runWorldsT"><title id="runWorldsT">For each of the four worlds, the mean changeover time drawn next to the machine time of one order, on one shared scale.</title></svg>
+      <p class="chart-cap">one row per world &#183; the head of the bar is the mean changeover, the body is one order's machine time &#183; same scale across the four</p>
+      <p class="status-line" id="runWorldsNote"></p>
+    </div>
+
+    <div class="run-two run-block">
+      <div>
+        <p class="run-h">Does the work fit the horizon?</p>
+        <svg class="run-svg" id="runLoadSvg" role="img" aria-labelledby="runLoadT"><title id="runLoadT">Total machine time of every order in the file, drawn against the file's scheduling horizon.</title></svg>
+        <p class="chart-cap">every order's machine time added up, against the file's own horizon &#183; past 100% the queue cannot all be made, in any order</p>
+      </div>
+      <div>
+        <p class="run-h">When they land, when they are promised</p>
+        <svg class="run-svg" id="runSpanSvg" role="img" aria-labelledby="runSpanT"><title id="runSpanT">Mean release, mean promise, last promise and the scheduling horizon of the file, on one shared scale.</title></svg>
+        <p class="chart-cap">the three dates averaged over the orders of this file, and the window the file allows, on one shared scale &#183; a promised date can fall outside the window</p>
+      </div>
+    </div>
+
+    <div class="run-block">
+      <div class="controls">
+        <button class="btn tiny" type="button" id="runMore" aria-expanded="false" aria-controls="runStatRows">Show every number</button>
+      </div>
+      <ul class="standings run-rows run-stats" id="runStatRows" hidden></ul>
+      <p class="chart-cap" id="runStatsCap">every field this page holds for the file, as written by <code>studio/scripts/build-instance-stats.mjs</code>, plus the changeover cost read from the same file with the same parser</p>
+    </div>
+  </div>
+
+  <!-- 2 · THE RUN -->
+  <div class="lab-cockpit" id="m-runlab">
+    <aside class="lab-console">
+
+      <div class="lab-card">
+        <h3>Run controls</h3>
+        <div class="lab-actions">
+          <a class="btn primary" id="runGo" href="studio-app.html" target="_blank" rel="noopener" aria-describedby="runWhy">&#9654; Run &#8599;</a>
+          <button class="btn" type="button" id="runNewSeed">&#8635; New seed</button>
+        </div>
+        <p class="status-line" id="runWhy">Run opens the Studio in a new tab and races the six methods there, on this file, at this seed and this budget. Its numbers do not come back here, so every result below stays an em dash.</p>
+
+        <label class="lab-field">World
+          <select id="runWorld" aria-label="World"></select>
+        </label>
+        <label class="lab-field">Instance
+          <select id="runInstance" aria-label="Instance"></select>
+        </label>
+        <div class="lab-field">Evaluation budget
+          <span class="seg" id="runBudget" role="group" aria-label="Evaluation budget">
+            <button type="button" data-bud="50000" aria-pressed="false">50k</button>
+            <button type="button" data-bud="200000" aria-pressed="true" class="on">200k</button>
+            <button type="button" data-bud="800000" aria-pressed="false">800k</button>
+          </span>
+        </div>
+        <div class="lab-field">Seed for every method
+          <div class="readouts" id="runSeedOut"></div>
+        </div>
+        <div class="lab-budget">
+          <div class="lab-budget-bar" aria-hidden="true"><span id="runBudFill"></span></div>
+          <p class="lab-budget-label" id="runBudLabel"></p>
+        </div>
+      </div>
+
+      <div class="lab-card">
+        <h3>Standings</h3>
+        <ol class="standings" id="runStandings"></ol>
+        <p class="lab-hint"><strong>One seed, one budget, all six methods.</strong> Every method below is
+        given the same instance, the same seed and the same evaluation budget. Select a method to mark it
+        in every view.</p>
+      </div>
+
+    </aside>
+
+    <div class="lab-stage">
+      <figure class="demo">
+        <figcaption class="fig-cap">
+          <span><span class="fig-no">Fig. 06</span> <span class="fig-name" id="runFigName">The schedule found</span></span>
+          <span class="lab-inst" id="runFigInst"></span>
+          <button class="btn tiny" type="button" id="runCopy">Copy link</button>
+        </figcaption>
+
+        <div class="fact-grid run-answer" id="runAnswer"></div>
+        <p class="status-line" role="status" id="runAnswerNote"></p>
+
+        <div class="run-note" id="runNote">
+          <b>The run happens next door, not here.</b> All six methods do race on this exact file, at the
+          seed and budget set on the left &#8212; in the <a href="studio-app.html">full Studio</a>, which
+          Run opens in its own tab. What this page cannot do yet is take the numbers back, so every result
+          on this figure is an em dash. The <a href="#demo-race">six-method comparison</a> above runs
+          inline instead, on generated instances rather than on these files.
+        </div>
+
+        <div class="controls">
+          <span class="ctl-label">View</span>
+          <span class="seg" id="runTabs" role="tablist" aria-label="View">
+            <button type="button" role="tab" data-pan="runPanSched" aria-selected="true" class="on">Schedule</button>
+            <button type="button" role="tab" data-pan="runPanSearch" aria-selected="false">Search</button>
+            <button type="button" role="tab" data-pan="runPanMeth" aria-selected="false">Methods</button>
+            <button type="button" role="tab" data-pan="runPanSeeds" aria-selected="false">Seeds</button>
+          </span>
+        </div>
+
+        <!-- SCHEDULE -->
+        <div class="run-panel" id="runPanSched" role="tabpanel" tabindex="0">
+          <svg class="run-svg" id="runSchedSvg" role="img" aria-labelledby="runSchedT"><title id="runSchedT">The machine lane the run would fill, drawn empty on the file's own horizon.</title></svg>
+          <p class="chart-cap">one machine lane on the file's own horizon &#183; the lane is empty because no schedule has been produced here</p>
+          <div class="run-two run-block">
+            <div>
+              <p class="run-h">Where the cost sits</p>
+              <div class="readouts" id="runSchedTerms"></div>
+              <p class="chart-cap">the four terms of the objective, in this world's own words</p>
+            </div>
+            <div>
+              <p class="run-h">What the schedule did with the queue</p>
+              <div class="readouts" id="runSchedCounts"></div>
+              <p class="chart-cap">made, refused and late, out of the orders in the file</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEARCH -->
+        <div class="run-panel" id="runPanSearch" role="tabpanel" tabindex="0" hidden>
+          <svg class="run-svg" id="runSearchSvg" role="img" aria-labelledby="runSearchT"><title id="runSearchT">The evaluation budget as an axis, with the three budget cuts marked and no cost curve on it.</title></svg>
+          <p class="chart-cap">the budget axis is real and the three cuts are the ones the console offers &#183; no curve is drawn because no search has run</p>
+          <div class="run-two run-block">
+            <div>
+              <p class="run-h">The search that would produce it</p>
+              <div class="readouts" id="runSearchOut"></div>
+            </div>
+            <div>
+              <p class="run-h">The parameters it would use</p>
+              <div class="readouts" id="runSearchParams"></div>
+              <p class="chart-cap">the engine's published settings, the ones the benchmark above was measured with</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- METHODS -->
+        <div class="run-panel" id="runPanMeth" role="tabpanel" tabindex="0" hidden>
+          <div class="readouts" id="runMethReq"></div>
+          <ul class="standings run-rows run-meth" id="runMethRows"></ul>
+          <p class="chart-cap" id="runMethCap"></p>
+
+          <div class="run-block">
+            <p class="run-h">How each method spent it</p>
+            <div class="run-legend" id="runDecompLegend"></div>
+            <svg class="run-svg" id="runDecompSvg" role="img" aria-labelledby="runDecompT"><title id="runDecompT">One track per method for the four cost terms, every track empty because no method has run.</title></svg>
+            <p class="chart-cap">the same four terms as the Schedule view, one track per method, on one shared money scale &#183; every track is an empty dashed line because no method has run here</p>
+          </div>
+
+          <div class="run-block">
+            <p class="run-h">Not in the race</p>
+            <ul class="standings run-rows run-methref" id="runMethRef"></ul>
+            <p class="chart-cap" id="runMethRefCap"></p>
+          </div>
+        </div>
+
+        <!-- SEEDS -->
+        <div class="run-panel" id="runPanSeeds" role="tabpanel" tabindex="0" hidden>
+          <div class="readouts" id="runSeedReq"></div>
+          <ul class="standings run-rows run-seedrows" id="runSeedRows"></ul>
+          <p class="chart-cap">twelve consecutive seeds of the same file at the same budget &#183; the seeds are real, the costs are not: nothing has run</p>
+        </div>
+
+      </figure>
+    </div>
+  </div>
+
+  <nav class="m-links" aria-label="The full Studio" style="margin-top:16px">
+    <a href="studio-app.html" id="runLinkStudio">Open the full Studio</a>
+    <a href="studio-app.html" id="runLinkProblem">Problem data &amp; distributions</a>
+    <a href="studio-app.html" id="runLinkSchedule">Full schedule table</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Benchmark results (RESULTS.md)</a>
+  </nav>
 </section>
 
 <section class="movement" id="m-future">
@@ -1247,7 +1487,7 @@ footer a{color:var(--terra-ink)}
   </div>
   <div class="m-body">
     <h3 class="f-head">What works today</h3>
-    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models.</p></div></div>
+    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models. <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md#the-llm-heuristic-factory" target="_blank" rel="noopener">See the campaign</a></p></div></div>
 
     <h3 class="f-head">The next problem</h3>
     <p class="f-lede">Exact methods now prove optimality on this benchmark, so there is nothing left for a heuristic to win. The interesting version is closer to a real shop: orders arrive during the day, the times are estimates, and each one has to be accepted or refused on the spot.</p>
@@ -2311,7 +2551,19 @@ function onWinResize(fn){
   }
 
   /* ---- small DOM utilities ---- */
+  /* Autoplay shows the loop once, then hands over. Measured end to end, this
+     figure takes 1 min 58 s at 1x to converge; committing an arriving reader to
+     that is worse than the Play button it replaced. It pauses when iteration 2
+     opens, so construction and one complete destroy-rebuild-decide cycle have
+     been seen. Restart and Play stay live for anyone who wants the rest. */
+  var autoPauseAfterIter = 0;
   function setPhase(title, sub){
+    if(autoPauseAfterIter && iter > autoPauseAfterIter && player.playing){
+      autoPauseAfterIter = 0;
+      setPlaying(false);
+      statusEl.innerHTML = L('Paused after one full iteration. Play continues to convergence.',
+        'Pausado após uma iteração completa. Play continua até a convergência.');
+    }
     phaseEl.innerHTML = '';
     phaseEl.appendChild(el('span', 'ph-no', 'PHASE'));
     phaseEl.appendChild(document.createTextNode(title + (sub ? ' — ' + sub : '')));
@@ -2709,8 +2961,8 @@ function onWinResize(fn){
   }
 
   /* ---- controls ---- */
-  btnPlay.addEventListener('click', function(){ setPlaying(!player.playing); });
-  btnStep.addEventListener('click', function(){ setPlaying(false); stepOnce(); });
+  btnPlay.addEventListener('click', function(){ autoPauseAfterIter = 0; setPlaying(!player.playing); });
+  btnStep.addEventListener('click', function(){ autoPauseAfterIter = 0; setPlaying(false); stepOnce(); });
   btnRestart.addEventListener('click', function(){ reset(); });
   speedSeg.addEventListener('click', function(ev){
     var b = ev.target.closest('button[data-speed]');
@@ -2793,6 +3045,7 @@ function onWinResize(fn){
       startIO.disconnect();
       if(autoStarted || genDone) return;
       autoStarted = true;
+      autoPauseAfterIter = 1;   /* only the automatic start is capped */
       setPlaying(true);
     }, { threshold:0.02, rootMargin:'0px 0px -20% 0px' });
     startIO.observe(fig);
@@ -2914,7 +3167,29 @@ function onWinResize(fn){
       'Implementações compactas dos métodos acima, escritas para o navegador e executadas sob um <b>orçamento de avaliações</b> comum. O orçamento é contado em avaliações completas do objetivo.',
     "#demo-benchmark .lede":
       'As instâncias <b>MaScLib</b> vêm do estudo de 2015, cada uma com um custo melhor-conhecido ' +
-      'publicado. O motor atual foi medido em todas elas:'
+      'publicado. O motor atual foi medido em todas elas:',
+
+    /* run — the four sentences of #m-run that carry mid-phrase emphasis or a link */
+    "#m-run .lede":
+      'O motor programa um recurso que faz uma coisa por vez. Trocar de família custa tempo parado e ' +
+      'dinheiro, cada pedido tem uma liberação, uma promessa e um limite, e o que não couber sai por um ' +
+      'preço. Os quatro mundos abaixo são esse modelo com outra fila. Só a <b>fábrica CNC</b> traz ' +
+      'recordes publicados: são os arquivos MaScLib medidos acima.',
+    "#runStatsCap":
+      'todo campo que esta página guarda do arquivo, como escrito por ' +
+      '<code>studio/scripts/build-instance-stats.mjs</code>, mais o custo de troca lido do mesmo arquivo ' +
+      'com o mesmo parser',
+    "#m-runlab .lab-hint":
+      '<strong>Uma seed, um orçamento, os seis métodos.</strong> Todo método abaixo recebe a mesma ' +
+      'instância, a mesma seed e o mesmo orçamento de avaliações. Selecione um método para marcá-lo em ' +
+      'todas as visões.',
+    "#runNote":
+      '<b>A execução acontece ao lado, não aqui.</b> Os seis métodos correm de verdade neste mesmo ' +
+      'arquivo, na seed e no orçamento escolhidos à esquerda &#8212; no <a href="studio-app.html">Studio ' +
+      'completo</a>, que o Executar abre na própria aba. O que esta página ainda não sabe fazer é trazer ' +
+      'os números de volta, então todo resultado nesta figura é um travessão. A ' +
+      '<a href="#demo-race">comparação de seis métodos</a> acima roda embutida, mas em instâncias ' +
+      'geradas, não nestes arquivos.'
   };
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
@@ -2934,11 +3209,12 @@ function onWinResize(fn){
     "The other methods": 'Os outros métodos',
     "eight of them, and the recorded scores": 'oito deles, e as pontuações registradas',
     "Run it": 'Rode',
-    "the same engine, in the browser": 'o mesmo motor, no navegador',
+    "the problem, in four worlds": 'o problema, em quatro mundos',
     "An optimal order exists, but there are too many orders to test. Iterated Greedy builds one order and improves it by iteration.": 'Existe uma ordem ótima, mas há ordens demais para testar. O Iterated Greedy constrói uma ordem e a melhora por iteração.',
     "Exact methods now prove optimality on this benchmark, so there is nothing left for a heuristic to win. The interesting version is closer to a real shop: orders arrive during the day, the times are estimates, and each one has to be accepted or refused on the spot.": 'Métodos exatos já provam otimalidade neste benchmark, então não sobra nada para uma heurística ganhar. A versão interessante está mais perto de uma oficina real: os pedidos chegam ao longo do dia, os tempos são estimativas, e cada um precisa ser aceito ou recusado na hora.',
     "The GPU fleet and the learned operators are in a notebook rather than in a claim. It runs on whatever hardware it finds, checks its pricing against the CPU engine before reporting a single timing, and recomputes the numbers every time.": 'A frota de GPU e os operadores aprendidos estão num notebook, não numa afirmação. Ele roda no hardware que encontrar, confere a precificação contra o motor de CPU antes de reportar qualquer tempo, e recalcula os números a cada execução.',
     "Few papers can mean the problem is open, or that nobody wants it solved. What the search shows is that the slot is empty. It does not show that anyone is asking for it, and that is the risk in this direction.": 'Poucos artigos podem significar que o problema está aberto, ou que ninguém quer resolvê-lo. O que a busca mostra é que a vaga está vazia. Não mostra que alguém está pedindo por ela, e esse é o risco desta direção.',
+    "See the campaign": "Ver a campanha",
     /* online order acceptance (future) */
     "The next problem": "O próximo problema",
     "The static benchmark is effectively closed — exact methods now prove optimality on it, so a metaheuristic can only tie. The open problem sits one step earlier and closer to a real shop floor: orders arrive over time, each processing time and due date is only an estimate, and every accept-or-reject is committed on the spot, before the future is known.": "O benchmark estático está praticamente fechado — métodos exatos hoje provam otimalidade nele, então uma metaheurística só pode empatar. O problema aberto fica um passo antes e mais perto de um chão de fábrica real: pedidos chegam ao longo do tempo, cada tempo de processamento e prazo é só uma estimativa, e cada aceitar-ou-recusar é comprometido na hora, antes de o futuro ser conhecido.",
@@ -2985,8 +3261,6 @@ function onWinResize(fn){
     "Future": "Futuro",
     /* added figures / captions */
     "Time runs left to right and each timeline ends at t. The bar below it shows setup plus weighted tardiness on a scale shared by all rails, and its length is the total Σ.": 'O tempo corre da esquerda para a direita e cada linha do tempo termina em t. A barra abaixo mostra setup mais atraso ponderado numa escala comum a todos os trilhos, e seu comprimento é o total Σ.' ,
-    "on small screens the frame scrolls internally": "em telas pequenas a rolagem ocorre dentro do quadro",
-    "Open in a tab": "Abrir em uma aba",
     "Idle": "Parado",
     "Ranks are provisional until the budget is spent": "As posições são provisórias até o orçamento se esgotar",
     "new best-knowns": "novos melhores-conhecidos",
@@ -3113,11 +3387,77 @@ function onWinResize(fn){
       "Cada candidata é avaliada por dois caminhos que devem coincidir até a última unidade: um avaliador incremental contra um oráculo do zero, e o motor Rust contra uma implementação Python independente. A busca precisa reproduzir os melhores-conhecidos de 2015 antes de qualquer resultado ser aceito. Quatro das cinco lacunas restantes ficam dentro de 0,34%; a quinta é de 2,44%.",
     "Full results & validation": "Resultados completos & validação",
     "2015 study (PDF)": "Estudo de 2015 (PDF)",
-    /* run */
-    "Run · IG Studio": "Executar · IG Studio",
-    "The benchmark engine runs in the browser.": "O motor do benchmark roda no navegador.",
-    "Iterated Greedy is a metaheuristic, a general-purpose search procedure. The application below is the engine measured in the benchmark above, compiled to WebAssembly. The scenario, instance and seed set are selected in its own controls.":
-      "Iterated Greedy é uma metaheurística, ou seja, um procedimento de busca de uso geral. A aplicação abaixo é o motor medido no benchmark acima, compilado para WebAssembly. O cenário, a instância e o conjunto de seeds são selecionados nos controles da própria aplicação.",
+    /* run — #m-run, the in-browser run. Every string of the section's static
+       markup is keyed here; the strings its script interpolates with a number
+       carry their own PT inside that script (STR), as the arena does. */
+    "In-browser run": "Execução no navegador",
+    "One engine, four worlds, one queue at a time.": "Um motor, quatro mundos, uma fila por vez.",
+    "The problem": "O problema",
+    "The four worlds, side by side": "Os quatro mundos, lado a lado",
+    "one row per world · the head of the bar is the mean changeover, the body is one order's machine time · same scale across the four":
+      "uma linha por mundo · a cabeça da barra é a troca média, o corpo é o tempo de máquina de um pedido · mesma escala nos quatro",
+    "For each of the four worlds, the mean changeover time drawn next to the machine time of one order, on one shared scale.":
+      "Para cada um dos quatro mundos, o tempo médio de troca desenhado ao lado do tempo de máquina de um pedido, numa escala comum.",
+    "Does the work fit the horizon?": "O trabalho cabe no horizonte?",
+    "every order's machine time added up, against the file's own horizon · past 100% the queue cannot all be made, in any order":
+      "o tempo de máquina de todos os pedidos somado, contra o horizonte do próprio arquivo · acima de 100% a fila não cabe inteira, em nenhuma ordem",
+    "Total machine time of every order in the file, drawn against the file's scheduling horizon.":
+      "Tempo total de máquina de todos os pedidos do arquivo, desenhado contra o horizonte de programação do arquivo.",
+    "When they land, when they are promised": "Quando chegam, quando são prometidos",
+    "the three dates averaged over the orders of this file, and the window the file allows, on one shared scale · a promised date can fall outside the window":
+      "as três datas médias dos pedidos deste arquivo, e a janela que o arquivo permite, numa escala comum · uma data prometida pode cair fora da janela",
+    "Mean release, mean promise, last promise and the scheduling horizon of the file, on one shared scale.":
+      "Liberação média, promessa média, última promessa e o horizonte de programação do arquivo, numa escala comum.",
+    "Show every number": "Mostrar todos os números",
+    "Hide every number": "Esconder todos os números",
+    "Run controls": "Controles da execução",
+    "▶ Run ↗": "▶ Executar ↗",
+    "Run opens the Studio in a new tab and races the six methods there, on this file, at this seed and this budget. Its numbers do not come back here, so every result below stays an em dash.":
+      "O Executar abre o Studio numa nova aba e corre os seis métodos lá, neste arquivo, nesta seed e neste orçamento. Os números dele não voltam para cá, então todo resultado abaixo continua um travessão.",
+    "↻ New seed": "↻ Nova seed",
+    "World": "Mundo",
+    "Instance": "Instância",
+    /* the race lab already keys the lower-case "evaluation budget"; this is the
+       console field label, and the map is case-sensitive. */
+    "Evaluation budget": "Orçamento de avaliações",
+    "Seed for every method": "Seed de todos os métodos",
+    "Standings": "Classificação",
+    "View": "Ver",
+    "Schedule": "Cronograma",
+    "Search": "Busca",
+    "Seeds": "Seeds",
+    "Copy link": "Copiar link",
+    "The schedule found": "O cronograma encontrado",
+    "The machine lane the run would fill, drawn empty on the file's own horizon.":
+      "A faixa de máquina que a execução preencheria, desenhada vazia no horizonte do próprio arquivo.",
+    "one machine lane on the file's own horizon · the lane is empty because no schedule has been produced here":
+      "uma faixa de máquina no horizonte do próprio arquivo · a faixa está vazia porque nenhum cronograma foi produzido aqui",
+    "Where the cost sits": "Onde o custo está",
+    "the four terms of the objective, in this world's own words":
+      "os quatro termos do objetivo, nas palavras deste mundo",
+    "What the schedule did with the queue": "O que o cronograma fez com a fila",
+    "made, refused and late, out of the orders in the file":
+      "feitos, recusados e atrasados, entre os pedidos do arquivo",
+    "The evaluation budget as an axis, with the three budget cuts marked and no cost curve on it.":
+      "O orçamento de avaliações como eixo, com os três cortes marcados e nenhuma curva de custo sobre ele.",
+    "the budget axis is real and the three cuts are the ones the console offers · no curve is drawn because no search has run":
+      "o eixo do orçamento é real e os três cortes são os que o console oferece · nenhuma curva é desenhada porque nenhuma busca rodou",
+    "The search that would produce it": "A busca que o produziria",
+    "The parameters it would use": "Os parâmetros que ela usaria",
+    "the engine's published settings, the ones the benchmark above was measured with":
+      "as configurações publicadas do motor, as mesmas com que o benchmark acima foi medido",
+    "How each method spent it": "Como cada método gastou",
+    "One track per method for the four cost terms, every track empty because no method has run.":
+      "Uma trilha por método para os quatro termos de custo, todas vazias porque nenhum método rodou.",
+    "the same four terms as the Schedule view, one track per method, on one shared money scale · every track is an empty dashed line because no method has run here":
+      "os mesmos quatro termos da aba Cronograma, uma trilha por método, numa escala de dinheiro comum · toda trilha é uma linha tracejada vazia porque nenhum método rodou aqui",
+    "Not in the race": "Fora da corrida",
+    "twelve consecutive seeds of the same file at the same budget · the seeds are real, the costs are not: nothing has run":
+      "doze seeds consecutivas do mesmo arquivo no mesmo orçamento · as seeds são reais, os custos não: nada rodou",
+    "Open the full Studio": "Abrir o Studio completo",
+    "Problem data & distributions": "Dados do problema & distribuições",
+    "Full schedule table": "Tabela completa do cronograma",
+    "Benchmark results (RESULTS.md)": "Resultados do benchmark (RESULTS.md)",
     /* future */
     "Future · where it goes": "Futuro · para onde vai",
     "Next research.": "Próximas pesquisas.",
@@ -3369,13 +3709,11 @@ function onWinResize(fn){
     if (md) md.setAttribute("content", META_DESC[lang] || META_DESC.en);
     applyHtml(lang);
     walk(lang);
-    /* studio iframe follows the page language (reload with ?lang) */
-    var frame = document.querySelector(".studio-frame");
-    if (frame) {
-      var base = frame.getAttribute("src").split("?")[0];
-      var want = base + (lang === "pt" ? "?lang=pt-BR" : "");
-      if (frame.getAttribute("src") !== want) frame.setAttribute("src", want);
-    }
+    /* every link out to the standalone Studio carries the page language */
+    document.querySelectorAll('a[href^="studio-app.html"]').forEach(function (a) {
+      var u = a.getAttribute("href").split("#")[0].replace(/([?&])lang=[^&]*&?/, "$1").replace(/[?&]$/, "");
+      a.setAttribute("href", lang === "pt" ? u + (u.indexOf("?") < 0 ? "?" : "&") + "lang=pt-BR" : u);
+    });
     /* toggle button state */
     document.querySelectorAll(".lang-toggle [data-lang]").forEach(function (b) {
       b.classList.toggle("on", b.getAttribute("data-lang") === lang);
@@ -5036,6 +5374,842 @@ function onWinResize(fn){
   if(reduce)pb.textContent=T("Play");
   window.addEventListener("resize",draw);
   requestAnimationFrame(loop);
+})();
+</script>
+<script>
+/* ============================================================
+   #m-run — the in-browser run.
+
+   THE PROBLEM HALF IS REAL. Every number comes from
+   studio/src/generated/instance-stats.js (written by
+   studio/scripts/build-instance-stats.mjs), plus the changeover-COST pair
+   read from the same CSV with the same parser; the world lenses, the
+   published records and the instance labels come from
+   studio/src/data/catalog.js. All 53 files the four lenses map to are
+   reachable from the console.
+
+   THE RESULT HALF IS NOT WIRED. The six-method engine for these files is
+   not compiled into this page, so every cost, gap, count and timing is an
+   em dash and the figure states that on itself rather than in a caption.
+   Nothing here is invented, and Run stays disabled until it is real.
+
+   i18n: the section's static markup is translated by the page's own
+   EN2PT / HTML_PT maps. Strings this module interpolates with a number
+   cannot be keyed on a whole text node, so they use the same local
+   bilingual pattern the arena already uses (arenaText(en, pt)); the module
+   re-renders on `langchange`.
+   ============================================================ */
+(function () {
+  "use strict";
+
+  /* ---------- the problem table ----------
+     0 n · 1 families · 2 horizon · 3 last promise · 4 mean machine time ·
+     5 mean release · 6 mean promise · 7 mean tardiness weight ·
+     8 mean changeover time · 9 longest changeover · 10 mean changeover cost ·
+     11 dearest changeover · 12 impossible-on-arrival % · 13 refusal / production ·
+     14 machine load · 15 published record (0 = none) · 16 n! · 17 length histogram */
+  var RUN_STATS={
+    "NCOS_01":[8,1,1000,900,79,97,519,2,0,0,0,0,0,1.5,0.64,800,"4.0×10^4",[1,4,0,0,0,0,1,2]],
+    "NCOS_01a":[8,1,1000,900,79,97,519,1,0,0,0,0,0,1.5,0.64,800,"4.0×10^4",[1,4,0,0,0,0,1,2]],
+    "NCOS_02":[10,1,20000,800,84,0,432,5.8,0,0,0,0,10,11.6,0.04,2570,"3.6×10^6",[3,0,0,0,0,0,0,7]],
+    "NCOS_02a":[10,1,20000,800,84,0,432,1,0,0,0,0,10,2.4,0.04,1210,"3.6×10^6",[3,0,0,0,0,0,0,7]],
+    "NCOS_03":[10,1,20000,750,66,395,625,4.8,0,0,0,0,10,28.5,0.03,6460,"3.6×10^6",[4,3,1,0,0,1,0,1]],
+    "NCOS_03a":[10,1,20000,750,66,395,625,1,0,0,0,0,10,3.6,0.03,1690,"3.6×10^6",[4,3,1,0,0,1,0,1]],
+    "NCOS_04":[10,1,4000,514,52,0,464,2.7,0,0,0,0,0,5,0.13,1011,"3.6×10^6",[3,1,2,1,0,0,0,3]],
+    "NCOS_04a":[10,1,4000,514,52,0,464,1,0,0,0,0,0,5,0.13,1008,"3.6×10^6",[3,1,2,1,0,0,0,3]],
+    "NCOS_05":[15,1,4000,1076,54,0,979,2.3,0,0,0,0,0,9,0.2,1500,"1.3×10^12",[2,3,0,3,2,1,0,4]],
+    "NCOS_05a":[15,1,4000,1076,54,0,979,1,0,0,0,0,0,9,0.2,1500,"1.3×10^12",[2,3,0,3,2,1,0,4]],
+    "NCOS_11":[20,1,4000,1076,54,0,970,2.4,0,0,0,0,0,9,0.27,2022,"2.4×10^18",[2,4,1,4,2,1,0,6]],
+    "NCOS_11a":[20,1,4000,1076,54,0,970,1,0,0,0,0,0,9,0.27,2006,"2.4×10^18",[2,4,1,4,2,1,0,6]],
+    "NCOS_12":[24,1,2000,512,43,0,512,2,0,0,0,0,0,6.7,0.51,6844,"6.2×10^23",[3,3,3,3,3,3,3,3]],
+    "NCOS_12a":[24,1,2000,512,43,0,512,1,0,0,0,0,0,3.4,0.51,4270,"6.2×10^23",[3,3,3,3,3,3,3,3]],
+    "NCOS_13":[24,1,2000,704,43,0,512,2,0,0,0,0,0,3.8,0.51,3912,"6.2×10^23",[3,3,3,3,3,3,3,3]],
+    "NCOS_13a":[24,1,2000,704,43,0,512,1,0,0,0,0,0,3.4,0.51,3441,"6.2×10^23",[3,3,3,3,3,3,3,3]],
+    "NCOS_14":[25,1,20000,2100,84,0,1116,5.9,0,0,0,0,0,16.9,0.11,6990,"1.6×10^25",[7,0,0,0,0,0,0,18]],
+    "NCOS_14a":[25,1,20000,1840,76,860,1343,1,0,0,0,0,4,5.1,0.1,3195,"1.6×10^25",[6,13,0,0,4,0,1,1]],
+    "NCOS_15":[30,1,4000,1753,60,0,1590,2.9,0,0,0,0,0,9,0.45,3052,"2.7×10^32",[4,3,1,6,3,4,4,5]],
+    "NCOS_15a":[30,1,4000,1753,60,0,1590,1,0,0,0,0,0,9,0.45,3035,"2.7×10^32",[4,3,1,6,3,4,4,5]],
+    "NCOS_31":[75,1,20000,5520,87,2253,4108,2,0,0,0,0,0,8.8,0.32,9510,"2.5×10^109",[58,7,7,2,0,0,0,1]],
+    "NCOS_31a":[75,1,20000,5520,87,2253,4108,1,0,0,0,0,0,4.6,0.32,8715,"2.5×10^109",[58,7,7,2,0,0,0,1]],
+    "NCOS_32":[75,1,20000,6300,84,0,3300,2,0,0,0,0,0,11.5,0.31,17310,"2.5×10^109",[24,0,0,0,0,0,0,51]],
+    "NCOS_32a":[75,1,20000,6300,84,0,3300,1,0,0,0,0,0,11.5,0.31,14720,"2.5×10^109",[24,0,0,0,0,0,0,51]],
+    "NCOS_41":[90,1,1500,439,5,113,235,5.2,0,0,0,0,0,20.4,0.31,13484,"1.5×10^138",[24,13,2,7,13,8,9,14]],
+    "NCOS_41a":[90,1,1500,439,5,113,235,1,0,0,0,0,0,10.2,0.31,10539,"1.5×10^138",[24,13,2,7,13,8,9,14]],
+    "NCOS_51":[200,1,40000,21500,81,0,10331,1.3,0,0,0,0,0,17.7,0.4,36170,"7.9×10^374",[93,0,0,0,0,0,0,107]],
+    "NCOS_51a":[200,1,40000,21500,81,0,10331,1,0,0,0,0,0,17.7,0.4,36170,"7.9×10^374",[93,0,0,0,0,0,0,107]],
+    "NCOS_61":[500,1,40000,16000,39,0,8480,0.8,0,0,0,0,0,88.2,0.49,1269365,"1.2×10^1134",[30,0,0,0,0,0,0,470]],
+    "NCOS_61a":[500,1,40000,16000,39,0,8480,1,0,0,0,0,0,88.2,0.49,1485232,"1.2×10^1134",[30,0,0,0,0,0,0,470]],
+    "STC_NCOS_01":[8,8,2000,1700,80,95,939,5,69,520,69,520,0,3.7,0.32,700,"4.0×10^4",[3,2,0,0,0,1,0,2]],
+    "STC_NCOS_01a":[8,8,2000,1700,80,95,939,1,69,520,69,520,0,1,0.32,610,"4.0×10^4",[3,2,0,0,0,1,0,2]],
+    "STC_NCOS_15":[30,3,800,158,6,50,96,6.8,58,100,63,100,0,12.9,0.24,17611,"2.7×10^32",[5,0,1,5,1,7,1,10]],
+    "STC_NCOS_15a":[30,3,800,158,6,50,96,1,58,100,63,100,0,6.5,0.24,5584,"2.7×10^32",[5,0,1,5,1,7,1,10]],
+    "STC_NCOS_31":[75,10,100000,10290,87,2253,5210,2,0,0,195,250,0,19.6,0.07,6615,"2.5×10^109",[58,7,7,2,0,0,0,1]],
+    "STC_NCOS_31a":[75,10,100000,10290,87,2253,5210,1,0,0,195,250,0,9.4,0.07,7590,"2.5×10^109",[58,7,7,2,0,0,0,1]],
+    "STC_NCOS_32":[75,4,20000,6300,84,0,3300,3.4,8,10,165,200,0,16.5,0.31,24068,"2.5×10^109",[24,0,0,0,0,0,0,51]],
+    "STC_NCOS_32a":[75,4,20000,6300,84,0,3300,1,8,10,165,200,0,16.5,0.31,16798,"2.5×10^109",[24,0,0,0,0,0,0,51]],
+    "STC_NCOS_41":[90,3,1500,439,5,113,235,5.2,58,100,63,100,0,20.4,0.31,43201,"1.5×10^138",[24,13,2,7,13,8,9,14]],
+    "STC_NCOS_41a":[90,3,1500,439,5,113,235,1,58,100,63,100,0,10.2,0.31,18579,"1.5×10^138",[24,13,2,7,13,8,9,14]],
+    "STC_NCOS_51":[200,3,40000,21500,81,0,10331,0.8,2000,2000,2000,2000,0,35.4,0.4,139675,"7.9×10^374",[93,0,0,0,0,0,0,107]],
+    "STC_NCOS_51a":[200,3,40000,21500,81,0,10331,1,2000,2000,2000,2000,0,35.4,0.4,148230,"7.9×10^374",[93,0,0,0,0,0,0,107]],
+    "STC_NCOS_61":[500,2,40000,16000,39,0,8480,0.8,365,860,365,860,0,118.2,0.49,1495045,"1.2×10^1134",[30,0,0,0,0,0,0,470]],
+    "STC_NCOS_61a":[500,2,40000,16000,39,0,8480,1,365,860,365,860,0,118.2,0.49,1814605,"1.2×10^1134",[30,0,0,0,0,0,0,470]],
+    "3DPRINT_FARM_45":[45,6,5760,5997,166,1374,2954,2,21,53,66,145,0,7.3,1.3,0,"1.2×10^56",[7,7,5,5,7,5,4,5]],
+    "3DPRINT_FARM_90":[90,6,11520,9803,161,3011,4536,1.9,21,53,66,145,4,7.4,1.26,0,"1.5×10^138",[13,11,20,12,9,12,8,5]],
+    "3DPRINT_FARM_180":[180,6,23040,17494,156,5921,7365,2,21,53,66,145,1,7.3,1.22,0,"2.0×10^329",[34,32,32,31,22,16,12,1]],
+    "COFFEE_S_45":[45,6,1440,4059,19,497,2020,5.4,9,20,33,59,0,25.6,0.59,0,"1.2×10^56",[4,9,3,9,7,6,6,1]],
+    "COFFEE_M_90":[90,6,2880,5131,18,930,2615,5.3,9,20,33,59,0,23.9,0.57,0,"1.5×10^138",[12,16,17,12,20,1,7,5]],
+    "COFFEE_L_180":[180,6,5760,7360,18,2049,3711,5.2,9,20,33,59,0,24.8,0.57,0,"2.0×10^329",[7,26,46,24,42,17,11,7]],
+    "BREWERY_S_45":[45,6,15840,16655,292,3675,7248,3.2,47,100,108,200,0,8.5,0.83,0,"1.2×10^56",[5,9,13,5,5,5,2,1]],
+    "BREWERY_M_90":[90,6,31680,27956,285,8229,12105,2.9,47,100,108,200,0,8.4,0.81,0,"1.5×10^138",[20,20,17,16,7,5,3,2]],
+    "BREWERY_L_180":[180,6,63360,49600,292,15990,19744,2.8,47,100,108,200,0,7.9,0.83,0,"2.0×10^329",[17,35,32,25,23,24,12,12]]
+  };
+
+  var RUN_WORLDS=[
+    { id:"factory", name:"CNC factory", dir:"masclib", kind:"published benchmark",
+      job:"orders", fam:"tool families", res:"CNC machining center", def:"STC_NCOS_31",
+      day:1440, dayName:"production days", pUnit:"min", pDiv:1,
+      terms:["tool and fixture changes","machining","delivery delay","supplier outsourcing"],
+      list:"NCOS_01 NCOS_01a NCOS_02 NCOS_02a NCOS_03 NCOS_03a NCOS_04 NCOS_04a NCOS_05 NCOS_05a NCOS_11 NCOS_11a NCOS_12 NCOS_12a NCOS_13 NCOS_13a NCOS_14 NCOS_14a NCOS_15 NCOS_15a NCOS_31 NCOS_31a NCOS_32 NCOS_32a NCOS_41 NCOS_41a NCOS_51 NCOS_51a NCOS_61 NCOS_61a STC_NCOS_01 STC_NCOS_01a STC_NCOS_15 STC_NCOS_15a STC_NCOS_31 STC_NCOS_31a STC_NCOS_32 STC_NCOS_32a STC_NCOS_41 STC_NCOS_41a STC_NCOS_51 STC_NCOS_51a STC_NCOS_61 STC_NCOS_61a",
+      labels:{} },
+    { id:"print3d", name:"3D print farm", dir:"masclib-domains", kind:"seeded domain workload",
+      job:"orders", fam:"filaments", res:"FDM printer", def:"3DPRINT_FARM_90",
+      day:1440, dayName:"print days", pUnit:"h", pDiv:60,
+      terms:["filament swaps","printing","late shipment","outsourcing"],
+      list:"3DPRINT_FARM_45 3DPRINT_FARM_90 3DPRINT_FARM_180",
+      labels:{"3DPRINT_FARM_45":"Four-day order book","3DPRINT_FARM_90":"Eight-day order book","3DPRINT_FARM_180":"Two-week peak horizon"} },
+    { id:"coffee", name:"Coffee roastery", dir:"masclib-domains", kind:"seeded domain workload",
+      job:"lots", fam:"profiles", res:"drum roaster", def:"COFFEE_M_90",
+      day:720, dayName:"roasting days", pUnit:"min", pDiv:1,
+      terms:["profile changeovers","roasting","late shipment","co-roaster buying"],
+      list:"COFFEE_S_45 COFFEE_M_90 COFFEE_L_180",
+      labels:{"COFFEE_S_45":"Two-day roast plan","COFFEE_M_90":"Four-day roast plan","COFFEE_L_180":"Eight-day roast plan"} },
+    { id:"brewery", name:"Craft brewery", dir:"masclib-domains", kind:"seeded domain workload",
+      job:"batches", fam:"styles", res:"brewhouse", def:"BREWERY_M_90",
+      day:1440, dayName:"brew days", pUnit:"h", pDiv:60,
+      terms:["CIP and sanitization","brewing","missed tank window","contract brewing"],
+      list:"BREWERY_S_45 BREWERY_M_90 BREWERY_L_180",
+      labels:{"BREWERY_S_45":"Eleven-day brew schedule","BREWERY_M_90":"Three-week brew schedule","BREWERY_L_180":"Five-week brew schedule"} }
+  ];
+
+  var N = 0, FAMS = 1, HOR = 2, MAXDUE = 3, PROC = 4, REL = 5, DUE = 6, WEIGHT = 7,
+      SETUP = 8, SETUPMAX = 9, SCOST = 10, SCOSTMAX = 11, TIGHT = 12, REJ = 13,
+      LOAD = 14, BEST = 15, POSS = 16, BINS = 17;
+
+  /* the six browser methods, in the names and colours #demo-race already uses */
+  var METHODS = [
+    ["ig", "Iterated Greedy", "--race-ig"],
+    ["greedy", "Greedy", "--race-greedy"],
+    ["descent", "Descent", "--race-descent"],
+    ["tabu", "Tabu", "--race-tabu"],
+    ["tabudiv", "TabuDiv", "--race-tabudiv"],
+    ["ama", "AMA (memetic)", "--race-ama"]
+  ];
+  /* the four terms of the objective, in the order each world lens names them */
+  var TERMC = ["--maple", "--steel", "--red", "--brass"];
+  var BUDGETS = [50000, 200000, 800000];
+
+  /* the four world descriptions, verbatim from catalog.js in both locales */
+  var DESC = {
+    factory: {
+      en: "One CNC receives parts from several product families. Material becomes available at different times, every order has a promised date, and changing family may require another tool, fixture, or program.",
+      pt: "Uma CNC recebe peças de várias famílias. O material fica disponível em instantes diferentes, cada pedido tem uma entrega prometida e mudar de família pode exigir outra ferramenta, fixação ou programa."
+    },
+    print3d: {
+      en: "You inherited a one-printer FDM print farm together with its book of about ninety part orders. Every material is a spool swap with a purge — and abrasive PA-CF also eats brass nozzles, so it forces the hardened nozzle on the way in and back out. Orders arrive approved on different days, each with a promised ship date and a late penalty, and the rush customers pay the steepest ones. Whatever does not fit the week goes to the partner farm — at a price.",
+      pt: "Você herdou uma fazenda de impressão com uma única impressora FDM e uma carteira de cerca de noventa pedidos de peças. Cada material é uma troca de rolo com purga — e o PA-CF, abrasivo, ainda come nozzle de latão, exigindo o nozzle endurecido na ida e na volta. Os pedidos chegam aprovados em dias diferentes, cada um com data prometida e multa de atraso, e os clientes relâmpago cobram as multas mais altas. O que não couber na semana vai para a farm parceira — por um preço."
+    },
+    coffee: {
+      en: "You run a microroastery built around one drum roaster and a queue of about ninety lots: subscriptions, partner cafes and the end-of-month wholesale round. A roasting day has 12 hours, and every profile change means purging and cleaning the drum — decaf is the troublemaker, demanding a full clean before and a sweep after so no flavor carries into the next lot. Whatever does not fit the week you buy roasted from another roaster to keep the ship date.",
+      pt: "Você toca uma microtorrefação com um único tambor e uma fila de cerca de noventa lotes: assinaturas, cafeterias parceiras e a rodada de atacado do fim do mês. O dia de torra tem 12 horas, e cada troca de perfil exige purgar e limpar o tambor — o descafeinado é o chato da fila, pedindo limpeza completa antes e varredura depois para não contaminar o lote seguinte. O que não couber na semana você compra torrado de outro torrefador para não furar a data de envio."
+    },
+    brewery: {
+      en: "Your brewery runs one brewhouse around the clock, with a queue of about ninety batches waiting to fill the fermenters. Every style change means a CIP and a fresh sanitization of the kettle — and after a sour the deep clean is heavy, because wild yeast contaminates the next batch. Each batch has a fermenter window waiting: miss the window and the tank sits blocked while the penalty runs. Whatever does not fit the cycle you send to be brewed at the partner brewery.",
+      pt: "Sua cervejaria roda uma única sala de brassagem 24 horas por dia, com uma fila de cerca de noventa bateladas esperando para encher os fermentadores. Cada troca de estilo exige CIP e nova sanitização da panela — e depois de uma sour a faxina é pesada, porque levedura selvagem contamina a batelada seguinte. Cada batelada tem a janela do fermentador esperando: perdeu a janela, o tanque fica bloqueado e a multa corre. O que não couber no ciclo você manda brasar na cervejaria parceira."
+    }
+  };
+
+  /* strings carrying an interpolated number, so they cannot be keyed on a whole
+     text node. Same shape as the arena's arenaText(en, pt). */
+  var STR = {
+    "published benchmark": "benchmark publicado",
+    "seeded domain workload": "carga de domínio gerada com seed",
+    "CNC factory": "Fábrica CNC",
+    "3D print farm": "Fazenda de impressão 3D",
+    "Coffee roastery": "Torrefação de café",
+    "Craft brewery": "Cervejaria artesanal",
+    "orders": "pedidos",
+    "lots": "lotes",
+    "batches": "bateladas",
+    "tool families": "famílias de ferramenta",
+    "filaments": "filamentos",
+    "profiles": "perfis",
+    "styles": "estilos",
+    "production days": "dias de produção",
+    "print days": "dias de impressão",
+    "roasting days": "dias de torra",
+    "brew days": "dias de brassagem",
+    "Four-day order book": "Carteira de quatro dias",
+    "Eight-day order book": "Carteira de oito dias",
+    "Two-week peak horizon": "Horizonte de pico de duas semanas",
+    "Two-day roast plan": "Plano de torra de dois dias",
+    "Four-day roast plan": "Plano de torra de quatro dias",
+    "Eight-day roast plan": "Plano de torra de oito dias",
+    "Eleven-day brew schedule": "Cronograma de onze dias",
+    "Three-week brew schedule": "Cronograma de três semanas",
+    "Five-week brew schedule": "Cronograma de cinco semanas",
+    "tool and fixture changes": "trocas de ferramenta e fixação",
+    "machining": "usinagem",
+    "delivery delay": "atraso de entrega",
+    "supplier outsourcing": "terceirização",
+    "filament swaps": "trocas de filamento",
+    "printing": "impressão",
+    "late shipment": "envio atrasado",
+    "outsourcing": "terceirização na farm parceira",
+    "profile changeovers": "trocas de perfil",
+    "roasting": "torra",
+    "co-roaster buying": "compra de outro torrefador",
+    "CIP and sanitization": "CIP e sanitização",
+    "brewing": "brassagem",
+    "missed tank window": "janela de tanque perdida",
+    "contract brewing": "brassagem terceirizada",
+    "The queue": "A fila",
+    "across": "em",
+    "Changeover share": "Peso da troca",
+    "of the machine time one order occupies": "do tempo de máquina que um pedido ocupa",
+    "no changeover time — the file still charges a changeover cost": "sem tempo de troca — o arquivo ainda cobra um custo de troca",
+    "Machine load": "Carga da máquina",
+    "of the scheduling horizon": "do horizonte de programação",
+    "of the horizon — the queue cannot all be made": "do horizonte — a fila não cabe inteira",
+    "Possible orders": "Ordens possíveis",
+    "sequences of this queue": "sequências desta fila",
+    "the heaviest of the four": "a mais pesada das quatro",
+    "the lightest of the four": "a mais leve das quatro",
+    "of one order's machine time is changeover": "do tempo de máquina de um pedido é troca",
+    "This file has no changeover time at all, and still charges up to": "Este arquivo não tem tempo de troca nenhum, e ainda cobra até",
+    "for one": "por troca",
+    "total machine time": "tempo total de máquina",
+    "horizon": "horizonte",
+    "over the horizon": "acima do horizonte",
+    "mean release": "liberação média",
+    "mean promise": "promessa média",
+    "last promise": "última promessa",
+    "families": "famílias",
+    "scheduling horizon": "horizonte de programação",
+    "mean machine time per order": "tempo médio de máquina por pedido",
+    "mean promised date": "data prometida média",
+    "mean late-penalty rate": "multa média por atraso",
+    "mean changeover time": "tempo médio de troca",
+    "longest changeover": "troca mais longa",
+    "mean changeover cost": "custo médio de troca",
+    "dearest changeover": "troca mais cara",
+    "impossible on arrival": "impossíveis na chegada",
+    "refusal against production": "recusar contra produzir",
+    "machine load": "carga da máquina",
+    "published best-known cost": "melhor custo conhecido publicado",
+    "possible sequences": "sequências possíveis",
+    "spread of order lengths": "distribuição dos tempos de máquina",
+    "shortest": "mais curto",
+    "longest": "mais longo",
+    "none": "nenhum",
+    "of the file's orders": "dos pedidos do arquivo",
+    "× the production cost": "× o custo de produzir",
+    "evaluations": "avaliações",
+    "Seed": "Seed",
+    "not run": "não executado",
+    "Cost found here": "Custo encontrado aqui",
+    "no run yet": "nenhuma execução ainda",
+    "Published record": "Recorde publicado",
+    "MaScLib, 2015": "MaScLib, 2015",
+    "seeded workload, no record": "carga gerada com seed, sem recorde",
+    "Distance from the record": "Distância do recorde",
+    "needs a run": "precisa de uma execução",
+    "Methods run": "Métodos executados",
+    "one seed, one budget": "uma seed, um orçamento",
+    "The published record for this file is": "O recorde publicado deste arquivo é",
+    "This file carries no published record.": "Este arquivo não tem recorde publicado.",
+    "Nothing has been run on this page.": "Nada foi executado nesta página.",
+    "The schedule found": "O cronograma encontrado",
+    "The search": "A busca",
+    "The six methods": "Os seis métodos",
+    "Twelve seeds": "Doze seeds",
+    "total": "total",
+    "made": "feitos",
+    "refused": "recusados",
+    "late": "atrasados",
+    "out of": "de",
+    "empty machine lane": "faixa de máquina vazia",
+    "iterations": "iterações",
+    "accepted improvements": "melhorias aceitas",
+    "last improvement at": "última melhoria em",
+    "wall clock": "tempo de relógio",
+    "destroy size": "tamanho da destruição",
+    "acceptance": "aceitação",
+    "current solution": "solução atual",
+    "pairwise exchange": "troca entre pares",
+    "on": "ligada",
+    "budget": "orçamento",
+    "no curve": "sem curva",
+    "instance": "instância",
+    "seed": "seed",
+    "methods": "métodos",
+    "queued": "na fila",
+    "method": "método",
+    "cost": "custo",
+    "gap": "distância",
+    "evals": "avaliações",
+    "All six race on the same instance, the same seed and the same budget — in the Studio, which Run opens in a tab. This page does not take their numbers back, so every cell here is an em dash.": "Os seis correm na mesma instância, com a mesma seed e o mesmo orçamento — no Studio, que o Executar abre numa aba. Esta página não recebe os números de volta, então toda célula aqui é um travessão.",
+    "published record": "recorde publicado",
+    "where it comes from": "de onde vem",
+    "no record for a seeded workload": "sem recorde: carga gerada com seed",
+    "WebAssembly engine": "motor WebAssembly",
+    "MaScLib 2015, published with the file": "MaScLib 2015, publicado com o arquivo",
+    "the benchmark engine — it runs in the Studio, not on this page": "o motor do benchmark — ele roda no Studio, não nesta página",
+    "The record is the file's own published value, not a result of this page. The engine row is empty for the same reason as the six above.": "O recorde é o valor publicado do próprio arquivo, não um resultado desta página. A linha do motor está vazia pelo mesmo motivo das seis acima.",
+    "Neither row is a result produced here.": "Nenhuma das duas linhas é um resultado produzido aqui.",
+    "seeds": "seeds",
+    "note": "observação",
+    "No setups (NCOS)": "Sem setups (NCOS)",
+    "With setups (STC)": "Com setups (STC)",
+    "copied": "copiado"
+  };
+  function pt() { return window.__lang === "pt"; }
+  function L(k) { return (pt() && STR[k]) || k; }
+
+  /* ---------- helpers ---------- */
+  function el(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  var NFC = null, NFL = null;
+  function fmt(v) {
+    if (v === null || v === undefined) return "—";
+    var lang = pt() ? "pt-BR" : "en-US";
+    if (NFL !== lang) { NFL = lang; NFC = new Intl.NumberFormat(lang); }
+    return NFC.format(v);
+  }
+  var SUP = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹" };
+  function poss(s) {
+    return String(s).replace(/\^(\d+)/, function (_, d) {
+      return d.replace(/\d/g, function (c) { return SUP[c]; });
+    });
+  }
+  function readout(label, value, cls) {
+    return '<span class="readout' + (cls ? " " + cls : "") + '">' + esc(label) +
+      " <b>" + esc(value) + "</b></span>";
+  }
+  var DASH = "—";
+
+  /* SVG helpers. One user unit is one CSS pixel, so type keeps the size it is
+     written at, at every width, and no figure needs a scrollport. */
+  function width(node) {
+    var w = Math.round(node.getBoundingClientRect().width);
+    if (w > 0) { node.__w = w; return w; }
+    return node.__w || 700;
+  }
+  function paint(node, h, body) {
+    var w = width(node);
+    node.setAttribute("viewBox", "0 0 " + w + " " + h);
+    var t = node.querySelector("title");
+    node.innerHTML = (t ? t.outerHTML : "") + body;
+    return w;
+  }
+  function txt(x, y, s, o) {
+    o = o || {};
+    return '<text x="' + x + '" y="' + y + '" text-anchor="' + (o.a || "start") +
+      '" font-family="' + (o.f || "var(--mono)") + '" font-size="' + (o.s || 10) +
+      '" font-weight="' + (o.w || 400) + '" fill="' + (o.c || "var(--ink-soft)") + '">' +
+      esc(s) + "</text>";
+  }
+  function rect(x, y, w, h, fill, extra) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + Math.max(0, w) + '" height="' +
+      Math.max(0, h) + '" fill="' + fill + '"' + (extra || "") + "/>";
+  }
+  function line(x1, y1, x2, y2, stroke, sw, extra) {
+    return '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 +
+      '" stroke="' + stroke + '" stroke-width="' + (sw || 1) + '"' + (extra || "") + "/>";
+  }
+  /* an absent result: a dashed track, so the figure says it on itself */
+  function track(x, y, w, h) {
+    return '<rect x="' + x + '" y="' + y + '" width="' + Math.max(0, w) + '" height="' + h +
+      '" fill="none" stroke="var(--rule-strong)" stroke-width="1" stroke-dasharray="3 4" rx="3"/>';
+  }
+
+  /* ---------- state ---------- */
+  var S = { world: "coffee", inst: "COFFEE_M_90", budget: 200000, seed: 1,
+            method: "ig", tab: "runPanSched" };
+
+  function W() {
+    for (var i = 0; i < RUN_WORLDS.length; i++) if (RUN_WORLDS[i].id === S.world) return RUN_WORLDS[i];
+    return RUN_WORLDS[0];
+  }
+  function D() { return RUN_STATS[S.inst]; }
+  function ids(w) { return w.list.split(" "); }
+  function days(w, minutes) { return Math.round(minutes / w.day); }
+  function pTime(w, minutes) { return w.pDiv === 1 ? String(minutes) : (minutes / w.pDiv).toFixed(1); }
+  /* catalog.js types every cost column of these files as R$ */
+  function money(v) { return "R$ " + fmt(v); }
+  /* the share of one order's machine time that a changeover takes */
+  function share(d) {
+    var t = d[SETUP] + d[PROC];
+    return t > 0 ? Math.round((100 * d[SETUP]) / t) : 0;
+  }
+  function fact(lbl, val, small, hot) {
+    return '<div class="fact' + (hot ? " hot" : "") + '"><div class="lbl">' + esc(lbl) +
+      '</div><div class="val">' + esc(val) + (small ? " <small>" + esc(small) + "</small>" : "") +
+      "</div></div>";
+  }
+
+  /* ============================================================
+     1 · THE PROBLEM
+     ============================================================ */
+  function renderProblem() {
+    var w = W(), d = D();
+    el("runFile").innerHTML = esc(L(w.name)) + " · <code>" + esc(w.dir + "/" + S.inst + ".csv") +
+      "</code> · " + esc(L(w.kind)) + (w.labels[S.inst] ? " · " + esc(L(w.labels[S.inst])) : "");
+    el("runStory").textContent = DESC[w.id][pt() ? "pt" : "en"];
+
+    var sh = share(d), noTime = d[SETUP] === 0 && d[SCOST] > 0;
+    el("runFacts").innerHTML =
+      fact(L("The queue"), fmt(d[N]), L(w.job) + " · " + L("across") + " " + d[FAMS] + " " + L(w.fam)) +
+      fact(L("Changeover share"), sh + "%",
+        noTime ? L("no changeover time — the file still charges a changeover cost")
+               : L("of the machine time one order occupies")) +
+      fact(L("Machine load"), Math.round(d[LOAD] * 100) + "%",
+        d[LOAD] > 1 ? L("of the horizon — the queue cannot all be made")
+                    : L("of the scheduling horizon")) +
+      fact(L("Possible orders"), poss(d[POSS]), L("sequences of this queue"));
+
+    renderWorlds();
+    renderLoad();
+    renderSpan();
+    renderStatRows();
+  }
+
+  /* the four worlds on one shared scale: the mean changeover next to the machine
+     time of one order. The selected world shows the selected file; the other
+     three show the file their own lens recommends. */
+  function renderWorlds() {
+    var node = el("runWorldsSvg");
+    var rows = RUN_WORLDS.map(function (w) {
+      var id = w.id === S.world ? S.inst : w.def, d = RUN_STATS[id];
+      return { w: w, d: d, tot: d[SETUP] + d[PROC], on: w.id === S.world };
+    });
+    var max = Math.max.apply(null, rows.map(function (r) { return r.tot; })) || 1;
+    var W0 = width(node), LX = Math.min(148, Math.round(W0 * 0.3)), RX = 54;
+    var h = 26, top = 6, body = "";
+    rows.forEach(function (r, i) {
+      var y = top + i * h, bw = Math.max(1, (W0 - LX - RX) * (r.tot / max));
+      var sw = bw * (r.d[SETUP] / (r.tot || 1));
+      body += txt(LX - 8, y + 13, L(r.w.name), { a: "end", f: "var(--sans)", s: 11.5,
+        w: r.on ? 700 : 500, c: r.on ? "var(--ink)" : "var(--ink-soft)" });
+      body += rect(LX, y + 3, bw, 13, "var(--steel)", ' rx="2" opacity="' + (r.on ? 1 : 0.5) + '"');
+      if (sw > 0.6) body += rect(LX, y + 3, sw, 13, "var(--maple)",
+        ' rx="2" opacity="' + (r.on ? 1 : 0.55) + '"');
+      body += txt(LX + bw + 7, y + 13, share(r.d) + "%",
+        { s: 10.5, w: 700, c: r.on ? "var(--terra-ink)" : "var(--ink-soft)" });
+    });
+    paint(node, top + rows.length * h + 4, body);
+
+    var w = W(), d = D();
+    var sorted = rows.slice().sort(function (a, b) { return share(b.d) - share(a.d); });
+    var rank = sorted[0].w.id === S.world ? L("the heaviest of the four")
+      : sorted[sorted.length - 1].w.id === S.world ? L("the lightest of the four") : "";
+    var note = L(w.name) + " · " + share(d) + "% " +
+      L("of one order's machine time is changeover") + (rank ? ", " + rank : "") + ".";
+    if (d[SETUP] === 0 && d[SCOST] > 0) {
+      note += " " + L("This file has no changeover time at all, and still charges up to") + " " +
+        money(d[SCOSTMAX]) + " " + L("for one") + ".";
+    }
+    el("runWorldsNote").textContent = note;
+  }
+
+  /* total machine time against the horizon; past 100% the queue cannot all be made */
+  function renderLoad() {
+    var node = el("runLoadSvg"), d = D(), W0 = width(node);
+    var pad = 4, full = W0 - pad * 2, r = d[LOAD], scale = Math.max(1, r);
+    var trackW = full / scale, fillW = full * (r / scale), body = "";
+    body += rect(pad, 22, trackW, 16, "var(--well)", ' rx="3"');
+    body += rect(pad, 22, Math.min(fillW, trackW), 16, "var(--sage)", ' rx="3"');
+    if (r > 1) body += rect(pad + trackW, 22, fillW - trackW, 16, "var(--red)", ' rx="3"');
+    body += line(pad + trackW, 16, pad + trackW, 44, "var(--edge)", 1);
+    body += txt(pad, 14, L("total machine time") + " · " + Math.round(r * 100) + "%",
+      { f: "var(--sans)", s: 10.5, w: 600, c: "var(--ink)" });
+    body += txt(Math.min(pad + trackW, pad + full), 54,
+      L("horizon") + " · " + fmt(days(W(), d[HOR])) + " " + L(W().dayName),
+      { a: trackW > full * 0.66 ? "end" : "start", s: 9.5 });
+    if (r > 1) body += txt(pad + full, 14, L("over the horizon"),
+      { a: "end", s: 9.5, c: "var(--red)" });
+    paint(node, 62, body);
+  }
+
+  /* the three dates and the horizon, one row each on one shared scale. A single
+     time axis cannot carry them: STC_NCOS_31's scheduling window is ten times its
+     last promised date, which would crush all three marks into the first tenth. */
+  function renderSpan() {
+    var node = el("runSpanSvg"), d = D(), w = W(), W0 = width(node);
+    var rows = [[L("mean release"), d[REL], "var(--steel)"],
+                [L("mean promise"), d[DUE], "var(--maple)"],
+                [L("last promise"), d[MAXDUE], "var(--terra)"],
+                [L("horizon"), d[HOR], "var(--edge)"]];
+    var max = Math.max.apply(null, rows.map(function (r) { return r[1]; })) || 1;
+    var LX = Math.min(112, Math.round(W0 * 0.36)), RX = 52, h = 20, top = 4, body = "";
+    rows.forEach(function (r, i) {
+      var y = top + i * h;
+      body += txt(LX - 8, y + 12, r[0], { a: "end", f: "var(--sans)", s: 10 });
+      body += rect(LX, y + 3, Math.max(1, (W0 - LX - RX) * (r[1] / max)), 11, r[2], ' rx="2"');
+      body += txt(W0 - 2, y + 12, fmt(days(w, r[1])), { a: "end", s: 10, c: "var(--ink)" });
+    });
+    body += txt(LX, top + rows.length * h + 12, L(w.dayName), { s: 9 });
+    paint(node, top + rows.length * h + 18, body);
+  }
+
+  /* every field this page holds for the selected file */
+  function renderStatRows() {
+    var d = D(), w = W(), rows = [];
+    function row(k, v, unit) { rows.push([k, v, unit || ""]); }
+    row(L(w.job), fmt(d[N]), "");
+    row(L("families"), fmt(d[FAMS]), L(w.fam));
+    row(L("scheduling horizon"), fmt(days(w, d[HOR])), L(w.dayName));
+    row(L("mean machine time per order"), pTime(w, d[PROC]), w.pUnit);
+    row(L("mean release"), fmt(days(w, d[REL])), L(w.dayName));
+    row(L("mean promised date"), fmt(days(w, d[DUE])), L(w.dayName));
+    row(L("last promise"), fmt(days(w, d[MAXDUE])), L(w.dayName));
+    row(L("mean late-penalty rate"), fmt(d[WEIGHT]), "R$");
+    row(L("mean changeover time"), fmt(d[SETUP]), "min");
+    row(L("longest changeover"), fmt(d[SETUPMAX]), "min");
+    row(L("mean changeover cost"), fmt(d[SCOST]), "R$");
+    row(L("dearest changeover"), fmt(d[SCOSTMAX]), "R$");
+    row(L("impossible on arrival"), d[TIGHT] + "%", L("of the file's orders"));
+    row(L("refusal against production"), fmt(d[REJ]), L("× the production cost"));
+    row(L("machine load"), Math.round(d[LOAD] * 100) + "%", L("of the scheduling horizon"));
+    row(L("published best-known cost"), d[BEST] ? fmt(d[BEST]) : L("none"),
+      d[BEST] ? L("MaScLib, 2015") : "");
+    row(L("possible sequences"), poss(d[POSS]), "");
+    var out = rows.map(function (r) {
+      return "<li><span>" + esc(r[0]) + '</span><span class="num">' + esc(r[1]) +
+        '</span><span class="dim">' + esc(r[2]) + "</span></li>";
+    }).join("");
+    var bins = d[BINS], mx = Math.max.apply(null, bins) || 1, bars = "";
+    bins.forEach(function (b) {
+      bars += '<i style="height:' + Math.max(2, Math.round((b / mx) * 20)) + 'px"></i>';
+    });
+    out += "<li><span>" + esc(L("spread of order lengths")) + '</span><span class="run-hist">' +
+      bars + '</span><span class="dim">' + esc(L("shortest") + " → " + L("longest")) + "</span></li>";
+    el("runStatRows").innerHTML = out;
+  }
+
+  /* ============================================================
+     2 · THE CONSOLE
+     ============================================================ */
+  function renderConsole() {
+    el("runSeedOut").innerHTML = readout(L("Seed"), fmt(S.seed));
+    el("runBudFill").style.width = "0%";
+    el("runBudLabel").textContent = "0 / " + fmt(S.budget) + " " + L("evaluations");
+    el("runStandings").innerHTML = METHODS.map(function (m) {
+      var on = m[0] === S.method;
+      return '<li data-m="' + m[0] + '" tabindex="0" role="button" aria-pressed="' + on + '"' +
+        (on ? ' class="leader"' : "") +
+        '><span class="st-rank">–</span><span class="st-dot" style="background:var(' + m[2] +
+        ')"></span><span class="st-name">' + esc(m[1]) +
+        '<span class="st-sep" aria-hidden="true"> · </span><small>' + esc(L("not run")) +
+        '</small></span><span class="st-cost">' + DASH + "</span></li>";
+    }).join("");
+  }
+
+  /* ============================================================
+     3 · THE STAGE
+     ============================================================ */
+  var TABNAME = { runPanSched: "The schedule found", runPanSearch: "The search",
+                  runPanMeth: "The six methods", runPanSeeds: "Twelve seeds" };
+
+  function renderStage() {
+    var w = W(), d = D();
+    el("runFigName").textContent = L(TABNAME[S.tab]);
+    el("runFigInst").textContent = L(w.name) + " · " + S.inst + " · " + L("no run yet");
+
+    el("runAnswer").innerHTML =
+      fact(L("Cost found here"), DASH, L("no run yet"), true) +
+      fact(L("Published record"), d[BEST] ? fmt(d[BEST]) : L("none"),
+        d[BEST] ? L("MaScLib, 2015") : L("seeded workload, no record")) +
+      fact(L("Distance from the record"), DASH, L("needs a run")) +
+      fact(L("Methods run"), "0 / 6", L("one seed, one budget"));
+    el("runAnswerNote").innerHTML = esc(S.inst) + " · " + fmt(d[N]) + " " + esc(L(w.job)) + " · " +
+      (d[BEST]
+        ? esc(L("The published record for this file is")) + " <b>" + esc(fmt(d[BEST])) + "</b>. "
+        : esc(L("This file carries no published record.")) + " ") +
+      esc(L("Nothing has been run on this page."));
+
+    renderSched();
+    renderSearch();
+    renderMethods();
+    renderSeeds();
+  }
+
+  function renderSched() {
+    var w = W(), d = D(), node = el("runSchedSvg"), W0 = width(node);
+    var pad = 4, full = W0 - pad * 2, body = "";
+    body += rect(pad, 20, full, 26, "var(--stage)", ' rx="4"');
+    body += track(pad + 3, 23, full - 6, 20);
+    body += txt(pad + full / 2, 37, L("empty machine lane"),
+      { a: "middle", f: "var(--sans)", s: 10.5 });
+    var ticks = 6, span = days(w, d[HOR]);
+    for (var i = 0; i <= ticks; i++) {
+      var x = pad + (full * i) / ticks;
+      body += line(x, 46, x, 51, "var(--rule-strong)", 1);
+      body += txt(x, 62, fmt(Math.round((span * i) / ticks)),
+        { a: i === 0 ? "start" : i === ticks ? "end" : "middle", s: 9 });
+    }
+    body += txt(pad + full, 14, L(w.dayName), { a: "end", s: 9.5 });
+    paint(node, 68, body);
+
+    el("runSchedTerms").innerHTML = w.terms.map(function (t, i) {
+      return '<span class="readout"><i class="run-sw" style="background:var(' + TERMC[i] +
+        ')"></i>' + esc(L(t)) + " <b>" + DASH + "</b></span>";
+    }).join("") + readout(L("total"), DASH, "total");
+    el("runSchedCounts").innerHTML = readout(L("made"), DASH) + readout(L("refused"), DASH) +
+      readout(L("late"), DASH) + readout(L("out of"), fmt(d[N]) + " " + L(w.job));
+  }
+
+  function renderSearch() {
+    var node = el("runSearchSvg"), W0 = width(node);
+    var pad = 4, full = W0 - pad * 2, body = "", maxB = BUDGETS[BUDGETS.length - 1];
+    body += track(pad, 14, full, 54);
+    BUDGETS.forEach(function (b) {
+      var on = b === S.budget, x = pad + full * (b / maxB);
+      body += line(x, 10, x, 72, on ? "var(--terra)" : "var(--rule-strong)", on ? 1.6 : 1,
+        on ? "" : ' stroke-dasharray="2 3"');
+      body += txt(Math.min(x, pad + full), 84, fmt(b),
+        { a: b === maxB ? "end" : "middle", s: 9.5, w: on ? 700 : 400,
+          c: on ? "var(--terra-ink)" : "var(--ink-soft)" });
+    });
+    body += txt(pad + full / 2, 46, L("no curve"), { a: "middle", f: "var(--sans)", s: 10.5 });
+    body += txt(pad, 96, L("evaluations"), { s: 9.5 });
+    paint(node, 102, body);
+
+    el("runSearchOut").innerHTML = readout(L("iterations"), DASH) +
+      readout(L("accepted improvements"), DASH) + readout(L("last improvement at"), DASH) +
+      readout(L("wall clock"), DASH);
+    el("runSearchParams").innerHTML = readout(L("destroy size"), "d = 2") +
+      readout(L("acceptance"), L("current solution")) +
+      readout(L("pairwise exchange"), L("on")) + readout(L("budget"), fmt(S.budget));
+  }
+
+  function renderMethods() {
+    var w = W(), d = D();
+    el("runMethReq").innerHTML = readout(L("instance"), S.inst) + readout(L("seed"), fmt(S.seed)) +
+      readout(L("budget"), fmt(S.budget)) + readout(L("methods"), "6 " + L("queued"));
+
+    var head = '<li class="run-head"><span>#</span><span></span><span>' + esc(L("method")) +
+      '</span><span class="num">' + esc(L("cost")) + '</span><span class="num drop">' +
+      esc(L("gap")) + '</span><span class="num drop">' + esc(L("evals")) + "</span></li>";
+    el("runMethRows").innerHTML = head + METHODS.map(function (m) {
+      return '<li data-m="' + m[0] + '"' + (m[0] === S.method ? ' class="sel"' : "") +
+        '><span class="dim">–</span><span class="st-dot" style="background:var(' + m[2] +
+        ')"></span><span class="key">' + esc(m[1]) + '</span><span class="num">' + DASH +
+        '</span><span class="num drop">' + DASH + '</span><span class="num drop">' + DASH +
+        "</span></li>";
+    }).join("");
+    el("runMethCap").textContent = L("All six race on the same instance, the same seed and the same budget — in the Studio, which Run opens in a tab. This page does not take their numbers back, so every cell here is an em dash.");
+
+    el("runDecompLegend").innerHTML = w.terms.map(function (t, i) {
+      return '<span><i class="run-sw" style="background:var(' + TERMC[i] + ')"></i>' +
+        esc(L(t)) + "</span>";
+    }).join("");
+
+    var node = el("runDecompSvg"), W0 = width(node);
+    var LX = Math.min(126, Math.round(W0 * 0.3)), h = 22, top = 4, body = "";
+    METHODS.forEach(function (m, i) {
+      var y = top + i * h, on = m[0] === S.method;
+      /* the same abbreviation the race chart uses for its end labels */
+      var name = LX < 96 ? (m[0] === "ig" ? "IG" : m[1].split(" ")[0]) : m[1];
+      body += txt(LX - 8, y + 13, name, { a: "end", f: "var(--sans)", s: 10.5, w: on ? 700 : 500,
+        c: on ? "var(--ink)" : "var(--ink-soft)" });
+      body += track(LX, y + 3, Math.max(10, W0 - LX - 26), 14);
+      body += txt(W0 - 2, y + 13, DASH, { a: "end", s: 10.5 });
+    });
+    paint(node, top + METHODS.length * h + 4, body);
+
+    var refHead = '<li class="run-head"><span></span><span></span><span>' + esc(L("method")) +
+      '</span><span class="num">' + esc(L("cost")) + '</span><span class="drop">' +
+      esc(L("where it comes from")) + "</span></li>";
+    el("runMethRef").innerHTML = refHead +
+      '<li><span class="dim">·</span><span class="st-dot" style="background:var(--brass)"></span>' +
+      '<span class="key">' + esc(L("published record")) + '</span><span class="num">' +
+      (d[BEST] ? esc(fmt(d[BEST])) : DASH) + '</span><span class="drop dim">' +
+      esc(d[BEST] ? L("MaScLib 2015, published with the file") : L("no record for a seeded workload")) +
+      "</span></li>" +
+      '<li><span class="dim">·</span><span class="st-dot" style="background:var(--edge)"></span>' +
+      '<span class="key">' + esc(L("WebAssembly engine")) + '</span><span class="num">' + DASH +
+      '</span><span class="drop dim">' + esc(L("the benchmark engine — it runs in the Studio, not on this page")) +
+      "</span></li>";
+    el("runMethRefCap").textContent = d[BEST]
+      ? L("The record is the file's own published value, not a result of this page. The engine row is empty for the same reason as the six above.")
+      : L("Neither row is a result produced here.");
+  }
+
+  function renderSeeds() {
+    el("runSeedReq").innerHTML = readout(L("seeds"), "12") + readout(L("instance"), S.inst) +
+      readout(L("budget"), fmt(S.budget));
+    var head = '<li class="run-head"><span>' + esc(L("seed")) + '</span><span class="num">' +
+      esc(L("cost")) + '</span><span class="num drop">' + esc(L("gap")) + '</span><span class="drop">' +
+      esc(L("note")) + "</span></li>", rows = "";
+    for (var i = 0; i < 12; i++) {
+      rows += "<li" + (i === 0 ? ' class="sel"' : "") + '><span class="key">' + fmt(S.seed + i) +
+        '</span><span class="num">' + DASH + '</span><span class="num drop">' + DASH +
+        '</span><span class="drop dim">' + esc(L("not run")) + "</span></li>";
+    }
+    el("runSeedRows").innerHTML = head + rows;
+  }
+
+  /* ============================================================
+     4 · CONTROLS
+     ============================================================ */
+  function fillWorlds() {
+    el("runWorld").innerHTML = RUN_WORLDS.map(function (w) {
+      return '<option value="' + w.id + '"' + (w.id === S.world ? " selected" : "") + ">" +
+        esc(L(w.name)) + "</option>";
+    }).join("");
+  }
+  /* every file the lens maps to is listed, all 44 of them for the factory. The
+     two MaScLib families are grouped, because 44 flat rows are not a chooser. */
+  function fillInstances() {
+    var w = W(), out = "", group = null;
+    ids(w).forEach(function (id) {
+      var d = RUN_STATS[id];
+      var g = w.id === "factory" ? (id.indexOf("STC_") === 0 ? "With setups (STC)" : "No setups (NCOS)") : null;
+      if (g !== group) {
+        if (group) out += "</optgroup>";
+        if (g) out += '<optgroup label="' + esc(L(g)) + '">';
+        group = g;
+      }
+      out += '<option value="' + id + '"' + (id === S.inst ? " selected" : "") + ">" +
+        esc((w.labels[id] ? L(w.labels[id]) : id) + " · " + fmt(d[N]) + " " + L(w.job)) + "</option>";
+    });
+    el("runInstance").innerHTML = out + (group ? "</optgroup>" : "");
+  }
+  /* The deep links into the standalone Studio. The language suffix is the one the
+     page's own i18n appends to every studio-app.html link.
+     Run is the real one: studio-app.html honours mode=race, page=method, scenario,
+     instance, seed, raceBudget and run=1, and races all six methods on this exact
+     file at this seed and this budget. Verified end to end on BREWERY_M_90 at
+     seed 7 and 50,000 evaluations per method. */
+  function links() {
+    var tail = "scenario=" + W().id + "&instance=" + S.inst + (pt() ? "&lang=pt-BR" : "");
+    el("runGo").href = "studio-app.html?mode=race&page=method&" + tail +
+      "&seed=" + S.seed + "&raceBudget=" + S.budget + "&run=1";
+    el("runLinkStudio").href = "studio-app.html?" + tail;
+    el("runLinkProblem").href = "studio-app.html?" + tail;
+    el("runLinkSchedule").href = "studio-app.html?page=schedule&" + tail;
+  }
+  function renderAll() { renderProblem(); renderConsole(); renderStage(); links(); }
+
+  function boot() {
+    if (!el("runWorld")) return;
+    /* a shared link preselects the world, the file and the seed */
+    try {
+      var p = new URLSearchParams(location.search), qw = p.get("world"), qi = p.get("instance");
+      if (qw) for (var i = 0; i < RUN_WORLDS.length; i++) if (RUN_WORLDS[i].id === qw) S.world = qw;
+      S.inst = qi && RUN_STATS[qi] && ids(W()).indexOf(qi) >= 0 ? qi : W().def;
+      var qs = parseInt(p.get("seed"), 10);
+      if (qs > 0 && qs < 1e9) S.seed = qs;
+    } catch (e) { /* an unparseable URL is not a reason to fail */ }
+
+    fillWorlds();
+    fillInstances();
+    renderAll();
+
+    el("runWorld").addEventListener("change", function () {
+      S.world = this.value;
+      if (ids(W()).indexOf(S.inst) < 0) S.inst = W().def;
+      fillInstances();
+      renderAll();
+    });
+    el("runInstance").addEventListener("change", function () { S.inst = this.value; renderAll(); });
+
+    el("runBudget").addEventListener("click", function (ev) {
+      var b = ev.target.closest("button[data-bud]");
+      if (!b) return;
+      S.budget = +b.getAttribute("data-bud");
+      Array.prototype.forEach.call(this.querySelectorAll("button"), function (x) {
+        var on = x === b;
+        x.classList.toggle("on", on);
+        x.setAttribute("aria-pressed", String(on));
+      });
+      renderConsole();
+      renderStage();
+      links();
+    });
+
+    el("runNewSeed").addEventListener("click", function () {
+      S.seed = 1 + Math.floor(Math.random() * 999999);
+      renderConsole();
+      renderStage();
+      links();
+    });
+
+    el("runMore").addEventListener("click", function () {
+      var box = el("runStatRows"), open = box.hidden;
+      box.hidden = !open;
+      this.setAttribute("aria-expanded", String(open));
+      /* written in English on purpose: the page's own EN2PT walker translates it */
+      this.textContent = open ? "Hide every number" : "Show every number";
+      if (open) renderStatRows();
+    });
+
+    el("runTabs").addEventListener("click", function (ev) {
+      var b = ev.target.closest("button[data-pan]");
+      if (!b) return;
+      S.tab = b.getAttribute("data-pan");
+      Array.prototype.forEach.call(this.querySelectorAll("button"), function (x) {
+        var on = x === b;
+        x.classList.toggle("on", on);
+        x.setAttribute("aria-selected", String(on));
+        el(x.getAttribute("data-pan")).hidden = !on;
+      });
+      renderStage();   /* a hidden panel had no width to draw into */
+    });
+
+    function pick(ev) {
+      var li = ev.target.closest("li[data-m]");
+      if (!li) return;
+      S.method = li.getAttribute("data-m");
+      renderConsole();
+      renderMethods();
+    }
+    el("runStandings").addEventListener("click", pick);
+    el("runStandings").addEventListener("keydown", function (ev) {
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); pick(ev); }
+    });
+    el("runMethRows").addEventListener("click", pick);
+
+    el("runCopy").addEventListener("click", function () {
+      var u = location.origin + location.pathname + "?world=" + S.world + "&instance=" + S.inst +
+        "&seed=" + S.seed + "#m-run";
+      var btn = this, was = btn.textContent;
+      function done() {
+        btn.textContent = "✓ " + L("copied");
+        setTimeout(function () { btn.textContent = was; }, 1400);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(u).then(done, function () {});
+      } else done();
+    });
+
+    /* one re-render for width, one for language */
+    var t = 0;
+    addEventListener("resize", function () {
+      clearTimeout(t);
+      t = setTimeout(function () { renderProblem(); renderStage(); }, 160);
+    }, { passive: true });
+    addEventListener("langchange", function () { fillWorlds(); fillInstances(); renderAll(); });
+  }
+
+  /* This script sits after the section, so the markup is already parsed: booting
+     now rather than at DOMContentLoaded keeps the section at its final height
+     before the legacy ?view=studio scroll fires. */
+  if (el("runWorld")) boot();
+  else if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
 })();
 </script>
 <script>
