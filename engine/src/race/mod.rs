@@ -14,6 +14,7 @@
 //! dispatch six times just to read scalars. `Common` sits at a fixed offset on
 //! every `Racer`, so the snapshot path never dispatches at all.
 
+pub mod ama;
 pub mod ctx;
 pub mod descent;
 pub mod greedy;
@@ -21,6 +22,7 @@ pub mod tabu;
 
 pub use ctx::Ctx;
 
+use ama::AmaState;
 use descent::DescentState;
 use greedy::GreedyState;
 use tabu::TabuState;
@@ -188,6 +190,7 @@ pub(crate) enum Body {
     /// Both "tabu" and "tabudiv": one search, one file, the `div` flag is the
     /// whole difference (a periodic diversification kick every 45 iterations).
     Tabu(TabuState),
+    Ama(AmaState),
     /// NOT YET PORTED. Each remaining method lands here as its own variant;
     /// until then a placeholder racer that spends nothing and reports itself
     /// finished, so the race can terminate. This variant disappears once all
@@ -213,6 +216,7 @@ impl Racer {
                 common.phase_arg = tabu::TENURE;
                 Body::Tabu(TabuState::new(inst, method == Method::TabuDiv, &mut common))
             }
+            Method::Ama => Body::Ama(AmaState::new(inst, &mut common)),
             _ => Body::Pending,
         };
         Racer { common, body }
@@ -238,6 +242,7 @@ impl Racer {
             Body::Greedy(s) => s.advance(&mut ctx),
             Body::Descent(s) => s.advance(&mut ctx),
             Body::Tabu(s) => s.advance(&mut ctx),
+            Body::Ama(s) => s.advance(&mut ctx),
             Body::Pending => ctx.finish(ST_PREPARING),
         }
         ctx.close()
@@ -250,6 +255,7 @@ impl Racer {
             Body::Greedy(s) => s.incumbent(),
             Body::Descent(s) => s.incumbent(),
             Body::Tabu(s) => s.cur(),
+            Body::Ama(s) => s.incumbent(&self.common),
             Body::Pending => &self.common.best,
         }
     }
