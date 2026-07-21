@@ -24,7 +24,10 @@ jobs:
         with:
           node-version: 22
       - name: Build WASM engine
-        run: cargo build --release --target wasm32-unknown-unknown --manifest-path engine/Cargo.toml
+        # --no-default-features drops the `cli` feature so the `ig` binary
+        # (required-features = ["cli"], which needs the native-only `solve`) is
+        # skipped and only the ig_core cdylib is compiled for wasm32. Matches ci.yml.
+        run: RUSTFLAGS="-C panic=abort" cargo build --release --target wasm32-unknown-unknown --no-default-features --manifest-path engine/Cargo.toml
       - name: Regenerate engine payload from current instances
         run: node studio/scripts/build-engine-payload.mjs --out=studio/src/generated/engine-payload.js
       - name: Studio check + build
