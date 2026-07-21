@@ -112,17 +112,23 @@
 }
 .scenario-pick-img {
   display: block;
-  aspect-ratio: 16 / 10;
+  /* Letterboxed, with the name riding on the art rather than in a strip below
+   * it: the taller tile plus its caption row cost the rail ~115px, which was
+   * the difference between the seed and the advanced controls fitting or not.
+   * The scenes are centred isometrics and carry --scenario-focus, so they crop. */
+  aspect-ratio: 16 / 7;
   background-size: cover;
   background-position: var(--scenario-focus, center);
   filter: saturate(.48) opacity(.76);
   transition: filter .24s ease;
 }
 .scenario-pick-name {
+  position: absolute;
+  inset: auto 0 0;
   display: block;
-  padding: 6px 8px 7px;
-  border-top: 1px solid var(--rule);
-  color: var(--muted);
+  padding: 12px 8px 6px;
+  background: linear-gradient(rgba(23, 25, 24, 0), rgba(23, 25, 24, .82) 62%);
+  color: #f4f1e7;
   font: 700 10px/1.15 var(--font-mono);
   letter-spacing: .03em;
   text-transform: uppercase;
@@ -136,7 +142,8 @@
   box-shadow: 3px 3px 0 rgba(169, 46, 10, .32);
 }
 .scenario-pick.is-active .scenario-pick-img { filter: none; }
-.scenario-pick.is-active .scenario-pick-name { color: var(--signal); }
+/* Lighter than --signal: the name now sits on a dark scrim over the art. */
+.scenario-pick.is-active .scenario-pick-name { color: #ffbb9c; }
 .scenario-pick.is-active .scenario-pick-index { background: var(--signal); }
 
 /* The hero image now stands on its own in the main column (carousel removed). */
@@ -317,6 +324,52 @@
   padding: 3px 0 2px;
 }
 
+/* The rail scrolls on its own, and on short viewports its content is taller
+ * than the panel — which pushed "Run" and the transport below the fold, so the
+ * primary action was invisible until you scrolled the panel. Dock them to the
+ * bottom instead. Mobile has its own fixed primary action (responsive.css), so
+ * this stays desktop-only. The rail loses its bottom padding to the dock so the
+ * docked and resting positions coincide and nothing jumps at the end of scroll. */
+@media (min-width: 761px) {
+  .control-rail { padding-bottom: 0; }
+
+  /* Order the rail by what the reader needs in order to act. The scenario art
+   * and the scenario prose together ran past 300px, which pushed the run modes,
+   * the budget and the seed out of an 860px-tall rail entirely: the controls
+   * were unreachable without scrolling a panel that gave no hint it scrolled.
+   * Pick, identify, navigate, configure, run stays above the fold; the
+   * explanatory prose sits after it, where scrolling for it is natural. */
+  .control-rail {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .scenario-picker { order: 1; margin-bottom: 8px; }
+  .rail-modes { order: 2; }
+  /* Sized so the whole stack still clears the dock in comparison mode, which
+   * carries one field more than the others. */
+  .control-stack { order: 3; gap: 11px; }
+  /* The story chip restates the PROBLEM select verbatim, so above the fold it
+   * cost 49px to say nothing new; comparison mode needs those pixels for its
+   * extra runs field. */
+  .selected-instance-story { order: 4; margin-top: 20px; }
+  .scenario-description { order: 5; margin-top: 16px; }
+  .instance-facts { order: 6; align-self: start; }
+  .model-disclosure { order: 7; }
+  .run-dock { order: 8; }
+
+  .run-dock {
+    position: sticky;
+    bottom: 0;
+    z-index: 4;
+    gap: 7px;
+    padding: 10px 0 12px;
+    border-top: 1px solid var(--rule-strong);
+    background: var(--paper);
+    box-shadow: 0 -14px 16px -14px rgba(23, 25, 24, .3);
+  }
+}
+
 .control-rail.is-compact .scenario-description {
   font-size: 13px;
   line-height: 1.42;
@@ -354,21 +407,25 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Three run modes, so three columns: at 1fr 1fr the third mode dropped onto a
+ * half-empty second row and read like a stray button rather than one of a set. */
 .segmented {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .segmented button {
+  padding-inline: 4px;
   border-radius: 0;
   border-color: var(--rule-strong);
   background: rgba(251, 249, 242, .48);
   color: var(--ink-soft);
   font-family: var(--font-mono);
   font-size: 10px;
+  line-height: 1.15;
 }
 
-.segmented button:last-child { margin-left: -1px; }
+.segmented button + button { margin-left: -1px; }
 
 .segmented button[aria-pressed="true"] {
   z-index: 1;

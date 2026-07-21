@@ -258,28 +258,52 @@
 
   .control-stack.is-mobile-open .experiment-fields { display: grid; }
 
+  /* The primary action is fixed to the bottom of the screen below, so the dock
+   * holds only the transport, the progress bar and the status line. It used to
+   * reserve 76px of headroom for a button that no longer sits in the flow,
+   * which read as a hole punched between the parameters and Pause/Reset. */
   .run-dock {
     position: relative;
     margin: 0 -3px;
-    padding: 76px 3px 10px;
+    padding: 4px 3px 10px;
     background: var(--paper);
   }
 
+  /* Full-bleed, so the fixed action and the fixed nav below it read as one solid
+   * band at the foot of the screen. Inset at 24/16px, page content showed
+   * through the margins either side and the button looked like it had landed on
+   * top of a card by accident. */
   .primary-action {
     position: fixed;
     z-index: 27;
-    right: 16px;
+    right: 0;
     bottom: calc(72px + env(safe-area-inset-bottom));
-    left: 24px;
+    left: 0;
     min-height: 57px;
+    border-left: 0;
+    border-right: 0;
     font-size: 13px;
-    box-shadow: 0 -6px 0 var(--paper);
+    box-shadow: none;
   }
 
   .transport { grid-template-columns: 1fr 1fr; }
 
+  /* Nothing to pause, reset or report before the first run — and on a phone the
+   * rail sits above the workspace, so that idle block pushed the page title and
+   * the scenario cards ~150px down the first screen. */
+  .studio-shell[data-status="ready"] .transport,
+  .studio-shell[data-status="ready"] .rail-progress,
+  .studio-shell[data-status="ready"] .run-status,
+  .studio-shell[data-status="loading"] .transport,
+  .studio-shell[data-status="loading"] .rail-progress { display: none; }
+
+  .studio-shell[data-status="ready"] .run-dock { padding-block: 0; }
+
+  /* Clear both fixed layers stacked at the bottom of the screen: the 72px nav
+   * and the 57px primary action floating above it. At 104px the action covered
+   * the last card of every page. */
   .workspace {
-    padding: 27px 16px 104px 24px;
+    padding: 27px 16px calc(150px + env(safe-area-inset-bottom)) 24px;
     background-size: 20px 20px;
   }
 
@@ -416,7 +440,8 @@
     grid-template-columns: repeat(3, 1fr);
     padding-bottom: env(safe-area-inset-bottom);
     border-top: 1px solid var(--rule-strong);
-    background: rgba(251, 249, 242, .98);
+    /* Opaque: at .98 the page still ghosted through behind the labels. */
+    background: var(--paper-bright);
   }
 
   .mobile-bottom-nav button {

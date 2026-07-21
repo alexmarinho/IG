@@ -413,6 +413,24 @@ class IGStudioApp {
     return this.metadata()?.referenceBest ?? null;
   }
 
+  /**
+   * Send the workspace to the page that actually shows the run in progress.
+   * Starting a run from the level picker (or from a stale results table) used
+   * to change nothing on screen but a status dot in the rail, so there was no
+   * way to tell where the answer would appear. Overview covers single and
+   * comparison runs, and falls through to the race page in race mode.
+   */
+  showRun() {
+    if (this.state.page !== "overview") this.state.page = "overview";
+    // On a phone the rail stacks above the workspace and fills the first
+    // screen, so the run the reader just started would draw entirely below the
+    // fold. The caller renders straight after this, so defer past that task —
+    // a timer rather than rAF, which a backgrounded tab would never fire.
+    if (globalThis.matchMedia?.("(max-width: 760px)").matches) {
+      setTimeout(() => this.container.querySelector(".workspace")?.scrollIntoView({ block: "start" }), 0);
+    }
+  }
+
   async startRun() {
     if (this.state.mode === "race") return this.startRace({ force: false });
     if (!this.client || !this.state.instance || ["running", "paused"].includes(this.state.status)) return;
@@ -430,6 +448,7 @@ class IGStudioApp {
     this.state.liveCheckpoints = [];
     if (this.state.mode === "single") this.state.singleResult = null;
     else { this.state.comparisonResult = null; this.state.selectedRunSeed = null; }
+    this.showRun();
     this.render();
     try {
       const checkpointEvery = Math.max(1, Math.ceil(this.state.iterationBudget / 50));
@@ -495,6 +514,7 @@ class IGStudioApp {
     this.state.raceResult = null;
     this.state.status = "running";
     this.state.error = null;
+    this.showRun();
     this.render();
     this.raceView.start();
     this.startEngineReference(this.state.race);

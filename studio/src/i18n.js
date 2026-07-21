@@ -2,7 +2,10 @@ export const UI_LOCALES = Object.freeze(["en", "pt-BR"]);
 
 const COPY = {
   en: {
-    nav: { overview: "Prepare", schedule: "Results", instance: "Problem", method: "Method", levels: "Levels" },
+    // A run lands on `overview` (metrics, convergence, distribution) and
+    // `schedule` is the job-by-job table, so the old Prepare/Results pair sent
+    // anyone looking for their results to the wrong tab. Name them for content.
+    nav: { overview: "Results", schedule: "Schedule", instance: "Problem", method: "Method", levels: "Levels" },
     links: { python: "Python", notebook: "Colab", sheets: "Google Sheets", workbook: "Workbook (.xlsx)", original: "Original project", results: "Results" },
     actions: {
       run: "Run algorithm", runSeeds: "Run {count} seeds", runRace: "Start the race", pause: "Pause", resume: "Resume",
@@ -209,7 +212,7 @@ const COPY = {
     misc: { jobs: "jobs", families: "families", noReference: "not published", yes: "Yes", no: "No", timeUnits: "time units", minutes: "min", fixedCatalogNote: "A fixed bundled problem; no data is generated or uploaded.", sequenceSetups: "sequence-dependent setups", noSequenceSetups: "no sequence-dependent setups" },
   },
   "pt-BR": {
-    nav: { overview: "Preparar", schedule: "Resultados", instance: "Problema", method: "Método", levels: "Problemas" },
+    nav: { overview: "Resultados", schedule: "Programação", instance: "Problema", method: "Método", levels: "Problemas" },
     links: { python: "Python", notebook: "Colab", sheets: "Google Sheets", workbook: "Planilha (.xlsx)", original: "Projeto original", results: "Resultados" },
     actions: {
       run: "Executar algoritmo", runSeeds: "Executar {count} seeds", runRace: "Iniciar a corrida", pause: "Pausar", resume: "Continuar",

@@ -26,9 +26,15 @@ invariant(Buffer.byteLength(HOSTED_BLOCK) === 1137, "Hosted shell block must sta
 
 const dist = await readFile(distPath, "utf8");
 invariant(!dist.includes('id="ig-hosted-shell"'), "dist already contains the hosted shell block");
-const marker = "<head>";
+/* Append, don't prepend: only `.topbar` and the rail spine carry !important, so
+ * at the top of <head> every other hosted rule lost the cascade to the app's own
+ * stylesheet — `--header:0px` never applied and the rail kept a 82px offset and
+ * a 82px-short height inside the iframe. The head holds no <script>, so the
+ * IG_STUDIO_CONFIG assignment still runs before the app module in <body>. */
+const marker = "</head>";
 const at = dist.indexOf(marker);
-invariant(at >= 0, "dist document has no <head> tag");
-const html = `${dist.slice(0, at + marker.length)}${HOSTED_BLOCK}${dist.slice(at + marker.length)}`;
+invariant(at >= 0, "dist document has no </head> tag");
+invariant(!dist.slice(0, at).includes("<script"), "a <script> appeared in <head>: hosted config must still run first");
+const html = `${dist.slice(0, at)}${HOSTED_BLOCK}${dist.slice(at)}`;
 await writeFile(outputPath, html);
 console.log(`Hosted Studio written: ${path.relative(repoRoot, outputPath)} (${html.length} chars, +${Buffer.byteLength(HOSTED_BLOCK)} hosted bytes)`);

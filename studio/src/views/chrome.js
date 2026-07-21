@@ -34,9 +34,16 @@ export const chromeView = {
     const instanceLabel = this.instanceDisplayLabel(selectedMapping);
     const instanceNote = selectedMapping?.interpretation?.note || this.t("misc.fixedCatalogNote");
     const running = ["running", "paused"].includes(this.state.status);
-    const compactRail = this.state.page !== "overview" || this.state.mode === "comparison" || this.state.mode === "race" || Boolean(this.state.singleResult || this.state.comparisonResult || this.state.raceResult);
+    // `running` counts as compact too: without it the rail rendered at full
+    // height for the first frames of a run and then collapsed the moment the
+    // first result landed, shifting the whole page up by ~340px on mobile.
+    const compactRail = this.state.page !== "overview" || this.state.mode === "comparison" || this.state.mode === "race"
+      || ["running", "paused"].includes(this.state.status)
+      || Boolean(this.state.singleResult || this.state.comparisonResult || this.state.raceResult);
     const statusText = this.statusText();
-    const hasOverviewResult = this.state.mode === "comparison" ? Boolean(this.state.comparisonResult) : this.state.mode === "race" ? Boolean(this.state.raceResult || this.state.race) : Boolean(this.state.singleResult);
+    // A run in flight already titles the page after its result: waiting for the
+    // first result to swap the heading reflowed the mobile rail mid-run.
+    const hasOverviewResult = running || (this.state.mode === "comparison" ? Boolean(this.state.comparisonResult) : this.state.mode === "race" ? Boolean(this.state.raceResult || this.state.race) : Boolean(this.state.singleResult));
     const mobileTitle = hasOverviewResult
       ? (this.state.mode === "comparison" ? this.t("overview.compareTitle") : this.state.mode === "race" ? this.t("race.title") : this.t("overview.singleTitle"))
       : this.t("overview.initialTitle");
@@ -91,15 +98,15 @@ export const chromeView = {
           <label class="check-field"><input id="permute-input" type="checkbox" ${this.state.permute ? "checked" : ""} ${running ? "disabled" : ""}>${escapeHtml(this.t("controls.exchange"))}</label>
         </div></details>
         </div>
-        <div class="run-dock">
-          <button class="primary-action" data-action="run" ${running || this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.state.mode === "comparison" ? this.t("actions.runSeeds", { count: this.state.runs }) : this.state.mode === "race" ? this.t("actions.runRace") : this.t("actions.run"))}</button>
-          <div class="transport">
-            <button class="secondary-action" data-action="pause" ${!running ? "disabled" : ""}>${escapeHtml(this.state.status === "paused" ? this.t("actions.resume") : this.t("actions.pause"))}</button>
-            <button class="secondary-action" data-action="reset" ${this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.t("actions.reset"))}</button>
-          </div>
-          <div class="rail-progress" aria-hidden="true" style="--progress:${(this.progressRatio() * 100).toFixed(2)}%"><span></span></div>
-          <div class="run-status" role="status"><i class="status-dot ${this.state.status}"></i><span>${escapeHtml(statusText || this.t("status.ready"))}${this.state.error ? `<br><small>${escapeHtml(this.state.error)}</small>` : ""}</span></div>
+      </div>
+      <div class="run-dock">
+        <button class="primary-action" data-action="run" ${running || this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.state.mode === "comparison" ? this.t("actions.runSeeds", { count: this.state.runs }) : this.state.mode === "race" ? this.t("actions.runRace") : this.t("actions.run"))}</button>
+        <div class="transport">
+          <button class="secondary-action" data-action="pause" ${!running ? "disabled" : ""}>${escapeHtml(this.state.status === "paused" ? this.t("actions.resume") : this.t("actions.pause"))}</button>
+          <button class="secondary-action" data-action="reset" ${this.state.status === "loading" ? "disabled" : ""}>${escapeHtml(this.t("actions.reset"))}</button>
         </div>
+        <div class="rail-progress" aria-hidden="true" style="--progress:${(this.progressRatio() * 100).toFixed(2)}%"><span></span></div>
+        <div class="run-status" role="status"><i class="status-dot ${this.state.status}"></i><span>${escapeHtml(statusText || this.t("status.ready"))}${this.state.error ? `<br><small>${escapeHtml(this.state.error)}</small>` : ""}</span></div>
       </div>
     </aside>`;
   },
