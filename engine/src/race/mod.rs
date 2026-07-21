@@ -15,10 +15,12 @@
 //! every `Racer`, so the snapshot path never dispatches at all.
 
 pub mod ctx;
+pub mod descent;
 pub mod greedy;
 
 pub use ctx::Ctx;
 
+use descent::DescentState;
 use greedy::GreedyState;
 
 use crate::eval::State;
@@ -46,6 +48,25 @@ pub const ST_DIVERSIFIED: u32 = 9;
 pub const ST_BREEDING: u32 = 10;
 pub const ST_IG_LOOP: u32 = 11;
 pub const ST_BUDGET_EXHAUSTED: u32 = 12;
+
+/// The same keys, unprefixed, for method files that read better as
+/// `status::STUCK_LOCAL`. Aliases of the constants above and never redefined —
+/// there is one numbering and it is the one written out ten lines up.
+pub mod status {
+    pub const PREPARING: u32 = super::ST_PREPARING;
+    pub const CONSTRUCTING: u32 = super::ST_CONSTRUCTING;
+    pub const CONSTRUCTING_GREEDY: u32 = super::ST_CONSTRUCTING_GREEDY;
+    pub const CONSTRUCTING_EDD: u32 = super::ST_CONSTRUCTING_EDD;
+    pub const DESCENDING: u32 = super::ST_DESCENDING;
+    pub const STUCK_LOCAL: u32 = super::ST_STUCK_LOCAL;
+    pub const DONE_CONSTRUCTIVE: u32 = super::ST_DONE_CONSTRUCTIVE;
+    pub const ITERATION: u32 = super::ST_ITERATION;
+    pub const GENERATION: u32 = super::ST_GENERATION;
+    pub const DIVERSIFIED: u32 = super::ST_DIVERSIFIED;
+    pub const BREEDING: u32 = super::ST_BREEDING;
+    pub const IG_LOOP: u32 = super::ST_IG_LOOP;
+    pub const BUDGET_EXHAUSTED: u32 = super::ST_BUDGET_EXHAUSTED;
+}
 
 /// No cost yet / infeasible. Kept out of band so the snapshot can turn it into
 /// `f64::INFINITY` without the search ever touching a float.
@@ -161,10 +182,11 @@ impl Common {
 // ---------------------------------------------------------------------------
 pub(crate) enum Body {
     Greedy(GreedyState),
-    /// NOT YET PORTED. Each remaining method lands here as its own variant
-    /// (`Descent(DescentState)`, ...); until then a placeholder racer that
-    /// spends nothing and reports itself finished, so the race can terminate.
-    /// This variant disappears once all six are in.
+    Descent(DescentState),
+    /// NOT YET PORTED. Each remaining method lands here as its own variant;
+    /// until then a placeholder racer that spends nothing and reports itself
+    /// finished, so the race can terminate. This variant disappears once all
+    /// six are in.
     Pending,
 }
 
@@ -181,6 +203,7 @@ impl Racer {
                 common.status_key = greedy::STATUS_INITIAL;
                 Body::Greedy(GreedyState::new(inst))
             }
+            Method::Descent => Body::Descent(DescentState::new(inst, &mut common)),
             _ => Body::Pending,
         };
         Racer { common, body }
@@ -204,6 +227,7 @@ impl Racer {
         let mut ctx = Ctx::open(inst, common, slice);
         match body {
             Body::Greedy(s) => s.advance(&mut ctx),
+            Body::Descent(s) => s.advance(&mut ctx),
             Body::Pending => ctx.finish(ST_PREPARING),
         }
         ctx.close()
@@ -214,6 +238,7 @@ impl Racer {
     pub fn incumbent(&self) -> &State {
         match &self.body {
             Body::Greedy(s) => s.incumbent(),
+            Body::Descent(s) => s.incumbent(),
             Body::Pending => &self.common.best,
         }
     }
