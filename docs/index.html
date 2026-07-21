@@ -1212,9 +1212,8 @@ footer a{color:var(--terra-ink)}
 
 <section class="movement" id="m-future">
   <div class="movement-head">
-    <p class="m-kick">Future · where it goes</p>
-    <h2 class="m-title">A tested baseline — and what comes next.</h2>
-    <p class="m-lede">This is a reproducible baseline against the 2015 study; the next steps extend the search and the model, one validated change at a time.</p>
+    <h2 class="m-title">Next research.</h2>
+    <p class="m-lede">The current engine reproduces the 2015 study. The work below extends the search and the model, one change at a time.</p>
   </div>
   <div class="m-body">
     <h3 class="f-head">Current evidence</h3>
@@ -1256,8 +1255,8 @@ footer a{color:var(--terra-ink)}
     <p class="f-lede">The two experimental rows above ship as a companion notebook instead of as assertions. It detects the runtime it lands on, re-verifies exact pricing against the CPU engine before reporting any timing, and recomputes every number on each run — including the ones that do not favour it.</p>
     <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a></div></div><div class="f-card"><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
 
-    <h3 class="f-head">Use IG at the depth you need</h3>
-    <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.</p>
+    <h3 class="f-head">Interfaces</h3>
+    <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code.</p>
     <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="studio-app.html" target=_blank rel=noopener>Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Read results</a></div></div></div>
 
     <nav class="m-links" aria-label="Resources" style="margin-top:22px">
@@ -3071,7 +3070,7 @@ function onWinResize(fn){
       "Iterated Greedy é uma metaheurística, ou seja, um procedimento de busca de uso geral. A aplicação abaixo é o motor medido no benchmark acima, compilado para WebAssembly. O cenário, a instância e o conjunto de seeds são selecionados nos controles da própria aplicação.",
     /* future */
     "Future · where it goes": "Futuro · para onde vai",
-    "A tested baseline — and what comes next.": "Uma base testada — e o que vem a seguir.",
+    "Next research.": "Próximas pesquisas.",
     "This is a reproducible baseline against the 2015 study; the next steps extend the search and the model, one validated change at a time.":
       "Esta é uma base reproduzível contra o estudo de 2015; os próximos passos estendem a busca e o modelo, uma mudança validada por vez.",
     "Source on GitHub": "Código no GitHub",
@@ -3084,8 +3083,8 @@ function onWinResize(fn){
     "for reproducibility ·": "para reprodutibilidade ·",
     "Current evidence": "Evidência atual",
     "Research sequence": "Sequência de pesquisa",
-    "Use IG at the depth you need": "Use o IG na profundidade que você precisa",
-    "The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code. Start with the interface that answers your next question.": "A mesma lógica de scheduling testada está disponível como experimento interativo, planilha de BI, notebook científico e código legível. Comece pela interface que responde à sua próxima pergunta.",
+    "Interfaces": "Interfaces",
+    "The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code.": "A mesma lógica de scheduling testada está disponível como experimento interativo, planilha de BI, notebook científico e código legível.",
     "Implemented": "Implementado",
     "Measured": "Medido",
     "Canonical": "Canônico",
