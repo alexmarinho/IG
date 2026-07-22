@@ -822,10 +822,26 @@ footer a{color:var(--terra-ink)}
 
   /* The answer band: the page's own .fact tiles at answer size, lifted one step
      above the --card surface of the figure.demo they sit on. */
-  .run-answer { margin: 0 0 4px; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(146px, 1fr)); }
+  /* Four tiles, and auto-fit would leave an orphan at the width where only
+     three fit. Two or four, never three: the band reads as one answer. */
+  .run-answer { margin: 0 0 4px; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  @media (min-width: 620px) { .run-answer { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
   .run-answer .fact { background: var(--raise); }
   .run-answer .fact .val { font-size: clamp(23px, 3.1vw, 32px); line-height: 1.08; }
   .run-answer .fact .val small { font-size: 12.5px; display: block; margin-top: 6px; letter-spacing: .04em; }
+  /* a tile the race has not reached is a statement, not a number */
+  .run-answer .fact.void .val { color: var(--ink-soft); }
+
+  /* The reading switch: one race, three evaluation counts. A rung the race did
+     not reach is disabled rather than hidden — the question stays on screen. */
+  .run-rungs { margin: 2px 0 0; }
+  .run-rungs .seg button[disabled] { opacity: .42; cursor: default; }
+  .run-rungs .seg button[disabled]:hover { color: inherit; }
+  #runRungCap { margin-bottom: 6px; }
+
+  /* The honesty line under the band carries its own control: the file where the
+     page's own method is beaten, one press away, on the same figure. */
+  #runControl { margin-left: 4px; vertical-align: baseline; }
 
   /* A .standings list used as a table: grid columns, page colours, no scrollport. */
   /* .standings sets display:flex, which outranks the UA rule for [hidden]: the
@@ -843,7 +859,7 @@ footer a{color:var(--terra-ink)}
   .run-rows li.sel { background: var(--hi-bg); box-shadow: inset 0 0 0 1px var(--brass); }
   .run-meth li { grid-template-columns: 22px 12px minmax(0, 1fr) 84px 64px 78px; }
   .run-methref li { grid-template-columns: 22px 12px minmax(0, 1fr) 84px minmax(0, 1.35fr); }
-  .run-seedrows li { grid-template-columns: 64px 84px 64px minmax(0, 1fr); }
+  .run-seedrows li { grid-template-columns: 52px 78px 62px 96px minmax(0, 1fr); }
   .run-stats li { grid-template-columns: minmax(0, 1fr) 100px minmax(0, .9fr); cursor: default; }
   .run-stats li:hover { background: transparent; }
   .run-hist { display: inline-flex; align-items: flex-end; align-self: center; gap: 2px; height: 20px; }
@@ -851,7 +867,7 @@ footer a{color:var(--terra-ink)}
   @media (max-width: 760px) {
     .run-meth li { grid-template-columns: 22px 12px minmax(0, 1fr) 78px; }
     .run-methref li { grid-template-columns: 22px 12px minmax(0, 1fr) 78px; }
-    .run-seedrows li { grid-template-columns: 64px minmax(0, 1fr); }
+    .run-seedrows li { grid-template-columns: 52px 84px minmax(0, 1fr); }
     .run-stats li { grid-template-columns: minmax(0, 1fr) 92px; }
     .run-rows li > span.drop { display: none; }
   }
@@ -1385,7 +1401,7 @@ footer a{color:var(--terra-ink)}
   <!-- 2 · THE FIGURE — the claim, then the proof -->
   <figure class="demo">
     <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 06</span> <span class="fig-name" id="runFigName">The six methods, against the record</span></span>
+      <span><span class="fig-no">Fig. 06</span> <span class="fig-name" id="runFigName">The six methods, read at three budgets</span></span>
       <span class="lab-inst" id="runFigInst"></span>
       <span class="fig-acts">
         <button class="btn tiny" type="button" id="runReplay" hidden>Replay</button>
@@ -1394,7 +1410,11 @@ footer a{color:var(--terra-ink)}
     </figcaption>
 
     <div class="fact-grid run-answer" id="runAnswer"></div>
-    <p class="status-line" role="status" id="runAnswerNote"></p>
+    <!-- The honesty line. The sentence is the live region; the control beside it
+         is a stable button, created once, so focus survives a re-render and a
+         screen reader is not handed a button every time a number moves. -->
+    <p class="status-line"><span role="status" id="runAnswerNote"></span>
+      <button class="btn tiny" type="button" id="runControl" hidden></button></p>
 
     <div class="controls">
       <span class="ctl-label">View</span>
@@ -1406,14 +1426,24 @@ footer a{color:var(--terra-ink)}
     </div>
 
     <!-- THE RACE. One .standings list where every row carries its own bar, and
-         one hairline down the board at the published record. -->
+         one hairline down the board at the published record. The rung switch
+         above it re-READS the same race at another evaluation count: the
+         engine stamps every improvement at its true count, so nothing is run
+         again and no budget can be the verdict on its own. -->
     <div class="run-panel" id="runPanRace" role="tabpanel" tabindex="0">
+      <div class="controls run-rungs">
+        <span class="ctl-label" id="runRungLabel">Read at</span>
+        <span class="seg" id="runRungs" role="group" aria-label="Reading"></span>
+      </div>
+      <p class="chart-cap" id="runRungCap"></p>
       <ol class="standings run-board" id="runStandings"></ol>
       <p class="chart-cap" id="runBoardCap"></p>
       <p class="status-line" id="runProv"></p>
-      <p class="lab-hint"><strong>One seed, one budget, all six methods.</strong> Every method above is
-      given the same instance, the same seed and the same evaluation budget. Select a method to mark it
-      in every view.</p>
+      <p class="lab-hint"><strong>One seed, one race, three budgets.</strong> Every method gets the
+      same instance, the same seed and the same evaluation count at each reading, taken from the same
+      race. A method that stops early keeps its final cost. A run halted at a budget would let some
+      methods finish a slice past it; the reading is taken at the exact count instead, which is the
+      stricter comparison. Select a method to mark it in every view.</p>
     </div>
 
     <!-- THE SCHEDULE -->
@@ -1446,7 +1476,7 @@ footer a{color:var(--terra-ink)}
         <div>
           <p class="run-h">The parameters it used</p>
           <div class="readouts" id="runSearchParams"></div>
-          <p class="chart-cap">the engine's published settings, the ones the benchmark above was measured with</p>
+          <p class="chart-cap" id="runParamCap"></p>
         </div>
       </div>
       <div class="run-block">
@@ -1456,7 +1486,8 @@ footer a{color:var(--terra-ink)}
           <span class="status-line" id="runSeeds12Note"></span>
         </div>
         <ul class="standings run-rows run-seedrows" id="runSeedRows"></ul>
-        <p class="chart-cap">twelve consecutive seeds of the same file at the same budget</p>
+        <p class="chart-cap" id="runSeedsCap"></p>
+        <p class="status-line" id="runSeedsSum"></p>
       </div>
     </div>
   </figure>
@@ -3208,9 +3239,11 @@ function onWinResize(fn){
       '<code>studio/scripts/build-instance-stats.mjs</code>, mais o custo de troca lido do mesmo arquivo ' +
       'com o mesmo parser',
     "#runPanRace .lab-hint":
-      '<strong>Uma seed, um orçamento, os seis métodos.</strong> Todo método acima recebe a mesma ' +
-      'instância, a mesma seed e o mesmo orçamento de avaliações. Selecione um método para marcá-lo em ' +
-      'todas as visões.'
+      '<strong>Uma seed, uma corrida, três orçamentos.</strong> Cada método recebe a mesma instância, ' +
+      'a mesma seed e o mesmo número de avaliações em cada leitura, tirados da mesma corrida. Um método ' +
+      'que para antes mantém seu custo final. Uma execução interrompida no orçamento deixaria alguns ' +
+      'métodos terminarem uma fatia além dele; a leitura é feita na contagem exata, que é a comparação ' +
+      'mais dura. Selecione um método para marcá-lo em todas as visões.'
   };
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
@@ -3442,7 +3475,9 @@ function onWinResize(fn){
     "The search": "A busca",
     "Replay": "Reexibir",
     "Copy link": "Copiar link",
-    "The six methods, against the record": "Os seis métodos, contra o recorde",
+    "The six methods, read at three budgets": "Os seis métodos, lidos em três orçamentos",
+    "Read at": "Ler em",
+    "Reading": "Leitura",
     "The sequence the winning method chose, one block per order, coloured by family.":
       "A sequência que o método vencedor escolheu, um bloco por pedido, colorido por família.",
     "Best cost against evaluations spent, one curve per method.":
@@ -3455,12 +3490,8 @@ function onWinResize(fn){
       "os quatro termos do objetivo, nas palavras deste mundo · a corrida reporta um total, não a divisão, então nenhum termo carrega um número aqui",
     "The search that produced it": "A busca que o produziu",
     "The parameters it used": "Os parâmetros que ela usou",
-    "the engine's published settings, the ones the benchmark above was measured with":
-      "as configurações publicadas do motor, as mesmas com que o benchmark acima foi medido",
     "Is this seed luck?": "Essa seed é sorte?",
     "Race twelve seeds": "Correr doze seeds",
-    "twelve consecutive seeds of the same file at the same budget":
-      "doze seeds consecutivas do mesmo arquivo no mesmo orçamento",
     "Open the full Studio": "Abrir o Studio completo",
     "Problem data & distributions": "Dados do problema & distribuições",
     "Full schedule table": "Tabela completa do cronograma",
@@ -5674,9 +5705,10 @@ function onWinResize(fn){
     "× the production cost": "× o custo de produzir",
     "evaluations": "avaliações",
     "evaluations each": "avaliações cada",
+    "evaluations per method": "avaliações por método",
     "standard": "padrão",
     "quick": "rápido",
-    "long": "longo",
+    "full": "completo",
     "Seed": "Seed",
     "not run": "não executado",
     "queued": "na fila",
@@ -5690,24 +5722,51 @@ function onWinResize(fn){
     "Run again": "Executar de novo",
     "Stop": "Parar",
 
-    /* the answer band */
-    "Cost found here": "Custo encontrado aqui",
+    /* the answer band — one race, read at three budgets */
     "no run yet": "nenhuma execução ainda",
     "Published record": "Recorde publicado",
     "MaScLib, 2015": "MaScLib, 2015",
-    "seeded workload, no record": "carga gerada com seed, sem recorde",
-    "Distance from the record": "Distância do recorde",
-    "needs a run": "precisa de uma execução",
+    "record": "recorde",
+    "no published record": "sem recorde publicado",
     "matched": "igualado",
+    "matched the published record": "igualou o recorde publicado",
     "below the record": "abaixo do recorde",
     "above the record": "acima do recorde",
-    "no record to measure against": "sem recorde para comparar",
     "Run in this page": "Executado nesta página",
-    "six methods, one seed": "seis métodos, uma seed",
-    "The published record for this file is": "O recorde publicado deste arquivo é",
-    "This file carries no published record.": "Este arquivo não tem recorde publicado.",
     "Nothing has been run on this page yet.": "Nada foi executado nesta página ainda.",
-    "Best of the six": "Melhor dos seis",
+    "best here": "melhor aqui",
+    "Evaluations to the record": "Avaliações até o recorde",
+    "Evaluations to the best cost found here": "Avaliações até o menor custo encontrado aqui",
+    "not reached": "não alcançado",
+    "no method reached": "nenhum método chegou a",
+    "in this race": "nesta corrida",
+    "level": "empatado",
+    "not run here": "não executado aqui",
+    "extend the race": "estender a corrida",
+    "the only method that got there": "o único método que chegou lá",
+    "first there": "chegou primeiro",
+    "this file has no published record": "este arquivo não tem recorde publicado",
+    "tied": "empatados",
+    "alone": "sozinho",
+    "and": "e",
+    "one race": "uma corrida",
+    "six methods": "seis métodos",
+    "one seed": "uma seed",
+
+    /* the reading switch and the honesty line */
+    "Read at": "Ler em",
+    "one race, three readings — switching is instant, nothing is run again":
+      "uma corrida, três leituras — trocar é instantâneo, nada é executado de novo",
+    "Both costs come from one race: a budget is where the reading stops, not a result.":
+      "Os dois custos saem de uma única corrida: um orçamento é onde a leitura para, não um resultado.",
+    "Iterated Greedy on this file": "Iterated Greedy neste arquivo",
+    "methods that end level are named together, not ordered by the list":
+      "métodos que terminam empatados são nomeados juntos, não ordenados pela lista",
+    "the three readings above are the marked gridlines":
+      "as três leituras acima são as linhas marcadas",
+    "one of": "um de",
+    "that finished level": "que terminaram empatados",
+    "the race as run, not a reading": "a corrida como foi executada, não uma leitura",
 
     /* the board */
     "the brass line is the published record": "a linha de latão é o recorde publicado",
@@ -5723,7 +5782,7 @@ function onWinResize(fn){
 
     /* the schedule */
     "The schedule found": "O cronograma encontrado",
-    "The six methods, against the record": "Os seis métodos, contra o recorde",
+    "The six methods, read at three budgets": "Os seis métodos, lidos em três orçamentos",
     "The search": "A busca",
     "the winning sequence, in the order the method chose": "a sequência vencedora, na ordem que o método escolheu",
     "each block is one order's machine time, coloured by family, repeating after six": "cada bloco é o tempo de máquina de um pedido, colorido por família, repetindo a cada seis",
@@ -5734,7 +5793,6 @@ function onWinResize(fn){
     "refused": "recusados",
     "out of": "de",
     "winner": "vencedor",
-    "leading": "na frente",
 
     /* the search */
     "iterations": "iterações",
@@ -5759,6 +5817,17 @@ function onWinResize(fn){
     "gap": "distância",
     "evals": "avaliações",
     "seeds": "seeds",
+    "to the record": "até o recorde",
+    "to the best here": "até o melhor daqui",
+    "twelve consecutive seeds of the same file, and the evaluations each one needed to reach":
+      "doze seeds consecutivas do mesmo arquivo, e as avaliações que cada uma precisou para chegar a",
+    "twelve consecutive seeds of the same file, at the budget the race ran to":
+      "doze seeds consecutivas do mesmo arquivo, no orçamento até onde a corrida rodou",
+    "of 12 seeds reach": "de 12 seeds chegam a",
+    "median": "mediana",
+    "inside": "dentro de",
+    "No seed reached": "Nenhuma seed chegou a",
+    "in this run.": "nesta execução.",
     "note": "observação",
     "No setups (NCOS)": "Sem setups (NCOS)",
     "With setups (STC)": "Com setups (STC)",
@@ -5788,9 +5857,9 @@ function onWinResize(fn){
      order. A string is prose; an object is a slot filled with a control. */
   var SENT = {
     en: ["Race the six methods on the ", { s: "world" }, " — ", { s: "inst" }, ", ", { s: "queue" },
-         " — at ", { s: "budget" }, " per method, from seed ", { s: "seed" }, { s: "reseed" }, "."],
+         " — to ", { s: "budget" }, " per method, from seed ", { s: "seed" }, { s: "reseed" }, "."],
     pt: ["Corra os seis métodos na ", { s: "world" }, " — ", { s: "inst" }, ", ", { s: "queue" },
-         " — com ", { s: "budget" }, " por método, a partir da seed ", { s: "seed" }, { s: "reseed" }, "."]
+         " — até ", { s: "budget" }, " por método, a partir da seed ", { s: "seed" }, { s: "reseed" }, "."]
   };
 
   /* ---------- helpers ---------- */
@@ -5875,8 +5944,22 @@ function onWinResize(fn){
   /* ---------- state ----------
      S is what the reader set. R is what the engine returned; it is cleared, not
      invented, whenever S changes. */
-  var S = { world: "factory", inst: "STC_NCOS_31", budget: 200000, seed: 1,
+  /* THE BUDGET IS A READING, NOT A VERDICT.
+     `budget` is how far the race is run; `rung` is the evaluation count the
+     board is read at. The default is the top of BUDGETS because the page's own
+     auto-run gate allows it (estimateMs(800000, 75) = 327 ms against
+     AUTO_MS = 900, with the untouched rate constant) — not because it is where
+     any method wins. Both smaller rungs stay on screen and are one click away,
+     read off the same race. */
+  var S = { world: "factory", inst: "STC_NCOS_31", budget: 800000, rung: 800000, seed: 1,
             method: "ig", tab: "runPanRace" };
+  /* The control the honesty line always carries: the file where Iterated Greedy
+     is beaten, and the file where it is not. Both are MaScLib, both race on the
+     same engine and the same settings, and each names the other. */
+  var CONTROL = { lose: "STC_NCOS_41", win: "STC_NCOS_31" };
+  /* what the engine actually measured, per file, in THIS session — so the
+     honesty line can quote a number instead of asserting one */
+  var SEEN = Object.create(null);
   var R = {
     phase: "idle",       /* idle · loading · racing · replay · settled · failed */
     costs: null,         /* six numbers, live or final; null before a run */
@@ -5884,9 +5967,11 @@ function onWinResize(fn){
     evals: null,
     traces: null,
     order: null, bestLen: 0, n: 0, fam: null, proc: null,
-    elapsed: 0, winner: -1, frames: 0,
+    elapsed: 0, winner: -1, leaders: null, frames: 0,
+    seedTarget: 0,
     wasmBytes: 0, wasmMs: 0, csvBytes: 0,
     hi: 0,               /* scale ceiling, captured once per race */
+    clock: -1,           /* how far the replay has read the traces, in evaluations */
     rate: 1.1e6,         /* job·evaluations per ms, measured on this machine */
     seedRows: null, seedsRunning: false,
     error: ""
@@ -5908,20 +5993,100 @@ function onWinResize(fn){
     var t = d[SETUP] + d[PROC];
     return t > 0 ? Math.round((100 * d[SETUP]) / t) : 0;
   }
-  function fact(lbl, val, small, hot) {
-    return '<div class="fact' + (hot ? " hot" : "") + '"><div class="lbl">' + esc(lbl) +
-      '</div><div class="val">' + esc(val) + (small ? " <small>" + esc(small) + "</small>" : "") +
-      "</div></div>";
+  function fact(lbl, val, small, hot, cls) {
+    return '<div class="fact' + (hot ? " hot" : "") + (cls ? " " + cls : "") + '"><div class="lbl">' +
+      esc(lbl) + '</div><div class="val">' + esc(val) +
+      (small ? " <small>" + esc(small) + "</small>" : "") + "</div></div>";
   }
+  /* the local bilingual pattern the arena uses, for sentences whose word order
+     is not a phrase-by-phrase translation */
+  function B(en, ptText) { return pt() ? ptText : en; }
   function record() { var b = D()[BEST]; return b > 0 ? b : 0; }
+
+  /* ---------- ONE RACE, READ AT THREE BUDGETS ----------
+     race_trace_write hands back every method's real (evaluations, cost) pairs, one
+     per improvement, stamped at the evaluation count where it landed
+     (engine/src/race/mod.rs). So a smaller budget is a READING of the same
+     race, not another run: nothing below is interpolated and nothing is run
+     twice. A method that stopped early keeps its final cost, which is what it
+     would score at any larger budget.
+
+     Reading at exactly B is also STRICTER than stopping a race at B: a stopped
+     race lets each method finish the slice it is inside, so some get a few
+     thousand evaluations past the cap. The lab hint says so. */
+  function costAt(m, b) {
+    var tr = R.traces && R.traces[m];
+    if (!tr || !tr.length) return Infinity;
+    var v = Infinity;
+    for (var k = 0; k < tr.length && tr[k][0] <= b; k++) v = tr[k][1];
+    return v;
+  }
+  function costsAt(b) {
+    var out = [], m;
+    for (m = 0; m < 6; m++) out.push(costAt(m, b));
+    return out;
+  }
+  /* the six costs the board is showing right now: live while racing, a reading
+     once the race is over */
+  function viewCosts() {
+    if (R.phase === "settled" && R.traces) return costsAt(S.rung);
+    return R.costs;
+  }
+  /* EVERY index at the minimum. A tie is a tie: the page names them all rather
+     than handing the headline to whichever one the engine lists first. */
+  function leadersOf(costs) {
+    var best = Infinity, out = [], m;
+    if (!costs) return out;
+    for (m = 0; m < 6; m++) if (isFinite(costs[m]) && costs[m] < best) best = costs[m];
+    if (!isFinite(best)) return out;
+    for (m = 0; m < 6; m++) if (costs[m] === best) out.push(m);
+    return out;
+  }
+  /* first evaluation at which a method reached `target`; 0 = never did */
+  function reachedAt(m, target) {
+    var tr = R.traces && R.traces[m];
+    if (!tr || !target) return 0;
+    for (var k = 0; k < tr.length; k++) if (tr[k][1] <= target) return tr[k][0];
+    return 0;
+  }
+  /* the rungs this race can actually be read at */
+  function readable() {
+    return BUDGETS.filter(function (b) { return b <= S.budget; });
+  }
+  function nameList(ms) {
+    var n = ms.map(function (m) { return METHODS[m][1]; });
+    if (!n.length) return DASH;
+    if (n.length === 1) return n[0];
+    return n.slice(0, -1).join(", ") + " " + L("and") + " " + n[n.length - 1];
+  }
+  function leaderPhrase(ms) {
+    return nameList(ms) + " · " + (ms.length > 1 ? L("tied") : L("alone"));
+  }
+  function ordinal(k) {
+    if (pt()) return k + "º";
+    var t = k % 10, h = k % 100;
+    return k + (t === 1 && h !== 11 ? "st" : t === 2 && h !== 12 ? "nd"
+              : t === 3 && h !== 13 ? "rd" : "th");
+  }
+  function rankIn(costs, m) {
+    var better = 0;
+    if (!costs || !isFinite(costs[m])) return 0;
+    for (var j = 0; j < 6; j++) if (costs[j] < costs[m]) better++;
+    return better + 1;
+  }
+  function atLabel(b) {
+    return pt() ? "Com " + fmt(b) + " avaliações" : "At " + fmt(b) + " evaluations";
+  }
+
   /* what the finish line means: the published record when the file has one,
-     otherwise the best cost this race actually found */
+     otherwise the best cost the current reading found */
   function reference() {
     var rec = record();
     if (rec) return rec;
-    if (!R.costs) return 0;
+    var costs = viewCosts();
+    if (!costs) return 0;
     var best = Infinity;
-    for (var m = 0; m < 6; m++) if (isFinite(R.costs[m]) && R.costs[m] < best) best = R.costs[m];
+    for (var m = 0; m < 6; m++) if (isFinite(costs[m]) && costs[m] < best) best = costs[m];
     return isFinite(best) ? best : 0;
   }
   /* the honest wait, from the last race measured on this machine */
@@ -6073,7 +6238,7 @@ function onWinResize(fn){
   var sentBuilt = "";
   function budgetLabel(b) {
     return fmt(b) + " " + L("evaluations") +
-      (b === 50000 ? " · " + L("quick") : b === 800000 ? " · " + L("long") : " · " + L("standard"));
+      (b === 50000 ? " · " + L("quick") : b === 800000 ? " · " + L("full") : " · " + L("standard"));
   }
   function slot(id, label, options, cls) {
     return '<span class="run-slot' + (cls ? " " + cls : "") + '"><select id="' + id +
@@ -6169,7 +6334,13 @@ function onWinResize(fn){
       changed();
     });
     el("runInstance").addEventListener("change", function () { S.inst = this.value; changed(); });
-    el("runBudget").addEventListener("change", function () { S.budget = +this.value; changed(); });
+    /* the race budget is how far it RUNS; the reading follows it up to the top
+       of what was run, and the smaller rungs stay readable */
+    el("runBudget").addEventListener("change", function () {
+      S.budget = +this.value;
+      S.rung = S.budget;
+      changed();
+    });
     el("runSeed").addEventListener("change", function () { S.seed = +this.value; changed(); });
     el("runNewSeed").addEventListener("click", function () {
       S.seed = 1 + Math.floor(Math.random() * 999999);
@@ -6243,14 +6414,15 @@ function onWinResize(fn){
   var lastBest = NaN;
   function paintBoard() {
     var ol = el("runStandings"), rec = record(), ref = reference();
+    var costs = viewCosts(), settled = R.phase === "settled" && !!R.traces;
     var zeroPct = rec ? 12 : 6, zero = zeroPct / 100;
     ol.classList.toggle("noref", !rec);
     ol.style.setProperty("--zero", zeroPct + "%");
 
-    var hi = R.hi;
+    var hi = settled ? 0 : R.hi, k;
     if (!hi || !isFinite(hi)) {
       hi = ref;
-      if (R.costs) for (var k = 0; k < 6; k++) if (isFinite(R.costs[k]) && R.costs[k] > hi) hi = R.costs[k];
+      if (costs) for (k = 0; k < 6; k++) if (isFinite(costs[k]) && costs[k] > hi) hi = costs[k];
     }
     var span = Math.max(hi - ref, Math.abs(ref) * 0.0005, 1);
     var under = span * zero / (1 - zero);
@@ -6259,13 +6431,13 @@ function onWinResize(fn){
     for (i = 0; i < rows.length; i++) {
       var li = rows[i], id = li.getAttribute("data-m"), m = 0;
       for (var q = 0; q < 6; q++) if (METHODS[q][0] === id) m = q;
-      var v = R.costs ? R.costs[m] : Infinity;
+      var v = costs ? costs[m] : Infinity;
       var bar = li.querySelector(".run-bar i"), cost = li.querySelector(".st-cost");
       var small = li.querySelector(".st-name small"), rank = li.querySelector(".st-rank");
 
       if (!isFinite(v)) {
         bar.classList.remove("under");
-        bar.style.setProperty("--w", R.costs ? 1 : 0);
+        bar.style.setProperty("--w", costs ? 1 : 0);
         cost.innerHTML = DASH;
       } else if (v < ref) {
         bar.classList.add("under");
@@ -6274,29 +6446,58 @@ function onWinResize(fn){
       } else {
         bar.classList.remove("under");
         bar.style.setProperty("--w", clamp((v - ref) / span, 0, 1));
-        cost.innerHTML = esc(fmtCost(v)) +
-          (rec ? "<small>" + esc(v === ref ? L("matched") : pct(100 * (v - ref) / ref)) + "</small>"
-               : "<small>" + esc(R.evals ? fmt(Math.round(R.evals[m])) + " " + L("evals") : "") + "</small>");
+        cost.innerHTML = esc(fmtCost(v)) + "<small>" +
+          esc(v === ref ? (rec ? L("matched") : L("best here")) : pct(100 * (v - ref) / ref)) +
+          "</small>";
       }
       small.textContent = statusText(m);
       li.classList.toggle("done", !!(R.status && R.status[m][3]));
       /* rank among the six, ties sharing a number */
-      if (R.costs) {
-        var better = 0;
-        for (var j = 0; j < 6; j++) if (R.costs[j] < v) better++;
-        rank.textContent = isFinite(v) ? String(better + 1) : "–";
-      } else rank.textContent = "–";
+      rank.textContent = costs && isFinite(v) ? String(rankIn(costs, m)) : "–";
     }
     placeFinish();
     /* the answer band follows the board, but only when the number it shows has
        actually moved: this runs inside a 60 fps replay */
     var top = Infinity;
-    if (R.costs) for (i = 0; i < 6; i++) if (isFinite(R.costs[i]) && R.costs[i] < top) top = R.costs[i];
+    if (costs) for (i = 0; i < 6; i++) if (isFinite(costs[i]) && costs[i] < top) top = costs[i];
     if (top !== lastBest) { lastBest = top; renderAnswer(); }
-    el("runBoardCap").textContent = rec
+    el("runBoardCap").textContent = (rec
       ? L("the brass line is the published record") + " · " +
         L("each bar is how far that method still is from it") + " · " + L("left of the line is below it")
-      : L("this file has no published record, so the line is the best cost found in this race") + ".";
+      : L("this file has no published record, so the line is the best cost found in this race")) +
+      " · " + L("methods that end level are named together, not ordered by the list") + ".";
+    renderRungs();
+  }
+
+  /* ---- the reading switch ----
+     Three buttons, the three budgets the page already ships (BUDGETS, written
+     before this question was asked). A rung the race did not reach is disabled,
+     never hidden: the question stays on screen and the sentence above says how
+     to answer it. */
+  var rungsBuilt = "";
+  function renderRungs() {
+    var box = el("runRungs");
+    if (!box) return;
+    var key = BUDGETS.join(",") + "|" + (pt() ? "pt" : "en");
+    if (rungsBuilt !== key) {
+      rungsBuilt = key;
+      box.innerHTML = BUDGETS.map(function (b) {
+        return '<button type="button" data-b="' + b + '">' + esc(fmt(b)) + "</button>";
+      }).join("");
+      el("runRungLabel").textContent = L("Read at");
+    }
+    var live = !!(R.phase === "settled" && R.traces);
+    Array.prototype.forEach.call(box.querySelectorAll("button"), function (btn) {
+      var b = +btn.getAttribute("data-b"), can = live && b <= S.budget;
+      btn.disabled = !can;
+      btn.classList.toggle("on", can && b === S.rung);
+      btn.setAttribute("aria-pressed", String(can && b === S.rung));
+      /* a rung above the race is a question the race did not answer, and says so */
+      if (b > S.budget) btn.title = L("not run here") + " — " + L("extend the race");
+      else btn.removeAttribute("title");
+    });
+    el("runRungCap").textContent = L("evaluations per method") + " · " +
+      L("one race, three readings — switching is instant, nothing is run again");
   }
 
   /* The hairline is one element across the whole board, so it has to be told
@@ -6314,10 +6515,12 @@ function onWinResize(fn){
   /* the FLIP that says the race is over: one motion, once */
   function settleBoard() {
     var ol = el("runStandings"), lis = Array.prototype.slice.call(ol.querySelectorAll("li"));
+    var costs = viewCosts();
+    if (!costs) return;
     var first = {};
     lis.forEach(function (li) { first[li.getAttribute("data-m")] = li.getBoundingClientRect().top; });
     var order = METHODS.map(function (m, i) { return i; }).sort(function (a, b) {
-      var ca = R.costs[a], cb = R.costs[b];
+      var ca = costs[a], cb = costs[b];
       if (!isFinite(ca) && !isFinite(cb)) return a - b;
       if (!isFinite(ca)) return 1;
       if (!isFinite(cb)) return -1;
@@ -6356,45 +6559,141 @@ function onWinResize(fn){
   /* ============================================================
      5 · THE ANSWER BAND
      ============================================================ */
-  var TABNAME = { runPanRace: "The six methods, against the record",
+  var TABNAME = { runPanRace: "The six methods, read at three budgets",
                   runPanSched: "The schedule found", runPanSearch: "The search" };
 
+  function atCount(b) { return B("at ", "em ") + fmt(b); }
+
+  /* How far into the traces the page is allowed to read right now. -1 before
+     any race; the replay clock while the replay runs, so a rung fills in as the
+     replay crosses it; everything once the race has settled. */
+  function readClock() {
+    if (!R.traces) return -1;
+    return R.phase === "settled" ? Infinity : R.clock;
+  }
+
   function renderAnswer() {
-    var w = W(), d = D(), rec = record();
-    var best = Infinity, lead = -1, m;
-    if (R.costs) {
-      for (m = 0; m < 6; m++) {
-        if (isFinite(R.costs[m]) && R.costs[m] < best) { best = R.costs[m]; lead = m; }
-      }
-    }
-    var have = isFinite(best);
-    var gap = have && rec ? 100 * (best - rec) / rec : null;
-    var settled = R.phase === "settled";
+    var w = W(), rec = record(), clock = readClock();
 
     el("runFigName").textContent = L(TABNAME[S.tab]);
     el("runFigInst").textContent = L(w.name) + " · " + S.inst + " · " +
-      (have ? L("seed") + " " + fmt(S.seed) : L("no run yet"));
+      (R.costs ? L("seed") + " " + fmt(S.seed) : L("no run yet")) + " · " +
+      (rec ? L("record") + " " + fmt(rec) : L("no published record"));
 
-    el("runAnswer").innerHTML =
-      fact(L("Cost found here"), have ? fmtCost(best) : DASH,
-        have ? METHODS[lead][1] + " · " + L(settled ? "winner" : "leading") : L("no run yet"), true) +
-      fact(L("Published record"), rec ? fmt(rec) : L("none"),
-        rec ? L("MaScLib, 2015") : L("seeded workload, no record")) +
-      fact(L("Distance from the record"),
-        gap === null ? DASH : (Math.abs(gap) < 0.005 ? pct(0) : pct(gap)),
-        gap === null ? (rec ? L("needs a run") : L("no record to measure against"))
-          : Math.abs(gap) < 0.005 ? L("matched") : gap < 0 ? L("below the record") : L("above the record"),
-        gap !== null && gap <= 0.005) +
-      fact(L("Run in this page"), R.elapsed ? fmtMs(R.elapsed) : DASH,
-        R.evals ? L("six methods, one seed") + " · " +
-          fmt(Math.round(R.evals.reduce(function (a, b) { return a + b; }, 0))) + " " + L("evaluations")
-        : L("six methods, one seed"));
+    /* THE TWO FIXED QUESTIONS. The page's own two upper budgets, asked in the
+       same order on every file, whichever way they answer. A budget chosen to
+       flatter would hide the other; this shows it. */
+    var tiles = "";
+    [BUDGETS[1], BUDGETS[2]].forEach(function (b) {
+      if (!(clock >= b && b <= S.budget)) {
+        tiles += fact(atLabel(b), DASH,
+          b > S.budget ? L("not run here") + " — " + L("extend the race") : "", false, "void");
+        return;
+      }
+      var cs = costsAt(b), ld = leadersOf(cs), best = ld.length ? cs[ld[0]] : Infinity;
+      var gap = rec && isFinite(best) ? 100 * (best - rec) / rec : null;
+      tiles += fact(atLabel(b), isFinite(best) ? fmtCost(best) : DASH,
+        leaderPhrase(ld) + (gap === null ? "" : " · " +
+          (Math.abs(gap) < 0.005 ? L("matched the published record")
+            : pct(gap) + " " + (gap < 0 ? L("below the record") : L("above the record")))),
+        gap !== null && gap <= 0.005);
+    });
 
-    el("runAnswerNote").innerHTML = esc(S.inst) + " · " + fmt(d[N]) + " " + esc(L(w.job)) + " · " +
-      (rec ? esc(L("The published record for this file is")) + " <b>" + esc(fmt(rec)) + "</b>."
-           : esc(L("This file carries no published record."))) +
-      (have ? "" : " " + esc(L("Nothing has been run on this page yet.")));
+    /* THE BUDGET-FREE QUESTION. "Evaluations to the record" cannot be tuned by
+       choosing a budget: it either happens or it does not, and it names
+       whoever gets there first — including when that is not Iterated Greedy. */
+    var fin = R.traces ? finalCosts() : null;
+    var target = rec;
+    if (!target && fin) {
+      target = Infinity;
+      for (var q = 0; q < 6; q++) if (isFinite(fin[q]) && fin[q] < target) target = fin[q];
+      if (!isFinite(target)) target = 0;
+    }
+    var tLabel = rec ? L("Evaluations to the record") : L("Evaluations to the best cost found here");
+    if (clock < 0 || !target) {
+      tiles += fact(tLabel, DASH, "", false, "void");
+    } else {
+      var hits = [], first = Infinity, got = 0, m;
+      for (m = 0; m < 6; m++) {
+        hits.push(reachedAt(m, target));
+        if (hits[m] > 0) { got++; if (hits[m] < first) first = hits[m]; }
+      }
+      if (!got || first > clock) {
+        tiles += fact(tLabel, L("not reached"),
+          L("no method reached") + " " + fmtCost(target) + " " + L("in this race"), false, "void");
+      } else {
+        var who = [];
+        for (m = 0; m < 6; m++) if (hits[m] === first) who.push(m);
+        var sub;
+        if (!rec) sub = nameList(who) + " · " + fmtCost(target) + " · " + L("this file has no published record");
+        else if (got === 1) sub = nameList(who) + " · " + L("the only method that got there");
+        else sub = nameList(who) + " · " + L("first there") +
+          (who.indexOf(IG) < 0 && hits[IG] > 0 ? " · " + METHODS[IG][1] + " " + fmt(hits[IG]) : "");
+        tiles += fact(tLabel, fmt(Math.round(first)), sub, !!rec);
+      }
+    }
+
+    tiles += fact(L("Run in this page"), R.elapsed ? fmtMs(R.elapsed) : DASH,
+      R.evals ? L("one race") + " · " + L("six methods") + " · " + L("one seed") + " · " +
+        fmt(Math.round(R.evals.reduce(function (a, b) { return a + b; }, 0))) + " " + L("evaluations")
+      : L("one race") + " · " + L("six methods") + " · " + L("one seed"));
+
+    el("runAnswer").innerHTML = tiles;
+    renderHonesty();
   }
+
+  /* ---- THE HONESTY LINE ----
+     Always visible, and it carries the figure's own control. Two facts, both
+     produced by the engine: where the page's own method stands on the file in
+     front of the reader, at every rung this race can be read at; and the file
+     where it is beaten, one click away. The counter-example's numbers appear
+     only after the reader has actually raced it — until then the line names it
+     and says what happens there, with no figure attached to a claim. */
+  function renderHonesty() {
+    var clock = readClock(), out = esc(L("Both costs come from one race: a budget is where the reading stops, not a result."));
+
+    var stand = [];
+    readable().forEach(function (b) {
+      if (clock < b) return;
+      var cs = costsAt(b), r = rankIn(cs, IG), ld = leadersOf(cs);
+      if (!r) return;
+      stand.push(ordinal(r) + (ld.length > 1 && ld.indexOf(IG) >= 0 ? " (" + L("level") + ")" : "") +
+        " " + atCount(b));
+    });
+    if (stand.length) {
+      out += " " + esc(L("Iterated Greedy on this file")) + ": <b>" + esc(stand.join(" · ")) + "</b>.";
+    } else if (clock < 0 && R.phase !== "stale") {
+      /* "stale" means a run was thrown away, not that none was ever made: the
+         transport bar says press Run, and this line does not claim otherwise */
+      out += " " + esc(L("Nothing has been run on this page yet."));
+    }
+
+    var other = S.inst === CONTROL.lose ? CONTROL.win : CONTROL.lose, seen = SEEN[other];
+    if (other === CONTROL.lose) {
+      out += " " + esc(seen
+        ? B("Iterated Greedy is not first everywhere: on " + other + ", measured here, it finished " +
+            ordinal(seen.rank) + " of six " + atCount(seen.rung) + ", " + pct(seen.gap) + " behind the leader.",
+            "O Iterated Greedy não é o primeiro em todo lugar: no " + other + ", medido aqui, ele terminou em " +
+            ordinal(seen.rank) + " de seis " + atCount(seen.rung) + ", " + pct(seen.gap) + " atrás do líder.")
+        : B("Iterated Greedy is not first everywhere: on " + other + " it finishes last of six. Same engine, same rule.",
+            "O Iterated Greedy não é o primeiro em todo lugar: no " + other + " ele termina em último dos seis. Mesmo motor, mesma regra."));
+    } else {
+      out += " " + esc(seen && seen.hit
+        ? B("On " + other + ", measured here, it reached " + fmtCost(seen.rec) + " — the published record — in " +
+            fmt(Math.round(seen.hit)) + " evaluations. Same engine, same rule.",
+            "No " + other + ", medido aqui, ele alcançou " + fmtCost(seen.rec) + " — o recorde publicado — em " +
+            fmt(Math.round(seen.hit)) + " avaliações. Mesmo motor, mesma regra.")
+        : B("It is first on " + other + ", where it reaches the published record. Same engine, same rule.",
+            "Ele é o primeiro no " + other + ", onde alcança o recorde publicado. Mesmo motor, mesma regra."));
+    }
+    el("runAnswerNote").innerHTML = out;
+    var btn = el("runControl");
+    btn.hidden = false;
+    btn.setAttribute("data-inst", other);
+    btn.textContent = B("Race " + other, "Correr " + other);
+  }
+
+  function finalCosts() { return costsAt(Infinity); }
 
   /* ============================================================
      6 · THE SCHEDULE — the winning sequence, not a timeline
@@ -6444,12 +6743,17 @@ function onWinResize(fn){
       body += txt(tx, 36 + H, (spanDays * i / ticks).toFixed(spanDays < 4 ? 1 : 0),
         { a: i === 0 ? "start" : i === ticks ? "end" : "middle", s: 9 });
     }
+    var ld = R.leaders && R.leaders.length ? R.leaders : [R.winner];
     body += txt(pad + full, 14, L(w.dayName), { a: "end", s: 9.5 });
-    body += txt(pad, 14, METHODS[R.winner][1] + " · " + L("winner"),
+    body += txt(pad, 14, METHODS[R.winner][1] + " · " + L("winner") +
+      (ld.length > 1 ? " · " + L("one of") + " " + fmt(ld.length) + " " + L("that finished level") : ""),
       { f: "var(--sans)", s: 10.5, w: 600, c: "var(--ink)" });
     paint(node, refused > 0 ? 80 : 66, body);
 
+    /* the engine exports ONE best order, at the end of the race: this strip is
+       the race as run, not a reading at a rung */
     el("runSchedCap").textContent = L("the winning sequence, in the order the method chose") + " · " +
+      L("the race as run, not a reading") + " · " +
       L("each block is one order's machine time, coloured by family, repeating after six") + " · " +
       L("the axis is machine time consumed, not the clock") +
       (refused > 0 ? " · " + L("refused orders sit below the line") : "") + ".";
@@ -6472,7 +6776,8 @@ function onWinResize(fn){
      ============================================================ */
   function renderSearch() {
     var node = el("runSearchSvg"), W0 = width(node), pad = 4, LX = 46, RX = 8;
-    var plotW = W0 - LX - RX, H = 116, top = 8, body = "";
+    /* `top` leaves a band above the plot for the three reading marks */
+    var plotW = W0 - LX - RX, H = 116, top = 20, body = "";
 
     if (!R.traces) {
       body += track(LX, top, plotW, H);
@@ -6506,6 +6811,25 @@ function onWinResize(fn){
       var Y = function (c) { return top + H - H * clamp((c - lo) / (hi - lo), 0, 1); };
 
       body += rect(LX, top, plotW, H, "var(--stage)", ' rx="4" opacity=".55"');
+      /* the three readings, drawn where they are actually taken: the answer
+         band is this axis, read at three x positions */
+      var lastRight = -1e9;
+      BUDGETS.forEach(function (b, bi) {
+        if (b > maxE) return;
+        var gx = X(b), on = b === S.rung && R.phase === "settled";
+        body += line(gx, top, gx, top + H, on ? "var(--terra)" : "var(--rule-strong)", 1,
+          ' stroke-dasharray="2 3"');
+        /* the mark is the gridline; the label is dropped rather than allowed to
+           collide with the one before it at a narrow width */
+        var label = fmt(b), wpx = label.length * 5.2;
+        var a = bi === 0 ? "start" : gx > LX + plotW * 0.9 ? "end" : "middle";
+        var lx = clamp(gx, LX + 2, LX + plotW - 2);
+        var left = a === "start" ? lx : a === "end" ? lx - wpx : lx - wpx / 2;
+        if (left < lastRight + 6) return;
+        lastRight = left + wpx;
+        body += txt(lx, top - 6, label,
+          { a: a, s: 8.5, c: on ? "var(--terra-ink)" : "var(--ink-soft)" });
+      });
       if (rec) {
         body += line(LX, Y(rec), LX + plotW, Y(rec), "var(--brass)", 1, ' stroke-dasharray="4 3"');
         body += txt(LX + plotW, Y(rec) - 4, L("Published record"),
@@ -6531,7 +6855,8 @@ function onWinResize(fn){
       body += txt(LX + plotW, top + H + 16, fmt(Math.round(maxE)) + " " + L("evaluations"),
         { a: "end", s: 9 });
       paint(node, top + H + 26, body);
-      el("runSearchCap").textContent = L("best cost") + " · " + L("evaluations") +
+      el("runSearchCap").textContent = L("best cost") + " · " + L("evaluations spent") + " · " +
+        L("the three readings above are the marked gridlines") +
         (rec ? " · " + L("the brass line is the published record") : "") +
         (clipped ? " · " + L("the top of the axis is clipped, above the worst final cost") : "") + ".";
     }
@@ -6549,30 +6874,83 @@ function onWinResize(fn){
       readout(L("wall clock"), R.elapsed ? fmtMs(R.elapsed) : DASH);
     el("runSearchParams").innerHTML = readout(L("destroy size"), "d = 2") +
       readout(L("acceptance"), L("current solution")) +
-      readout(L("pairwise exchange"), L("on")) + readout(L("budget"), fmt(S.budget));
+      readout(L("pairwise exchange"), L("on")) + readout(L("budget"), fmt(S.budget)) +
+      readout(L("Read at"), fmt(S.rung));
+    /* The race runs one configuration at every size. The benchmarked CLI does
+       not: engine/src/main.rs:58-67 switches to d = 50 and turns the pairwise
+       exchange off at n >= 500. Where that matters, the caption says so rather
+       than letting the reader assume this is the method at its best. */
+    el("runParamCap").textContent = D()[N] >= 500
+      ? B("the settings this race uses · the benchmarked command line switches to d = 50 with no pairwise exchange at 500 orders and up, so this is the page's configuration, not the method's best one at this size",
+          "as configurações que esta corrida usa · a linha de comando do benchmark passa a d = 50 sem troca entre pares a partir de 500 pedidos, então esta é a configuração da página, não a melhor do método neste tamanho")
+      : B("the settings this race uses, the same ones the benchmark above was measured with",
+          "as configurações que esta corrida usa, as mesmas com que o benchmark acima foi medido");
     renderSeeds();
   }
 
+  /* Twelve seeds, and the budget-free column: the evaluations each seed needed
+     to reach the target. A seed that never gets there says so. */
   function renderSeeds() {
-    var rec = record(), head = '<li class="run-head"><span>' + esc(L("seed")) +
+    /* before the twelve run, the caption already names the target they will be
+       timed against — the same one the single race in front of the reader is
+       measured by */
+    var rec = record(), target = R.seedTarget || reference();
+    var col = rec ? L("to the record") : L("to the best here");
+    var head = '<li class="run-head"><span>' + esc(L("seed")) +
       '</span><span class="num">' + esc(L("cost")) + '</span><span class="num drop">' +
-      esc(L("gap")) + '</span><span class="drop">' + esc(L("winner")) + "</span></li>", rows = "";
+      esc(L("gap")) + '</span><span class="num">' + esc(col) + '</span><span class="drop">' +
+      esc(L("winner")) + "</span></li>", rows = "";
     for (var i = 0; i < 12; i++) {
       var got = R.seedRows && R.seedRows[i];
+      var hit = got && got.hits ? Math.min.apply(null, got.hits.filter(function (e) { return e > 0; })
+                                                  .concat([Infinity])) : Infinity;
       rows += "<li" + (got && got.seed === S.seed ? ' class="sel"' : "") + '><span class="key">' +
         fmt(S.seed + i) + '</span><span class="num">' + (got ? esc(fmtCost(got.cost)) : DASH) +
         '</span><span class="num drop">' +
         (got && rec ? esc(pct(100 * (got.cost - rec) / rec)) : DASH) +
-        '</span><span class="drop dim">' + (got ? esc(METHODS[got.winner][1]) : esc(L("not run"))) +
-        "</span></li>";
+        '</span><span class="num">' +
+        (!got ? DASH : isFinite(hit) ? esc(fmt(Math.round(hit))) : esc(L("not reached"))) +
+        '</span><span class="drop dim">' +
+        (got ? esc(nameList(got.leaders && got.leaders.length ? got.leaders : [got.winner]))
+             : esc(L("not run"))) + "</span></li>";
     }
     el("runSeedRows").innerHTML = head + rows;
+
+    el("runSeedsCap").textContent = target
+      ? L("twelve consecutive seeds of the same file, and the evaluations each one needed to reach") +
+        " " + fmtCost(target)
+      : L("twelve consecutive seeds of the same file, at the budget the race ran to");
+    el("runSeedsSum").textContent = seedSummary(target);
+
     var est = estimateMs(S.budget, D()[N], 12);
     el("runSeeds12Note").textContent = R.seedsRunning
       ? L("Racing twelve seeds") + " …"
       : L("twelve races, about") + " " + fmtMs(est) + ".";
     el("runSeeds12").disabled = R.seedsRunning || R.phase === "racing" || R.phase === "loading" ||
-      R.phase === "failed";
+      R.phase === "failed" || !R.traces;
+  }
+
+  function seedSummary(target) {
+    if (!R.seedRows || !target) return "";
+    var got = [], inside = 0, done = 0;
+    for (var i = 0; i < 12; i++) {
+      var row = R.seedRows[i];
+      if (!row) continue;
+      done++;
+      var hs = (row.hits || []).filter(function (e) { return e > 0; });
+      if (!hs.length) continue;
+      var e = Math.min.apply(null, hs);
+      got.push(e);
+      if (e <= S.budget) inside++;
+    }
+    if (!done) return "";
+    if (!got.length) return L("No seed reached") + " " + fmtCost(target) + " " + L("in this run.");
+    got.sort(function (a, b) { return a - b; });
+    var med = got.length % 2 ? got[(got.length - 1) / 2]
+      : (got[got.length / 2 - 1] + got[got.length / 2]) / 2;
+    return fmt(got.length) + " " + L("of 12 seeds reach") + " " + fmtCost(target) + " · " +
+      L("median") + " " + fmt(Math.round(med)) + " " + L("evaluations") + " · " +
+      fmt(inside) + " " + L("inside") + " " + fmt(S.budget) + ".";
   }
 
   /* ============================================================
@@ -6648,8 +7026,12 @@ function onWinResize(fn){
 
   function onDone(d) {
     absorb(d);
-    R.traces = d.traces; R.winner = d.winner; R.order = d.order;
-    R.bestLen = d.snaps[d.winner].bestLen; R.n = d.n; R.frames = d.frames;
+    R.traces = d.traces; R.order = d.order;
+    /* leaders is every index at the minimum; winner is the one the schedule
+       strip has to draw, and the caption says when it is one of several */
+    R.leaders = (d.leaders && d.leaders.length) ? d.leaders : [d.winner];
+    R.winner = R.leaders[0];
+    R.bestLen = d.snaps[R.winner].bestLen; R.n = d.n; R.frames = d.frames;
     var spent = R.evals.reduce(function (a, b) { return a + b; }, 0);
     if (d.elapsed > 4) R.rate = spent * d.n / d.elapsed;   /* calibrate the estimate */
     R.hi = 0;
@@ -6668,19 +7050,27 @@ function onWinResize(fn){
     R.phase = "replay";
     renderGo();
     renderTransport();
-    var maxE = 1;
-    for (var m = 0; m < 6; m++) if (R.evals[m] > maxE) maxE = R.evals[m];
-    var t0 = (window.performance || Date).now(), DUR = 1600, mine = token;
+    /* The replay clock runs to the READING, not to the evaluations spent: the
+       board it hands over to is the board read at S.rung, so the last frame of
+       the replay and the first frame of the settled board are the same numbers.
+       The answer band fills in as the clock crosses each rung. */
+    var maxE = Math.max(1, S.rung);
+    var t0 = (window.performance || Date).now(), DUR = 1600, mine = token, crossed = -1;
     function step() {
       if (token !== mine || R.phase !== "replay") return;
       var t = clamp(((window.performance || Date).now() - t0) / DUR, 0, 1);
       var clock = t * maxE;
+      R.clock = clock;
       for (var i = 0; i < 6; i++) {
         var tr = R.traces[i], v = Infinity;
         for (var k = 0; k < tr.length && tr[k][0] <= clock; k++) v = tr[k][1];
-        R.costs[i] = t >= 1 ? FINAL[i] : v;
+        R.costs[i] = v;
       }
       paintBoard();
+      /* the band only moves when the clock passes a rung — re-reading three
+         traces sixty times a second would be a lot of work for no pixel */
+      var now = BUDGETS.filter(function (b) { return b <= clock; }).length;
+      if (now !== crossed) { crossed = now; renderAnswer(); }
       if (t >= 1) { finishRace(); return; }
       replayRaf = requestAnimationFrame(step);
     }
@@ -6688,7 +7078,7 @@ function onWinResize(fn){
     /* rAF does not fire in a background tab, and the result must land anyway */
     clearTimeout(replayGuard);
     replayGuard = setTimeout(function () {
-      if (token === mine && R.phase === "replay") { R.costs = FINAL.slice(); finishRace(); }
+      if (token === mine && R.phase === "replay") finishRace();
     }, DUR + 260);
   }
 
@@ -6696,7 +7086,9 @@ function onWinResize(fn){
     cancelAnimationFrame(replayRaf);
     clearTimeout(replayGuard);
     if (FINAL) R.costs = FINAL.slice();
+    R.clock = Infinity;
     R.phase = "settled";
+    remember();
     paintBoard();
     settleBoard();
     renderGo();
@@ -6707,6 +7099,21 @@ function onWinResize(fn){
     renderSearch();
   }
 
+  /* What the engine measured on this file, in this session. The honesty line
+     quotes it instead of asserting a number the reader cannot check: before the
+     control has been raced there is no percentage on screen at all. */
+  function remember() {
+    if (!R.traces) return;
+    var rec = record(), cs = costsAt(S.rung), ld = leadersOf(cs);
+    if (!ld.length) return;
+    var best = cs[ld[0]], mine = cs[IG];
+    SEEN[S.inst] = {
+      rank: rankIn(cs, IG), rung: S.rung, seed: S.seed, rec: rec,
+      gap: isFinite(mine) && best > 0 ? 100 * (mine - best) / best : 0,
+      hit: rec ? reachedAt(IG, rec) : 0
+    };
+  }
+
   function startRace() {
     var w;
     try { w = ensureWorker(); } catch (e) { engineFailed(String(e && e.message || e)); return; }
@@ -6715,7 +7122,8 @@ function onWinResize(fn){
     el("runReplay").hidden = true;
     R.phase = "loading";
     R.costs = null; R.status = null; R.evals = null; R.traces = null;
-    R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.hi = 0; FINAL = null;
+    R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.leaders = null;
+    R.hi = 0; R.clock = -1; FINAL = null;
     el("runStandings").classList.remove("stale");
     paintBoard();
     renderGo();
@@ -6737,7 +7145,8 @@ function onWinResize(fn){
     clearTimeout(replayGuard);
     var had = R.phase === "racing" || R.phase === "loading";
     R.costs = null; R.status = null; R.evals = null; R.traces = null;
-    R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.hi = 0; FINAL = null;
+    R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.leaders = null;
+    R.hi = 0; R.clock = -1; FINAL = null;
     R.phase = had ? "stale" : "idle";
     el("runStandings").classList.toggle("stale", had);
     el("runReplay").hidden = true;
@@ -6751,7 +7160,8 @@ function onWinResize(fn){
 
   function onSeed(d) {
     if (!R.seedRows) R.seedRows = [];
-    R.seedRows[d.index] = { seed: d.seed, cost: d.cost, winner: d.winner };
+    R.seedRows[d.index] = { seed: d.seed, cost: d.cost, winner: d.winner,
+                            leaders: d.leaders, hits: d.hits };
     renderSeeds();
   }
 
@@ -6762,10 +7172,14 @@ function onWinResize(fn){
     token++;
     R.seedRows = [];
     R.seedsRunning = true;
+    /* the target the twelve seeds are timed against: the published record where
+       the file has one, otherwise the best cost the race in front of the reader
+       actually found. Stated in the caption either way. */
+    R.seedTarget = reference();
     renderSeeds();
     w.postMessage({ cmd: "seeds", token: token, inst: S.inst, seed: S.seed, budget: S.budget,
                     count: 12, slice: Math.max(200, Math.round(S.budget / 200)),
-                    d: 2, accept: 0, permute: 1 });
+                    target: R.seedTarget, d: 2, accept: 0, permute: 1 });
   }
 
   /* Any change to the sentence invalidates the result rather than reinterpreting
@@ -6774,8 +7188,11 @@ function onWinResize(fn){
   function changed() {
     if (R.phase === "racing" || R.phase === "loading" || R.phase === "replay") stopRace();
     R.costs = null; R.status = null; R.evals = null; R.traces = null;
-    R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.hi = 0;
-    R.seedRows = null; FINAL = null;
+    R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.leaders = null;
+    R.hi = 0; R.clock = -1;
+    R.seedRows = null; R.seedTarget = 0; FINAL = null;
+    /* the reading can never claim more than the race is going to run */
+    if (S.rung > S.budget) S.rung = S.budget;
     el("runReplay").hidden = true;
     renderAll();
     /* a previous failure is not sticky: the new file may well load, and if it
@@ -6826,7 +7243,9 @@ function onWinResize(fn){
       var qs = parseInt(p.get("seed"), 10);
       if (qs > 0 && qs < 1e9) S.seed = qs;
       var qb = parseInt(p.get("budget"), 10);
-      if (BUDGETS.indexOf(qb) >= 0) S.budget = qb;
+      if (BUDGETS.indexOf(qb) >= 0) { S.budget = qb; S.rung = qb; }
+      var qr = parseInt(p.get("read"), 10);
+      if (BUDGETS.indexOf(qr) >= 0 && qr <= S.budget) S.rung = qr;
     } catch (e) { /* an unparseable URL is not a reason to fail */ }
 
     renderAll();
@@ -6838,6 +7257,31 @@ function onWinResize(fn){
       /* written in English on purpose: the page's own EN2PT walker translates it */
       this.textContent = open ? "Hide every number" : "Show every number";
       if (open) renderStatRows();
+    });
+
+    /* THE READING SWITCH. It re-reads the traces the race already produced —
+       no postMessage, no engine call, nothing run again. */
+    el("runRungs").addEventListener("click", function (ev) {
+      var b = ev.target.closest("button[data-b]");
+      if (!b || b.disabled) return;
+      S.rung = +b.getAttribute("data-b");
+      remember();
+      paintBoard();
+      settleBoard();
+      renderAnswer();
+      renderSearch();
+    });
+
+    /* THE CONTROL. One click to the file where the page's own method is beaten,
+       and from there one click back. Same engine, same settings, same board. */
+    el("runControl").addEventListener("click", function () {
+      var id = this.getAttribute("data-inst");
+      if (!RUN_STATS[id]) return;
+      S.world = "factory";
+      S.inst = id;
+      changed();
+      var sect = document.getElementById("m-run");
+      if (sect) sect.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" });
     });
 
     el("runTabs").addEventListener("click", function (ev) {
@@ -6906,7 +7350,7 @@ function onWinResize(fn){
 
     el("runCopy").addEventListener("click", function () {
       var u = location.origin + location.pathname + "?world=" + S.world + "&instance=" + S.inst +
-        "&seed=" + S.seed + "&budget=" + S.budget + "#m-run";
+        "&seed=" + S.seed + "&budget=" + S.budget + "&read=" + S.rung + "#m-run";
       var btn = this, was = btn.textContent;
       function done() {
         btn.textContent = "✓ " + L("copied");

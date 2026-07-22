@@ -228,6 +228,30 @@ function raceToEnd(job, inst, onFrame, onDone) {
   tick();
 }
 
+/* WHO IS FIRST, when two methods end level.
+   The old scan was `if (snaps[m].best < snaps[winner].best) winner = m` from
+   index 0 — a STRICT test, so an exact tie was awarded to the lower index, and
+   the engine's order is greedy 0 … ig 5. That is a list position deciding a
+   race. This returns EVERY index at the minimum; the page names them all and
+   uses leaders[0] only where it has to draw ONE thing (the schedule strip).
+   It is index-free: it equally denies IG a win it did not earn. */
+function leadersOf(snaps) {
+  var best = Infinity, out = [], m;
+  for (m = 0; m < 6; m++) if (snaps[m].best < best) best = snaps[m].best;
+  if (!isFinite(best)) return [];
+  for (m = 0; m < 6; m++) if (snaps[m].best === best) out.push(m);
+  return out;
+}
+
+/* First evaluation at which a method's best reached `target`, 0 if it never
+   did. Read off the same trace the page reads its rungs from, so the count and
+   the curve cannot disagree. */
+function reachedAt(trace, target) {
+  if (!target) return 0;
+  for (var k = 0; k < trace.length; k++) if (trace[k][1] <= target) return trace[k][0];
+  return 0;
+}
+
 function bestOrderOf(m, n) {
   var ptr = X.race_best_ptr();
   if (!ptr) return [];
@@ -257,12 +281,12 @@ function handleRace(job) {
     raceToEnd(job, inst, function (snaps, elapsed) {
       self.postMessage({ type: "frame", token: mine, snaps: snaps, elapsed: elapsed });
     }, function (snaps, elapsed, frames, worst) {
-      var winner = 0;
-      for (var m = 1; m < 6; m++) if (snaps[m].best < snaps[winner].best) winner = m;
+      var leaders = leadersOf(snaps), winner = leaders.length ? leaders[0] : 0;
       var traces = [];
       for (var t = 0; t < 6; t++) traces.push(traceOf(t));
       self.postMessage({
-        type: "done", token: mine, snaps: snaps, traces: traces, winner: winner,
+        type: "done", token: mine, snaps: snaps, traces: traces,
+        leaders: leaders, winner: winner,
         order: bestOrderOf(winner, inst.n), elapsed: elapsed, frames: frames,
         worstFrame: Math.round(worst * 10) / 10, n: inst.n
       });
@@ -273,7 +297,12 @@ function handleRace(job) {
 /* Twelve consecutive seeds of the same file at the same budget, run to the end
    one after another: the answer to "is this seed luck?". Every seed is a full
    six-method race, so this costs twelve times a single Run — the page states
-   the estimate before it offers the button. */
+   the estimate before it offers the button.
+
+   Each seed also reports, per method, the evaluation at which it first reached
+   `job.target` (the published record where the file has one). That count is
+   budget-free: it either happens or it does not, and no choice of budget can
+   move it. */
 function handleSeeds(job) {
   var mine = job.token;
   loadWasm().then(function () {
@@ -289,10 +318,12 @@ function handleSeeds(job) {
                   d: job.d, accept: job.accept, permute: job.permute };
       startRace(one, inst);
       raceToEnd(one, inst, function () {}, function (snaps) {
-        var winner = 0;
-        for (var m = 1; m < 6; m++) if (snaps[m].best < snaps[winner].best) winner = m;
+        var leaders = leadersOf(snaps), hits = [];
+        for (var m = 0; m < 6; m++) hits.push(reachedAt(traceOf(m), job.target || 0));
         self.postMessage({ type: "seed", token: mine, index: i, seed: one.seed,
-                           cost: snaps[winner].best, winner: winner });
+                           cost: leaders.length ? snaps[leaders[0]].best : Infinity,
+                           leaders: leaders, winner: leaders.length ? leaders[0] : 0,
+                           hits: hits });
         i++;
         nextTick(next);
       });
