@@ -1,0 +1,273 @@
+{
+ "instance": "NCOS_14",
+ "source": "masclib/NCOS_14.csv",
+ "reading": {
+  "machine": "one GPU",
+  "time_unit": "seconds",
+  "money_unit": "credits (1 credit \u2248 $0.0001)",
+  "setup": "none \u2014 a single resident model (pure admission/SLO problem)",
+  "rejection": "route the request to a cloud API and pay its price",
+  "note": "numbers are identical to the source instance \u2014 only the semantics layer is new, so published best-known objective values remain valid"
+ },
+ "requests": 25,
+ "models": {
+  "0": {
+   "model": "qwen-7b (single resident model)",
+   "size_class": "S",
+   "load_seconds": 0,
+   "swap_cost_credits": 0
+  }
+ },
+ "jobs": [
+  {
+   "id": 0,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 1700,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 1,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 1900,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 2,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 1800,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 3,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 1800,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 4,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 1600,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 5,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 1200,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 6,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 1400,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 7,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 1200,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 8,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 1400,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 9,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 1600,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 10,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 2000,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 11,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 2100,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 12,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 2000,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 13,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 500,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 14,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 500,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 15,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 70,
+   "slo_deadline_s": 400,
+   "slo_class": "batch",
+   "late_penalty_credits_per_s": 3.0,
+   "cloud_price_credits": 1400.0
+  },
+  {
+   "id": 16,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 200,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 17,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 200,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 18,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 300,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 19,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 600,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 20,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 700,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 21,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 700,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 22,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 700,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 23,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 700,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  },
+  {
+   "id": 24,
+   "model": "qwen-7b (single resident model)",
+   "arrival_s": 0,
+   "inference_s": 90,
+   "slo_deadline_s": 700,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 7.0,
+   "cloud_price_credits": 1800.0
+  }
+ ]
+}

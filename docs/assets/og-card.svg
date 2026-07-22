@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img"
+     aria-label="Iterated Greedy — single-machine scheduling. 39 of 44 best-knowns matched or beaten.">
+  <defs>
+    <!-- faint blueprint grid, the project's background language -->
+    <pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#2254a3" stroke-opacity=".055" stroke-width="1"/>
+    </pattern>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f6f1e8" stop-opacity="0"/>
+      <stop offset="1" stop-color="#f6f1e8" stop-opacity=".85"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="630" fill="#f6f1e8"/>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <rect y="430" width="1200" height="200" fill="url(#fade)"/>
+
+  <!-- kicker -->
+  <text x="80" y="96" font-family="Menlo, monospace" font-size="19" letter-spacing="3.4"
+        fill="#6a6255">ITERATED GREEDY · SCHEDULING</text>
+  <rect x="80" y="112" width="58" height="3" fill="#b0562f"/>
+
+  <!-- the page's own hook, so the card and the site rhyme -->
+  <text x="80" y="212" font-family="Georgia, 'Iowan Old Style', serif" font-size="72" fill="#2a2620">Order changes time.</text>
+  <text x="80" y="296" font-family="Georgia, 'Iowan Old Style', serif" font-size="72" fill="#b0562f">Time changes cost.</text>
+
+  <text x="80" y="352" font-family="Georgia, 'Iowan Old Style', serif" font-size="27" font-style="italic" fill="#6a6255">
+    An interactive explanation of a small algorithm that schedules better.
+  </text>
+
+  <!-- signature motif: one machine's timeline — setup gaps, jobs, a late tail -->
+  <g transform="translate(80 404)">
+    <rect x="0" y="26" width="1040" height="1" fill="#e2d9c8"/>
+    <rect x="0"   y="0" width="150" height="26" rx="3" fill="#7d94b0"/>
+    <rect x="158" y="0" width="26"  height="26" rx="3" fill="#ad7644"/>
+    <rect x="192" y="0" width="118" height="26" rx="3" fill="#7a8b6f"/>
+    <rect x="318" y="0" width="26"  height="26" rx="3" fill="#ad7644"/>
+    <rect x="352" y="0" width="196" height="26" rx="3" fill="#b0562f"/>
+    <rect x="556" y="0" width="104" height="26" rx="3" fill="#c9a148"/>
+    <rect x="668" y="0" width="26"  height="26" rx="3" fill="#ad7644"/>
+    <rect x="702" y="0" width="164" height="26" rx="3" fill="#7d94b0"/>
+    <rect x="874" y="0" width="88"  height="26" rx="3" fill="#a8432e" opacity=".55"/>
+    <text x="874" y="50" font-family="Menlo, monospace" font-size="14" fill="#a8432e">late</text>
+    <text x="0"   y="50" font-family="Menlo, monospace" font-size="14" fill="#6a6255">setup · processing · tardiness</text>
+  </g>
+
+  <!-- evidence, stated plainly -->
+  <g transform="translate(80 508)">
+    <rect x="0" y="0" width="310" height="74" rx="9" fill="#fbf8f1" stroke="#e2d9c8"/>
+    <text x="20" y="30" font-family="Menlo, monospace" font-size="13" letter-spacing="1.2" fill="#6a6255">BEST-KNOWNS MATCHED OR BEATEN</text>
+    <text x="20" y="60" font-family="Georgia, serif" font-size="26" fill="#b0562f">39<tspan font-size="17" fill="#6a6255">&#160;/ 44 instances</tspan></text>
+
+    <rect x="330" y="0" width="286" height="74" rx="9" fill="#fbf8f1" stroke="#e2d9c8"/>
+    <text x="350" y="30" font-family="Menlo, monospace" font-size="13" letter-spacing="1.2" fill="#6a6255">VERIFIED THREE WAYS</text>
+    <text x="350" y="60" font-family="Georgia, serif" font-size="26" fill="#2a2620">Rust<tspan font-size="17" fill="#6a6255">&#160;· Python · WASM</tspan></text>
+  </g>
+
+  <text x="1120" y="566" text-anchor="end" font-family="Menlo, monospace" font-size="17" fill="#6a6255">alexmarinho.github.io/IG</text>
+</svg>

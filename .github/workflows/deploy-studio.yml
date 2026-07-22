@@ -1,0 +1,65 @@
+name: deploy-studio
+
+on:
+  push:
+    branches: [master]
+    paths:
+      - ".github/workflows/deploy-studio.yml"
+      - "masclib*/**"
+      - "studio/**"
+      - "engine/**"
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build WASM engine
+        # --no-default-features drops the `cli` feature so the `ig` binary
+        # (required-features = ["cli"], which needs the native-only `solve`) is
+        # skipped and only the ig_core cdylib is compiled for wasm32. Matches ci.yml.
+        run: RUSTFLAGS="-C panic=abort" cargo build --release --target wasm32-unknown-unknown --no-default-features --manifest-path engine/Cargo.toml
+      - name: Regenerate engine payload from current instances
+        run: node studio/scripts/build-engine-payload.mjs --out=studio/src/generated/engine-payload.js
+      - name: Mirror scenario artwork into docs/
+        # BEFORE the check, which asserts the two copies are byte-identical: the
+        # homepage (#m-run) fetches these four renders as files while the Studio
+        # embeds them as data URIs, and a re-rendered image must not be able to
+        # leave the homepage showing the old one — or nothing.
+        run: |
+          mkdir -p docs/assets/scenarios
+          cp studio/assets/scenarios/*.webp docs/assets/scenarios/
+      - name: Studio check + build
+        run: |
+          npm --prefix studio run check
+          npm --prefix studio run build
+      - name: Publish to docs/
+        run: |
+          # make-hosted-embed keeps the +1137-byte hosted-shell block (hides the
+          # in-app chrome, sticky Prepare/Results, ?lang wiring) the homepage
+          # iframe depends on. A plain copy of dist/ would drop it.
+          node studio/scripts/make-hosted-embed.mjs
+          # The homepage's #m-run races the six methods IN the page, so it needs
+          # the wasm as a fetchable file (not the base64 the Studio embeds) and
+          # the instance CSVs one file at a time — a visitor who presses Run
+          # pays 51 KB gzipped for the engine plus ~2 KB for one instance.
+          # docs/engine/race-worker.js is hand-written and is not regenerated here.
+          mkdir -p docs/engine
+          cp engine/target/wasm32-unknown-unknown/release/ig_core.wasm docs/engine/ig_core.wasm
+          rm -rf docs/engine/instances && mkdir -p docs/engine/instances
+          cp masclib/*.csv masclib-domains/*.csv docs/engine/instances/
+          # docs/assets/scenarios was already mirrored above, before the check.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A docs/studio-app.html docs/engine docs/assets/scenarios studio/src/generated/
+          git diff --cached --quiet || git commit -m "studio: rebuild published app [skip ci]"
+          git push

@@ -1,0 +1,45 @@
+name: import-assets
+
+# One-shot: fetch the kept scenario images (print3d, coffee, brewery) from
+# temporary signed URLs and commit them as real binaries (the MCP contents
+# API cannot transport binary files). Deleted from the branch after success.
+
+on:
+  push:
+    branches: [feat/scenario-levels]
+    paths:
+      - ".github/workflows/import-assets.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download scenario images
+        run: |
+          set -euo pipefail
+          cd studio/assets/scenarios
+          curl -fsSL 'https://www.kimi.com/apiv2-files/sign-obj/kimi-fs%2Ffiles%2Fblob%2F5b8aa96718c2f57087ecf7cdc89802116286ad0d1e9b1d61cca9934282ed44c2?filename=print3d.webp&sig=5z0m7hSsN1m2_hbnvvH0vtkML-ckDG-xqDzOzyCCcmQ=&t=o' -o print3d.webp
+          curl -fsSL 'https://www.kimi.com/apiv2-files/sign-obj/kimi-fs%2Ffiles%2Fblob%2Faab23b01dc3d4c227f819a42ecd753aca8ba966a582bebe9644cc01bb5ec807d?filename=coffee.webp&sig=D488NLfTRi-QTwSufJ_LRmwoA-lUKI9ZfIS9lcHszWY=&t=o' -o coffee.webp
+          curl -fsSL 'https://www.kimi.com/apiv2-files/sign-obj/kimi-fs%2Ffiles%2Fblob%2F2f93f57fedd5e9205e4b3c53ddb05d9c811c5006b960ce5e74f17b73740cc95b?filename=brewery.webp&sig=CP6XkS1BPD8mwahd7mHs76KIqYc63Fe0KjvKZMHt_8k=&t=o' -o brewery.webp
+      - name: Verify downloads are real webp binaries
+        run: |
+          set -euo pipefail
+          cd studio/assets/scenarios
+          for f in print3d coffee brewery; do
+            size=$(stat -c%s "$f.webp")
+            magic=$(head -c4 "$f.webp")
+            echo "$f.webp $size bytes magic=$magic"
+            [ "$size" -gt 5000 ] || { echo "too small: $f.webp"; exit 1; }
+            [ "$magic" = "RIFF" ] || { echo "not a webp: $f.webp"; exit 1; }
+          done
+      - name: Commit images
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add studio/assets/scenarios/
+          git diff --cached --quiet || git commit -m "assets: import print3d, coffee, brewery images [skip ci]"
+          git push

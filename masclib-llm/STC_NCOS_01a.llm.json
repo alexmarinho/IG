@@ -1,0 +1,145 @@
+{
+ "instance": "STC_NCOS_01a",
+ "source": "masclib/STC_NCOS_01a.csv",
+ "reading": {
+  "machine": "one GPU",
+  "time_unit": "seconds",
+  "money_unit": "credits (1 credit \u2248 $0.0001)",
+  "setup": "model load/swap (time and/or GPU-credit cost \u2014 some instances price the swap without stalling the queue)",
+  "rejection": "route the request to a cloud API and pay its price",
+  "note": "numbers are identical to the source instance \u2014 only the semantics layer is new, so published best-known objective values remain valid"
+ },
+ "requests": 8,
+ "models": {
+  "0": {
+   "model": "qwen-7b",
+   "size_class": "S",
+   "load_seconds": 185.0,
+   "swap_cost_credits": 185.0
+  },
+  "1": {
+   "model": "llama-8b",
+   "size_class": "S",
+   "load_seconds": 30.0,
+   "swap_cost_credits": 30.0
+  },
+  "2": {
+   "model": "mistral-24b",
+   "size_class": "M",
+   "load_seconds": 25.0,
+   "swap_cost_credits": 25.0
+  },
+  "3": {
+   "model": "qwen-32b",
+   "size_class": "M",
+   "load_seconds": 30.0,
+   "swap_cost_credits": 30.0
+  },
+  "4": {
+   "model": "sdxl-image",
+   "size_class": "S",
+   "load_seconds": 30.0,
+   "swap_cost_credits": 30.0
+  },
+  "5": {
+   "model": "whisper-large",
+   "size_class": "S",
+   "load_seconds": 25.0,
+   "swap_cost_credits": 25.0
+  },
+  "6": {
+   "model": "embed-8b",
+   "size_class": "S",
+   "load_seconds": 30.0,
+   "swap_cost_credits": 30.0
+  },
+  "7": {
+   "model": "llama-70b",
+   "size_class": "L",
+   "load_seconds": 30.0,
+   "swap_cost_credits": 30.0
+  }
+ },
+ "jobs": [
+  {
+   "id": 0,
+   "model": "qwen-7b",
+   "arrival_s": 0,
+   "inference_s": 10,
+   "slo_deadline_s": 690,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 1,
+   "model": "llama-8b",
+   "arrival_s": 30,
+   "inference_s": 30,
+   "slo_deadline_s": 110,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 2,
+   "model": "mistral-24b",
+   "arrival_s": 310,
+   "inference_s": 130,
+   "slo_deadline_s": 1580,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 150.0
+  },
+  {
+   "id": 3,
+   "model": "qwen-32b",
+   "arrival_s": 150,
+   "inference_s": 180,
+   "slo_deadline_s": 1260,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 200.0
+  },
+  {
+   "id": 4,
+   "model": "sdxl-image",
+   "arrival_s": 40,
+   "inference_s": 40,
+   "slo_deadline_s": 110,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 5,
+   "model": "whisper-large",
+   "arrival_s": 40,
+   "inference_s": 40,
+   "slo_deadline_s": 1700,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 6,
+   "model": "embed-8b",
+   "arrival_s": 30,
+   "inference_s": 30,
+   "slo_deadline_s": 1170,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 50.0
+  },
+  {
+   "id": 7,
+   "model": "llama-70b",
+   "arrival_s": 160,
+   "inference_s": 180,
+   "slo_deadline_s": 890,
+   "slo_class": "interactive",
+   "late_penalty_credits_per_s": 1.0,
+   "cloud_price_credits": 200.0
+  }
+ ]
+}

@@ -1,0 +1,27 @@
+[package]
+name = "ig-core"
+version = "0.1.0"
+edition = "2021"
+description = "Iterated Greedy for single-machine scheduling with rejection, tardiness penalties and sequence-dependent family setups (OAS / MaScLib)"
+license = "GPL-3.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "ig"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[features]
+default = ["cli"]
+cli = ["dep:rayon", "dep:serde_json"]
+
+[dependencies]
+rayon = { version = "1", optional = true }
+serde_json = { version = "1", optional = true }
+
+[profile.release]
+opt-level = 3       # cargo's release default, made explicit
+lto = true
+codegen-units = 1
