@@ -22,6 +22,13 @@
    indivisible phase of n(n+1)/2 evaluations, which at n=500 is a single
    ~1.3 s block that no slice size can cut. On the main thread that is a
    frozen page; here it is a paused number on a live one.
+
+   THE PER-METHOD CLOCK, and why it is only now worth reading. Until the Rust
+   port five of these six methods were JavaScript and one was WebAssembly, so
+   any wall-clock comparison between them measured the LANGUAGE. All six are
+   the same engine behind one objective now, which is what makes `ms[]` below a
+   comparison of algorithms rather than of runtimes. It is still the SECONDARY
+   currency: evaluations are reproducible on any machine, milliseconds are not.
    ============================================================ */
 "use strict";
 
@@ -195,10 +202,26 @@ function nextTick(fn) {
 var YIELD_MS = 12;    /* how long one macrotask may hold the worker */
 var FRAME_MS = 33;    /* how often the page is told anything */
 
+/* `ms[m]` is the machine time racer m spent inside its own `race_step` calls,
+   and it is measured identically for all six: ONE clock (the same
+   performance.now() that times the race), started at the instant that racer's
+   call begins and stopped at the instant it returns, six times per pass.
+   The reads telescope — one stamp before the pass, one after each racer — so
+   the six always sum to EXACTLY the pass's own duration. A browser that
+   clamps its clock (100 µs in Chrome, coarser elsewhere) can hand a tick to
+   the neighbouring racer, but it cannot invent or lose one.
+   What a racer's number does NOT contain: race_snapshot, the trace pull, and
+   the yields between macrotasks. That is why the six sum to less than
+   `elapsed`, and why both are reported rather than one standing in for the
+   other. A racer that has finished still gets its call every pass — `advance`
+   returns on the done flag — so its clock keeps that call overhead, measured
+   at about half a microsecond a pass (1,900 extra passes add ~0.8 ms to
+   greedy's number). At this page's slice that is a tenth of a millisecond, and
+   it is never the reason a method's number is small. Its evaluations are. */
 function raceToEnd(job, inst, onFrame, onDone) {
   var mine = job.token, t0 = (self.performance || Date).now();
   var now = function () { return (self.performance || Date).now(); };
-  var frames = 0, worst = 0, posted = 0;
+  var frames = 0, worst = 0, posted = 0, ms = [0, 0, 0, 0, 0, 0];
   function tick() {
     if (token !== mine) return;                       /* superseded: drop it */
     var slot = now(), done = false, snaps;
@@ -206,9 +229,14 @@ function raceToEnd(job, inst, onFrame, onDone) {
        long enough. One pass can overrun it by a lot and that is not a bug:
        greedy's construction is a single indivisible phase. */
     do {
-      var p0 = now();
-      for (var m = 0; m < 6; m++) X.race_step(m, job.slice);
-      var dt = now() - p0;
+      var p0 = now(), mark = p0;
+      for (var m = 0; m < 6; m++) {
+        X.race_step(m, job.slice);
+        var at = now();
+        ms[m] += at - mark;
+        mark = at;
+      }
+      var dt = mark - p0;
       if (dt > worst) worst = dt;
       X.race_snapshot(0);
       snaps = allSnapshots();
@@ -219,10 +247,10 @@ function raceToEnd(job, inst, onFrame, onDone) {
     var elapsed = now() - t0;
     if (done) {
       X.race_snapshot(2);                             /* bit1: refresh best orders */
-      onDone(snaps, elapsed, frames, worst);
+      onDone(snaps, elapsed, frames, worst, ms);
       return;
     }
-    if (elapsed - posted >= FRAME_MS) { posted = elapsed; onFrame(snaps, elapsed, frames); }
+    if (elapsed - posted >= FRAME_MS) { posted = elapsed; onFrame(snaps, elapsed, frames, ms); }
     nextTick(tick);
   }
   tick();
@@ -278,9 +306,12 @@ function handleRace(job) {
     self.postMessage({ type: "ready", token: mine, n: inst.n, fam: inst.fam, proc: inst.proc,
                        csvBytes: inst.bytes });
     startRace(job, inst);
-    raceToEnd(job, inst, function (snaps, elapsed) {
-      self.postMessage({ type: "frame", token: mine, snaps: snaps, elapsed: elapsed });
-    }, function (snaps, elapsed, frames, worst) {
+    raceToEnd(job, inst, function (snaps, elapsed, frames, ms) {
+      /* `ms` is the live per-racer clock, so the board can carry a method's own
+         time while the race is still running. It is copied by the structured
+         clone, so the accumulator keeps accumulating. */
+      self.postMessage({ type: "frame", token: mine, snaps: snaps, elapsed: elapsed, ms: ms });
+    }, function (snaps, elapsed, frames, worst, ms) {
       var leaders = leadersOf(snaps), winner = leaders.length ? leaders[0] : 0;
       var traces = [];
       for (var t = 0; t < 6; t++) traces.push(traceOf(t));
@@ -288,7 +319,7 @@ function handleRace(job) {
         type: "done", token: mine, snaps: snaps, traces: traces,
         leaders: leaders, winner: winner,
         order: bestOrderOf(winner, inst.n), elapsed: elapsed, frames: frames,
-        worstFrame: Math.round(worst * 10) / 10, n: inst.n
+        worstFrame: Math.round(worst * 10) / 10, n: inst.n, ms: ms
       });
     });
   }).catch(function (err) { if (token === mine) fail(mine, err); });

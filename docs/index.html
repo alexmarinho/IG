@@ -947,6 +947,13 @@ footer a{color:var(--terra-ink)}
   .run-seedrows li { grid-template-columns: 52px 78px 62px 96px minmax(0, 1fr); }
   .run-stats li { grid-template-columns: minmax(0, 1fr) 100px minmax(0, .9fr); cursor: default; }
   .run-stats li:hover { background: transparent; }
+  /* the clock ledger: the same table shape, carrying the rate the Rust port
+     bought and the engine's own account of what each method did */
+  .run-clockrows li { grid-template-columns: 12px minmax(0, 1fr) 84px 64px 78px minmax(0, 1.1fr); cursor: default; }
+  .run-clockrows li:hover { background: transparent; }
+  /* "wall clock" is the whole point of this table and must not be ellipsed into
+     "wall cl…" on a phone: its header wraps instead of truncating. */
+  .run-clockrows li.run-head > span { white-space: normal; }
   .run-hist { display: inline-flex; align-items: flex-end; align-self: center; gap: 2px; height: 20px; }
   .run-hist i { width: 8px; background: var(--steel); border-radius: 1px; display: block; }
   @media (max-width: 760px) {
@@ -954,8 +961,14 @@ footer a{color:var(--terra-ink)}
     .run-methref li { grid-template-columns: 22px 12px minmax(0, 1fr) 78px; }
     .run-seedrows li { grid-template-columns: 52px 84px minmax(0, 1fr); }
     .run-stats li { grid-template-columns: minmax(0, 1fr) 92px; }
+    .run-clockrows li { grid-template-columns: 12px minmax(0, 1fr) 78px 60px; }
     .run-rows li > span.drop { display: none; }
   }
+  /* A disclosure INSIDE a panel, not a card: it takes the panel's surface and a
+     hairline of its own, and its title is a panel heading rather than a card
+     title. Closed by default, with the measured finding in the summary. */
+  .run-fold { margin-top: 13px; padding-top: 13px; border-top: 1px solid var(--rule); }
+  .run-fold > summary h3 { font: 600 14px/1.25 var(--serif); margin: 0; }
 
   /* Two columns inside a panel, collapsing to one; and the hairline that
      separates one block of a card from the next. */
@@ -998,12 +1011,20 @@ footer a{color:var(--terra-ink)}
      --zero is the record's x inside the bar column; the strip to its left is
      the room a method needs to BEAT the record. One scale, one direction. */
   .run-board { position: relative; }
-  .run-board li { display: grid; grid-template-columns: 20px 10px minmax(0, 1fr) minmax(0, 2.1fr) 96px; gap: 8px; align-items: center; }
+  .run-board li { display: grid; grid-template-columns: 20px 10px minmax(0, 1fr) minmax(0, 1.9fr) 94px 72px; gap: 8px; align-items: center; }
   .run-board li .st-rank { grid-column: 1; }
   .run-board li .st-dot { grid-column: 2; }
   .run-board li .st-name { grid-column: 3; }
   .run-board li .run-bar { grid-column: 4; }
   .run-board li .st-cost { grid-column: 5; margin-left: 0; }
+  /* WHAT THE METHOD SPENT — and which of the two numbers is the currency.
+     The evaluation count is the reproducible one, so it takes the ink and the
+     upper line; the machine's own milliseconds sit beneath it in the muted ink
+     this page keeps for a qualifier. The same pair-shape as .st-cost and its
+     gap, because a reader already parses that as number-then-caveat. */
+  .run-board li .st-spent { grid-column: 6; text-align: right; font: 600 11.5px/1.15 var(--mono); color: var(--ink); }
+  .run-board li .st-spent small { display: block; font: 500 10px/1.2 var(--mono); color: var(--ink-soft); }
+  .run-board li .st-spent.void { color: var(--ink-soft); }
   .run-bar { position: relative; height: 13px; align-self: center; background: var(--well); border-radius: 3px; overflow: hidden; }
   .run-bar i { position: absolute; left: var(--zero, 0); top: 0; bottom: 0; width: calc(100% - var(--zero, 0px)); transform-origin: left center; transform: scaleX(var(--w, 0)); border-radius: 0 3px 3px 0; }
   .run-bar i.under { left: auto; right: calc(100% - var(--zero, 0px)); width: var(--zero, 0px); transform-origin: right center; border-radius: 3px 0 0 3px; }
@@ -1064,9 +1085,13 @@ footer a{color:var(--terra-ink)}
   #m-run .lab-cockpit + .m-links { margin-top: 16px; }
 
   @media (max-width: 760px) {
+    /* Two rows on a phone: the standing on the first, and the bar with what the
+       method spent on the second — the spend keeps the cost's column, so the
+       two currencies stay in one right-hand stack and nothing is dropped. */
     .run-board li { grid-template-columns: 20px 10px minmax(0, 1fr) 86px; }
     .run-board li .st-cost { grid-column: 4; }
-    .run-board li .run-bar { grid-column: 1 / -1; grid-row: 2; margin-top: 2px; }
+    .run-board li .st-spent { grid-column: 4; grid-row: 2; }
+    .run-board li .run-bar { grid-column: 1 / 4; grid-row: 2; margin-top: 2px; align-self: start; }
     .run-board::after { display: none; }
     .run-bar::before { content: ""; position: absolute; left: var(--zero, 0); top: 0; bottom: 0; width: 1px; background: var(--brass); z-index: 2; }
     .run-board.noref .run-bar::before { background: var(--rule-strong); }
@@ -1633,7 +1658,28 @@ footer a{color:var(--terra-ink)}
           <p class="chart-cap" id="runRungCap"></p>
           <ol class="standings run-board" id="runStandings"></ol>
           <p class="chart-cap" id="runBoardCap"></p>
+          <!-- The spend column gets its own caption rather than a clause in the
+               one above: it is the only place on this page where a number
+               changes with the machine, and that has to be said plainly. -->
+          <p class="chart-cap" id="runSpentCap"></p>
           <p class="status-line" id="runProv"></p>
+
+          <!-- THE CLOCK LEDGER. Folded, because the board already carries the
+               two numbers a reader needs; open, it adds the third — evaluations
+               a second, the number the Rust port actually bought — beside the
+               engine's own reason each method stopped, and the accounting
+               between the six methods' time and the race's own wall clock.
+               The summary states the finding, measured, so a reader who never
+               opens it still gets it. -->
+          <details class="lab-fold run-fold" id="runClock">
+            <summary>
+              <h3>What each method spent</h3>
+              <span class="f-fold-find" id="runClockFind">Evaluations, wall clock and evaluations a second for each of the six, measured here when you press Run &#183; the evaluation count reproduces on any machine, the milliseconds beside it do not.</span>
+            </summary>
+            <ul class="standings run-rows run-clockrows" id="runClockRows"></ul>
+            <p class="chart-cap" id="runClockCap"></p>
+          </details>
+
           <p class="lab-hint"><strong>One seed, one race, three budgets.</strong> Every method gets the
           same instance, the same seed and the same evaluation count at each reading, taken from the same
           race. A method that stops early keeps its final cost. A run halted at a budget would let some
@@ -3740,6 +3786,12 @@ function onWinResize(fn){
     "What the schedule did with the queue": "O que o cronograma fez com a fila",
     "made and refused, out of the orders in the file":
       "feitos e recusados, entre os pedidos do arquivo",
+    /* the clock ledger's fold: an <h3> and a finding line, two text nodes and
+       two keys. The finding is rewritten from the engine on every race — this
+       pair is what the markup ships and what a reader sees before one runs. */
+    "What each method spent": "O que cada método gastou",
+    "Evaluations, wall clock and evaluations a second for each of the six, measured here when you press Run · the evaluation count reproduces on any machine, the milliseconds beside it do not.":
+      "Avaliações, tempo de relógio e avaliações por segundo de cada um dos seis, medidos aqui quando você aperta Executar · a contagem de avaliações se reproduz em qualquer máquina, os milissegundos ao lado dela não.",
     "What the objective prices": "O que o objetivo precifica",
     "the four terms of the objective, in this world's own words · the race reports one total, not a split, so no term carries a number here":
       "os quatro termos do objetivo, nas palavras deste mundo · a corrida reporta um total, não a divisão, então nenhum termo carrega um número aqui",
@@ -5829,11 +5881,24 @@ function onWinResize(fn){
    from the same CSV with the same parser; the world lenses, the published
    records and the instance labels come from studio/src/data/catalog.js.
 
+   TWO CURRENCIES, AND ONLY ONE OF THEM REPRODUCES. The evaluation budget is
+   the section's unit because it is machine-independent: the same file, seed and
+   budget give the same counts on any laptop. Wall clock does not, so it is the
+   SECOND readout everywhere it appears — under the count on the board, behind a
+   fold in the ledger, and never without the words that say whose machine it is.
+   It is worth printing at all only because of the Rust port: five of these six
+   methods used to be JavaScript and one WebAssembly, so a wall-clock comparison
+   between them measured the language. One engine, one objective, six racers —
+   `race-worker.js` times each racer around its own `race_step` calls, one clock,
+   the same start and stop points for all six.
+
    HONEST GAPS, kept as gaps. The race exports one total cost per method, not a
    split, so the four objective terms are named and never priced here. It does
    not export a late count, so "late" is not printed. The schedule strip is the
    winning SEQUENCE against machine time consumed, not a clock: start times,
-   setups and waiting are priced by the engine and are not drawn.
+   setups and waiting are priced by the engine and are not drawn. A method's
+   clock covers its own steps and nothing else, so the six sum to less than the
+   race — the ledger prints both rather than letting one stand for the other.
 
    THE ARTWORK. The four renders in docs/assets/scenarios/ are the Studio's own
    scenario art, published as files by .github/workflows/deploy-studio.yml and
@@ -6190,8 +6255,26 @@ function onWinResize(fn){
     "the brass line is the published record": "a linha de latão é o recorde publicado",
     "each bar is how far that method still is from it": "cada barra é o quanto aquele método ainda está longe dele",
     "left of the line is below it": "à esquerda da linha é abaixo dele",
+
+    /* the second currency: what each method spent, and whose clock that is */
+    "beside each cost, what that method spent": "ao lado de cada custo, o que aquele método gastou",
+    "evaluations, and the wall clock they took on this machine":
+      "avaliações, e o tempo de relógio que elas levaram nesta máquina",
+    "the count reproduces on any machine, the milliseconds do not":
+      "a contagem se reproduz em qualquer máquina, os milissegundos não",
+    "few milliseconds against few evaluations is a method that stopped, not one that was quicker — read the two together":
+      "poucos milissegundos com poucas avaliações é um método que parou, não um método mais rápido — leia os dois juntos",
+    "wall clock changes with the machine; the evaluation counts do not":
+      "o tempo de relógio muda com a máquina; as contagens de avaliações não",
+    "this machine's clock": "relógio desta máquina",
+    "evaluations/s": "avaliações/s",
+    "per second": "por segundo",
+    "what it did with them": "o que ele fez com elas",
+    "wall clock, this machine": "tempo de relógio, nesta máquina",
     "this file has no published record, so the line is the best cost found in this race": "este arquivo não tem recorde publicado, então a linha é o melhor custo encontrado nesta corrida",
     "one worker, round-robin slices": "um worker, fatias em rodízio",
+    "each method timed around its own steps, on one clock":
+      "cada método cronometrado em torno dos próprios passos, num só relógio",
     "loaded in": "carregado em",
     "measured here": "medido aqui",
     "bytes": "bytes",
@@ -6293,6 +6376,27 @@ function onWinResize(fn){
     if (!isFinite(ms)) return DASH;
     return ms < 950 ? Math.round(ms) + " ms" : (ms / 1000).toFixed(ms < 9500 ? 1 : 0) + " s";
   }
+  /* A single method can finish inside a millisecond, and "0 ms" would read as
+     "no time at all" for something that really did run. Under ten milliseconds
+     this prints a tenth — which is also about as fine as a browser clock gets,
+     since performance.now() is clamped for fingerprinting reasons. */
+  function fmtSpan(ms) {
+    if (ms === null || ms === undefined || !isFinite(ms)) return DASH;
+    return ms < 9.95 ? fmt(Math.round(ms * 10) / 10) + " ms" : fmtMs(ms);
+  }
+  /* Evaluations a second — the number the Rust port bought, and the one number
+     here that is stable in RATIO between methods even when the absolute times
+     are not. Left blank, never guessed, below a floor: a method that ran for a
+     millisecond is measured mostly on the engine warming up (the wasm memory
+     grows once mid-race) and on a clock the browser deliberately blunts.
+     Measured on this build: greedy's whole construction is 0.4–0.9 ms, so it is
+     the row this floor keeps honest. */
+  var RATE_FLOOR_MS = 10;
+  function fmtRate(evals, ms) {
+    if (!evals || !ms || ms < RATE_FLOOR_MS) return DASH;
+    var r = evals / (ms / 1000);
+    return r >= 1e6 ? fmt(Math.round(r / 1e5) / 10) + "M" : fmt(Math.round(r / 1e3)) + "k";
+  }
   var NFP = null, NFPL = null;
   function pct(v) {
     var lang = pt() ? "pt-BR" : "en-US";
@@ -6374,6 +6478,7 @@ function onWinResize(fn){
     costs: null,         /* six numbers, live or final; null before a run */
     status: null,        /* six [key, arg, phase, done] */
     evals: null,
+    ms: null,            /* six wall clocks, one per racer, measured in the worker */
     traces: null,
     order: null, bestLen: 0, n: 0, fam: null, proc: null,
     elapsed: 0, winner: -1, leaders: null, frames: 0,
@@ -6859,7 +6964,8 @@ function onWinResize(fn){
           ')"></span><span class="st-name">' + esc(m[1]) +
           '<span class="st-sep" aria-hidden="true"> · </span><small>' + esc(L("not run")) +
           '</small></span><span class="run-bar" aria-hidden="true"><i style="background:var(' +
-          m[2] + ')"></i></span><span class="st-cost">' + DASH + "</span></li>";
+          m[2] + ')"></i></span><span class="st-cost">' + DASH +
+          '</span><span class="st-spent void">' + DASH + "</span></li>";
       }).join("");
   }
 
@@ -6915,6 +7021,16 @@ function onWinResize(fn){
           esc(v === ref ? (rec ? L("matched") : L("best here")) : pct(100 * (v - ref) / ref)) +
           "</small>";
       }
+      /* WHAT IT SPENT — the two currencies, in the order the page ranks them.
+         Both belong to the race AS RUN: a rung re-reads the cost off the trace,
+         but nothing is run again, so the evaluations and the milliseconds are
+         the whole race's either way. The caption says so at a smaller rung. */
+      var spent = li.querySelector(".st-spent");
+      var ev = R.evals ? R.evals[m] : null, took = R.ms ? R.ms[m] : null;
+      spent.classList.toggle("void", ev === null);
+      spent.innerHTML = ev === null ? DASH
+        : esc(fmt(Math.round(ev))) + "<small>" + esc(fmtSpan(took)) + "</small>";
+
       small.textContent = statusText(m);
       li.classList.toggle("done", !!(R.status && R.status[m][3]));
       /* rank among the six, ties sharing a number */
@@ -6931,6 +7047,15 @@ function onWinResize(fn){
         L("each bar is how far that method still is from it") + " · " + L("left of the line is below it")
       : L("this file has no published record, so the line is the best cost found in this race")) +
       " · " + L("methods that end level are named together, not ordered by the list") + ".";
+    /* THE SECOND CURRENCY, SAID PLAINLY. The evaluation count is the page's
+       unit because it reproduces anywhere; the milliseconds beside it are this
+       machine's alone. And a short time is a method that STOPPED, which is the
+       one way this column could be misread. */
+    el("runSpentCap").textContent = L("beside each cost, what that method spent") + " · " +
+      L("evaluations, and the wall clock they took on this machine") + " · " +
+      L("the count reproduces on any machine, the milliseconds do not") + " · " +
+      L("few milliseconds against few evaluations is a method that stopped, not one that was quicker — read the two together") +
+      (S.rung < S.budget ? " · " + L("the race as run, not a reading") : "") + ".";
     renderRungs();
   }
 
@@ -7013,12 +7138,108 @@ function onWinResize(fn){
   function renderProvenance() {
     var p = el("runProv");
     if (!R.wasmBytes) { p.textContent = ""; return; }
-    var rate = R.elapsed > 0 && R.evals
-      ? R.evals.reduce(function (a, b) { return a + b; }, 0) / (R.elapsed / 1000) : 0;
+    /* the whole race's rate: every method's evaluations over the race's own
+       wall clock. Formatted by the same helper the per-method ledger uses, so
+       the two rates on this page are written the same way in both locales. */
+    var all = R.evals ? R.evals.reduce(function (a, b) { return a + b; }, 0) : 0;
+    var rate = fmtRate(all, R.elapsed);
     p.textContent = "ig_core.wasm · " + fmt(R.wasmBytes) + " " + L("bytes") + " · " + L("loaded in") +
       " " + fmtMs(R.wasmMs) + " · " + L("one worker, round-robin slices") +
-      (rate ? " · " + (rate / 1e6).toFixed(1) + "M " + L("evaluations") + "/s " + L("measured here") : "") +
+      /* HOW THE PER-METHOD CLOCK IS TAKEN, where the numbers' provenance is
+         already stated: one clock, and the same two points for all six. */
+      " · " + L("each method timed around its own steps, on one clock") +
+      (rate === DASH ? "" : " · " + rate + " " + L("evaluations") + "/s " + L("measured here")) +
       " · " + L("the same Rust build the benchmark above was scored with") + ".";
+  }
+
+  /* ============================================================
+     4b · THE CLOCK LEDGER — the third number, and the arithmetic
+     ============================================================
+     WHY A PER-METHOD CLOCK IS ONLY NOW WORTH PRINTING. Until the Rust port,
+     five of these six methods were JavaScript and one was WebAssembly, so any
+     wall-clock comparison measured the LANGUAGE rather than the algorithm —
+     which is exactly why this section counts in evaluations. All six are the
+     same engine behind one objective now, and that is what makes a millisecond
+     comparable between them. It is still the second currency: an evaluation
+     count is the same number on every machine and a millisecond is not.
+
+     Folded, because the board already carries both numbers. Open, it adds the
+     rate — the thing the port actually bought — the engine's own reason each
+     method stopped, and the arithmetic between the six clocks and the race's
+     own, so the page's overhead is stated instead of hiding inside a method. */
+  function renderClock() {
+    var head = '<li class="run-head"><span></span><span>' + esc(L("method")) +
+      '</span><span class="num">' + esc(L("evaluations")) + '</span><span class="num">' +
+      /* "evaluations/s" is one unbreakable token and would be ellipsed into
+         "evaluatio…" in this column; the row above it already says what is
+         being counted, so the header only has to say per what. */
+      esc(L("wall clock")) + '</span><span class="num drop">' + esc(L("per second")) +
+      '</span><span class="drop">' + esc(L("what it did with them")) + "</span></li>";
+
+    el("runClockRows").innerHTML = head + METHODS.map(function (mm, m) {
+      var ev = R.evals ? R.evals[m] : null, took = R.ms ? R.ms[m] : null;
+      return '<li' + (mm[0] === S.method ? ' class="sel"' : "") +
+        '><span class="st-dot" style="background:var(' + mm[2] + ')"></span><span class="key">' +
+        esc(mm[1]) + '</span><span class="num">' +
+        (ev === null ? DASH : esc(fmt(Math.round(ev)))) + '</span><span class="num">' +
+        esc(fmtSpan(took)) + '</span><span class="num drop">' +
+        (ev === null ? DASH : esc(fmtRate(ev, took))) + '</span><span class="drop dim">' +
+        esc(R.status ? statusText(m) : L("not run")) + "</span></li>";
+    }).join("");
+
+    var find = el("runClockFind"), cap = el("runClockCap");
+    if (!R.evals || !R.ms) {
+      find.textContent = B("Evaluations, wall clock and evaluations a second for each of the six, measured here when you press Run · the evaluation count reproduces on any machine, the milliseconds beside it do not.",
+        "Avaliações, tempo de relógio e avaliações por segundo de cada um dos seis, medidos aqui quando você aperta Executar · a contagem de avaliações se reproduz em qualquer máquina, os milissegundos ao lado dela não.");
+      cap.textContent = B("nothing has been measured yet: every cell here is an em dash until a race runs.",
+        "nada foi medido ainda: cada célula aqui é um travessão até uma corrida rodar.");
+      return;
+    }
+
+    /* THE FINDING, from the engine: who stopped first and who spent it all.
+       Named rather than asserted, so the sentence follows the race even when
+       the file, the seed or the budget changes what it says. Where no method
+       stopped early there is no spread in evaluations to report, and the
+       sentence falls back to the two ends of the clock — never to one method
+       named twice. */
+    var lo = 0, hi2 = 0, sum = 0, m;
+    for (m = 0; m < 6; m++) {
+      sum += R.ms[m];
+      if (R.evals[m] < R.evals[lo]) lo = m;
+      if (R.evals[m] > R.evals[hi2]) hi2 = m;
+    }
+    var same = R.evals[lo] === R.evals[hi2];
+    if (same) {
+      lo = 0; hi2 = 0;
+      for (m = 0; m < 6; m++) {
+        if (R.ms[m] < R.ms[lo]) lo = m;
+        if (R.ms[m] > R.ms[hi2]) hi2 = m;
+      }
+    }
+    var loN = METHODS[lo][1], hiN = METHODS[hi2][1];
+    find.textContent = (same
+      ? B("All six spent " + fmt(Math.round(R.evals[hi2])) + " evaluations, and the clock is what separates them: " +
+          loN + " in " + fmtSpan(R.ms[lo]) + ", " + hiN + " in " + fmtSpan(R.ms[hi2]) + ".",
+          "Os seis gastaram " + fmt(Math.round(R.evals[hi2])) + " avaliações, e o relógio é o que os separa: " +
+          loN + " em " + fmtSpan(R.ms[lo]) + ", " + hiN + " em " + fmtSpan(R.ms[hi2]) + ".")
+      : B(loN + " stopped after " + fmt(Math.round(R.evals[lo])) + " evaluations in " + fmtSpan(R.ms[lo]) +
+          "; " + hiN + " spent " + fmt(Math.round(R.evals[hi2])) + " in " + fmtSpan(R.ms[hi2]) + ".",
+          "O " + loN + " parou depois de " + fmt(Math.round(R.evals[lo])) + " avaliações em " + fmtSpan(R.ms[lo]) +
+          "; o " + hiN + " gastou " + fmt(Math.round(R.evals[hi2])) + " em " + fmtSpan(R.ms[hi2]) + ".")) +
+      " " + B("All six are the same Rust engine behind one objective, so the difference is the method and not the language it is written in — but the milliseconds are this machine's and the evaluation counts are not.",
+              "Os seis são o mesmo motor Rust atrás de um só objetivo, então a diferença é o método e não a linguagem em que ele está escrito — mas os milissegundos são desta máquina e as avaliações não.");
+
+    /* The gap is printed as its own number rather than left to be subtracted:
+       at second-scale both totals round to the same string, and the sentence
+       would look like it was claiming a difference between two equal numbers. */
+    var gap = Math.max(0, R.elapsed - sum);
+    cap.textContent = B("the six methods' own clocks add up to " + fmtSpan(sum) + " inside a race of " +
+        fmtMs(R.elapsed) + " wall to wall — the " + fmtSpan(gap) + " between them is the snapshot the page reads between passes and the yields that keep it answering",
+        "os relógios dos seis métodos somam " + fmtSpan(sum) + " dentro de uma corrida de " +
+        fmtMs(R.elapsed) + " de ponta a ponta — os " + fmtSpan(gap) + " entre eles são o retrato que a página lê entre as passagens e as pausas que a mantêm respondendo") +
+      " · " + B("a rate is left blank below " + RATE_FLOOR_MS + " ms of a method's own clock: too short a run to divide, with the engine still warming up",
+                "a taxa fica em branco abaixo de " + RATE_FLOOR_MS + " ms de relógio do próprio método: curto demais para dividir, com o motor ainda esquentando") +
+      " · " + L("wall clock changes with the machine; the evaluation counts do not") + ".";
   }
 
   /* ============================================================
@@ -7098,10 +7319,14 @@ function onWinResize(fn){
       }
     }
 
+    /* THE ONE TILE WHOSE NUMBER DOES NOT REPRODUCE, and it says so. The three
+       tiles beside it are counted in evaluations, which is the same number on
+       any machine; this one is a clock, so the evaluations lead its sub-line
+       and the last clause names whose clock it is. */
     tiles += fact(L("Run in this page"), R.elapsed ? fmtMs(R.elapsed) : DASH,
-      R.evals ? L("one race") + " · " + L("six methods") + " · " + L("one seed") + " · " +
-        fmt(Math.round(R.evals.reduce(function (a, b) { return a + b; }, 0))) + " " + L("evaluations")
-      : L("one race") + " · " + L("six methods") + " · " + L("one seed"));
+      (R.evals ? fmt(Math.round(R.evals.reduce(function (a, b) { return a + b; }, 0))) + " " +
+        L("evaluations") + " · " : L("one race") + " · ") +
+      L("six methods") + " · " + L("one seed") + " · " + L("this machine's clock"));
 
     el("runAnswer").innerHTML = tiles;
     renderHonesty();
@@ -7336,7 +7561,11 @@ function onWinResize(fn){
       readout(L("accepted improvements"), tr2 ? fmt(tr2.length) : DASH) +
       readout(L("last improvement at"), lastAt === null ? DASH
         : fmt(Math.round(lastAt)) + " · " + Math.round(100 * lastAt / S.budget) + "% " + L("of the budget")) +
-      readout(L("wall clock"), R.elapsed ? fmtMs(R.elapsed) : DASH);
+      /* THIS METHOD'S clock, not the race's. The worker times each racer around
+         its own race_step calls, so this block — "the search that produced it" —
+         no longer answers with the other five methods' time included. */
+      readout(L("wall clock, this machine"), R.ms ? fmtSpan(R.ms[sel]) : DASH) +
+      readout(L("evaluations/s"), R.evals && R.ms ? fmtRate(R.evals[sel], R.ms[sel]) : DASH);
     el("runSearchParams").innerHTML = readout(L("destroy size"), "d = 2") +
       readout(L("acceptance"), L("current solution")) +
       readout(L("pairwise exchange"), L("on")) + readout(L("budget"), fmt(S.budget)) +
@@ -7471,6 +7700,10 @@ function onWinResize(fn){
       R.status.push([d.snaps[m].status, d.snaps[m].arg, d.snaps[m].phase, !!(d.snaps[m].flags & 1)]);
     }
     R.elapsed = d.elapsed;
+    /* the per-racer clock, measured in the worker around each racer's own
+       race_step and nothing else (engine/race-worker.js). Live, like the costs:
+       a method's time is on the board while it is still spending it. */
+    R.ms = d.ms ? d.ms.slice() : null;
     /* the ceiling is captured once, at the first frame where all six have a
        solution, so the bars only ever shrink toward the line */
     if (!R.hi) {
@@ -7486,6 +7719,7 @@ function onWinResize(fn){
   function onFrame(d) {
     absorb(d);
     paintBoard();
+    renderClock();
     renderTransport();
   }
 
@@ -7560,6 +7794,7 @@ function onWinResize(fn){
     renderTransport();
     renderAnswer();
     renderProvenance();
+    renderClock();
     renderSched();
     renderSearch();
   }
@@ -7586,11 +7821,12 @@ function onWinResize(fn){
     el("runNote").hidden = true;
     el("runReplay").hidden = true;
     R.phase = "loading";
-    R.costs = null; R.status = null; R.evals = null; R.traces = null;
+    R.costs = null; R.status = null; R.evals = null; R.ms = null; R.traces = null;
     R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.leaders = null;
     R.hi = 0; R.clock = -1; FINAL = null;
     el("runStandings").classList.remove("stale");
     paintBoard();
+    renderClock();
     renderGo();
     renderTransport();
     renderAnswer();
@@ -7609,13 +7845,14 @@ function onWinResize(fn){
     cancelAnimationFrame(replayRaf);
     clearTimeout(replayGuard);
     var had = R.phase === "racing" || R.phase === "loading";
-    R.costs = null; R.status = null; R.evals = null; R.traces = null;
+    R.costs = null; R.status = null; R.evals = null; R.ms = null; R.traces = null;
     R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.leaders = null;
     R.hi = 0; R.clock = -1; FINAL = null;
     R.phase = had ? "stale" : "idle";
     el("runStandings").classList.toggle("stale", had);
     el("runReplay").hidden = true;
     paintBoard();
+    renderClock();
     renderGo();
     renderTransport();
     renderAnswer();
@@ -7652,7 +7889,7 @@ function onWinResize(fn){
      the board and wakes Run, with the wait stated in advance. */
   function changed() {
     if (R.phase === "racing" || R.phase === "loading" || R.phase === "replay") stopRace();
-    R.costs = null; R.status = null; R.evals = null; R.traces = null;
+    R.costs = null; R.status = null; R.evals = null; R.ms = null; R.traces = null;
     R.order = null; R.bestLen = 0; R.elapsed = 0; R.winner = -1; R.leaders = null;
     R.hi = 0; R.clock = -1;
     R.seedRows = null; R.seedTarget = 0; FINAL = null;
@@ -7692,6 +7929,7 @@ function onWinResize(fn){
     renderTransport();
     renderAnswer();
     renderProvenance();
+    renderClock();
     renderSched();
     renderSearch();
     links();
@@ -7786,6 +8024,7 @@ function onWinResize(fn){
         x.classList.toggle("leader", on);
         x.setAttribute("aria-pressed", String(on));
       });
+      renderClock();      /* the ledger marks the same method the board does */
       renderSearch();
     }
     el("runStandings").addEventListener("click", pickMethod);
