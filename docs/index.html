@@ -224,6 +224,17 @@
     --scene-filter:none;
   }
   .head-utils,.anchor-nav,.read-progress,.skip-link{display:none!important}
+
+  /* PAPER LOSES NOTHING. Progressive disclosure ranks the page for a reader who
+     can click; a sheet of paper cannot click, so every <details> prints open and
+     the run section's inactive tab panels print with the active one. The
+     `beforeprint` handler at the foot of the page sets [open] and clears
+     [hidden] first, which keeps the grids inside a disclosure laid out as grids;
+     these rules are the floor for any engine that prints without firing it.
+     Deliberately unweighted, so an author `display:grid` still wins the tie. */
+  details:not([open]) > *:not(summary){display:revert}
+  details::details-content{content-visibility:visible!important;display:block}
+  #runPanSched[hidden],#runPanSearch[hidden],#runStatRows[hidden]{display:revert}
 }
 
 /* ============ theme cross-fade — armed only during a switch ============ */
@@ -455,6 +466,35 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .f-acts a{font:700 11px/1 var(--sans);color:var(--terra-ink);text-decoration:none;border:1px solid var(--edge);border-radius:6px;padding:7px 10px;background:var(--paper)}
 .f-acts a:hover{background:var(--terra);border-color:var(--terra);color:var(--on-accent)}
 @media(max-width:640px){.f-fields{grid-template-columns:1fr;padding-left:8px}.f-item>summary{grid-template-columns:36px 1fr}.f-next{grid-column:2}}
+
+/* ---- .f-fold: a heading that is also a disclosure ----------------------------
+   Same grammar as .f-item, which this section already uses and the reader has
+   already met by the time they arrive: a title line, then the finding. The
+   finding is the point — a reader who never opens one still leaves knowing what
+   the block would have told them, so what is folded is reference material and
+   never an argument. No colour of its own; --terra / --ink-soft / --wash-terra
+   are the tokens .f-item is drawn with, and both themes get them free. */
+.f-fold{border-top:1px solid var(--rule);margin:22px 0 12px}
+.f-fold>summary{cursor:pointer;list-style:none;position:relative;padding:12px 2px 12px 20px}
+.f-fold>summary::-webkit-details-marker{display:none}
+.f-fold>summary::before{content:"\25B8";position:absolute;left:2px;top:15px;color:var(--ink-soft);font-size:11px;line-height:1.2}
+.f-fold[open]>summary::before{content:"\25BE"}
+.f-fold[open]>summary{background:var(--wash-terra)}
+.f-fold>summary .f-head{margin:0}
+.f-fold>summary:hover .f-head{color:var(--terra)}
+.f-fold-find{display:block;max-width:74ch;margin-top:5px;font-size:13.5px;line-height:1.5;color:var(--ink-soft)}
+.f-fold-body{padding:4px 2px 16px}
+.f-fold-body>.f-lede{margin-top:2px}
+
+/* the same disclosure inside a .lab-card, where the heading is 15px not 23px */
+.lab-fold>summary{cursor:pointer;list-style:none;position:relative;padding:1px 2px 1px 18px}
+.lab-fold>summary::-webkit-details-marker{display:none}
+.lab-fold>summary::before{content:"\25B8";position:absolute;left:0;top:2px;color:var(--ink-soft);font-size:11px;line-height:1.3}
+.lab-fold[open]>summary::before{content:"\25BE"}
+.lab-fold>summary h3{margin:0}
+.lab-fold>summary:hover h3{color:var(--terra)}
+.lab-fold>summary .f-fold-find{margin-top:4px;font-size:12.5px}
+.lab-fold[open]>summary{margin-bottom:11px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
 .subtitle{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
 .subtitle code{font-family:var(--mono);font-size:11.5px;color:var(--maple)}
 nav.anchor-nav{max-width:1120px;margin:0 auto;padding:0 20px}
@@ -1055,6 +1095,15 @@ footer a{color:var(--terra-ink)}
   .data-fold > summary::before { content: "▸\00a0"; color: var(--ink-soft); }
   .data-fold[open] > summary::before { content: "▾\00a0"; }
   .data-fold table { margin-top: 8px; }
+  /* Fig 01a's fold, for a summary that carries a finding rather than a label:
+     a finding is a sentence, and sentences wrap and read in the body voice.
+     The terracotta moves to the caret, which is the part that is clickable. */
+  .data-fold.fold-find { margin: 10px 0 16px; }
+  .data-fold.fold-find > summary { display: block; max-width: 74ch;
+    font: 500 13px/1.5 var(--sans); letter-spacing: 0; color: var(--ink-soft);
+    text-indent: -1.05em; padding-left: 1.05em; }
+  .data-fold.fold-find > summary::before { color: var(--terra-ink); }
+  .data-fold.fold-find > summary:hover { color: var(--ink); }
 </style>
 </head>
 <body>
@@ -1226,11 +1275,17 @@ footer a{color:var(--terra-ink)}
       </div>
       <div class="mult-row" id="multRow"><span>each job multiplies:</span></div>
     </div>
+    <!-- A LOOKUP TABLE. The slider, the three facts and the log bar already make
+         the argument; five fixed rows of n are the reference behind it. Same
+         fold as Fig 01a's exact numbers, one figure earlier. -->
+    <details class="data-fold fold-find">
+      <summary>Enumeration time at five sizes — ten jobs pass in one frame, twelve in a blink, and twenty take a human lifetime</summary>
     <table class="data" aria-label="Analogies">
       <caption>Enumeration time at selected values of n</caption>
       <thead><tr><th>n</th><th>orders n!</th><th>enumerate at 10⁹ orders/s</th><th>analogy</th></tr></thead>
       <tbody id="analogyBody"></tbody>
     </table>
+    </details>
     <p class="status-line" id="d2status" aria-live="polite"></p>
   </figure>
 </section>
@@ -1631,9 +1686,16 @@ footer a{color:var(--terra-ink)}
 
       <!-- 4 · WHAT WAS SOLVED — every number here is read from the repository.
            The world picker moved into the rail and the story into Fig. 06; what
-           is left is the file itself. -->
-      <div class="lab-card" id="runProblem">
-        <h3>What was solved</h3>
+           is left is the file itself — the section's footnote, not its claim, so
+           it is folded. Closed it costs 0px of the console column's slack and
+           saves its own height; the summary states the provenance, which is the
+           reason to trust it. Two SVGs inside cannot measure a closed box, so
+           the toggle repaints them — same reason the tab strip repaints. -->
+      <details class="lab-card lab-fold" id="runProblem">
+        <summary>
+          <h3>What was solved</h3>
+          <span class="f-fold-find">The input file's own numbers, read from the repository and never from a race &#183; the queue and its families, the changeover share, the load against the horizon, and every field the page holds.</span>
+        </summary>
         <p class="run-file" id="runFile"></p>
         <div class="fact-grid" id="runFacts"></div>
 
@@ -1657,7 +1719,7 @@ footer a{color:var(--terra-ink)}
           <ul class="standings run-rows run-stats" id="runStatRows" hidden></ul>
           <p class="chart-cap" id="runStatsCap">every field this page holds for the file, as written by <code>studio/scripts/build-instance-stats.mjs</code>, plus the changeover cost read from the same file with the same parser</p>
         </div>
-      </div>
+      </details>
     </div>
   </div>
 
@@ -1675,8 +1737,19 @@ footer a{color:var(--terra-ink)}
     <p class="m-lede">The current engine reproduces the 2015 study. The work below extends the search and the model, one change at a time.</p>
   </div>
   <div class="m-body">
-    <h3 class="f-head">What works today</h3>
+    <!-- A LEDGER, NOT AN ARGUMENT. Four status rows crossed by two axes
+         (Implemented/Measured × Canonical/Experimental) are inventory; the
+         section argues where the work goes next. The count and the two adverse
+         results ride in the summary, so folding this costs a reader nothing. -->
+    <details class="f-fold">
+      <summary>
+        <h3 class="f-head">What works today</h3>
+        <span class="f-fold-find">One canonical build and three measured experiments, two of which report against themselves: 16× GPU replicas cost 22% more wall clock at n=30, and the learned operators lose 1.3 pp held out.</span>
+      </summary>
+      <div class="f-fold-body">
     <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models. <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md#the-llm-heuristic-factory" target="_blank" rel="noopener">See the campaign</a></p></div></div>
+      </div>
+    </details>
 
     <h3 class="f-head">The next problem</h3>
     <p class="f-lede">Exact methods now prove optimality on this benchmark, so there is nothing left for a heuristic to win. The interesting version is closer to a real shop: orders arrive during the day, the times are estimates, and each one has to be accepted or refused on the spot.</p>
@@ -1698,25 +1771,59 @@ footer a{color:var(--terra-ink)}
       </div>
     </div>
     <p class="f-lede" id="oa-why">The greedy policy takes every order it can fit and later has no room for the profitable ones. The reoptimizing policy sometimes <b>rejects a cheap order to protect capacity</b>, then accepts a valuable one that arrives afterward. Each decision is final and is taken without knowledge of future arrivals, which requires an exact evaluator fast enough to reprice the schedule inside the decision window.</p>
+    <!-- WHY THIS PROBLEM. Three justification cards under a heading whose prose
+         has already justified the direction; the count and the three verdicts
+         ride in the summary. The Fig 01a fold, because this hangs under an
+         existing heading rather than replacing one. -->
+    <details class="data-fold fold-find">
+      <summary>Three reasons this is the next problem — the literature has one direct paper, make-to-order shops answer accept-or-refuse every day, and exact pricing is finally fast enough to replan per arrival</summary>
     <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>One incumbent</strong><span class="f-chip meas">Open</span></div><p>Online acceptance with rejection has essentially one direct paper — theory-first, with no fast reoptimizing engine and no setups.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Make-to-order reality</strong><span class="f-chip dim">Applied</span></div><p>Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Reoptimize per arrival</strong><span class="f-chip dim">Fit</span></div><p>At millions of exact evaluations per second, replanning everything before answering is no longer too slow.</p></div></div>
+    </details>
+
+    <!-- THE BIBLIOGRAPHY. Reachable, not read: four titles with year chips and
+         abstracts are the evidence for the empty slot, and the summary states
+         what that evidence amounts to. -->
+    <details class="data-fold fold-find">
+      <summary>The four papers that bound the empty slot — the one direct paper, from 2025, is theory-first, with no reoptimizing engine and no setups</summary>
     <div class="oa-read">
       <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054825000565" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Online order acceptance and scheduling in a single machine environment</b><small>Competitive-ratio bounds and online algorithms — theory-first, without a reoptimizing engine or setups.</small></span><span class="g o">Open slot</span></a>
       <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054820301349" target="_blank" rel="noopener"><span class="y">2020</span><span class="x"><b>Distributionally robust scheduling with job selection and sequence-dependent setups</b><small>The closest marriage of robustness, acceptance and setups under uncertain processing times.</small></span><span class="g p">Peer-reviewed</span></a>
       <a href="https://www.sciencedirect.com/science/article/abs/pii/S0377221721007141" target="_blank" rel="noopener"><span class="y">2022</span><span class="x"><b>A matheuristic for generalized order acceptance and scheduling</b><small>State of the art on the static problem, with exact models that push the proven-optimal boundary.</small></span><span class="g p">Peer-reviewed</span></a>
       <a href="https://www.sciencedirect.com/science/article/pii/S0377221721004707" target="_blank" rel="noopener"><span class="y">2022</span><span class="x"><b>Metaheuristics “In the Large”</b><small>Verified reference implementations and honest protocols — the bar a new result should clear.</small></span><span class="g b">Method</span></a>
     </div>
+    </details>
     <p class="f-lede" id="oa-caveat" style="font-size:13.5px">Few papers can mean the problem is open, or that nobody wants it solved. What the search shows is that the slot is empty. It does not show that anyone is asking for it, and that is the risk in this direction.</p>
 
     <h3 class="f-head">Next milestone</h3>
     <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P0</span><span class="f-it-title">External validation</span><span class="f-next">Next milestone</span><span class="f-sum">Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.</span></summary><dl class="f-fields"><dt>Question</dt><dd>How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?</dd><dt>Change</dt><dd>No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.</dd><dt>Comparator</dt><dd>Published baselines and exact solutions for small cases.</dd><dt>Success criterion</dt><dd>Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.</dd><dt>Evidence</dt><dd>Archived configurations, raw result tables, plots and exact small-case checks.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P1</span><span class="f-it-title">Reactive operators</span><span class="f-sum">Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can operator choice adapt without losing the exploration supplied by random removal?</dd><dt>Change</dt><dd>Add a stochastic operator portfolio with a minimum exploration probability.</dd><dt>Comparator</dt><dd>Random removal, measured adaptive destruction and tuned ALNS/tabu variants.</dd><dt>Success criterion</dt><dd>Better time-to-target and tails without degradation on held-out instances.</dd><dt>Evidence</dt><dd>Operator traces, ablations, paired seeds and distribution-shift tests.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P2</span><span class="f-it-title">Exact repair</span><span class="f-sum">Let IG define a bounded neighbourhood and solve only that repair exactly.</span></summary><dl class="f-fields"><dt>Question</dt><dd>When does exact local repair repay its solver overhead?</dd><dt>Change</dt><dd>Pass a bounded removed-job neighbourhood to an exact repair model.</dd><dt>Comparator</dt><dd>Current lowest-cost reinsertion under the same outer search budget.</dd><dt>Success criterion</dt><dd>Higher improvement per millisecond and lower time-to-target.</dd><dt>Evidence</dt><dd>Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P3</span><span class="f-it-title">Multiple machines</span><span class="f-sum">Add assignment, eligibility and machine-dependent setup in a separate mathematical model.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Which gains survive when jobs also choose a machine?</dd><dt>Change</dt><dd>Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.</dd><dt>Comparator</dt><dd>Open multi-machine OAS data and exact small solutions.</dd><dt>Success criterion</dt><dd>Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.</dd><dt>Evidence</dt><dd>Eligibility tests, model validation and published multi-machine instances.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P4</span><span class="f-it-title">Parallel search</span><span class="f-sum">Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Does parallel breadth improve wall-clock time rather than only evaluation count?</dd><dt>Change</dt><dd>Add deterministic CPU multi-start first, then evaluate GPU replicas.</dd><dt>Comparator</dt><dd>One optimized Rust core with serial-equivalent per-seed results.</dd><dt>Success criterion</dt><dd>Lower time-to-target with reported wall time, energy and deterministic ordering.</dd><dt>Evidence</dt><dd>Replayable seeds, hardware disclosure, anytime curves and energy measurements.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P5</span><span class="f-it-title">Learned discovery</span><span class="f-sum">Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can learned proposals generalize beyond the instances that suggested them?</dd><dt>Change</dt><dd>Sandbox proposed operators while keeping the exact evaluator authoritative.</dd><dt>Comparator</dt><dd>Simple hand-designed baselines under nested train/validation/test splits.</dd><dt>Success criterion</dt><dd>Registered gains on fresh seeds and held-out distributions with a stated failure criterion.</dd><dt>Evidence</dt><dd>Sandboxed code, nested splits, ablations and distribution-shift tests.</dd></dl></details></div>
 
-    <h3 class="f-head">Two experiments you can run</h3>
+    <!-- TWO CALLS TO ACTION. The finding they exist to support is already in the
+         section above them, so what is folded here is the invitation, not the
+         result. The summary keeps both honest boundaries on screen. -->
+    <details class="f-fold">
+      <summary>
+        <h3 class="f-head">Two experiments you can run</h3>
+        <span class="f-fold-find">Two Colab notebooks that re-check their pricing against the CPU engine before reporting a timing: GPU width is nearly free until the instance grows, and the operator gain turns into a loss once the split is honest.</span>
+      </summary>
+      <div class="f-fold-body">
     <p class="f-lede">The GPU fleet and the learned operators are in a notebook rather than in a claim. It runs on whatever hardware it finds, checks its pricing against the CPU engine before reporting a single timing, and recomputes the numbers every time.</p>
     <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a></div></div><div class="f-card"><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
+      </div>
+    </details>
 
-    <h3 class="f-head">Interfaces</h3>
+    <!-- THE BACK MATTER. Six cards are a distribution menu: where the engine can
+         be run, not what the section argues. Naming all six in the summary means
+         a reader looking for one surface finds it without opening anything. -->
+    <details class="f-fold">
+      <summary>
+        <h3 class="f-head">Interfaces</h3>
+        <span class="f-fold-find">Six ways to run the same engine — the browser Studio, a Google Sheets workbook, a Colab notebook, the Python reference, the 2015 archive and the results ledger.</span>
+      </summary>
+      <div class="f-fold-body">
     <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code.</p>
     <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="studio-app.html" target=_blank rel=noopener>Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Read results</a></div></div></div>
+      </div>
+    </details>
 
     <nav class="m-links" aria-label="Resources" style="margin-top:22px">
     <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
@@ -3489,6 +3596,10 @@ function onWinResize(fn){
       'As mesmas cinco tarefas em duas ordens.' ,
     "Job": "Tarefa",
     "The exact numbers behind these jobs": "Os números exatos dessas tarefas",
+    /* disclosure summaries — every one carries its block's finding, so the PT
+       reader who opens nothing learns exactly what the EN reader does */
+    "Enumeration time at five sizes — ten jobs pass in one frame, twelve in a blink, and twenty take a human lifetime":
+      "Tempo de enumeração em cinco tamanhos — dez tarefas passam em um quadro, doze num piscar de olhos, e vinte levam uma vida humana",
     "Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)":
       "Conjunto fixo — uma máquina, setup de 3 de tempo / 6 de custo entre famílias diferentes (0 dentro da mesma família)",
     "Family": "Família",
@@ -3587,6 +3698,8 @@ function onWinResize(fn){
     "In-browser run": "Execução no navegador",
     "One engine, four worlds, one queue at a time.": "Um motor, quatro mundos, uma fila por vez.",
     "What was solved": "O que foi resolvido",
+    "The input file's own numbers, read from the repository and never from a race · the queue and its families, the changeover share, the load against the horizon, and every field the page holds.":
+      "Os números do próprio arquivo de entrada, lidos do repositório e nunca de uma corrida · a fila e suas famílias, a fatia de troca, a carga contra o horizonte, e todo campo que a página guarda.",
     /* the console rail: the card titles, the field labels and the two buttons */
     "The four worlds": "Os quatro mundos",
     "This run": "Esta execução",
@@ -3654,6 +3767,19 @@ function onWinResize(fn){
     "What works today": "O que já funciona",
     "Next milestone": "Próximo marco",
     "Interfaces": "Interfaces",
+    /* the five #m-future / #m-run disclosure summaries. The walker keys on whole
+       text nodes, so a summary built from an <h3> and a <span> is two nodes and
+       needs two keys: the heading titles above, the finding lines here. */
+    "One canonical build and three measured experiments, two of which report against themselves: 16× GPU replicas cost 22% more wall clock at n=30, and the learned operators lose 1.3 pp held out.":
+      "Uma implementação canônica e três experimentos medidos, dois deles depondo contra si mesmos: 16× réplicas em GPU custam 22% mais tempo de parede com n=30, e os operadores aprendidos perdem 1,3 pp fora do treino.",
+    "Three reasons this is the next problem — the literature has one direct paper, make-to-order shops answer accept-or-refuse every day, and exact pricing is finally fast enough to replan per arrival":
+      "Três razões para este ser o próximo problema — a literatura tem um único artigo direto, oficinas sob encomenda respondem aceita-ou-recusa todo dia, e a precificação exata enfim é rápida o bastante para replanejar a cada chegada",
+    "The four papers that bound the empty slot — the one direct paper, from 2025, is theory-first, with no reoptimizing engine and no setups":
+      "Os quatro artigos que delimitam a lacuna — o único artigo direto, de 2025, é teórico primeiro, sem motor de reotimização e sem setups",
+    "Two Colab notebooks that re-check their pricing against the CPU engine before reporting a timing: GPU width is nearly free until the instance grows, and the operator gain turns into a loss once the split is honest.":
+      "Dois notebooks no Colab que reconferem sua precificação contra o motor de CPU antes de reportar qualquer tempo: a largura na GPU sai quase de graça até a instância crescer, e o ganho dos operadores vira derrota quando a divisão é honesta.",
+    "Six ways to run the same engine — the browser Studio, a Google Sheets workbook, a Colab notebook, the Python reference, the 2015 archive and the results ledger.":
+      "Seis formas de rodar o mesmo motor — o Studio no navegador, uma planilha do Google Sheets, um notebook no Colab, a referência em Python, o arquivo de 2015 e o registro de resultados.",
     "The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code.": "A mesma lógica de scheduling testada está disponível como experimento interativo, planilha de BI, notebook científico e código legível.",
     "Implemented": "Implementado",
     "Measured": "Medido",
@@ -7641,6 +7767,15 @@ function onWinResize(fn){
       placeFinish();
     });
 
+    /* Same reason, one fold down: "What was solved" is a <details>, and a closed
+       <details> gives its two SVGs a zero-width box, which width() answers with
+       its 700px fallback. Repaint on open, at the width they really get. */
+    el("runProblem").addEventListener("toggle", function () {
+      if (!this.open) return;
+      renderLoad();
+      renderSpan();
+    });
+
     /* the board rows select a method everywhere */
     function pickMethod(ev) {
       var li = ev.target.closest("li[data-m]");
@@ -7807,6 +7942,48 @@ function onWinResize(fn){
   });
 
   apply(effective(), stored()!==null, false);   /* reflect only — never re-decide */
+})();
+</script>
+<script>
+/* T2 — PAPER LOSES NOTHING. Progressive disclosure ranks the page for a reader
+   who can click. Paper cannot click, so before the sheet is composed every
+   closed <details> is opened and the run section's inactive tab panels are
+   shown; afterwards the page is put back exactly as the reader left it.
+
+   Doing this in script rather than only in @media print is deliberate: a CSS
+   rule that forces the children of a closed <details> back into flow has to
+   name a display value, and naming one would flatten the grids inside — the
+   evidence cards, the interface cards, the roadmap's two-column field list.
+   Setting [open] leaves every one of those laid out exactly as on screen.
+   The @media print block near the top of the stylesheet is the floor for any
+   engine that composes a page without firing these events. */
+(function () {
+  var opened = null, unhidden = null;
+  /* the two inactive tab panels and the stats list the console keeps folded;
+     scoped by id so no transient [hidden] element is dragged onto the page */
+  var HIDDEN = "#runPanSched[hidden],#runPanSearch[hidden],#runStatRows[hidden]";
+
+  function expand() {
+    if (opened) return;                       /* beforeprint can fire twice */
+    opened = [].slice.call(document.querySelectorAll("details:not([open])"));
+    unhidden = [].slice.call(document.querySelectorAll(HIDDEN));
+    opened.forEach(function (d) { d.open = true; });
+    unhidden.forEach(function (n) { n.hidden = false; });
+  }
+  function restore() {
+    if (!opened) return;
+    opened.forEach(function (d) { d.open = false; });
+    unhidden.forEach(function (n) { n.hidden = true; });
+    opened = unhidden = null;
+  }
+  addEventListener("beforeprint", expand);
+  addEventListener("afterprint", restore);
+  /* Safari reaches print through the media query rather than the events */
+  if (window.matchMedia) {
+    var mq = matchMedia("print"), on = function (e) { e.matches ? expand() : restore(); };
+    if (mq.addEventListener) mq.addEventListener("change", on);
+    else if (mq.addListener) mq.addListener(on);
+  }
 })();
 </script>
 </body>
