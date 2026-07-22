@@ -1,0 +1,257 @@
+/* IG Studio stylesheet — part 1/8: base.css. Design tokens, reset and app chrome (topbar, brand, nav, shell grid).
+ * Split of the former styles.css; concatenated in fixed order by scripts/build.mjs
+ * (see STYLE_PARTS in scripts/check.mjs). Keep the cascade order intact. */
+
+:root {
+  color-scheme: light;
+  --paper: #f3efe4;
+  --paper-bright: #fbf9f2;
+  --paper-blue: #edf1ef;
+  --ink: #171918;
+  --ink-soft: #41433f;
+  --muted: #62645e;
+  --quiet: #7f8179;
+  --rule: #cbc5b7;
+  --rule-soft: rgba(34, 84, 163, .13);
+  --rule-strong: #252724;
+  --cobalt: #2254a3;
+  --cobalt-soft: rgba(34, 84, 163, .09);
+  --signal: #df430f;
+  --signal-dark: #a92e0a;
+  --teal: #1f7a6d;
+  --ochre: #b17a12;
+  --danger: #a63a35;
+  --sidebar: 368px;
+  --header: 82px;
+  --radius: 0px;
+  --font-display: "Arial Narrow", "Avenir Next Condensed", "Roboto Condensed", Impact, sans-serif;
+  --font-body: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-ui: "Aptos", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", "SFMono-Regular", Menlo, Consolas, monospace;
+  --shadow-focus: 0 0 0 3px rgba(34, 84, 163, .18);
+  font-family: var(--font-ui);
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+
+html {
+  background: var(--paper);
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: var(--paper);
+  background-image:
+    linear-gradient(var(--rule-soft) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule-soft) 1px, transparent 1px);
+  background-size: 24px 24px;
+  color: var(--ink);
+}
+
+button,
+input,
+select { font: inherit; }
+
+button,
+select,
+input,
+summary,
+a { -webkit-tap-highlight-color: transparent; }
+
+button,
+select,
+input {
+  min-height: 42px;
+  border: 1px solid var(--rule-strong);
+  border-radius: 0;
+  background: rgba(251, 249, 242, .68);
+  color: var(--ink);
+}
+
+button:focus-visible,
+select:focus-visible,
+input:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--cobalt);
+  outline-offset: 3px;
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; opacity: .42; }
+a { color: inherit; text-decoration: none; }
+
+::selection {
+  background: var(--cobalt);
+  color: var(--paper-bright);
+}
+
+.studio-shell {
+  min-height: 100vh;
+  counter-reset: studio-figure;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  height: var(--header);
+  display: grid;
+  grid-template-columns: var(--sidebar) minmax(0, 1fr) auto;
+  align-items: stretch;
+  border-bottom: 2px solid var(--ink);
+  background:
+    linear-gradient(rgba(34, 84, 163, .045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 84, 163, .045) 1px, transparent 1px),
+    rgba(251, 249, 242, .97);
+  background-size: 24px 24px;
+}
+
+.brand {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 28px 0 82px;
+  border-right: 1px solid var(--rule);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: .015em;
+  line-height: 1;
+}
+
+.brand::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42px;
+  border-right: 2px solid var(--ink);
+  background:
+    repeating-linear-gradient(90deg, #1d201f 0 5px, #343633 5px 7px),
+    #242625;
+}
+
+.brand-mark {
+  width: 32px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+}
+
+.brand-mark svg {
+  width: 31px;
+  height: 27px;
+}
+
+.primary-nav {
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  padding-left: 12px;
+}
+
+.nav-button {
+  position: relative;
+  min-height: 0;
+  padding: 0 23px;
+  border: 0;
+  border-right: 1px solid transparent;
+  border-bottom: 4px solid transparent;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: -.025em;
+}
+
+.nav-button:hover {
+  background: rgba(34, 84, 163, .045);
+  color: var(--cobalt);
+}
+
+.nav-button[aria-current="page"] {
+  border-bottom-color: var(--cobalt);
+  color: var(--cobalt);
+}
+
+.top-actions {
+  height: 100%;
+  display: flex;
+  align-items: stretch;
+  padding-right: 14px;
+}
+
+.top-action {
+  min-height: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  border: 0;
+  border-left: 1px dashed var(--rule);
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.top-action:hover {
+  background: rgba(34, 84, 163, .045);
+  color: var(--cobalt);
+}
+
+.top-action svg {
+  width: 18px;
+  height: 18px;
+}
+
+.mobile-menu,
+.mobile-rail-intro,
+.mobile-config-toggle { display: none; }
+
+.body-grid {
+  display: grid;
+  grid-template-columns: var(--sidebar) minmax(0, 1fr);
+}
+
+.control-rail {
+  position: sticky;
+  top: var(--header);
+  align-self: start;
+  min-height: calc(100vh - var(--header));
+  max-height: calc(100vh - var(--header));
+  overflow-y: auto;
+  scrollbar-width: thin;
+  padding: 31px 26px 52px 30px;
+  border-right: 1px solid var(--rule-strong);
+  background-color: rgba(243, 239, 228, .96);
+  background-image:
+    linear-gradient(rgba(34, 84, 163, .065) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34, 84, 163, .065) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.control-rail::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 auto 0 0;
+  width: 41px;
+  border-right: 2px solid var(--ink);
+  background:
+    radial-gradient(circle at 20px 42px, #aaa99f 0 3px, #171918 4px 7px, transparent 8px),
+    repeating-linear-gradient(90deg, #1d201f 0 5px, #333531 5px 7px),
+    #242625;
+  background-size: auto, auto, auto;
+}
+

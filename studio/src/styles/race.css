@@ -1,0 +1,302 @@
+/* IG Studio stylesheet — part 9/9: race.css. Race lab (heuristic race)
+ * styles, ported verbatim from the master styles.css race block.
+ * Split of the former styles.css; concatenated in fixed order by scripts/build.mjs
+ * (see STYLE_PARTS in scripts/check.mjs). Keep the cascade order intact. */
+
+
+/* ---------------------------------------------------------------- Race lab */
+
+:root {
+  --race-greedy: #c9a148;
+  --race-descent: #7d94b0;
+  --race-tabu: #7a8b6f;
+  --race-tabudiv: #5f7d6e;
+  --race-ama: #ad7644;
+  --race-ig: #b0562f;
+}
+
+.race-brief {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 230px;
+  gap: 22px;
+  margin-bottom: 26px;
+  padding: 18px 20px;
+  border: 1px solid var(--rule-strong);
+  background: rgba(251, 249, 242, .5);
+}
+
+.race-brief-main { min-width: 0; }
+
+.race-facts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0 0 12px;
+}
+
+.race-instance-note {
+  margin: 0 0 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+}
+
+.race-variables summary {
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--cobalt);
+  min-height: 0;
+  border: 0;
+  background: none;
+  padding: 4px 0;
+}
+
+.race-variables dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px 18px;
+  margin: 10px 0 0;
+}
+
+.race-variables dt {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.race-variables dd {
+  margin: 1px 0 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.race-transport {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-content: start;
+}
+
+.race-speed {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.race-speed > span {
+  flex: 1;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-right: 8px;
+}
+
+.race-speed button {
+  min-height: 34px;
+  min-width: 42px;
+  margin-left: -1px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: rgba(251, 249, 242, .68);
+}
+
+.race-speed button[aria-pressed="true"] {
+  background: var(--ink);
+  color: var(--paper-bright);
+  border-color: var(--ink);
+}
+
+.race-budget-track {
+  height: 6px;
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-bright);
+  overflow: hidden;
+}
+
+.race-budget-fill {
+  height: 100%;
+  width: 0;
+  background: var(--cobalt);
+  transition: width .18s linear;
+}
+
+.race-budget small {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--muted);
+}
+
+.race-grid {
+  display: grid;
+  grid-template-columns: minmax(240px, 300px) minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+  margin-bottom: 26px;
+}
+
+.race-standings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.race-standings > li {
+  display: grid;
+  grid-template-columns: 34px 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--rule);
+  background: rgba(251, 249, 242, .6);
+  cursor: pointer;
+  transition: border-color .15s ease, opacity .15s ease;
+}
+
+.race-standings > li:hover { border-color: var(--ink); }
+.race-standings > li:focus-visible { outline: 2px solid var(--cobalt); outline-offset: 2px; }
+
+.race-standings > li.leader {
+  border-color: var(--ink);
+  border-left-width: 3px;
+  background: var(--paper-bright);
+}
+
+.race-standings > li.off { opacity: .42; }
+
+.st-rank {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.race-standings > li.leader .st-rank { color: var(--signal); }
+
+.st-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+
+.st-name {
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.15;
+}
+
+.st-name small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--quiet);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.st-cost {
+  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.st-cost small {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--quiet);
+}
+
+.race-leader-note {
+  margin: 12px 0 0;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.race-chart-frame canvas { height: 290px; }
+.race-space-frame { margin-bottom: 8px; }
+.race-space-frame canvas { height: 440px; }
+
+.race-space-panel { margin-bottom: 26px; }
+
+.race-space-note {
+  margin: 10px 2px 0;
+  font-family: var(--font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink-soft);
+}
+
+.race-leaf-strip {
+  display: flex;
+  height: 10px;
+  border-radius: 3px;
+  overflow: hidden;
+  margin-top: 5px;
+}
+
+.race-final { margin-bottom: 26px; }
+
+.race-final-table td:nth-child(3),
+.race-final-table td:nth-child(4),
+.race-final-table td:nth-child(5) {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.race-final-table th:nth-child(3),
+.race-final-table th:nth-child(4),
+.race-final-table th:nth-child(5) { text-align: right; }
+
+.race-final-table tr.is-winner td {
+  background: rgba(34, 84, 163, .07);
+  font-weight: 600;
+}
+
+.race-winner-badge {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 2px 7px;
+  border: 1px solid var(--signal);
+  color: var(--signal-dark);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  vertical-align: 1px;
+}
+
+@media (max-width: 980px) {
+  .race-grid { grid-template-columns: minmax(0, 1fr); }
+  .race-brief { grid-template-columns: minmax(0, 1fr); }
+  .race-transport { flex-direction: row; flex-wrap: wrap; align-items: center; }
+  .race-transport > * { flex: 1 1 180px; }
+  .race-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 560px) {
+  .race-facts { grid-template-columns: minmax(0, 1fr); }
+  .race-standings > li { grid-template-columns: 28px 10px minmax(0, 1fr) auto; padding: 7px 8px; }
+}

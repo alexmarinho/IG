@@ -1,0 +1,49 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ig-scheduler"
+version = "1.0.0"
+description = "Iterated Greedy for single-machine scheduling with rejection (OAS / MaScLib) — zero-dependency Python engine"
+readme = "python/README.md"
+license = "GPL-3.0-only"
+license-files = ["LICENSE.txt"]
+requires-python = ">=3.10"
+dependencies = []
+authors = [{ name = "Alex Marinho" }]
+keywords = [
+    "scheduling",
+    "iterated-greedy",
+    "metaheuristics",
+    "order-acceptance",
+    "rejection",
+    "masclib",
+    "llm-serving",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Science/Research",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Office/Business :: Scheduling",
+]
+
+[project.urls]
+Homepage = "https://github.com/alexmarinho/IG"
+Repository = "https://github.com/alexmarinho/IG"
+"Live demo" = "https://alexmarinho.github.io/IG/"
+Results = "https://github.com/alexmarinho/IG/blob/master/RESULTS.md"
+
+[project.scripts]
+ig-solve = "ig_scheduler:main"
+
+[tool.setuptools]
+package-dir = { "" = "python" }
+py-modules = ["ig_scheduler"]

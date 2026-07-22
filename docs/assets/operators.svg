@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" role="img"
+     aria-label="The three operators: destroy removes d jobs, rebuild reinserts each at its cheapest feasible position, swap exchanges a rejected job with a scheduled one.">
+  <defs>
+    <pattern id="g" width="24" height="24" patternUnits="userSpaceOnUse">
+      <path d="M24 0H0V24" fill="none" stroke="#2254a3" stroke-opacity=".05" stroke-width="1"/>
+    </pattern>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#b0562f"/>
+    </marker>
+    <style>
+      .step{font:600 10px Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;fill:#b0562f}
+      .ttl{font:600 15px Georgia,serif;fill:#2a2620}
+      .sub{font:400 11.5px Menlo,monospace;fill:#6a6255}
+      .job{font:700 11px Menlo,monospace;fill:#fdf8ef}
+      .tray{fill:none;stroke:#cfc4ac;stroke-dasharray:4 3}
+      .trayl{font:600 9.5px Menlo,monospace;letter-spacing:.08em;text-transform:uppercase;fill:#8a8377}
+      .arr{stroke:#b0562f;stroke-width:1.6;fill:none;marker-end:url(#ar)}
+      .cost{font:700 10.5px Menlo,monospace;fill:#6a6255;text-anchor:middle}
+      .win{font:700 10.5px Menlo,monospace;fill:#7a8b6f;text-anchor:middle}
+    </style>
+  </defs>
+
+  <rect width="900" height="620" fill="#f6f1e8"/>
+  <rect width="900" height="620" fill="url(#g)"/>
+
+  <text x="36" y="40" class="ttl" font-size="17">One iteration, three operators</text>
+  <text x="36" y="61" class="sub">Π = the performed sequence · Ω = the jobs deliberately left outside</text>
+
+  <!-- ══ 1 · DESTROY ══ -->
+  <text x="36" y="104" class="step">1 · Destroy</text>
+  <text x="126" y="104" class="sub">remove d random jobs from Π — they fall back into Ω</text>
+
+  <g transform="translate(36 118)">
+    <rect x="0"   y="0" width="70" height="30" rx="4" fill="#7d94b0"/><text x="26" y="20" class="job">J1</text>
+    <rect x="76"  y="0" width="70" height="30" rx="4" fill="#7a8b6f"/><text x="102" y="20" class="job">J2</text>
+    <rect x="152" y="0" width="70" height="30" rx="4" fill="#b0562f"/><text x="178" y="20" class="job">J3</text>
+    <rect x="228" y="0" width="70" height="30" rx="4" fill="#c9a148"/><text x="254" y="20" class="job">J4</text>
+    <rect x="304" y="0" width="70" height="30" rx="4" fill="#ad7644"/><text x="330" y="20" class="job">J5</text>
+    <rect x="380" y="0" width="70" height="30" rx="4" fill="#7d94b0"/><text x="406" y="20" class="job">J6</text>
+    <text x="462" y="20" class="sub">Π</text>
+  </g>
+  <!-- victims drop out below the row, then into the tray -->
+  <path d="M147 148 V176 H556" class="arr"/>
+  <path d="M375 148 V190 H556" class="arr"/>
+
+  <rect x="566" y="150" width="150" height="46" rx="6" class="tray"/>
+  <text x="566" y="143" class="trayl">Ω · rejected</text>
+  <rect x="577" y="161" width="56" height="24" rx="4" fill="#7a8b6f" opacity=".55"/><text x="597" y="178" class="job">J2</text>
+  <rect x="639" y="161" width="56" height="24" rx="4" fill="#ad7644" opacity=".55"/><text x="659" y="178" class="job">J5</text>
+
+  <!-- ══ 2 · REBUILD ══ -->
+  <text x="36" y="262" class="step">2 · Rebuild</text>
+  <text x="126" y="262" class="sub">try J2 in every feasible slot — keep the cheapest, or leave it out</text>
+
+  <g transform="translate(36 276)">
+    <rect x="0"   y="0" width="70" height="30" rx="4" fill="#7d94b0"/><text x="26" y="20" class="job">J1</text>
+    <rect x="76"  y="0" width="70" height="30" rx="4" fill="#b0562f"/><text x="102" y="20" class="job">J3</text>
+    <rect x="152" y="0" width="70" height="30" rx="4" fill="#c9a148"/><text x="178" y="20" class="job">J4</text>
+    <rect x="228" y="0" width="70" height="30" rx="4" fill="#7d94b0"/><text x="254" y="20" class="job">J6</text>
+
+    <g fill="#b0562f">
+      <path d="M-7 -9 l7 11 l-7 11 z" opacity=".4"/>
+      <path d="M69 -9 l7 11 l-7 11 z"/>
+      <path d="M145 -9 l7 11 l-7 11 z" opacity=".4"/>
+      <path d="M221 -9 l7 11 l-7 11 z" opacity=".4"/>
+      <path d="M297 -9 l7 11 l-7 11 z" opacity=".4"/>
+    </g>
+    <text x="-3"  y="54" class="cost">+38</text>
+    <text x="73"  y="54" class="win">+21 ✓</text>
+    <text x="149" y="54" class="cost">+34</text>
+    <text x="225" y="54" class="cost">+47</text>
+    <text x="301" y="54" class="cost">+52</text>
+    <text x="342" y="54" class="sub">← cost per slot</text>
+  </g>
+
+  <text x="600" y="290" class="sub">leave J2 out instead:</text>
+  <text x="600" y="310" class="sub">rejection cost <tspan class="cost" style="text-anchor:start">+44</tspan></text>
+  <text x="600" y="332" style="font:700 11px Menlo,monospace" fill="#7a8b6f">21 &lt; 44 → schedule it</text>
+
+  <!-- ══ 3 · SWAP ══ -->
+  <text x="36" y="424" class="step">3 · Swap</text>
+  <text x="112" y="424" class="sub">optional: trade a scheduled job for a rejected one, if cheaper</text>
+
+  <g transform="translate(36 438)">
+    <rect x="0"   y="0" width="70" height="30" rx="4" fill="#7d94b0"/><text x="26" y="20" class="job">J1</text>
+    <rect x="76"  y="0" width="70" height="30" rx="4" fill="#7a8b6f"/><text x="102" y="20" class="job">J2</text>
+    <rect x="152" y="0" width="70" height="30" rx="4" fill="#b0562f"/><text x="178" y="20" class="job">J3</text>
+    <rect x="228" y="0" width="70" height="30" rx="4" fill="#c9a148" opacity=".4"/><text x="254" y="20" class="job">J4</text>
+    <rect x="304" y="0" width="70" height="30" rx="4" fill="#7d94b0"/><text x="330" y="20" class="job">J6</text>
+  </g>
+
+  <rect x="566" y="434" width="150" height="46" rx="6" class="tray"/>
+  <text x="566" y="427" class="trayl">Ω · rejected</text>
+  <rect x="577" y="445" width="56" height="24" rx="4" fill="#ad7644" opacity=".55"/><text x="597" y="462" class="job">J5</text>
+
+  <!-- both directions routed below the row, nested so they never cross text -->
+  <path d="M300 468 V500 H556" class="arr"/>
+  <text x="404" y="494" class="sub" style="text-anchor:middle">J4 out</text>
+  <path d="M600 480 V524 H302 V472" class="arr"/>
+  <text x="440" y="540" class="sub" style="text-anchor:middle">J5 in — only if the total drops</text>
+
+  <text x="36" y="580" class="sub">Every placement is priced with the <tspan fill="#2a2620">complete</tspan> objective — setup + processing + weighted tardiness + rejection —</text>
+  <text x="36" y="600" class="sub">so a job stays out precisely when performing it costs more than the <tspan fill="#2a2620">uⱼ</tspan> paid to turn it away.</text>
+</svg>

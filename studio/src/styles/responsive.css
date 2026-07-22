@@ -1,0 +1,529 @@
+/* IG Studio stylesheet — part 5/8: responsive.css. Global responsive breakpoints for the sections above (must stay in this order).
+ * Split of the former styles.css; concatenated in fixed order by scripts/build.mjs
+ * (see STYLE_PARTS in scripts/check.mjs). Keep the cascade order intact. */
+
+@media (max-width: 1180px) {
+  :root { --sidebar: 326px; }
+  .brand { padding-left: 69px; font-size: 29px; }
+  .control-rail { padding-left: 77px; padding-right: 20px; }
+  .scenario-tabs { width: 52px; }
+  .nav-button { padding-inline: 14px; }
+  .top-action { padding-inline: 12px; }
+  .workspace { padding-inline: 28px; }
+  .comparison-summary { grid-template-columns: 145px minmax(220px, 1fr); }
+  .comparison-summary .run-actions { grid-column: 1 / -1; grid-row: auto; grid-template-columns: 1fr 1fr; margin-top: 0; }
+  .comparison-summary > .interpretation { grid-column: 2; }
+  .method-steps { grid-template-columns: repeat(2, 1fr); }
+  .method-step:nth-child(2) { border-right: 0; }
+  .method-step:nth-child(-n + 2) { border-bottom: 1px dashed var(--cobalt); }
+}
+
+@media (max-width: 920px) {
+  :root { --sidebar: 298px; }
+  .brand { padding-left: 60px; font-size: 26px; }
+  .brand-mark { display: none; }
+  .top-action span { display: none; }
+  .top-action { padding-inline: 10px; }
+  .comparison-figures { grid-template-columns: 1fr; }
+  .comparison-figures > .analysis-panel + .analysis-panel {
+    border-left: 0;
+    border-top: 1px dashed var(--cobalt);
+  }
+  .distribution-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mini-chart,
+  .mini-chart:nth-child(4),
+  .mini-chart:nth-child(5) { grid-column: auto; }
+  .mini-chart:nth-child(3n) { border-right: 1px dashed var(--cobalt); }
+  .mini-chart:nth-child(2n) { border-right: 0; }
+  .mini-chart:nth-last-child(-n + 2) { border-bottom: 1px dashed var(--cobalt); }
+  .mini-chart:last-child { border-bottom: 0; }
+}
+
+@media (max-width: 760px) {
+  :root {
+    --header: 66px;
+    --sidebar: 100%;
+  }
+
+  body { background-size: 20px 20px; }
+
+  .topbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    background-size: 20px 20px;
+  }
+
+  .brand {
+    padding: 0 12px 0 27px;
+    border-right: 0;
+    font-size: 27px;
+  }
+
+  .brand::before { width: 11px; }
+
+  .brand-mark {
+    display: grid;
+    width: 28px;
+  }
+
+  .brand-mark svg { width: 27px; }
+
+  .primary-nav,
+  .top-actions > .top-action:not(.language-action) { display: none; }
+
+  .top-actions { padding-right: 5px; }
+
+  .top-actions .language-action {
+    display: inline-flex;
+    border-left: 0;
+    padding: 0 8px;
+  }
+
+  .top-actions .language-action span { display: inline; }
+
+  .mobile-menu {
+    width: 44px;
+    min-height: 44px;
+    display: inline-grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+  }
+
+  .mobile-menu svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  .body-grid { display: block; }
+
+  .control-rail {
+    position: static;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    padding: 21px 17px 26px 28px;
+    border-right: 0;
+    border-bottom: 1px solid var(--rule-strong);
+    background-size: 20px 20px;
+  }
+
+  .control-rail::before { width: 11px; }
+
+  .scenario-tabs {
+    position: static;
+    width: auto;
+    display: flex;
+    gap: 0;
+    margin: 0 -17px 28px -17px;
+    padding: 0 17px;
+    overflow-x: auto;
+    border-bottom: 1px solid var(--cobalt);
+    scrollbar-width: none;
+  }
+
+  .scenario-tab {
+    min-width: 96px;
+    min-height: 71px;
+    display: grid;
+    place-items: end center;
+    padding: 29px 12px 12px;
+    border: 0;
+    border-right: 1px dashed var(--rule);
+    border-bottom: 4px solid transparent;
+    background: transparent;
+    box-shadow: none;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    writing-mode: horizontal-tb;
+    transform: none;
+  }
+
+  .scenario-tab::before {
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    color: var(--cobalt);
+    font-size: 15px;
+    transform: translateX(-50%);
+  }
+
+  .scenario-tab:nth-child(1)::before { content: "01"; }
+  .scenario-tab:nth-child(2)::before { content: "02"; }
+  .scenario-tab:nth-child(3)::before { content: "03"; }
+  .scenario-tab:nth-child(4)::before { content: "04"; }
+  .scenario-tab::after { display: none; }
+
+  .scenario-tab[aria-pressed="true"] {
+    border-color: var(--signal);
+    background: transparent;
+    box-shadow: none;
+    color: var(--signal);
+  }
+
+  .scenario-tab[aria-pressed="true"]::before { color: var(--signal); }
+
+  .mobile-rail-intro {
+    display: block;
+    margin: 0 0 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--cobalt);
+  }
+
+  .mobile-rail-intro h1 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(36px, 12vw, 49px);
+    font-weight: 800;
+    letter-spacing: .01em;
+    line-height: .98;
+  }
+
+  .scenario-name {
+    margin-bottom: 7px;
+    color: var(--cobalt);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: .055em;
+    text-transform: uppercase;
+  }
+
+  .scenario-description {
+    max-width: 600px;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .instance-facts { display: none; }
+  .selected-instance-story { margin-top: 13px; }
+  .selected-instance-story span { display: block !important; }
+
+  .control-rail.is-compact .scenario-description,
+  .control-rail.is-compact .selected-instance-story,
+  .control-rail.is-compact .model-disclosure {
+    display: none;
+  }
+
+  .mobile-config-toggle {
+    width: 100%;
+    min-height: 67px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 5px 12px;
+    align-items: center;
+    margin-top: 20px;
+    padding: 10px 13px;
+    border: 1px solid var(--rule-strong);
+    background: rgba(251, 249, 242, .7);
+    color: var(--ink);
+    text-align: left;
+  }
+
+  .mobile-config-toggle span {
+    color: var(--cobalt);
+    font-family: var(--font-mono);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+  }
+
+  .mobile-config-toggle strong {
+    grid-column: 1;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 520;
+  }
+
+  .mobile-config-toggle svg {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    width: 20px;
+    transition: transform .16s ease;
+  }
+
+  .mobile-config-toggle[aria-expanded="true"] svg { transform: rotate(180deg); }
+
+  .control-stack {
+    display: block;
+    padding-top: 13px;
+  }
+
+  .experiment-fields {
+    display: none;
+    gap: 12px;
+    padding: 13px 0 4px;
+    border-bottom: 1px dashed var(--rule);
+  }
+
+  .control-stack.is-mobile-open .experiment-fields { display: grid; }
+
+  /* The primary action is fixed to the bottom of the screen below, so the dock
+   * holds only the transport, the progress bar and the status line. It used to
+   * reserve 76px of headroom for a button that no longer sits in the flow,
+   * which read as a hole punched between the parameters and Pause/Reset. */
+  .run-dock {
+    position: relative;
+    margin: 0 -3px;
+    padding: 4px 3px 10px;
+    background: var(--paper);
+  }
+
+  /* Full-bleed, so the fixed action and the fixed nav below it read as one solid
+   * band at the foot of the screen. Inset at 24/16px, page content showed
+   * through the margins either side and the button looked like it had landed on
+   * top of a card by accident. */
+  .primary-action {
+    position: fixed;
+    z-index: 27;
+    right: 0;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    left: 0;
+    min-height: 57px;
+    border-left: 0;
+    border-right: 0;
+    font-size: 13px;
+    box-shadow: none;
+  }
+
+  .transport { grid-template-columns: 1fr 1fr; }
+
+  /* Nothing to pause, reset or report before the first run — and on a phone the
+   * rail sits above the workspace, so that idle block pushed the page title and
+   * the scenario cards ~150px down the first screen. */
+  .studio-shell[data-status="ready"] .transport,
+  .studio-shell[data-status="ready"] .rail-progress,
+  .studio-shell[data-status="ready"] .run-status,
+  .studio-shell[data-status="loading"] .transport,
+  .studio-shell[data-status="loading"] .rail-progress { display: none; }
+
+  .studio-shell[data-status="ready"] .run-dock { padding-block: 0; }
+
+  /* Clear both fixed layers stacked at the bottom of the screen: the 72px nav
+   * and the 57px primary action floating above it. At 104px the action covered
+   * the last card of every page. */
+  .workspace {
+    padding: 27px 16px calc(150px + env(safe-area-inset-bottom)) 24px;
+    background-size: 20px 20px;
+  }
+
+  .studio-shell[data-active-page="overview"] .workspace > .page-head { display: none; }
+
+  .page-head {
+    padding-right: 0;
+    padding-bottom: 17px;
+  }
+
+  .page-head h1 { font-size: 36px; }
+  .page-head p { font-size: 15px; }
+
+  .metric-strip {
+    margin-inline: -8px -16px;
+    padding-left: 8px;
+    scroll-snap-type: x proximity;
+  }
+
+  .metric {
+    min-width: 148px;
+    flex-basis: 148px;
+    scroll-snap-align: start;
+  }
+
+  .problem-layout,
+  .analysis-grid,
+  .method-intro,
+  .comparison-figures,
+  .comparison-summary { grid-template-columns: 1fr; }
+
+  .problem-brief > header { padding: 17px 68px 15px 16px; }
+  .problem-brief h2 { font-size: 22px; }
+  .scenario-figure img { aspect-ratio: 16 / 9; }
+  .scenario-figure figcaption { padding: 8px 16px 9px; font-size: 8px; }
+  .problem-facts {
+    grid-template-columns: 1fr;
+    padding-inline: 16px;
+    border-right: 0;
+    border-bottom: 1px dashed var(--cobalt);
+  }
+
+  .problem-facts div { padding-right: 0; }
+  .problem-facts div:nth-last-child(2) { border-bottom: 1px dotted var(--rule); }
+  .problem-story { padding-inline: 16px; }
+
+  .experiment-guide .section-title-row { display: block; }
+
+  .experiment-guide .section-note {
+    display: block;
+    margin-top: 7px;
+    text-align: left;
+  }
+
+  .experiment-options { grid-template-columns: 1fr; }
+
+  .analysis-grid { border: 0; }
+
+  .analysis-grid > .analysis-panel {
+    border: 1px solid var(--cobalt);
+  }
+
+  .analysis-grid > .analysis-panel + .analysis-panel {
+    border-top: 0;
+    border-left: 1px solid var(--cobalt);
+  }
+
+  .comparison-figures > .analysis-panel + .analysis-panel {
+    border-left: 0;
+    border-top: 1px dashed var(--cobalt);
+  }
+
+  .comparison-summary {
+    gap: 14px;
+    padding-top: 45px;
+  }
+
+  .comparison-summary::before { top: 18px; }
+
+  .comparison-summary .summary-list {
+    grid-template-columns: 1fr;
+    border-left: 0;
+  }
+
+  .comparison-summary > .interpretation {
+    grid-column: 1;
+    margin: 0;
+  }
+
+  .comparison-summary .run-actions {
+    grid-column: 1;
+    grid-row: auto;
+    grid-template-columns: 1fr;
+  }
+
+  .selected-run-head { display: grid; }
+  .run-picker { grid-template-columns: 1fr; gap: 5px; }
+  .schedule-run-picker { justify-content: stretch; }
+  .schedule-run-picker .run-picker { width: 100%; }
+
+  .table-tools { grid-template-columns: 1fr; }
+  .filter-tabs { overflow-x: auto; }
+  .instance-metrics { grid-template-columns: repeat(2, 1fr); }
+  .instance-metric:nth-child(2) { border-right: 0; }
+  .instance-metric:nth-child(-n + 2) { border-bottom: 1px dashed var(--cobalt); }
+
+  .distribution-grid { grid-template-columns: 1fr; }
+  .mini-chart,
+  .mini-chart:nth-child(2n),
+  .mini-chart:nth-child(3n),
+  .mini-chart:nth-last-child(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px dashed var(--cobalt);
+  }
+  .mini-chart:last-child { border-bottom: 0; }
+
+  .method-steps { grid-template-columns: 1fr; }
+  .method-step,
+  .method-step:nth-child(2) {
+    min-height: 0;
+    border-right: 0;
+    border-bottom: 1px dashed var(--cobalt);
+  }
+  .method-step:last-child { border-bottom: 0; }
+
+  .mobile-bottom-nav {
+    position: fixed;
+    z-index: 28;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    min-height: 72px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding-bottom: env(safe-area-inset-bottom);
+    border-top: 1px solid var(--rule-strong);
+    /* Opaque: at .98 the page still ghosted through behind the labels. */
+    background: var(--paper-bright);
+  }
+
+  .mobile-bottom-nav button {
+    position: relative;
+    min-height: 72px;
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 4px;
+    border: 0;
+    border-right: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink-soft);
+    font-family: var(--font-mono);
+    font-size: 9px;
+  }
+
+  .mobile-bottom-nav button:last-child { border-right: 0; }
+
+  .mobile-bottom-nav button svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .mobile-bottom-nav button[aria-current="page"] {
+    border-top: 4px solid var(--signal);
+    color: var(--signal);
+  }
+
+  .mobile-sheet.open {
+    position: fixed;
+    z-index: 50;
+    inset: var(--header) 0 0;
+    display: grid;
+    align-content: start;
+    padding: 20px 22px;
+    background:
+      linear-gradient(rgba(34, 84, 163, .055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(34, 84, 163, .055) 1px, transparent 1px),
+      var(--paper-bright);
+    background-size: 20px 20px;
+  }
+
+  .mobile-sheet a,
+  .mobile-sheet button {
+    min-height: 52px;
+    display: flex;
+    align-items: center;
+    border: 0;
+    border-bottom: 1px solid var(--rule);
+    background: transparent;
+    color: var(--ink);
+    font-family: var(--font-mono);
+    text-align: left;
+  }
+}
+
+@media (max-width: 420px) {
+  .brand { gap: 7px; font-size: 25px; }
+  .brand-mark { width: 25px; }
+  .top-actions .language-action { font-size: 10px; }
+  .scenario-tab { min-width: 88px; }
+  .mobile-rail-intro h1 { font-size: 42px; }
+  .field-inline { grid-template-columns: 1fr; gap: 3px; }
+  .field-suffix { min-height: 0; }
+  .analysis-panel { padding: 15px; }
+  .analysis-panel::before { top: 15px; right: 15px; }
+  .chart-frame canvas,
+  .analysis-panel canvas {
+    --chart-height: 220px;
+    height: 220px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .001ms !important;
+    transition-duration: .001ms !important;
+  }
+}
+
+

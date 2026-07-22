@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this code or the benchmark data, please cite the 2015 monograph below."
+title: "Iterated Greedy scheduling with rejection and tardiness penalties"
+authors:
+  - family-names: Marinho
+    given-names: Alex dos Santos
+repository-code: "https://github.com/alexmarinho/IG"
+license: GPL-3.0
+preferred-citation:
+  type: thesis
+  title: "Um algoritmo iterated greedy aplicado em scheduling com rejeição e penalidade de atraso"
+  authors:
+    - family-names: Marinho
+      given-names: Alex dos Santos
+  institution:
+    name: "Universidade Federal de São Carlos (UFSCar), Departamento de Engenharia de Produção"
+  year: 2015
+  thesis-type: "Undergraduate thesis (Monografia, Engenharia de Produção)"

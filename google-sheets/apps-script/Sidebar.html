@@ -1,0 +1,652 @@
+<!doctype html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="utf-8">
+  <title>IG Scheduling Lab — Setup</title>
+  <style>
+    :root {
+      --ink: #111318;
+      --paper: #f5f2ea;
+      --panel: #ffffff;
+      --muted: #666b73;
+      --line: #d8d5cd;
+      --orange: #f05a28;
+      --teal: #087f73;
+      --lime: #c7ff5e;
+      --red: #c9342f;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--paper); color: var(--ink); }
+    body { font: 13px/1.4 "Google Sans", Arial, sans-serif; }
+    button, input, select { font: inherit; }
+    .masthead {
+      background: var(--ink);
+      color: #fff;
+      padding: 18px 18px 16px;
+      border-bottom: 5px solid var(--orange);
+    }
+    .eyebrow { color: var(--lime); font: 700 10px/1.2 "Roboto Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+    h1 { margin: 7px 0 4px; font-size: 22px; line-height: 1.05; letter-spacing: -.03em; }
+    .dek { margin: 0; color: #c7c9ce; font-size: 11px; max-width: 29ch; }
+    .language { display: flex; gap: 4px; margin-top: 13px; }
+    .language button {
+      border: 1px solid #4c5058; background: transparent; color: #d8dbe1;
+      padding: 4px 8px; cursor: pointer;
+    }
+    .language button[aria-pressed="true"] { background: var(--lime); color: var(--ink); border-color: var(--lime); font-weight: 700; }
+    .first-run {
+      margin: 14px 14px 0; padding: 12px 13px; background: var(--panel);
+      border: 1px solid var(--line); border-top: 4px solid var(--lime);
+    }
+    .first-run h2 { margin-bottom: 5px; }
+    .first-run-summary { margin: 0; color: var(--muted); font-size: 11px; }
+    .copy-action {
+      display: inline-flex; align-items: center; justify-content: center; min-height: 36px;
+      margin-top: 10px; padding: 8px 11px; background: var(--ink); color: #fff;
+      border: 1px solid var(--ink); font-weight: 800; letter-spacing: .02em;
+      text-decoration: none;
+    }
+    .copy-action:hover { box-shadow: 0 3px 0 var(--orange); transform: translateY(-1px); }
+    .copy-action:focus-visible { outline: 3px solid rgba(8,127,115,.25); outline-offset: 2px; }
+    .first-run-steps { margin: 10px 0 0; padding-left: 18px; color: var(--ink); font-size: 11px; }
+    .first-run-steps li + li { margin-top: 4px; }
+    .first-run-steps li::marker { color: var(--orange); font-weight: 800; }
+    .xlsx-note {
+      margin: 10px 0 0; padding-top: 9px; border-top: 1px solid var(--line);
+      color: var(--muted); font-size: 10px;
+    }
+    .account-policy { margin-top: 8px; padding-top: 7px; }
+    .account-policy summary { color: var(--muted); font-size: 10px; }
+    .account-policy p { margin: 6px 0 0; }
+    main { padding: 0 14px 22px; }
+    section { border-top: 1px solid var(--line); padding: 15px 4px; }
+    section:first-child { border-top: 0; }
+    .section-index { color: var(--orange); font: 700 10px/1.2 "Roboto Mono", monospace; letter-spacing: .12em; }
+    h2 { margin: 3px 0 11px; font-size: 13px; text-transform: uppercase; letter-spacing: .07em; }
+    label { display: block; color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+    input, select {
+      width: 100%; margin-top: 5px; border: 1px solid #b8b5ad; border-radius: 0;
+      background: #fff; color: var(--ink); padding: 8px 9px; min-height: 35px;
+    }
+    input:focus, select:focus, button:focus-visible { outline: 3px solid rgba(8,127,115,.25); outline-offset: 1px; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .wide { grid-column: 1 / -1; }
+    .field-note {
+      display: block; margin-top: 4px; color: var(--muted); font-size: 9px;
+      font-weight: 400; letter-spacing: 0; line-height: 1.3; text-transform: none;
+    }
+    .check { display: flex; align-items: center; gap: 8px; min-height: 34px; margin-top: 13px; color: var(--ink); font-size: 11px; text-transform: none; letter-spacing: 0; }
+    .check input { width: 16px; min-height: 16px; margin: 0; accent-color: var(--teal); }
+    .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-top: 13px; }
+    .action {
+      border: 1px solid var(--ink); border-radius: 0; padding: 10px 8px; cursor: pointer;
+      font-weight: 800; letter-spacing: .03em; min-height: 42px;
+    }
+    .action.primary { background: var(--ink); color: #fff; }
+    .action.secondary { background: var(--lime); color: var(--ink); }
+    .action:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 3px 0 var(--orange); }
+    .action:disabled { opacity: .45; cursor: wait; }
+    .status {
+      min-height: 58px; border-left: 4px solid var(--teal); background: #fff;
+      margin-top: 10px; padding: 9px 10px;
+    }
+    .status.error { border-left-color: var(--red); }
+    .status-title { font-weight: 800; }
+    .status-detail { color: var(--muted); font-size: 11px; margin-top: 2px; }
+    .status-setup { display: none; }
+    .status.needs-setup .status-setup { display: block; }
+    .status-setup .copy-action { min-height: 31px; margin-top: 8px; padding: 5px 8px; font-size: 10px; }
+    .progress { height: 4px; margin-top: 9px; background: #e4e1da; overflow: hidden; }
+    .progress > i { display: block; width: 0; height: 100%; background: var(--orange); transition: width .25s ease; }
+    .progress.indeterminate > i { width: 35%; animation: scan 1.1s ease-in-out infinite; }
+    @keyframes scan { from { transform: translateX(-110%); } to { transform: translateX(320%); } }
+    .results { display: none; }
+    .results.visible { display: block; }
+    .hero-number { font-size: 34px; font-weight: 800; letter-spacing: -.06em; line-height: 1; }
+    .hero-label { color: var(--muted); font-size: 10px; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; margin-bottom: 5px; }
+    .kpis { display: grid; grid-template-columns: 1fr 1fr; margin-top: 13px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+    .kpi { background: #fff; padding: 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .kpi b { display: block; font-size: 15px; }
+    .kpi span { color: var(--muted); font-size: 9px; text-transform: uppercase; letter-spacing: .06em; }
+    .replay-wrap { margin-top: 12px; background: var(--ink); color: #fff; padding: 10px; }
+    .replay-head { display: flex; justify-content: space-between; align-items: baseline; }
+    .replay-head b { font-size: 10px; letter-spacing: .07em; text-transform: uppercase; }
+    .replay-head span { color: #aeb2bb; font: 10px "Roboto Mono", monospace; }
+    svg { display: block; width: 100%; height: 90px; margin-top: 7px; overflow: visible; }
+    .chart-grid { stroke: #3b3f47; stroke-width: 1; }
+    .chart-line { fill: none; stroke: var(--lime); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+    .chart-dot { fill: var(--orange); }
+    .engine-note { display: grid; grid-template-columns: 1fr auto; gap: 5px 10px; font: 10px/1.35 "Roboto Mono", monospace; }
+    .engine-note dt { color: var(--muted); }
+    .engine-note dd { margin: 0; text-align: right; }
+    details { border-top: 1px solid var(--line); padding-top: 9px; margin-top: 10px; }
+    summary { cursor: pointer; font-weight: 700; }
+    details p { color: var(--muted); font-size: 11px; }
+    .sr-only { position: absolute; width: 1px; height: 1px; clip: rect(0 0 0 0); overflow: hidden; }
+  </style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="eyebrow">WebAssembly × Google Sheets</div>
+    <h1>IG Scheduling Lab</h1>
+    <p class="dek" data-copy="dek">Run the validated scheduler, then inspect the decision like a BI model.</p>
+    <div class="language" data-copy-aria="languageLabel" aria-label="Language">
+      <button id="lang-en" type="button" aria-pressed="true">EN</button>
+      <button id="lang-pt" type="button" aria-pressed="false">PT-BR</button>
+    </div>
+  </header>
+
+  <aside class="first-run" aria-labelledby="first-run-title">
+    <div class="section-index" data-copy="firstRunIndex">START HERE</div>
+    <h2 id="first-run-title" data-copy="firstRunTitle">Use your own copy</h2>
+    <p class="first-run-summary" data-copy="firstRunSummary">The public master is read-only, so its buttons cannot run. Create a private Google Sheets copy before using the lab.</p>
+    <a
+      class="copy-action"
+      href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy"
+      target="_blank"
+      rel="noopener noreferrer"
+      data-copy="copyAction"
+      data-copy-aria="copyActionAria"
+      aria-label="Create an executable private copy in Google Sheets"
+    >Create my copy</a>
+    <ol class="first-run-steps">
+      <li data-copy="firstRunVerify">In your copy, open IG Scheduler → Verify embedded engine.</li>
+      <li data-copy="firstRunAuthorize">Approve access once, then close and reopen this control panel.</li>
+    </ol>
+    <p class="xlsx-note" data-copy="xlsxNote">An uploaded .xlsx preserves the workbook design and sample results, but cannot include the bound Apps Script. Use the copy link above for the executable version.</p>
+    <details class="account-policy">
+      <summary data-copy="policySummary">Authorization blocked by account policy?</summary>
+      <p data-copy="policyNote">Keep the account's protections enabled. With Advanced Protection or an administrator policy, use another standard Google account for an executable copy, or continue with the read-only portfolio.</p>
+    </details>
+  </aside>
+
+  <main>
+    <section>
+      <div class="section-index" data-copy="configureIndex">01 / CONFIGURE</div>
+      <h2 data-copy="configure">Experiment design</h2>
+      <div class="grid">
+        <label class="wide"><span data-copy="instance">Bundled instance</span>
+          <select id="instance"></select>
+        </label>
+        <label><span data-copy="iterations">Iterations / run</span>
+          <input id="iterations" type="number" min="1" max="100000" step="1" value="2500">
+          <small class="field-note" data-copy="budgetNote">Maximum 100,000. Larger budgets may exceed the Apps Script runtime.</small>
+        </label>
+        <label><span data-copy="destroy">Destroy size d</span>
+          <input id="destroy" type="number" min="1" max="500" step="1" value="2">
+        </label>
+        <label><span data-copy="seed">Starting seed</span>
+          <input id="seed" type="number" min="0" max="4294967295" step="1" value="1">
+        </label>
+        <label><span data-copy="runs">Runs in experiment</span>
+          <input id="runs" type="number" min="2" max="30" step="1" value="10">
+        </label>
+        <label class="wide"><span data-copy="accept">Acceptance reference</span>
+          <select id="accept">
+            <option value="current" data-copy="current">Current candidate</option>
+            <option value="best" data-copy="best">Best found</option>
+          </select>
+        </label>
+      </div>
+      <label class="check"><input id="permute" type="checkbox" checked> <span data-copy="permute">Run accepted ↔ rejected swap pass</span></label>
+      <div class="button-row">
+        <button id="run-one" class="action primary" type="button" data-copy="runOne">Run once</button>
+        <button id="run-many" class="action secondary" type="button" data-copy="runMany">Run experiment</button>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite">
+        <div id="status-title" class="status-title">Ready for a reproducible run.</div>
+        <div id="status-detail" class="status-detail">Only the bundled catalog is available; no upload is required.</div>
+        <div id="status-setup" class="status-setup" aria-hidden="true">
+          <a
+            class="copy-action"
+            href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy"
+            target="_blank"
+            rel="noopener noreferrer"
+            data-copy="copyAction"
+            data-copy-aria="copyActionAria"
+            aria-label="Create an executable private copy in Google Sheets"
+          >Create my copy</a>
+        </div>
+        <div id="progress" class="progress"><i></i></div>
+      </div>
+    </section>
+
+    <section id="results" class="results" aria-live="polite">
+      <div class="section-index" data-copy="readIndex">02 / READ</div>
+      <h2 data-copy="verified">Verified result</h2>
+      <div class="hero-label" data-copy="bestCost">Best objective cost</div>
+      <div id="best-cost" class="hero-number">—</div>
+      <div class="kpis">
+        <div class="kpi"><b id="performed">—</b><span data-copy="performed">Scheduled</span></div>
+        <div class="kpi"><b id="rejected">—</b><span data-copy="rejected">Rejected</span></div>
+        <div class="kpi"><b id="evaluations">—</b><span data-copy="evaluations">Evaluations</span></div>
+        <div class="kpi"><b id="runtime">—</b><span data-copy="runtime">Runtime</span></div>
+      </div>
+      <div class="replay-wrap">
+        <div class="replay-head"><b data-copy="replay">Real search replay</b><span id="replay-label">0 → 0</span></div>
+        <svg id="replay" viewBox="0 0 260 90" role="img" data-copy-aria="replayAria" aria-label="Best cost by real iteration checkpoint">
+          <path class="chart-grid" d="M8 18H252M8 45H252M8 72H252"></path>
+          <path id="chart-line" class="chart-line" d=""></path>
+          <circle id="chart-dot" class="chart-dot" cx="0" cy="0" r="3.5"></circle>
+        </svg>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-index" data-copy="engineIndex">03 / ENGINE</div>
+      <h2 data-copy="engineering">Engineering contract</h2>
+      <dl class="engine-note">
+        <dt data-copy="solverLabel">solver</dt><dd id="engine-name">—</dd>
+        <dt>wasm</dt><dd id="engine-size">—</dd>
+        <dt data-copy="instancesLabel">instances</dt><dd id="engine-instances">—</dd>
+        <dt data-copy="objectiveLabel">objective</dt><dd data-copy="fixedPoint">fixed-point ×10</dd>
+      </dl>
+      <details>
+        <summary data-copy="whyCopy">Why run in a copy?</summary>
+        <p data-copy="copyNote">The public master stays immutable. A private copy includes this bound script, isolates your results, and requests access only to that spreadsheet.</p>
+      </details>
+    </section>
+  </main>
+
+  <script>
+    const COPY = {
+      en: {
+        dek: 'Run the validated scheduler, then inspect the decision like a BI model.', configure: 'Experiment design',
+        languageLabel: 'Language', configureIndex: '01 / CONFIGURE', readIndex: '02 / READ', engineIndex: '03 / ENGINE',
+        firstRunIndex: 'START HERE', firstRunTitle: 'Use your own copy',
+        firstRunSummary: 'The public master is read-only, so its buttons cannot run. Create a private Google Sheets copy before using the lab.',
+        copyAction: 'Create my copy', copyActionAria: 'Create an executable private copy in Google Sheets',
+        firstRunVerify: 'In your copy, open IG Scheduler → Verify embedded engine.',
+        firstRunAuthorize: 'Approve access once, then close and reopen this control panel.',
+        xlsxNote: 'An uploaded .xlsx preserves the workbook design and sample results, but cannot include the bound Apps Script. Use the copy link above for the executable version.',
+        policySummary: 'Authorization blocked by account policy?',
+        policyNote: "Keep the account's protections enabled. With Advanced Protection or an administrator policy, use another standard Google account for an executable copy, or continue with the read-only portfolio.",
+        instance: 'Bundled instance', iterations: 'Iterations / run', destroy: 'Destroy size d', seed: 'Starting seed',
+        budgetNote: 'Maximum 100,000. Larger budgets may exceed the Apps Script runtime.',
+        runs: 'Runs in experiment', accept: 'Acceptance reference', current: 'Current candidate', best: 'Best found',
+        permute: 'Run accepted ↔ rejected swap pass', runOne: 'Run once', runMany: 'Run experiment',
+        ready: 'Ready for a reproducible run.', readyDetail: 'Only the bundled catalog is available; no upload is required.',
+        running: 'The real engine is running.', runningDetail: 'This is an indeterminate wait, not a simulated percentage.',
+        runProgress: 'Completed run {done} of {total}.', writing: 'All runs complete. Verifying and writing one batch…',
+        complete: 'Dashboard updated from verified data.', error: 'The run stopped.',
+        setupRequired: 'Finish the one-time setup.',
+        setupRequiredDetail: 'Authorization is not active here. In your private copy, use IG Scheduler → Verify embedded engine, approve access, then close and reopen this panel.',
+        policyBlocked: 'This account cannot authorize the script.',
+        policyBlockedDetail: "Keep its security protections enabled. Use another standard Google account for the executable copy, or continue with the read-only portfolio.",
+        verified: 'Verified result',
+        integerRange: '{label}: enter a whole number from {minimum} to {maximum}.', seedOverflow: 'The seed range exceeds uint32.',
+        selectInstance: 'Select a bundled instance.', medianShort: 'median', seedShort: 'seed',
+        bestCost: 'Best objective cost', performed: 'Scheduled', rejected: 'Rejected', evaluations: 'Evaluations',
+        runtime: 'Runtime', replay: 'Real search replay', engineering: 'Engineering contract',
+        replayAria: 'Best cost by real iteration checkpoint', solverLabel: 'solver', instancesLabel: 'instances',
+        objectiveLabel: 'objective', fixedPoint: 'fixed-point ×10',
+        groupSetup: 'Sequence-dependent setup', groupStandard: 'No setup effects', groupGpu: 'Derived bundled workloads',
+        whyCopy: 'Why run in a copy?', copyNote: 'The public master stays immutable. A private copy includes this bound script, isolates your results, and requests access only to that spreadsheet.',
+      },
+      'pt-BR': {
+        dek: 'Execute o solver validado e analise a decisão como um modelo de BI.', configure: 'Desenho do experimento',
+        languageLabel: 'Idioma', configureIndex: '01 / CONFIGURAR', readIndex: '02 / ANALISAR', engineIndex: '03 / ENGINE',
+        firstRunIndex: 'COMECE AQUI', firstRunTitle: 'Use sua própria cópia',
+        firstRunSummary: 'O master público é somente leitura; por isso, os botões não podem executar. Crie uma cópia privada no Google Sheets antes de usar o laboratório.',
+        copyAction: 'Criar minha cópia', copyActionAria: 'Criar uma cópia privada executável no Google Sheets',
+        firstRunVerify: 'Na sua cópia, abra IG Scheduler → Verificar engine incorporado.',
+        firstRunAuthorize: 'Autorize o acesso uma única vez; depois feche e reabra este painel de controle.',
+        xlsxNote: 'Um .xlsx importado mantém o design da planilha e os resultados de exemplo, mas não pode incluir o Apps Script vinculado. Use o link de cópia acima para obter a versão executável.',
+        policySummary: 'A política da conta bloqueou a autorização?',
+        policyNote: 'Mantenha as proteções da conta ativadas. Com a Proteção Avançada ou uma política administrativa, use outra conta Google padrão para criar uma cópia executável ou continue no portfólio somente leitura.',
+        instance: 'Instância incluída', iterations: 'Iterações por execução', destroy: 'Tamanho da destruição d', seed: 'Semente inicial',
+        budgetNote: 'Máximo de 100.000. Orçamentos maiores podem exceder o tempo limite do Apps Script.',
+        runs: 'Execuções no experimento', accept: 'Referência de aceitação', current: 'Candidato atual', best: 'Melhor encontrado',
+        permute: 'Executar troca entre aceitos e rejeitados', runOne: 'Executar 1×', runMany: 'Executar experimento',
+        ready: 'Pronto para uma execução reproduzível.', readyDetail: 'Somente o catálogo incluído está disponível; nenhum upload é necessário.',
+        running: 'O engine real está executando.', runningDetail: 'Esta espera é indeterminada; não é uma porcentagem simulada.',
+        runProgress: 'Execução {done} de {total} concluída.', writing: 'Todas concluídas. Verificando e gravando em um único lote…',
+        complete: 'Dashboard atualizado com dados verificados.', error: 'A execução foi interrompida.',
+        setupRequired: 'Conclua a configuração inicial.',
+        setupRequiredDetail: 'A autorização não está ativa aqui. Na sua cópia privada, use IG Scheduler → Verificar engine incorporado, autorize o acesso e depois feche e reabra este painel.',
+        policyBlocked: 'Esta conta não pode autorizar o script.',
+        policyBlockedDetail: 'Mantenha as proteções de segurança ativadas. Use outra conta Google padrão para criar a cópia executável ou continue no portfólio somente leitura.',
+        verified: 'Resultado verificado',
+        integerRange: '{label}: informe um número inteiro de {minimum} a {maximum}.', seedOverflow: 'O intervalo de sementes excede uint32.',
+        selectInstance: 'Selecione uma instância incluída.', medianShort: 'mediana', seedShort: 'semente',
+        bestCost: 'Melhor custo objetivo', performed: 'Programados', rejected: 'Rejeitados', evaluations: 'Avaliações',
+        runtime: 'Tempo', replay: 'Replay da busca real', engineering: 'Contrato de engenharia',
+        replayAria: 'Melhor custo por checkpoint real de iteração', solverLabel: 'solver', instancesLabel: 'instâncias',
+        objectiveLabel: 'objetivo', fixedPoint: 'ponto fixo ×10',
+        groupSetup: 'Setup dependente da sequência', groupStandard: 'Sem efeitos de setup', groupGpu: 'Cargas derivadas incluídas',
+        whyCopy: 'Por que executar em uma cópia?', copyNote: 'O master público permanece imutável. Uma cópia privada inclui este script, isola os resultados e pede acesso somente a essa planilha.',
+      },
+    };
+
+    let bootstrap = null;
+    let language = 'en';
+    let busy = false;
+    let resultState = null;
+    let statusState = {
+      titleKey: 'ready', titleValues: {}, detailKey: 'readyDetail', detailValues: {}, detailText: null,
+      error: false, needsSetup: false, indeterminate: false, ratio: null,
+    };
+
+    const $ = (id) => document.getElementById(id);
+    const tr = (key, values = {}) => Object.entries(values).reduce(
+      (text, [name, value]) => text.replace(`{${name}}`, value),
+      (COPY[language] && COPY[language][key]) || COPY.en[key] || key,
+    );
+
+    function server(name, ...args) {
+      return new Promise((resolve, reject) => {
+        const runner = google.script.run
+          .withSuccessHandler(resolve)
+          .withFailureHandler((error) => reject(new Error(error && error.message ? error.message : String(error))));
+        runner[name](...args);
+      });
+    }
+
+    function applyCopy() {
+      document.documentElement.lang = language === 'pt-BR' ? 'pt-BR' : 'en';
+      document.querySelectorAll('[data-copy]').forEach((node) => {
+        const key = node.dataset.copy;
+        if (COPY[language][key]) node.textContent = COPY[language][key];
+      });
+      document.querySelectorAll('[data-copy-aria]').forEach((node) => {
+        node.setAttribute('aria-label', tr(node.dataset.copyAria));
+      });
+      $('lang-en').setAttribute('aria-pressed', String(language === 'en'));
+      $('lang-pt').setAttribute('aria-pressed', String(language === 'pt-BR'));
+      document.querySelectorAll('optgroup[data-label-copy]').forEach((group) => { group.label = tr(group.dataset.labelCopy); });
+      renderStatus();
+      if (resultState) renderResultNumbers(resultState.run, resultState.receipt);
+    }
+
+    async function setLanguage(next) {
+      if (busy) {
+        if (!bootstrap) {
+          language = next === 'pt-BR' ? 'pt-BR' : 'en';
+          applyCopy();
+        }
+        return;
+      }
+      const previous = language;
+      setBusy(true);
+      language = next === 'pt-BR' ? 'pt-BR' : 'en';
+      applyCopy();
+      try {
+        language = await server('igSetLanguage', language);
+        applyCopy();
+      } catch (error) {
+        if (!requiresSetup(error)) language = previous;
+        applyCopy();
+        showFailure(error);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function renderStatus() {
+      const state = statusState;
+      $('status').classList.toggle('error', state.error);
+      $('status').classList.toggle('needs-setup', state.needsSetup);
+      $('status').setAttribute('role', state.error ? 'alert' : 'status');
+      $('status-setup').setAttribute('aria-hidden', String(!state.needsSetup));
+      $('status-title').textContent = tr(state.titleKey, state.titleValues);
+      $('status-detail').textContent = state.detailText == null
+        ? (state.detailKey ? tr(state.detailKey, state.detailValues) : '')
+        : state.detailText;
+      $('progress').classList.toggle('indeterminate', state.indeterminate);
+      if (!state.indeterminate) {
+        $('progress').firstElementChild.style.width = state.ratio == null
+          ? '0%'
+          : `${Math.max(0, Math.min(1, state.ratio)) * 100}%`;
+      }
+    }
+
+    function setStatus(titleKey, options = {}) {
+      statusState = {
+        titleKey,
+        titleValues: options.titleValues || {},
+        detailKey: options.detailKey || null,
+        detailValues: options.detailValues || {},
+        detailText: options.detailText == null ? null : String(options.detailText),
+        error: options.error === true,
+        needsSetup: options.needsSetup === true,
+        indeterminate: options.indeterminate === true,
+        ratio: options.ratio == null ? null : options.ratio,
+      };
+      renderStatus();
+    }
+
+    function blockedByAccountPolicy(error) {
+      const message = String(error && error.message ? error.message : error || '');
+      return /advanced\s+protection|this\s+app\s+is\s+blocked|policy[_\s-]*enforced|blocked\s+by\s+(?:your\s+)?administrator|admin(?:istrator)?\s+policy/i.test(message);
+    }
+
+    function requiresSetup(error) {
+      const message = String(error && error.message ? error.message : error || '');
+      return blockedByAccountPolicy(error)
+        || /authorization\s+(?:is\s+)?required|requires?\s+authorization|not\s+authori[sz]ed|permission[_\s-]*denied|insufficient\s+permissions?|do\s+not\s+have\s+permission|access\s+(?:is\s+)?denied|script\s+function\s+not\s+found/i.test(message);
+    }
+
+    function showFailure(error) {
+      if (blockedByAccountPolicy(error)) {
+        setStatus('policyBlocked', { detailKey: 'policyBlockedDetail', error: true, needsSetup: true });
+        return;
+      }
+      if (requiresSetup(error)) {
+        setStatus('setupRequired', { detailKey: 'setupRequiredDetail', error: true, needsSetup: true });
+        return;
+      }
+      setStatus('error', { detailText: error && error.message ? error.message : String(error), error: true });
+    }
+
+    function setBusy(value) {
+      busy = value;
+      $('run-one').disabled = value;
+      $('run-many').disabled = value;
+      ['instance', 'iterations', 'destroy', 'seed', 'runs', 'accept', 'permute']
+        .forEach((id) => { $(id).disabled = value; });
+      ['lang-en', 'lang-pt'].forEach((id) => { $(id).disabled = value && bootstrap !== null; });
+    }
+
+    function selectedCatalogRow() {
+      return bootstrap.catalog.find((row) => row.id === $('instance').value);
+    }
+
+    function applyInstanceDefaults() {
+      const row = selectedCatalogRow();
+      if (!row) return;
+      $('iterations').value = row.suggestedIterations;
+      $('destroy').value = row.suggestedD;
+      $('destroy').max = row.jobs;
+      $('permute').checked = row.suggestedPermute;
+    }
+
+    function integerInput(id, label, minimum, maximum) {
+      const raw = $(id).value;
+      const value = raw.trim() === '' ? Number.NaN : Number(raw);
+      if (!Number.isSafeInteger(value) || value < minimum || value > maximum) {
+        throw new RangeError(tr('integerRange', { label, minimum, maximum }));
+      }
+      return value;
+    }
+
+    function readConfig(seed, compact = true) {
+      const row = selectedCatalogRow();
+      if (!row) throw new RangeError(tr('selectInstance'));
+      return {
+        instance: $('instance').value,
+        seed,
+        iterationBudget: integerInput('iterations', tr('iterations'), 1, 100000),
+        d: integerInput('destroy', tr('destroy'), 1, row.jobs),
+        accept: $('accept').value,
+        permute: $('permute').checked,
+        checkpointCount: 40,
+        compact,
+      };
+    }
+
+    function formatNumber(value, maximumFractionDigits = 1) {
+      return new Intl.NumberFormat(language === 'pt-BR' ? 'pt-BR' : 'en', { maximumFractionDigits }).format(value);
+    }
+
+    function renderResultNumbers(run, receipt) {
+      $('best-cost').textContent = formatNumber(receipt.bestCost, 1);
+      $('performed').textContent = formatNumber(receipt.scheduledJobs, 0);
+      $('rejected').textContent = formatNumber(receipt.rejectedJobs, 0);
+      $('evaluations').textContent = formatNumber(run.evaluations, 0);
+      $('runtime').textContent = `${formatNumber(run.elapsedMs / 1000, 2)} s`;
+      const points = run.checkpoints || [];
+      if (points.length) {
+        $('replay-label').textContent = `${formatNumber(points[0].bestCost, 1)} → ${formatNumber(points[points.length - 1].bestCost, 1)}`;
+      }
+    }
+
+    function renderResult(run, receipt) {
+      resultState = { run, receipt };
+      $('results').classList.add('visible');
+      renderResultNumbers(run, receipt);
+      drawReplay(run.checkpoints || []);
+    }
+
+    function drawReplay(points) {
+      if (!points.length) return;
+      const width = 244;
+      const height = 54;
+      const left = 8;
+      const top = 18;
+      const values = points.map((point) => Number(point.bestCost));
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      const spread = Math.max(1e-9, max - min);
+      const coordinates = points.map((point, index) => {
+        const x = left + (points.length === 1 ? 0 : (index / (points.length - 1)) * width);
+        const y = top + ((Number(point.bestCost) - min) / spread) * height;
+        return [x, y];
+      });
+      const path = coordinates.map(([x, y], index) => `${index ? 'L' : 'M'}${x.toFixed(1)} ${y.toFixed(1)}`).join(' ');
+      const line = $('chart-line');
+      line.setAttribute('d', path);
+      const length = line.getTotalLength();
+      line.style.transition = 'none';
+      line.style.strokeDasharray = String(length);
+      line.style.strokeDashoffset = String(length);
+      requestAnimationFrame(() => {
+        line.style.transition = 'stroke-dashoffset 900ms cubic-bezier(.22,.8,.3,1)';
+        line.style.strokeDashoffset = '0';
+      });
+      const [x, y] = coordinates[coordinates.length - 1];
+      $('chart-dot').setAttribute('cx', x);
+      $('chart-dot').setAttribute('cy', y);
+    }
+
+    async function runOne() {
+      if (busy) return;
+      setBusy(true);
+      setStatus('running', { detailKey: 'runningDetail', indeterminate: true });
+      try {
+        const seed = integerInput('seed', tr('seed'), 0, 4294967295);
+        const run = await server('igComputeRun', readConfig(seed, true));
+        setStatus('writing', { indeterminate: true });
+        const receipt = await server('igCommitSingle', run);
+        renderResult(run, receipt);
+        setStatus('complete', { detailText: `${receipt.instance} · ${tr('seedShort')} ${receipt.seed}`, ratio: 1 });
+      } catch (error) {
+        showFailure(error);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function runMany() {
+      if (busy) return;
+      setBusy(true);
+      const runs = [];
+      try {
+        const count = integerInput('runs', tr('runs'), 2, 30);
+        const seedStart = integerInput('seed', tr('seed'), 0, 4294967295);
+        if (seedStart + count - 1 > 4294967295) throw new RangeError(tr('seedOverflow'));
+        // Compute the seeds in server-side chunks: one execution per chunk
+        // instantiates the engine and unpacks the catalog once, instead of
+        // paying a fresh execution per seed. Results are identical and each is
+        // still individually signed before it returns.
+        const config = readConfig(seedStart, true);
+        const CHUNK = 8;
+        setStatus('running', { detailKey: 'runningDetail', indeterminate: true });
+        for (let start = 0; start < count; start += CHUNK) {
+          const seeds = [];
+          for (let index = start; index < Math.min(start + CHUNK, count); index += 1) {
+            seeds.push(seedStart + index);
+          }
+          const chunk = await server('igComputeExperiment', { config, seeds });
+          for (const run of chunk) runs.push(run);
+          const last = runs[runs.length - 1];
+          setStatus('runProgress', {
+            titleValues: { done: runs.length, total: count },
+            detailText: `${formatNumber(last.bestCost, 1)} · ${tr('seedShort')} ${last.seed}`,
+            ratio: runs.length / count,
+          });
+        }
+        setStatus('writing', { indeterminate: true });
+        const receipt = await server('igCommitExperiment', { runs });
+        const bestRun = runs.slice().sort((a, b) => a.bestCost - b.bestCost || a.seed - b.seed)[0];
+        renderResult(bestRun, receipt);
+        setStatus('complete', {
+          detailText: `${receipt.instance} · n=${receipt.runCount} · ${tr('medianShort')} ${formatNumber(receipt.median, 1)}`,
+          ratio: 1,
+        });
+      } catch (error) {
+        showFailure(error);
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function initialize() {
+      try {
+        bootstrap = await server('igGetBootstrap');
+        language = bootstrap.language === 'pt-BR' ? 'pt-BR' : 'en';
+        applyCopy();
+        const select = $('instance');
+        const groups = {
+          setup: ['groupSetup', []],
+          standard: ['groupStandard', []],
+          gpu: ['groupGpu', []],
+        };
+        bootstrap.catalog.forEach((row) => (groups[row.family] || groups.standard)[1].push(row));
+        Object.values(groups).forEach(([copyKey, rows]) => {
+          if (!rows.length) return;
+          const group = document.createElement('optgroup');
+          group.dataset.labelCopy = copyKey;
+          group.label = tr(copyKey);
+          rows.forEach((row) => {
+            const option = document.createElement('option');
+            option.value = row.id;
+            option.textContent = `${row.id} · ${row.jobs} jobs`;
+            group.appendChild(option);
+          });
+          select.appendChild(group);
+        });
+        select.value = bootstrap.defaults.instance;
+        applyInstanceDefaults();
+        $('seed').value = bootstrap.defaults.seed;
+        $('runs').value = bootstrap.defaults.runCount;
+        $('engine-name').textContent = bootstrap.engine.implementation;
+        $('engine-size').textContent = `${Math.round(bootstrap.engine.wasmBytes / 1024)} KB`;
+        $('engine-instances').textContent = String(bootstrap.engine.catalogEntries);
+        setBusy(false);
+      } catch (error) {
+        showFailure(error);
+        setBusy(true);
+      }
+    }
+
+    $('instance').addEventListener('change', applyInstanceDefaults);
+    $('run-one').addEventListener('click', runOne);
+    $('run-many').addEventListener('click', runMany);
+    $('lang-en').addEventListener('click', () => setLanguage('en'));
+    $('lang-pt').addEventListener('click', () => setLanguage('pt-BR'));
+    setBusy(true);
+    initialize();
+  </script>
+</body>
+</html>

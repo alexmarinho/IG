@@ -1,0 +1,12 @@
+{
+  "name": "ig-studio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "payload": "node scripts/build-engine-payload.mjs --out=src/generated/engine-payload.js",
+    "test": "node --test tests/**/*.test.mjs",
+    "check": "node scripts/check.mjs",
+    "build": "node scripts/build.mjs"
+  }
+}
