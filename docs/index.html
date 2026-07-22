@@ -353,6 +353,40 @@ h1.brand em{font-style:normal;color:var(--terra)}
 #m-arena .tile .t-value{font:650 19px/1.2 var(--serif);margin:2px 0 0;font-variant-numeric:tabular-nums}
 #m-arena .tile .t-value small{font-size:12px;color:var(--ink-soft);font-weight:500}
 #m-arena .algo-note{margin:12px 0 0;font-size:12.5px;color:var(--ink-soft);border-left:3px solid var(--brass);padding-left:10px;line-height:1.5}
+/* the method sheet: same four fields for every method, closed by default.
+   No scrollport — the fields wrap; the grid stacks below 560px. */
+#m-arena .algo-sheet{margin-top:14px;padding-top:11px;border-top:1px solid var(--rule)}
+#m-arena .algo-sheet>summary{cursor:pointer;list-style:none;display:flex;align-items:baseline;gap:7px;
+  font:600 12.5px/1.5 var(--sans);color:var(--ink-soft);transition:color .15s}
+#m-arena .algo-sheet>summary::-webkit-details-marker{display:none}
+#m-arena .algo-sheet>summary::before{content:"▸";flex:0 0 auto;font-size:10px;color:var(--muted)}
+#m-arena .algo-sheet[open]>summary::before{content:"▾"}
+#m-arena .algo-sheet>summary:hover{color:var(--terra)}
+#m-arena .algo-sheet>summary:hover::before{color:var(--terra)}
+#m-arena .algo-sheet>summary:focus-visible{outline:2px solid var(--ring);outline-offset:3px;border-radius:4px}
+#m-arena .sheet-fields{margin:11px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px 14px;align-items:baseline}
+#m-arena .sheet-fields dt{margin:0;font:600 10.5px/1.6 var(--sans);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);white-space:nowrap}
+#m-arena .sheet-fields dd{margin:0;font-size:13px;line-height:1.55;color:var(--ink-soft);max-width:66ch}
+#m-arena .sheet-fields dd b{color:var(--ink);font-weight:650}
+@media(max-width:560px){
+  #m-arena .sheet-fields{grid-template-columns:minmax(0,1fr);gap:2px}
+  #m-arena .sheet-fields dt{margin-top:8px}
+  #m-arena .sheet-fields dt:first-child{margin-top:0}
+}
+/* Paper cannot click, so the sheet prints open even when it is closed on
+   screen. Two engines to answer: the older one hides the children, the current
+   one hides ::details-content. The third rule puts the field grid back —
+   reverting the children out-specifies .sheet-fields above, and without it the
+   four fields would print as a plain stacked list. Deliberately no JS here: a
+   beforeprint handler in this section would race the page-wide one. */
+@media print{
+  #m-arena .algo-sheet{break-inside:avoid}
+  #m-arena .algo-sheet>summary{color:var(--ink)}
+  #m-arena .algo-sheet:not([open])>*:not(summary){display:revert}
+  #m-arena .algo-sheet:not([open])>.sheet-fields{display:grid}
+  #m-arena .algo-sheet::details-content{content-visibility:visible;display:block}
+}
 #m-arena .arena-score{margin-top:26px}
 #m-arena .ar-h{font:600 clamp(17px,1.8vw,20px)/1.25 var(--serif);margin-bottom:10px}
 #m-arena .res-controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
@@ -1298,6 +1332,13 @@ footer a{color:var(--terra-ink)}
       <p class="algo-desc" id="algoDesc"></p>
       <div class="algo-stats" id="algoStats"></div>
       <p class="algo-note" id="algoNote"></p>
+      <!-- the method sheet: the same four fields for every one of the eight, so
+           they can be read against each other. Summary and fields are written by
+           the arena script, which carries its own PT (as the rest of #m-arena does). -->
+      <details class="algo-sheet" id="algoSheet">
+        <summary id="algoSheetSum"></summary>
+        <dl class="sheet-fields" id="algoSheetBody"></dl>
+      </details>
     </div>
   </div>
 
@@ -3907,56 +3948,152 @@ function onWinResize(fn){
   const ALGOS = [
     { id: 'ig', col: 7, name: 'Iterated Greedy', short: 'IG', full: 'Iterated greedy with dynamic deadline', family: 'iterated greedy', stack: 'Excel VBA · i7 2.3 GHz',
       desc: '<strong>Destroy</strong> d random jobs, <strong>reinsert</strong> every pending job at its best position (NEH-style) and try <strong>swaps</strong> between scheduled and rejected, keeping whatever lowers cost. Its key innovation is the <strong>dynamic deadline d̄ⱼ</strong>: a job is rejected the instant setup + processing + lateness exceed its rejection cost — and since setup depends on position, the deadline moves with the sequence (the break-even shown in Fig. 03).',
-      note: 'Best average on the 30 NCOS (0.02%) · found the best known in 38/44 instances · beat the literature’s best on NCOS_31 and STC_NCOS_32 · weak spot: 200-job STC (~21%).' },
+      note: 'Best average on the 30 NCOS (0.02%) · found the best known in 38/44 instances · beat the literature’s best on NCOS_31 and STC_NCOS_32 · weak spot: 200-job STC (~21%).',
+      sheet: {
+        sum: 'Origin &amp; standing — a 2007 method with two parameters',
+        does: 'Destroy part of the current solution, rebuild it greedily, and keep the rebuild only if it is better.',
+        why: '<b>Iterated greedy — Ruiz &amp; Stützle, 2007.</b> Its contribution was subtraction: a metaheuristic with almost no parameters that still matched far more elaborate ones.',
+        where: 'Flowshop and job-shop scheduling first, then anywhere a decent constructive heuristic already exists to rebuild with.',
+        rank: 'Well known inside scheduling, much less so outside it. The whole method is a destroy size and an acceptance rule.' } },
     { id: 'pl', col: 0, name: 'MILP', full: 'Mixed-Integer Linear Programming', family: 'exact method', stack: 'CPLEX · 1 h per instance',
       desc: 'The exact mathematical model of the problem, given 1 hour of CPU per instance. When it finishes, it <strong>guarantees the optimum</strong> — but combinatorial explosion knocks it down early: from 75 jobs the errors exceed 80%, and on 200+ job instances it returns nothing at all.',
-      note: 'The optimality reference on small instances; 8 of 44 returned no result. The role CP-SAT would play better today.' },
+      note: 'The optimality reference on small instances; 8 of 44 returned no result. The role CP-SAT would play better today.',
+      sheet: {
+        sum: 'Origin &amp; standing — the only method here that can prove it is right',
+        does: 'Linear constraints plus integer variables handed to a solver, which returns a bound as well as an answer.',
+        why: '<b>Branch and bound — Land &amp; Doig, 1960.</b> The idea it contributed is the bound: a search can be pruned without being run.',
+        where: 'The default opening move in industrial operations research — production planning, logistics, crew rostering, network design.',
+        rank: 'Universal, and the reference that says how good “good” is — until the instance outgrows the hour.' } },
     { id: 'greedy', col: 1, name: 'Greedy', full: 'Constructive heuristic', family: 'constructive', stack: 'C++ · i7 2.93 GHz',
       desc: 'The constructive of Thevenin et al.: walks the rejected jobs in random order and inserts each one <strong>at the cheapest position</strong> in the sequence; displaced jobs that break a constraint fall back to rejection. Fast and simple — the starting point of every other algorithm in this arena.',
-      note: 'Alone it stays far from optimal (4.6% / 15.6%). It seeds everything else: Descent, Tabu and the AMAs start from it.' },
+      note: 'Alone it stays far from optimal (4.6% / 15.6%). It seeds everything else: Descent, Tabu and the AMAs start from it.',
+      sheet: {
+        sum: 'Origin &amp; standing — optimal on matroids, a warm start everywhere else',
+        does: 'Takes one decision at a time, always the locally cheapest, and never revisits it.',
+        why: 'The baseline everyone starts from; <b>Edmonds, 1971</b> showed it is exactly optimal on matroids, which is why it is trusted as a building block.',
+        where: 'Inside almost every metaheuristic, as the warm start — and on its own in Huffman coding, minimum spanning trees, Dijkstra.',
+        rank: 'Ubiquitous as a component, almost never a final answer.' } },
     { id: 'descent', col: 2, name: 'Descent', full: 'Local search (hill descent)', family: 'local search', stack: 'C++ · i7 2.93 GHz',
       desc: 'Pure local search from the Greedy solution: explores the <strong>entire neighborhood</strong> — remove, add, reposition and swap jobs — accepting only improving moves. It converges fast and stops at the first <strong>local minimum</strong>.',
-      note: 'Improves on Greedy but inherits the flaw: when no neighbor is better, the search is over.' },
+      note: 'Improves on Greedy but inherits the flaw: when no neighbor is better, the search is over.',
+      sheet: {
+        sum: 'Origin &amp; standing — the atom every later method is built from',
+        does: 'Moves to a better neighbour, over and over, and stops when no neighbour is better.',
+        why: 'No single inventor; the first published combinatorial case is <b>2-opt for routing, Croes, 1958</b>. Its failure — stopping at the first local minimum — is the problem every later method was built to solve.',
+        where: 'Everywhere, but as a subroutine: the improvement step inside tabu search, the memetics and the iterated greedy itself.',
+        rank: 'Foundational rather than competitive: cited constantly, deployed alone almost never.' } },
     { id: 'tabu', col: 3, name: 'Tabu', full: 'Tabu search', family: 'tabu search', stack: 'C++ · i7 2.93 GHz',
       desc: 'Descent with memory: recent moves enter a <strong>tabu list</strong> and stay forbidden for a few iterations. That forces the algorithm to accept worse moves and <strong>escape local minima</strong>. Solves up to 500-job instances in seconds.',
-      note: 'The IG’s direct rival: 0.05% average on NCOS and sub-second times (in C++).' },
+      note: 'The IG’s direct rival: 0.05% average on NCOS and sub-second times (in C++).',
+      sheet: {
+        sum: 'Origin &amp; standing — Glover 1986 put memory at the centre of search',
+        does: 'Local search that forbids reversing its recent moves, so it can take a worsening step and leave a local minimum.',
+        why: '<b>Glover, 1986.</b> The contribution was memory: what the search may not do next is derived from what it just did.',
+        where: 'Vehicle routing, scheduling, timetabling, telecommunications network design.',
+        rank: 'One of the canonical metaheuristics — in every textbook on the subject, and still a working default.' } },
     { id: 'tabudiv', col: 4, name: 'TabuDiv', full: 'Tabu search + diversification', family: 'tabu search', stack: 'C++ · i7 2.93 GHz',
       desc: 'Tabu with a periodic perturbation: every 500 iterations, <strong>the 30% “oldest” jobs</strong> in the sequence are forcibly rejected, shoving the search into fresh regions of the solution space. Also carries special handling for instances with many identical jobs.',
-      note: 'Best of the six on setup instances (1.2% average).' },
+      note: 'Best of the six on setup instances (1.2% average).',
+      sheet: {
+        sum: 'Origin &amp; standing — what a modern paper usually means by “tabu”',
+        does: 'Tabu search with an explicit escape: when the search stops improving, part of the solution is discarded on purpose.',
+        why: 'No separate origin — diversification belongs to Glover’s own framework (<b>Tabu Search, Part II, 1990</b>). It fixes tabu’s real failure: intensifying in one basin forever.',
+        where: 'The same domains as tabu search, because in practice this is how tabu search is implemented.',
+        rank: 'Now standard practice rather than a named method, which is why it has little literature of its own.' } },
     { id: 'ama', col: 5, name: 'AMAᴹᵉᵐ', full: 'Adaptive memetic algorithm', family: 'evolutionary', stack: 'C++ · i7 2.93 GHz',
       desc: 'Evolutionary: keeps a <strong>population</strong> of solutions, selects the best as parents, breeds children by <strong>recombination</strong> and <strong>mutation</strong>, then intensifies each child with tabu search. Recombining two good sequences inherits good blocks from both.',
-      note: 'Robust on the big setup instances (1.0% average), at the cost of far more machinery than the IG.' },
+      note: 'Robust on the big setup instances (1.0% average), at the cost of far more machinery than the IG.',
+      sheet: {
+        sum: 'Origin &amp; standing — Moscato 1989: optimise every child before it competes',
+        does: 'Keeps a population, recombines parents into children, and runs local search on every child before selection.',
+        why: '<b>Memetic algorithms — Moscato, 1989.</b> The contribution: a genetic algorithm improves sharply once each child is locally optimised rather than merely inherited.',
+        where: 'Scheduling, routing, timetabling, bioinformatics — strongest in the operations-research community, where local search is already trusted.',
+        rank: 'A well-established family. Considerably more machinery than a tabu search, and it has to earn that cost.' } },
     { id: 'amasp', col: 6, name: 'AMAˢᵖ', full: 'Memetic, alternative recombination', family: 'evolutionary', stack: 'C++ · i7 2.93 GHz',
       desc: 'Identical to AMAᴹᵉᵐ except for the parents’ <strong>recombination procedure</strong>. In practice the two memetics tie: 0.08% vs 0.19% on NCOS and ~1% on STC.',
-      note: 'The evolutionary pair shows crossover design matters less than the population + tabu skeleton.' },
+      note: 'The evolutionary pair shows crossover design matters less than the population + tabu skeleton.',
+      sheet: {
+        sum: 'Origin &amp; standing — not famous on its own: it is a controlled experiment',
+        does: 'Identical to AMAᴹᵉᵐ apart from the procedure that recombines the parents.',
+        why: '<b>Not a method from the literature.</b> It isolates one operator — recombination — with everything else held fixed.',
+        where: 'Only here, and in papers running the same kind of ablation.',
+        rank: 'Not famous on its own. The tie with AMAᴹᵉᵐ in the scores above is the result it exists to produce.' } },
   ];
 
   // derived statistics
   const ALGOS_PT = {
     ig: { full: 'Iterated greedy com prazo dinâmico', family: 'iterated greedy',
       desc: '<strong>Destruir</strong> d tarefas aleatórias, <strong>reinserir</strong> cada tarefa pendente na sua melhor posição (estilo NEH) e tentar <strong>trocas</strong> entre agendadas e rejeitadas, mantendo o que reduz custo. Sua inovação central é o <strong>prazo dinâmico d̄ⱼ</strong>: a tarefa é rejeitada no instante em que setup + processamento + atraso superam seu custo de rejeição — e como o setup depende da posição, o prazo se move com a sequência (o ponto de equilíbrio mostrado na Fig. 03).',
-      note: 'Melhor média nas 30 NCOS (0,02%) · achou o melhor conhecido em 38/44 instâncias · superou o melhor da literatura em NCOS_31 e STC_NCOS_32 · ponto fraco: STC de 200 tarefas (~21%).' },
+      note: 'Melhor média nas 30 NCOS (0,02%) · achou o melhor conhecido em 38/44 instâncias · superou o melhor da literatura em NCOS_31 e STC_NCOS_32 · ponto fraco: STC de 200 tarefas (~21%).',
+      sheet: {
+        sum: 'Origem &amp; reputação — uma ideia de 2007 com dois parâmetros',
+        does: 'Destruir parte da solução atual, reconstruí-la de forma gulosa e ficar com a reconstrução só se ela for melhor.',
+        why: '<b>Iterated greedy — Ruiz &amp; Stützle, 2007.</b> A contribuição foi por subtração: uma metaheurística quase sem parâmetros que ainda assim empatava com outras muito mais elaboradas.',
+        where: 'Primeiro em flowshop e job-shop; depois, em qualquer lugar onde já exista uma heurística construtiva decente para reconstruir.',
+        rank: 'Conhecido dentro de escalonamento, bem menos fora dele. O método inteiro é um tamanho de destruição e uma regra de aceitação.' } },
     pl: { full: 'Programação Linear Inteira Mista', family: 'método exato',
       desc: 'O modelo matemático exato do problema, com 1 hora de CPU por instância. Quando termina, <strong>garante o ótimo</strong> — mas a explosão combinatória o derruba cedo: a partir de 75 tarefas os erros passam de 80%, e em instâncias de 200+ tarefas não retorna nada.',
-      note: 'A referência de otimalidade nas instâncias pequenas; 8 de 44 sem resultado. O papel que o CP-SAT faria melhor hoje.' },
+      note: 'A referência de otimalidade nas instâncias pequenas; 8 de 44 sem resultado. O papel que o CP-SAT faria melhor hoje.',
+      sheet: {
+        sum: 'Origem &amp; reputação — o único método aqui que consegue provar que está certo',
+        does: 'Restrições lineares mais variáveis inteiras entregues a um solver, que devolve um limitante além da resposta.',
+        why: '<b>Branch and bound — Land &amp; Doig, 1960.</b> A ideia que ele contribuiu é o limitante: dá para podar a busca sem executá-la.',
+        where: 'A abertura padrão da pesquisa operacional industrial — planejamento de produção, logística, escala de pessoal, projeto de redes.',
+        rank: 'Universal, e a referência que diz o quão bom é “bom” — até a instância não caber mais na hora de CPU.' } },
     greedy: { full: 'Heurística construtiva', family: 'construtivo',
       desc: 'O construtivo de Thevenin et al.: percorre as tarefas rejeitadas em ordem aleatória e insere cada uma <strong>na posição mais barata</strong> da sequência; tarefas deslocadas que quebram restrição voltam à rejeição. Rápido e simples — o ponto de partida de todos os outros algoritmos da arena.',
-      note: 'Sozinho fica longe do ótimo (4,6% / 15,6%). Semeia todo o resto: Descent, Tabu e os AMAs partem dele.' },
+      note: 'Sozinho fica longe do ótimo (4,6% / 15,6%). Semeia todo o resto: Descent, Tabu e os AMAs partem dele.',
+      sheet: {
+        sum: 'Origem &amp; reputação — ótimo em matroides, partida quente em todo o resto',
+        does: 'Toma uma decisão por vez, sempre a mais barata localmente, e nunca a revisita.',
+        why: 'A linha de base de que todo mundo parte; <b>Edmonds, 1971</b> mostrou que ele é exatamente ótimo em matroides — por isso é confiável como peça.',
+        where: 'Dentro de quase toda metaheurística, como partida; e sozinho na codificação de Huffman, em árvores geradoras mínimas, no Dijkstra.',
+        rank: 'Onipresente como componente, quase nunca como resposta final.' } },
     descent: { full: 'Busca local (descida)', family: 'busca local',
       desc: 'Busca local pura a partir da solução Greedy: explora a <strong>vizinhança inteira</strong> — remover, adicionar, reposicionar e trocar tarefas — aceitando só movimentos que melhoram. Converge rápido e para no primeiro <strong>mínimo local</strong>.',
-      note: 'Melhora o Greedy mas herda a falha: sem vizinho melhor, a busca acabou.' },
+      note: 'Melhora o Greedy mas herda a falha: sem vizinho melhor, a busca acabou.',
+      sheet: {
+        sum: 'Origem &amp; reputação — o átomo de que todo método posterior é feito',
+        does: 'Move para um vizinho melhor, repetidamente, e para quando nenhum vizinho é melhor.',
+        why: 'Sem inventor único; o primeiro caso combinatório publicado é o <b>2-opt para roteamento, Croes, 1958</b>. Sua falha — parar no primeiro mínimo local — é o problema que todo método posterior foi feito para resolver.',
+        where: 'Em todo lugar, mas como sub-rotina: o passo de melhoria dentro da busca tabu, dos meméticos e do próprio iterated greedy.',
+        rank: 'Fundacional, não competitivo: citado o tempo todo, usado sozinho quase nunca.' } },
     tabu: { full: 'Busca tabu', family: 'busca tabu',
       desc: 'Descent com memória: movimentos recentes entram numa <strong>lista tabu</strong> e ficam proibidos por algumas iterações. Isso força aceitar movimentos piores e <strong>escapar de mínimos locais</strong>. Resolve instâncias de até 500 tarefas em segundos.',
-      note: 'O rival direto do IG: 0,05% de média nas NCOS e tempos sub-segundo (em C++).' },
+      note: 'O rival direto do IG: 0,05% de média nas NCOS e tempos sub-segundo (em C++).',
+      sheet: {
+        sum: 'Origem &amp; reputação — Glover 1986 pôs a memória no centro da busca',
+        does: 'Busca local que proíbe desfazer seus movimentos recentes, e por isso consegue aceitar uma piora e sair de um mínimo local.',
+        why: '<b>Glover, 1986.</b> A contribuição foi a memória: o que a busca não pode fazer agora deriva do que ela acabou de fazer.',
+        where: 'Roteamento de veículos, escalonamento, montagem de grades horárias, projeto de redes de telecomunicações.',
+        rank: 'Uma das metaheurísticas canônicas — está em todo livro-texto da área, e ainda é um padrão de trabalho.' } },
     tabudiv: { full: 'Busca tabu + diversificação', family: 'busca tabu',
       desc: 'Tabu com perturbação periódica: a cada 500 iterações, <strong>as 30% de tarefas mais “antigas”</strong> da sequência são rejeitadas à força, empurrando a busca para regiões novas do espaço. Também trata instâncias com muitas tarefas idênticas.',
-      note: 'Melhor dos seis nas instâncias com setup (1,2% de média).' },
+      note: 'Melhor dos seis nas instâncias com setup (1,2% de média).',
+      sheet: {
+        sum: 'Origem &amp; reputação — o que um artigo moderno costuma querer dizer com “tabu”',
+        does: 'Busca tabu com uma fuga explícita: quando a busca para de melhorar, parte da solução é descartada de propósito.',
+        why: 'Sem origem separada — a diversificação é do próprio arcabouço de Glover (<b>Tabu Search, Parte II, 1990</b>). Ela corrige a falha real do tabu: intensificar para sempre na mesma bacia.',
+        where: 'Os mesmos domínios da busca tabu, porque é assim que a busca tabu é implementada na prática.',
+        rank: 'Hoje é prática padrão, não um método com nome — por isso tem pouca literatura própria.' } },
     ama: { full: 'Algoritmo memético adaptativo', family: 'evolutivo',
       desc: 'Evolutivo: mantém uma <strong>população</strong> de soluções, seleciona as melhores como pais, gera filhos por <strong>recombinação</strong> e <strong>mutação</strong>, e intensifica cada filho com busca tabu. A recombinação de duas boas sequências herda bons blocos de ambas.',
-      note: 'Robusto nas grandes instâncias com setup (1,0% de média), ao custo de muito mais maquinário que o IG.' },
+      note: 'Robusto nas grandes instâncias com setup (1,0% de média), ao custo de muito mais maquinário que o IG.',
+      sheet: {
+        sum: 'Origem &amp; reputação — Moscato 1989: otimizar cada filho antes de ele competir',
+        does: 'Mantém uma população, recombina pais em filhos e roda busca local em cada filho antes da seleção.',
+        why: '<b>Algoritmos meméticos — Moscato, 1989.</b> A contribuição: um algoritmo genético melhora muito quando cada filho é otimizado localmente, em vez de apenas herdado.',
+        where: 'Escalonamento, roteamento, grades horárias, bioinformática — mais forte na comunidade de pesquisa operacional, onde a busca local já é confiável.',
+        rank: 'Uma família bem estabelecida. Bem mais maquinário que uma busca tabu, e precisa justificar esse custo.' } },
     amasp: { full: 'Memético, recombinação alternativa', family: 'evolutivo',
       desc: 'Idêntico ao AMAᴹᵉᵐ exceto pelo <strong>procedimento de recombinação</strong> dos pais. Na prática os dois meméticos empatam: 0,08% vs 0,19% nas NCOS e ~1% nas STC.',
-      note: 'O par evolutivo mostra que o desenho do crossover importa menos que o esqueleto população + tabu.' },
+      note: 'O par evolutivo mostra que o desenho do crossover importa menos que o esqueleto população + tabu.',
+      sheet: {
+        sum: 'Origem &amp; reputação — não é famoso sozinho: é um experimento controlado',
+        does: 'Idêntico ao AMAᴹᵉᵐ exceto pelo procedimento que recombina os pais.',
+        why: '<b>Não é um método da literatura.</b> Ele isola um operador — a recombinação — com todo o resto mantido fixo.',
+        where: 'Só aqui, e em artigos que fazem o mesmo tipo de ablação.',
+        rank: 'Não é famoso sozinho. O empate com o AMAᴹᵉᵐ nos escores acima é o resultado que ele existe para produzir.' } },
   };
   const names = Object.keys(ARENA);
   ALGOS.forEach((a, i) => {
@@ -4009,7 +4146,29 @@ function onWinResize(fn){
       <div class="tile"><p class="t-label">Mean, no-setup (30 NCOS)</p><p class="t-value">${nf.format(a.mNcos)}%</p></div>
       <div class="tile"><p class="t-label">Mean, with setups (14 STC)</p><p class="t-value">${nf.format(a.mStc)}%</p></div>
       <div class="tile"><p class="t-label">Found the best known</p><p class="t-value">${a.opt}<small> /${a.solved} instances</small></p></div>`;
+    renderSheet(a, pt);
     animT0 = performance.now();
+  }
+
+  /* ---------- method sheet: the same four fields for all eight ----------
+     The diagram caption above says what THIS implementation does in THIS study
+     — the moves the animation is drawing. The sheet is one level up: the method
+     as a method, its provenance and its reputation. Deliberately no scores here:
+     the tiles and the note already carry them, and the sheet points at them
+     instead of reprinting them. Stays open across a change of method, because
+     a standard shape only pays off when it can be read method against method. */
+  const SHEET_FIELDS = [
+    ['does',  'What it does',      'O que faz'],
+    ['why',   'Why it matters',    'Por que importa'],
+    ['where', 'Where you meet it', 'Onde você encontra'],
+    ['rank',  'Standing',          'Reputação'],
+  ];
+  function renderSheet(a, pt) {
+    const s = (pt && pt.sheet) || a.sheet;
+    if (!s) return;
+    $('algoSheetSum').innerHTML = s.sum;
+    $('algoSheetBody').innerHTML = SHEET_FIELDS
+      .map(([k, en, ptl]) => `<dt>${arenaText(en, ptl)}</dt><dd>${s[k]}</dd>`).join('');
   }
 
   /* ---------- mini-stage: schematic animations ---------- */
