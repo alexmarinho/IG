@@ -328,7 +328,11 @@ h1.brand em{font-style:normal;color:var(--terra)}
   --late:var(--red); --good:var(--sage); --serious:var(--terra);
 }
 #m-arena .arena-grid{display:grid;grid-template-columns:225px minmax(0,1fr);gap:18px;margin-top:6px}
-@media(max-width:780px){#m-arena .arena-grid{grid-template-columns:1fr}}
+/* minmax(0,1fr), not 1fr: a bare 1fr track cannot shrink below the min-content
+   of the method buttons, whose score chip is nowrap — so on a phone the list
+   held the column open at ~765px and the whole PAGE scrolled sideways. The
+   desktop rule above already uses minmax; this one had been left behind. */
+@media(max-width:780px){#m-arena .arena-grid{grid-template-columns:minmax(0,1fr)}}
 #m-arena .algo-list{display:flex;flex-direction:column;gap:6px}
 #m-arena .algo-btn{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 11px;
   border:1px solid var(--rule);border-radius:8px;background:var(--card);color:var(--ink);
