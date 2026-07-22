@@ -30,6 +30,14 @@ jobs:
         run: RUSTFLAGS="-C panic=abort" cargo build --release --target wasm32-unknown-unknown --no-default-features --manifest-path engine/Cargo.toml
       - name: Regenerate engine payload from current instances
         run: node studio/scripts/build-engine-payload.mjs --out=studio/src/generated/engine-payload.js
+      - name: Mirror scenario artwork into docs/
+        # BEFORE the check, which asserts the two copies are byte-identical: the
+        # homepage (#m-run) fetches these four renders as files while the Studio
+        # embeds them as data URIs, and a re-rendered image must not be able to
+        # leave the homepage showing the old one — or nothing.
+        run: |
+          mkdir -p docs/assets/scenarios
+          cp studio/assets/scenarios/*.webp docs/assets/scenarios/
       - name: Studio check + build
         run: |
           npm --prefix studio run check
@@ -49,8 +57,9 @@ jobs:
           cp engine/target/wasm32-unknown-unknown/release/ig_core.wasm docs/engine/ig_core.wasm
           rm -rf docs/engine/instances && mkdir -p docs/engine/instances
           cp masclib/*.csv masclib-domains/*.csv docs/engine/instances/
+          # docs/assets/scenarios was already mirrored above, before the check.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A docs/studio-app.html docs/engine studio/src/generated/
+          git add -A docs/studio-app.html docs/engine docs/assets/scenarios studio/src/generated/
           git diff --cached --quiet || git commit -m "studio: rebuild published app [skip ci]"
           git push

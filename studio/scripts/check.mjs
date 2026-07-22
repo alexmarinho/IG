@@ -22,6 +22,10 @@ const payloadPath = path.join(sourceRoot, "generated", "engine-payload.js");
 const sourceHtmlPath = path.join(studioRoot, "index.html");
 const packagePath = path.join(studioRoot, "package.json");
 const generatedSceneAssetRoot = path.join(sourceRoot, "generated", "scene-assets");
+const sceneAssetSourceRoot = path.join(studioRoot, "assets", "scenarios");
+/* The homepage (#m-run) fetches the same four renders as files rather than as
+   data URIs, so docs/ carries a published mirror that deploy-studio.yml writes. */
+const docsSceneAssetRoot = path.resolve(studioRoot, "..", "docs", "assets", "scenarios");
 
 /** assetKey -> fallback .webp filename; the committed generated module is canonical. */
 export const SCENE_ASSET_FILES = Object.freeze({
@@ -303,6 +307,21 @@ async function validateCatalogAndPayload() {
     invariant(bytes.length <= MAX_SCENE_ASSET_BYTES,
       `Scenario asset ${assetKey} exceeds ${MAX_SCENE_ASSET_BYTES} bytes`);
     sceneAssetBytes += bytes.length;
+  }
+
+  // The published homepage mirror: #m-run fetches these as files, so a render
+  // that exists only in the Studio would leave the homepage chooser blank.
+  for (const [assetKey, fileName] of Object.entries(SCENE_ASSET_FILES)) {
+    const sourceFile = path.join(sceneAssetSourceRoot, fileName);
+    const docsFile = path.join(docsSceneAssetRoot, fileName);
+    await assertExists(sourceFile, `Scene artwork for ${assetKey}`);
+    await assertExists(docsFile, `Published homepage scene artwork for ${assetKey}`);
+    const published = await readFile(docsFile);
+    invariant(published.subarray(0, 4).toString("ascii") === "RIFF"
+      && published.subarray(8, 12).toString("ascii") === "WEBP",
+    `Published scene asset ${fileName} is not a valid WebP container`);
+    invariant(published.equals(await readFile(sourceFile)),
+      `Published docs/assets/scenarios/${fileName} has drifted from studio/assets/scenarios/${fileName}`);
   }
 
   for (const [id, item] of Object.entries(packedCatalog)) {
