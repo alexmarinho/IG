@@ -16,6 +16,8 @@
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="Iterated Greedy — 39 of 44 best-known values matched or beaten.">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="pt_BR">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Iterated Greedy — an interactive explanation">
 <meta name="twitter:description" content="Order changes time. Time changes cost. Run a validated scheduling engine in your browser and watch it search.">
@@ -24,11 +26,18 @@
 <meta name="theme-color" content="#211d18" media="(prefers-color-scheme: dark)" data-for="dark">
 <link rel="icon" data-for="light" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%232a2620%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%228%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.2%22%20fill%3D%22%237d94b0%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%2214.5%22%20width%3D%2220%22%20height%3D%224.5%22%20rx%3D%222.2%22%20fill%3D%22%23b0562f%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%2221%22%20width%3D%2211%22%20height%3D%224.5%22%20rx%3D%222.2%22%20fill%3D%22%23c9a148%22%2F%3E%3C%2Fsvg%3E">
 <link rel="icon" data-for="dark" media="(prefers-color-scheme: dark)" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23efe7d8%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%228%22%20width%3D%2216%22%20height%3D%224.5%22%20rx%3D%222.2%22%20fill%3D%22%237d94b0%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%2214.5%22%20width%3D%2220%22%20height%3D%224.5%22%20rx%3D%222.2%22%20fill%3D%22%23b0562f%22%2F%3E%3Crect%20x%3D%226%22%20y%3D%2221%22%20width%3D%2211%22%20height%3D%224.5%22%20rx%3D%222.2%22%20fill%3D%22%23c9a148%22%2F%3E%3C%2Fsvg%3E">
+<link rel="prefetch" href="engine/ig_core.wasm" as="fetch" type="application/wasm">
 <script>
 /* T0 — pre-paint theme stamp. Must stay ABOVE the first <style>. No defer/async/module. */
 (function(){
   var t=null;
   try{ t=localStorage.getItem("ig-theme"); }catch(e){}
+  /* stamp the saved language before first paint so <html lang> is right from
+     the start; absent === markup default ("en"), no storage write here */
+  var l=null;
+  try{ l=localStorage.getItem("ig-lang"); }catch(e){}
+  if(l==="pt") document.documentElement.setAttribute("lang","pt-BR");
+  else if(l==="en") document.documentElement.setAttribute("lang","en");
   if(t!=="light"&&t!=="dark"){
     if(t!==null){ try{ localStorage.removeItem("ig-theme"); }catch(e){} }
     return;                       /* absent === follow the OS; CSS @media handles it, no JS needed */
@@ -55,6 +64,8 @@
   --sans:-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
   --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   --sm:118px; /* sticky-header scroll offset — recomputed by JS (header height + 10) */
+  --rail:288px; /* one console-rail width for every cockpit (.lab-cockpit, #m-runlab, .ig-grid) */
+  --gap-section:64px; /* vertical rhythm between sections */
 
   /* ---- aliases: one declaration serves every theme ---- */
   --race-greedy:var(--brass);  --race-descent:var(--steel);
@@ -75,6 +86,7 @@
   /* brand hues — FILLS AND MARKS ONLY */
   --terra:#b0562f; --maple:#b27b4a; --steel:#7d94b0; --brass:#c9a148; --sage:#7a8b6f;
   --red:#a8432e;
+  --setup-token:#ad7644; /* setup-time fill: swatches, cost-composition bars, anatomy figure */
   /* AA text variants of the brand hues */
   --terra-ink:#9c4b28; --brass-ink:#7a5f14; --sage-ink:#4f6047; --steel-ink:#46596f;
   /* boundaries */
@@ -117,6 +129,7 @@
     --ink:#efe7d8; --ink-soft:#b3a892;
     --terra:#e0895f; --maple:#d0a06a; --steel:#a7bcd8; --brass:#e0be6a; --sage:#a4bd97;
     --red:#e0836e;
+    --setup-token:#c98f5e;
     --terra-ink:#e59a72; --brass-ink:#e0be6a; --sage-ink:#a4bd97; --steel-ink:#a7bcd8;
     --rule:#3a3226; --rule-strong:#4d4335; --edge:#897761;
     --f1:#e0895f; --f2:#a7bcd8; --f3:#a4bd97; --f4:#e0be6a;
@@ -150,6 +163,7 @@
   --ink:#2a2620; --ink-soft:#6a6255;
   --terra:#b0562f; --maple:#b27b4a; --steel:#7d94b0; --brass:#c9a148; --sage:#7a8b6f;
   --red:#a8432e;
+  --setup-token:#ad7644;
   --terra-ink:#9c4b28; --brass-ink:#7a5f14; --sage-ink:#4f6047; --steel-ink:#46596f;
   --rule:#e2d9c8; --rule-strong:#d3c7b0; --edge:#91836b;
   --f1:#b0562f; --f2:#7d94b0; --f3:#7a8b6f; --f4:#c9a148;
@@ -177,6 +191,7 @@
   --ink:#efe7d8; --ink-soft:#b3a892;
   --terra:#e0895f; --maple:#d0a06a; --steel:#a7bcd8; --brass:#e0be6a; --sage:#a4bd97;
   --red:#e0836e;
+  --setup-token:#c98f5e;
   --terra-ink:#e59a72; --brass-ink:#e0be6a; --sage-ink:#a4bd97; --steel-ink:#a7bcd8;
   --rule:#3a3226; --rule-strong:#4d4335; --edge:#897761;
   --f1:#e0895f; --f2:#a7bcd8; --f3:#a4bd97; --f4:#e0be6a;
@@ -205,6 +220,7 @@
     --ink:#2a2620; --ink-soft:#6a6255;
     --terra:#b0562f; --maple:#b27b4a; --steel:#7d94b0; --brass:#c9a148; --sage:#7a8b6f;
     --red:#a8432e;
+    --setup-token:#ad7644;
     --terra-ink:#9c4b28; --brass-ink:#7a5f14; --sage-ink:#4f6047; --steel-ink:#46596f;
     --rule:#e2d9c8; --rule-strong:#d3c7b0; --edge:#91836b;
     --f1:#b0562f; --f2:#7d94b0; --f3:#7a8b6f; --f4:#c9a148;
@@ -262,7 +278,7 @@ body{
 .skip-link:focus{left:0}
 /* H4 — comfortable touch targets on coarse pointers */
 @media (pointer:coarse){
-  .btn,.seg button,.algo-btn{min-height:44px}
+  .btn,.seg button,.algo-btn,.oa-ctl button,nav.anchor-nav a,.lang-toggle button,input[type=range]{min-height:44px}
   .lang-toggle button{padding:8px 14px}
 }
 /* H2 — keep the Fig 01 gantt legible on narrow screens (scrolls inside its wrap) */
@@ -273,8 +289,12 @@ body{
   position:sticky;top:0;z-index:50;
   background:var(--paper);
   border-bottom:1px solid var(--rule);
+  transition:padding .2s ease;
 }
-.site-head-inner{max-width:1120px;margin:0 auto;padding:14px 20px 10px}
+.site-head-inner{max-width:1120px;margin:0 auto;padding:14px 20px 10px;transition:padding .2s ease}
+/* JS toggles .compact on scroll: the header sheds its subtitle and tightens */
+.site-head.compact .site-head-inner{padding-top:8px;padding-bottom:8px}
+.site-head.compact .subtitle{display:none}
 .brand-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px}
 h1.brand{font:600 21px/1.25 var(--serif);letter-spacing:.2px}
 h1.brand em{font-style:normal;color:var(--terra)}
@@ -286,13 +306,14 @@ h1.brand em{font-style:normal;color:var(--terra)}
 
 
 /* ---- Comparison lab: controls, standings, stage ---- */
-/* The 272px console + fluid stage is the cockpit shape, not one lab's identity:
-   #m-racelab and #m-run both wear it. #m-run overrides the rail width only,
-   because its first card is four pictures rather than four rows. */
+/* The --rail console + fluid stage is the cockpit shape, not one lab's identity:
+   #m-racelab, #m-run and the IG loop all wear it at the same 288px. */
 .lab-cockpit{
-  display:grid;grid-template-columns:272px minmax(0,1fr);gap:16px;margin-top:10px;align-items:start;
+  display:grid;grid-template-columns:var(--rail) minmax(0,1fr);gap:16px;margin-top:10px;align-items:start;
 }
 @media(max-width:900px){.lab-cockpit{grid-template-columns:1fr}}
+/* desktop only: the console rail rides along while the stage scrolls */
+@media(min-width:901px){.lab-cockpit>.lab-console{position:sticky;top:calc(var(--sm,118px) + 12px);align-self:start}}
 #m-racelab{
   --surface-1:var(--card); --ink-2:var(--ink-soft); --fam-c:var(--brass);
   /* --muted, --baseline, --grid and the six --race-* now live at :root, so the
@@ -304,7 +325,7 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .lab-actions{display:flex;gap:8px;margin-bottom:12px}
 .lab-actions .btn{flex:1}
 .lab-field{display:block;font:700 10px/1.4 var(--sans);letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:11px}
-.lab-field select{display:block;width:100%;margin-top:5px;padding:7px 8px;border:1px solid var(--rule);border-radius:7px;background:var(--paper);font:500 12.5px var(--sans);color:var(--ink)}
+.lab-field select{display:block;width:100%;margin-top:5px;padding:7px 8px;border:1px solid var(--rule);border-radius:7px;background:var(--paper);font:500 14px var(--sans);color:var(--ink)}
 .lab-field .seg{display:flex;margin-top:5px}
 .lab-field .seg button{flex:1}
 .lab-budget{margin-top:2px}
@@ -330,7 +351,7 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .lab-hint{font-size:11.5px;line-height:1.5;color:var(--ink-soft);margin-top:9px}
 .lab-stage{display:flex;flex-direction:column;gap:14px;min-width:0;min-height:96px}
 .lab-inst{font:500 11px var(--mono);color:var(--ink-soft)}
-.btn.tiny{padding:4px 9px;font-size:11px}
+.btn.tiny{padding:4px 9px;font-size:12px}
 /* ---- Arena: per-method explainer + recorded 2015 benchmark ---- */
 #m-arena{
   --page:var(--card); --ink-2:var(--ink-soft); --line:var(--steel);
@@ -378,7 +399,7 @@ h1.brand em{font-style:normal;color:var(--terra)}
 #m-arena .algo-sheet[open]>summary::before{content:"▾"}
 #m-arena .algo-sheet>summary:hover{color:var(--terra)}
 #m-arena .algo-sheet>summary:hover::before{color:var(--terra)}
-#m-arena .algo-sheet>summary:focus-visible{outline:2px solid var(--ring);outline-offset:3px;border-radius:4px}
+#m-arena .algo-sheet>summary:focus-visible{outline:2px solid var(--terra-ink);outline-offset:2px;border-radius:4px}
 #m-arena .sheet-fields{margin:11px 0 0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:9px 14px;align-items:baseline}
 #m-arena .sheet-fields dt{margin:0;font:600 10.5px/1.6 var(--sans);letter-spacing:.06em;text-transform:uppercase;
   color:var(--muted);white-space:nowrap}
@@ -408,7 +429,7 @@ h1.brand em{font-style:normal;color:var(--terra)}
 #m-arena .ar-field{font-size:12px;color:var(--ink-soft);display:inline-flex;align-items:center;gap:6px}
 #m-arena #cvRes{display:block;width:100%}
 #m-arena .res-note{margin:10px 0 0;font-size:12.5px;color:var(--ink-soft);line-height:1.55;max-width:88ch}
-#m-arena .res-note .beat{color:var(--sage);font-weight:700}
+#m-arena .res-note .beat{color:var(--sage-ink);font-weight:700}
 #m-arena .arena-cite{margin:16px 0 2px;padding-top:13px;border-top:1px solid var(--rule);
   color:var(--muted);font:600 11.5px/1.6 var(--mono)}
 .ar-tip{position:fixed;z-index:60;display:none;max-width:280px;padding:8px 10px;border-radius:8px;
@@ -454,6 +475,8 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .f-next{font:700 9.5px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--on-accent);background:var(--terra);padding:4px 8px;border-radius:999px;white-space:nowrap}
 .f-sum{grid-column:2/-1;font-size:13px;color:var(--ink-soft);line-height:1.5}
 .f-item[open]>summary{background:var(--wash-terra)}
+/* an expanded disclosure must land below the sticky header, not under it */
+.f-item[open],details{scroll-margin-top:calc(var(--sm,118px) + 12px)}
 .f-fields{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;padding:2px 2px 16px 54px;font-size:13px}
 .f-fields dt{font:700 10px/1.5 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--terra);white-space:nowrap}
 .f-fields dd{color:var(--ink-soft);line-height:1.5}
@@ -496,7 +519,7 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .lab-fold>summary .f-fold-find{margin-top:4px;font-size:12.5px}
 .lab-fold[open]>summary{margin-bottom:11px;padding-bottom:10px;border-bottom:1px solid var(--rule)}
 .subtitle{font-size:12.5px;color:var(--ink-soft);margin-top:4px}
-.subtitle code{font-family:var(--mono);font-size:11.5px;color:var(--maple)}
+.subtitle code{font-family:var(--mono);font-size:11.5px;color:var(--brass-ink)}
 nav.anchor-nav{max-width:1120px;margin:0 auto;padding:0 20px}
 nav.anchor-nav ul{
   display:flex;gap:2px;list-style:none;overflow-x:auto;scrollbar-width:thin;
@@ -515,7 +538,7 @@ nav.anchor-nav a.active{color:var(--terra);border-bottom-color:var(--terra)}
 
 /* ---------- page layout ---------- */
 main{max-width:1120px;margin:0 auto;padding:0 20px 40px}
-section.section{padding:44px 0 8px;scroll-margin-top:var(--sm,118px)}
+section.section{padding:var(--gap-section) 0 0;scroll-margin-top:var(--sm,118px)}
 .kicker{
   font:600 11px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase;
   color:var(--terra-ink);margin-bottom:8px;
@@ -558,15 +581,16 @@ figcaption.fig-cap{
   color:var(--ink-soft);margin-bottom:14px;display:flex;flex-wrap:wrap;gap:6px 14px;
   align-items:baseline;
 }
-figcaption.fig-cap .fig-no{color:var(--terra);font-weight:700}
+figcaption.fig-cap .fig-no{color:var(--terra-ink);font-weight:700}
 figcaption.fig-cap .fig-name{color:var(--ink);letter-spacing:.06em}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 4px}
 button.btn,a.btn{
-  font:600 12.5px/1 var(--sans);color:var(--ink);
+  font:600 14px/1 var(--sans);color:var(--ink);
   background:var(--card);border:1px solid var(--edge);border-radius:7px;
-  padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+  padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s,color .15s,transform .12s ease;
 }
-button.btn:hover,a.btn:hover{border-color:var(--terra);color:var(--terra)}
+button.btn:hover:not(:disabled),a.btn:hover:not(:disabled){border-color:var(--terra);color:var(--terra)}
+button.btn:active,a.btn:active{transform:scale(.97)}
 a.btn{display:inline-flex;align-items:center;justify-content:center;text-decoration:none}
 button.btn:disabled{opacity:.45;cursor:not-allowed}
 button.btn.primary,a.btn.primary{background:var(--terra);border-color:var(--terra);color:var(--on-accent)}
@@ -576,7 +600,10 @@ button.btn.primary:hover,a.btn.primary:hover{background:var(--terra-ink);color:v
 .seg button{
   font:600 12px/1 var(--sans);color:var(--ink-soft);background:transparent;
   border:0;padding:9px 12px;cursor:pointer;border-right:1px solid var(--rule);
+  transition:transform .12s ease;
 }
+.seg button:active{transform:scale(.97)}
+.seg button[disabled]{opacity:.45;cursor:not-allowed}
 .seg button:last-child{border-right:0}
 .seg button.on{background:var(--ink);color:var(--paper)}
 .seg button:hover:not(.on){color:var(--terra)}
@@ -609,8 +636,8 @@ button.btn.primary:hover,a.btn.primary:hover{background:var(--terra-ink);color:v
 .rail-block.pending{visibility:hidden}
 .rail-block.pending .gantt-wrap{min-height:90px}
 .rail-best{border-left:3px solid var(--sage);padding:10px 12px 4px;background:var(--wash-sage);border-radius:8px}
-.rail-best .rail-title .tag{color:var(--sage)}
-.rail-rank{margin-left:auto;font:700 12px/1 var(--mono);color:var(--sage)}
+.rail-best .rail-title .tag{color:var(--sage-ink)}
+.rail-rank{margin-left:auto;font:700 12px/1 var(--mono);color:var(--sage-ink)}
 .rail-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-bottom:8px}
 .rail-title{font:700 13px/1 var(--sans);letter-spacing:.04em}
 .rail-title .tag{font-size:10px;color:var(--ink-soft);font-weight:600;letter-spacing:.1em;text-transform:uppercase;margin-left:6px}
@@ -639,7 +666,7 @@ svg.gantt{display:block;width:100%;min-width:520px;height:auto}
 .costcomp .cc-fill{position:relative;display:flex;flex:none;height:100%;border-radius:3px 0 0 3px}
 .costcomp .cc-seg{display:block;height:100%;flex:none}
 .costcomp .cc-proc{background:var(--steel)}
-.costcomp .cc-setup{background:#ad7644}
+.costcomp .cc-setup{background:var(--setup-token)}
 .costcomp .cc-delay{background:var(--red)}
 .costcomp .cc-total{position:absolute;left:100%;top:50%;transform:translate(5px,-50%);
   font:700 9px/1 var(--mono);color:var(--terra);white-space:nowrap}
@@ -661,7 +688,7 @@ table.data .famcell{font-weight:700;text-align:center}
 .gantt-legend>span{display:inline-flex;align-items:center;gap:6px}
 .swatch{width:14px;height:10px;border-radius:2px;display:inline-block;flex:none}
 .swatch.hatch{border:1px solid var(--edge);background-color:var(--stage);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='6'%3E%3Cpath d='M-1 7 L7 -1 M-1 1 L1 -1 M5 7 L7 5' stroke='%23d9cdb4' stroke-width='1.4'/%3E%3C/svg%3E")}
-.swatch.setup{background:#ad7644;height:6px;border-radius:3px}
+.swatch.setup{background:var(--setup-token);height:6px;border-radius:3px}
 .swatch.proc{background:var(--steel)}
 .swatch.tard{background:rgba(168,67,46,.45)}
 .tick-demo{width:2px;height:12px;background:var(--red);display:inline-block;flex:none}
@@ -674,7 +701,7 @@ table.data .famcell{font-weight:700;text-align:center}
 .fact .lbl{font:600 10.5px/1.3 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:6px}
 /* E3 — keep case-sensitive math tokens literal + italic inside uppercased labels */
 .math{text-transform:none;font-style:italic;letter-spacing:.02em}
-.fact .val{font:600 24px/1.15 var(--serif);color:var(--ink);word-break:break-word}
+.fact .val{font:600 20px/1.15 var(--serif);color:var(--ink);word-break:break-word}
 .fact .val small{font-size:14px;color:var(--ink-soft)}
 .fact.hot .val{color:var(--terra-ink)}
 .slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 6px;padding:13px 16px;background:var(--f4-bg);border:1px solid var(--brass);border-radius:9px}
@@ -697,7 +724,7 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
   font:700 11px/1 var(--sans);color:var(--on-accent);white-space:nowrap;
 }
 /* H5 — when the bar is too thin (pct<8) the label sits outside-right in maple */
-.bar-fill-label.outside{left:calc(100% + 7px);right:auto;color:var(--maple)}
+.bar-fill-label.outside{left:calc(100% + 7px);right:auto;color:var(--brass-ink)}
 .bar-ticks{position:absolute;inset:0;pointer-events:none}
 .bar-ticks i{position:absolute;top:0;bottom:0;width:1px;background:var(--rule)}
 .bar-ticks b{position:absolute;top:2px;font:600 8.5px/1 var(--sans);color:var(--ink-soft);transform:translateX(3px)}
@@ -709,8 +736,9 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
 .mult-chip.last{color:var(--terra-ink);font-weight:800;background:none;border:0}
 
 /* ---------- demo 3 : the IG loop ---------- */
-.ig-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;gap:16px;margin-top:6px}
+.ig-grid{display:grid;grid-template-columns:minmax(0,1fr) var(--rail);gap:16px;margin-top:6px}
 @media (max-width:920px){.ig-grid{grid-template-columns:1fr}}
+@media (min-width:921px){.ig-grid>.ig-right{position:sticky;top:calc(var(--sm,118px) + 12px);align-self:start}}
 .ig-left,.ig-right{min-width:0}
 .ig-rail-label{
   font:600 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);
@@ -817,6 +845,28 @@ canvas.chart{
 .banner.show{display:block}
 .banner b{color:var(--terra)}
 
+/* ---------- anatomy figure: one order's cost on one shared scale ----------
+   setup = the --setup-token brown, proc = a family hue, late = a terra wash
+   with terra-ink text; the due tick is a dashed --ink line that carries its
+   own label. figure.anat is the scrollport, so the bar never pushes the page
+   sideways on a phone. */
+figure.anat{margin:14px 0 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.anat-bar{position:relative;display:flex;height:44px;min-width:420px;
+  background:var(--well);border:1px solid var(--rule);border-radius:8px;overflow:hidden}
+.anat-seg{width:var(--w);flex:none;display:inline-flex;align-items:center;justify-content:center;min-width:0}
+.anat-seg+.anat-seg{border-left:1px solid var(--card)}
+.anat-seg i{font:600 11px/1 var(--sans);font-style:normal;letter-spacing:.04em;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 6px}
+.anat-seg.setup{background:var(--setup-token);color:var(--fam-ink)}
+.anat-seg.proc{background:var(--f2);color:var(--fam-ink)}
+.anat-seg.late{background:var(--wash-terra);color:var(--terra-ink)}
+.anat-due{position:absolute;left:var(--x);top:0;bottom:0;z-index:2;pointer-events:none;
+  border-left:2px dashed var(--ink);
+  font:600 9.5px/1 var(--sans);letter-spacing:.07em;text-transform:uppercase;
+  color:var(--ink-soft);white-space:nowrap;padding:31px 0 0 4px}
+figure.anat figcaption{font:600 11px/1.4 var(--sans);letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ink-soft);margin-top:10px}
+
 
 
 
@@ -829,20 +879,23 @@ footer a{color:var(--terra-ink)}
 @media (max-width:640px){
   h1.brand{font-size:17px}
   h2.section-title{font-size:22px}
-  section.section{padding:34px 0 6px}
+  section.section{padding:34px 0 0}
   figure.demo{padding:14px 12px}
   .legend-row{grid-template-columns:20px 14px minmax(90px,1fr) auto}
   .legend-row .st{display:none}
+  .chart-cap{font-size:12px}
+  .gantt-legend{font-size:12px}
 }
 @media (prefers-reduced-motion:reduce){
-  .bar-fill,.progress-fill,button.btn{transition:none !important}
+  .bar-fill,.progress-fill,button.btn,.seg button,.oa-ctl button{transition:none !important}
 }
 /* --- online order acceptance (future) --- */
 .oa{margin:18px 0 6px;border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--card)}
 .oa-top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 14px;border-bottom:1px solid var(--rule);flex-wrap:wrap}
 .oa-t{font:700 10.5px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
 .oa-ctl{display:flex;gap:7px}
-.oa-ctl button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:700 11.5px/1 var(--sans);border-radius:6px;padding:7px 12px;cursor:pointer}
+.oa-ctl button{border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:700 14px/1 var(--sans);border-radius:6px;padding:7px 12px;cursor:pointer;transition:transform .12s ease}
+.oa-ctl button:active{transform:scale(.97)}
 .oa-ctl button:hover{border-color:var(--terra);color:var(--terra)}
 .oa canvas{display:block;width:100%;height:auto}
 .oa-beat{padding:11px 14px;font-size:13.5px;min-height:42px;border-top:1px solid var(--rule);color:var(--ink)}
@@ -872,7 +925,7 @@ footer a{color:var(--terra-ink)}
 .oa-read .g.p{background:var(--f2-bg);color:var(--steel)}
 .oa-read .g.b{background:var(--card);color:var(--ink-soft);border:1px solid var(--rule)}
 @media(max-width:560px){.oa-sc{grid-template-columns:1fr}}
-.f-ev a{color:var(--terra);text-decoration:none;border-bottom:1px solid rgba(176,86,47,.38)}
+.f-ev a{color:var(--terra-ink);text-decoration:none;border-bottom:1px solid rgba(176,86,47,.38)}
 .f-ev a:hover{border-bottom-color:var(--terra)}
 
 </style>
@@ -881,7 +934,7 @@ footer a{color:var(--terra-ink)}
   .site-head .badge { display: none; }
   /* Movements flow one after another in a single scroll */
   section.movement { padding: 0; scroll-margin-top: var(--sm, 118px); border-top: 1px solid var(--rule); }
-  .movement-head { padding: 44px 0 2px; }
+  .movement-head { padding: var(--gap-section) 0 2px; }
   .movement-head .m-kick { font: 700 11px/1 var(--sans); letter-spacing: .18em; text-transform: uppercase; color: var(--brass-ink); margin-bottom: 10px; }
   .movement-head h2.m-title { font: 600 clamp(26px,2.9vw,38px)/1.12 var(--serif); letter-spacing: .2px; margin-bottom: 10px; }
   .movement-head h2.m-title em { font-style: normal; color: var(--terra); }
@@ -920,7 +973,7 @@ footer a{color:var(--terra-ink)}
   /* The reading switch: one race, three evaluation counts. A rung the race did
      not reach is disabled rather than hidden — the question stays on screen. */
   .run-rungs { margin: 2px 0 0; }
-  .run-rungs .seg button[disabled] { opacity: .42; cursor: default; }
+  .run-rungs .seg button[disabled] { opacity: .45; cursor: not-allowed; }
   .run-rungs .seg button[disabled]:hover { color: inherit; }
   #runRungCap { margin-bottom: 6px; }
 
@@ -997,12 +1050,12 @@ footer a{color:var(--terra-ink)}
      read as a form disguised as prose and made the four worlds look like four
      synonyms. They are .lab-field selects now, in the same cockpit #demo-race
      uses, and the world is chosen by picking a shop rather than a noun.
-     272px cannot hold a legible two-up render, so this rail alone is 300px. */
-  #m-runlab { grid-template-columns: 300px minmax(0, 1fr); }
+     The rail is the shared --rail token: 288px holds a legible two-up render. */
+  #m-runlab { grid-template-columns: var(--rail) minmax(0, 1fr); }
   @media (max-width: 900px) { #m-runlab { grid-template-columns: 1fr; } }
   /* Run wakes up only when a change is too expensive to run by itself. */
   #runGo.idle { background: var(--card); color: var(--ink-soft); border-color: var(--rule-strong); }
-  #runGo[disabled] { opacity: .5; cursor: default; }
+  #runGo[disabled] { opacity: .45; cursor: not-allowed; }
   /* the field label is a real <label for>, so its accessible name is the same
      words the reader sees — in both locales — with no aria-label to drift */
   .lab-field > label { display: block; }
@@ -1044,6 +1097,7 @@ footer a{color:var(--terra-ink)}
      across the foot of every render, so the image is never seen without its
      measurement, and the tile survives the artwork failing to load. */
   .run-worlds { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 360px) { .run-worlds { grid-template-columns: minmax(0, 1fr); } }
   .run-worlds li { display: block; padding: 0; overflow: hidden; border: 1px solid var(--rule); border-radius: 9px; background: var(--paper); }
   .run-worlds li:hover { background: var(--paper); border-color: var(--terra); }
   .run-worlds li.leader { background: var(--hi-bg); border-color: var(--terra); box-shadow: inset 0 0 0 2px var(--terra); }
@@ -1097,7 +1151,7 @@ footer a{color:var(--terra-ink)}
     .run-board.noref .run-bar::before { background: var(--rule-strong); }
   }
   /* Hero intro block */
-  .ig-hero { padding: 44px 0 8px; }
+  .ig-hero { padding: 88px 0 8px; }
   .ig-hero .kick { font: 600 11px/1 var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--terra); margin-bottom: 12px; }
   .ig-hero h2 { font: 600 clamp(30px, 3.4vw, 46px)/1.08 var(--serif); letter-spacing: .2px; max-width: 20ch; margin-bottom: 16px; }
   .ig-hero h2 em { font-style: normal; color: var(--terra); }
@@ -1114,7 +1168,7 @@ footer a{color:var(--terra-ink)}
   @keyframes heroFadeUp { to { opacity: 1; transform: none; } }
   @keyframes cueNudge { 0%,100% { transform: translateY(0); } 50% { transform: translateY(4px); } }
   /* Collapsible "exact numbers" — keeps the opening intuitive, not technical */
-  .data-fold { margin: 4px 0 16px; }
+  .data-fold { margin: 4px 0 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .data-fold > summary { cursor: pointer; font: 600 12px/1 var(--sans); letter-spacing: .04em; color: var(--terra-ink); padding: 7px 0; list-style: none; display: inline-block; }
   .data-fold > summary::-webkit-details-marker { display: none; }
   .data-fold > summary::before { content: "▸\00a0"; color: var(--ink-soft); }
@@ -1161,9 +1215,10 @@ footer a{color:var(--terra-ink)}
   <nav class="anchor-nav" aria-label="Sections">
     <ul id="navList">
       <li><a href="#m-story" class="active">Story</a></li>
-      <li><a href="#m-compare">Compare</a></li>
+      <li><a href="#m-arena">Compare</a></li>
       <li><a href="#m-run">Run</a></li>
       <li><a href="#m-future">Future</a></li>
+      <li><a href="#m-interfaces">Get it</a></li>
     </ul>
   </nav>
   <div class="read-progress" id="readProgress" aria-hidden="true"></div>
@@ -1174,6 +1229,7 @@ footer a{color:var(--terra-ink)}
   <p class="kick">Story · why order matters</p>
   <h2>The order of the jobs <em>determines the total cost.</em></h2>
   <p class="bridge">An optimal order exists, but there are too many orders to test. Iterated Greedy builds one order and improves it by iteration.</p>
+  <p class="bridge">For anyone who has ever had to decide which job runs next.</p>
 
   <p class="intro">A machine runs one job at a time. Changing from one product family to another costs a setup, every order has a promised date, and finishing late costs money. The order the jobs run in decides the bill. This page builds that problem from five jobs, shows why testing every option stops working almost immediately, and then runs the algorithm that searches instead.</p>
 
@@ -1192,16 +1248,17 @@ footer a{color:var(--terra-ink)}
      2 · Live demo 1 — Order changes time. Time changes cost.
      ============================================================ -->
 <section class="section" id="demo-order">
-  <p class="kicker"><span class="fig">Order and cost</span></p>
+  <p class="kicker"><span class="fig">The cost of an order</span></p>
   <h2 class="section-title">The same five jobs in two orders.</h2>
   <p class="lede">The cost of an order is the sum of the setups between families and the weighted
-  tardiness. Waiting for a release date delays every later job.</p>
+  tardiness. Waiting for a release date delays every later job. Any order can also be refused
+  entirely, paying a fixed rejection cost instead of running it.</p>
 
   <details class="data-fold">
     <summary>The exact numbers behind these jobs</summary>
     <table class="data" aria-label="Demo dataset">
       <caption>Fixed dataset — one machine, setup 3 time / 6 cost between different families (0 within a family)</caption>
-      <thead><tr><th>Job</th><th>Family</th><th>Release r</th><th>Processing p</th><th>Due d</th><th>Weight w</th></tr></thead>
+      <thead><tr><th>Job</th><th>Family</th><th>Release r</th><th>Processing p</th><th>Due d</th><th>Weight w</th><th>Rejection</th></tr></thead>
       <tbody id="d1data"></tbody>
     </table>
   </details>
@@ -1218,6 +1275,16 @@ footer a{color:var(--terra-ink)}
       <span><i class="swatch tard"></i> weighted tardiness</span>
       <span><i class="tick-demo"></i> due date</span>
     </p>
+
+    <figure class="anat" aria-label="Anatomy of one order's cost: a setup, the processing time, and a late tail past the due date that costs w per day">
+      <div class="anat-bar">
+        <span class="anat-seg setup" style="--w:12%"><i>setup</i></span>
+        <span class="anat-seg proc" style="--w:58%"><i>processing p</i></span>
+        <span class="anat-due" style="--x:70%">due</span>
+        <span class="anat-seg late" style="--w:30%"><i>w × days late</i></span>
+      </div>
+      <figcaption>One order on one machine — a setup between families, the processing time, and every day past the due date costs w per day.</figcaption>
+    </figure>
 
     <div class="rail-block" id="railBlockA">
       <div class="rail-head">
@@ -1249,7 +1316,7 @@ footer a{color:var(--terra-ink)}
 
     <div class="rail-block rail-best pending" id="railBlockC">
       <div class="rail-head">
-        <span class="rail-title">Best order <span class="tag">found by checking all 120</span></span>
+        <span class="rail-title">Best order <span class="tag">found by checking all 120 complete orders — every job scheduled</span></span>
         <span class="rail-rank" id="railCrank"></span>
       </div>
       <div class="chips-row" id="railC" aria-label="Best order"></div>
@@ -1275,7 +1342,7 @@ footer a{color:var(--terra-ink)}
 <section class="section" id="demo-factorial">
   <p class="kicker"><span class="fig">Enumeration</span></p>
   <h2 class="section-title">The time needed to test every option.</h2>
-  <p class="carry">Five jobs have 120 possible orders, and the figure above priced every one of them. Twelve jobs have 479 million, which a billion-per-second machine still finishes in half a second. Double that to twenty-four and the answer is not one second more: 6.2×10²³ orders, about 20 million years.</p>
+  <p class="carry">Five jobs have 120 possible orders, and the figure above priced every one of them. From there the count multiplies with every added job — this figure puts a clock against it.</p>
   <p class="lede">Enumerating a 28-job instance at 10⁹ orders per second takes longer than the age of the universe.</p>
 
   <figure class="demo" id="d2figure">
@@ -1289,7 +1356,7 @@ footer a{color:var(--terra-ink)}
     </div>
     <div class="fact-grid">
       <div class="fact"><div class="lbl">Complete orders — <span class="math">n!</span></div><div class="val" id="fOrders">–</div></div>
-      <div class="fact"><div class="lbl">Candidate plans incl. rejection — <span class="math">Σ n!/(n−k)!</span></div><div class="val" id="fPlans">–</div></div>
+      <div class="fact"><div class="lbl">Candidate plans incl. rejection — some orders refused, not just reordered — <span class="math">Σ n!/(n−k)!</span></div><div class="val" id="fPlans">–</div></div>
       <div class="fact hot"><div class="lbl">Time to enumerate all orders at 10⁹ orders/s</div><div class="val" id="fTime">–</div></div>
     </div>
     <div class="bar-zone" aria-hidden="true">
@@ -1321,8 +1388,9 @@ footer a{color:var(--terra-ink)}
 <section class="section" id="demo-ig">
   <p class="kicker"><span class="fig">The method</span></p>
   <h2 class="section-title">The destroy–rebuild loop.</h2>
-  <p class="lede">An Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance
-  (<b>mulberry32, seed 0xce29767d</b>). <b>Greedy</b>, because every move takes the cheapest insertion;
+  <p class="carry">Since testing every order is impossible, we search instead — and here is the searcher.</p>
+  <p class="lede">An Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance.
+  <b>Greedy</b>, because every move takes the cheapest insertion;
   <b>iterated</b>, because the destroy–rebuild cycle repeats. Every insertion position is re-evaluated
   against the complete objective. The five steps:
   <b>construct</b> by best insertion, <b>destroy</b> three jobs, <b>measure every insertion</b> on the trial
@@ -1330,7 +1398,8 @@ footer a{color:var(--terra-ink)}
 
   <figure class="demo" id="d3figure">
     <figcaption class="fig-cap">
-      <span><span class="fig-no">Fig. 03</span> <span class="fig-name">One central clock drives every beat — Play / Pause / Step / Speed all scale the same timeline</span></span>
+      <span><span class="fig-no">Fig. 03</span> <span class="fig-name">Destroy three jobs, rebuild, keep what is cheaper</span></span>
+      <span>Play / Pause / Step / Speed share one clock</span>
     </figcaption>
 
     <div class="controls" role="group" aria-label="Playback controls">
@@ -1383,6 +1452,7 @@ footer a{color:var(--terra-ink)}
         <div class="log" id="igLog" aria-label="Event log"></div>
       </div>
     </div>
+    <p class="chart-cap">Seeded instance — 12 jobs · 4 families · mulberry32, seed 0xce29767d.</p>
     <p class="status-line" id="d3status" aria-live="polite"></p>
   </figure>
 </section>
@@ -1401,7 +1471,7 @@ footer a{color:var(--terra-ink)}
   <h2 class="section-title">The eight methods of the 2015 study.</h2>
   <p class="lede">Six published C++ heuristics, one exact reference (MILP) with a one-hour limit and the
   Iterated Greedy written in Excel VBA. Selecting a method shows a schematic animation of how it moves and
-  its score across the 44 instances of the standard <b>MaScLib</b> benchmark. Nothing is solved in the
+  its score across the <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener"><b>MaScLib</b> benchmark set</a> (44 published test problems from the 2015 study). Nothing is solved in the
   diagram. Six of the eight run in the scenario configured below.</p>
 
   <div class="arena-grid">
@@ -1450,9 +1520,6 @@ footer a{color:var(--terra-ink)}
             <option value="setups">High setup costs</option>
             <option value="tight">Tight due dates</option>
             <option value="reject">Low rejection cost</option>
-            <option value="print3d">3D print farm</option>
-            <option value="coffee">Coffee roastery</option>
-            <option value="brewery">Craft brewery</option>
           </select>
         </label>
         <label class="lab-field">Number of jobs
@@ -1475,6 +1542,7 @@ footer a{color:var(--terra-ink)}
           <div class="lab-budget-bar" aria-hidden="true"><span id="budgetFill"></span></div>
           <p class="lab-budget-label" id="budgetLabel">evaluation budget</p>
         </div>
+        <p class="lab-hint">These four scenarios are synthetic settings — the real shops are one section down.</p>
       </div>
       <div class="lab-card">
         <h3>Current results</h3>
@@ -1525,7 +1593,7 @@ footer a{color:var(--terra-ink)}
   five remaining gaps are within 0.34%; the fifth is 2.44%.</p>
 
   <nav class="m-links" aria-label="Evidence" style="margin-top:14px">
-    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Full results &amp; validation</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation (RESULTS.md)</a>
     <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 study (PDF)</a>
   </nav>
 </section>
@@ -1770,11 +1838,10 @@ footer a{color:var(--terra-ink)}
   </div>
 
   <nav class="m-links" aria-label="The full Studio" style="margin-top:16px">
-    <a href="studio-app.html" id="runLinkStudio">Open the full Studio</a>
-    <a href="studio-app.html" id="runLinkProblem">Problem data &amp; distributions</a>
-    <a href="studio-app.html" id="runLinkSchedule">Full schedule table</a>
-    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Benchmark results (RESULTS.md)</a>
+    <a href="studio-app.html" id="runLinkStudio">Continue this exact run in the Studio →</a>
   </nav>
+  <p class="lab-hint" style="margin-top:8px">The world, the instance file, the seed, the budget and the language carry over — the Studio re-runs this exact run in seconds.</p>
+  <p class="lab-hint">For the published numbers behind this page, see the <a href="#demo-benchmark">recorded benchmark section</a> above.</p>
 </section>
 
 <section class="movement" id="m-future">
@@ -1793,7 +1860,7 @@ footer a{color:var(--terra-ink)}
         <span class="f-fold-find">One canonical build and three measured experiments, two of which report against themselves: 16× GPU replicas cost 22% more wall clock at n=30, and the learned operators lose 1.3 pp held out.</span>
       </summary>
       <div class="f-fold-body">
-    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models. <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md#the-llm-heuristic-factory" target="_blank" rel="noopener">See the campaign</a></p></div></div>
+    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models. <a href="#demo-benchmark">Recorded in the benchmark section above.</a></p></div></div>
       </div>
     </details>
 
@@ -1841,7 +1908,16 @@ footer a{color:var(--terra-ink)}
     <p class="f-lede" id="oa-caveat" style="font-size:13.5px">Few papers can mean the problem is open, or that nobody wants it solved. What the search shows is that the slot is empty. It does not show that anyone is asking for it, and that is the risk in this direction.</p>
 
     <h3 class="f-head">Next milestone</h3>
-    <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P0</span><span class="f-it-title">External validation</span><span class="f-next">Next milestone</span><span class="f-sum">Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.</span></summary><dl class="f-fields"><dt>Question</dt><dd>How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?</dd><dt>Change</dt><dd>No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.</dd><dt>Comparator</dt><dd>Published baselines and exact solutions for small cases.</dd><dt>Success criterion</dt><dd>Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.</dd><dt>Evidence</dt><dd>Archived configurations, raw result tables, plots and exact small-case checks.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P1</span><span class="f-it-title">Reactive operators</span><span class="f-sum">Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can operator choice adapt without losing the exploration supplied by random removal?</dd><dt>Change</dt><dd>Add a stochastic operator portfolio with a minimum exploration probability.</dd><dt>Comparator</dt><dd>Random removal, measured adaptive destruction and tuned ALNS/tabu variants.</dd><dt>Success criterion</dt><dd>Better time-to-target and tails without degradation on held-out instances.</dd><dt>Evidence</dt><dd>Operator traces, ablations, paired seeds and distribution-shift tests.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P2</span><span class="f-it-title">Exact repair</span><span class="f-sum">Let IG define a bounded neighbourhood and solve only that repair exactly.</span></summary><dl class="f-fields"><dt>Question</dt><dd>When does exact local repair repay its solver overhead?</dd><dt>Change</dt><dd>Pass a bounded removed-job neighbourhood to an exact repair model.</dd><dt>Comparator</dt><dd>Current lowest-cost reinsertion under the same outer search budget.</dd><dt>Success criterion</dt><dd>Higher improvement per millisecond and lower time-to-target.</dd><dt>Evidence</dt><dd>Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P3</span><span class="f-it-title">Multiple machines</span><span class="f-sum">Add assignment, eligibility and machine-dependent setup in a separate mathematical model.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Which gains survive when jobs also choose a machine?</dd><dt>Change</dt><dd>Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.</dd><dt>Comparator</dt><dd>Open multi-machine OAS data and exact small solutions.</dd><dt>Success criterion</dt><dd>Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.</dd><dt>Evidence</dt><dd>Eligibility tests, model validation and published multi-machine instances.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P4</span><span class="f-it-title">Parallel search</span><span class="f-sum">Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Does parallel breadth improve wall-clock time rather than only evaluation count?</dd><dt>Change</dt><dd>Add deterministic CPU multi-start first, then evaluate GPU replicas.</dd><dt>Comparator</dt><dd>One optimized Rust core with serial-equivalent per-seed results.</dd><dt>Success criterion</dt><dd>Lower time-to-target with reported wall time, energy and deterministic ordering.</dd><dt>Evidence</dt><dd>Replayable seeds, hardware disclosure, anytime curves and energy measurements.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P5</span><span class="f-it-title">Learned discovery</span><span class="f-sum">Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can learned proposals generalize beyond the instances that suggested them?</dd><dt>Change</dt><dd>Sandbox proposed operators while keeping the exact evaluator authoritative.</dd><dt>Comparator</dt><dd>Simple hand-designed baselines under nested train/validation/test splits.</dd><dt>Success criterion</dt><dd>Registered gains on fresh seeds and held-out distributions with a stated failure criterion.</dd><dt>Evidence</dt><dd>Sandboxed code, nested splits, ablations and distribution-shift tests.</dd></dl></details></div>
+    <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P0</span><span class="f-it-title">External validation</span><span class="f-next">Next milestone</span><span class="f-sum">Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.</span></summary><dl class="f-fields"><dt>Question</dt><dd>How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?</dd><dt>Change</dt><dd>No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.</dd><dt>Comparator</dt><dd>Published baselines and exact solutions for small cases.</dd><dt>Success criterion</dt><dd>Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.</dd><dt>Evidence</dt><dd>Archived configurations, raw result tables, plots and exact small-case checks.</dd></dl></details></div>
+    <details class="f-fold">
+      <summary>
+        <h3 class="f-head">For researchers</h3>
+        <span class="f-fold-find">Milestones P1–P5 — reactive operators, exact repair, multiple machines, parallel search and learned discovery, each laid out with question, change, comparator, success criterion and evidence.</span>
+      </summary>
+      <div class="f-fold-body">
+    <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P1</span><span class="f-it-title">Reactive operators</span><span class="f-sum">Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can operator choice adapt without losing the exploration supplied by random removal?</dd><dt>Change</dt><dd>Add a stochastic operator portfolio with a minimum exploration probability.</dd><dt>Comparator</dt><dd>Random removal, measured adaptive destruction and tuned ALNS/tabu variants.</dd><dt>Success criterion</dt><dd>Better time-to-target and tails without degradation on held-out instances.</dd><dt>Evidence</dt><dd>Operator traces, ablations, paired seeds and distribution-shift tests.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P2</span><span class="f-it-title">Exact repair</span><span class="f-sum">Let IG define a bounded neighbourhood and solve only that repair exactly.</span></summary><dl class="f-fields"><dt>Question</dt><dd>When does exact local repair repay its solver overhead?</dd><dt>Change</dt><dd>Pass a bounded removed-job neighbourhood to an exact repair model.</dd><dt>Comparator</dt><dd>Current lowest-cost reinsertion under the same outer search budget.</dd><dt>Success criterion</dt><dd>Higher improvement per millisecond and lower time-to-target.</dd><dt>Evidence</dt><dd>Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P3</span><span class="f-it-title">Multiple machines</span><span class="f-sum">Add assignment, eligibility and machine-dependent setup in a separate mathematical model.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Which gains survive when jobs also choose a machine?</dd><dt>Change</dt><dd>Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.</dd><dt>Comparator</dt><dd>Open multi-machine OAS data and exact small solutions.</dd><dt>Success criterion</dt><dd>Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.</dd><dt>Evidence</dt><dd>Eligibility tests, model validation and published multi-machine instances.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P4</span><span class="f-it-title">Parallel search</span><span class="f-sum">Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Does parallel breadth improve wall-clock time rather than only evaluation count?</dd><dt>Change</dt><dd>Add deterministic CPU multi-start first, then evaluate GPU replicas.</dd><dt>Comparator</dt><dd>One optimized Rust core with serial-equivalent per-seed results.</dd><dt>Success criterion</dt><dd>Lower time-to-target with reported wall time, energy and deterministic ordering.</dd><dt>Evidence</dt><dd>Replayable seeds, hardware disclosure, anytime curves and energy measurements.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P5</span><span class="f-it-title">Learned discovery</span><span class="f-sum">Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can learned proposals generalize beyond the instances that suggested them?</dd><dt>Change</dt><dd>Sandbox proposed operators while keeping the exact evaluator authoritative.</dd><dt>Comparator</dt><dd>Simple hand-designed baselines under nested train/validation/test splits.</dd><dt>Success criterion</dt><dd>Registered gains on fresh seeds and held-out distributions with a stated failure criterion.</dd><dt>Evidence</dt><dd>Sandboxed code, nested splits, ablations and distribution-shift tests.</dd></dl></details></div>
+      </div>
+    </details>
 
     <!-- TWO CALLS TO ACTION. The finding they exist to support is already in the
          section above them, so what is folded here is the invitation, not the
@@ -1849,31 +1925,27 @@ footer a{color:var(--terra-ink)}
     <details class="f-fold">
       <summary>
         <h3 class="f-head">Two experiments you can run</h3>
-        <span class="f-fold-find">Two Colab notebooks that re-check their pricing against the CPU engine before reporting a timing: GPU width is nearly free until the instance grows, and the operator gain turns into a loss once the split is honest.</span>
+        <span class="f-fold-find">One Colab notebook with two experiments that re-check their pricing against the CPU engine before reporting a timing: GPU width is nearly free until the instance grows, and the operator gain turns into a loss once the split is honest.</span>
       </summary>
       <div class="f-fold-body">
     <p class="f-lede">The GPU fleet and the learned operators are in a notebook rather than in a claim. It runs on whatever hardware it finds, checks its pricing against the CPU engine before reporting a single timing, and recomputes the numbers every time.</p>
-    <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a></div></div><div class="f-card"><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
+    <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
       </div>
     </details>
+  </div>
+</section>
 
-    <!-- THE BACK MATTER. Six cards are a distribution menu: where the engine can
-         be run, not what the section argues. Naming all six in the summary means
-         a reader looking for one surface finds it without opening anything. -->
-    <details class="f-fold">
-      <summary>
-        <h3 class="f-head">Interfaces</h3>
-        <span class="f-fold-find">Six ways to run the same engine — the browser Studio, a Google Sheets workbook, a Colab notebook, the Python reference, the 2015 archive and the results ledger.</span>
-      </summary>
-      <div class="f-fold-body">
+<section class="movement" id="m-interfaces">
+  <div class="movement-head">
+    <p class="m-kick">Interfaces</p>
+    <h2 class="m-title">Six ways to run <em>the same engine.</em></h2>
+  </div>
+  <div class="m-body">
     <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code.</p>
-    <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="studio-app.html" target=_blank rel=noopener>Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Read results</a></div></div></div>
-      </div>
-    </details>
-
+    <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="studio-app.html" target=_blank rel=noopener>Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Results &amp; validation (RESULTS.md)</a></div></div></div>
     <nav class="m-links" aria-label="Resources" style="margin-top:22px">
     <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
-    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation</a>
+    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation (RESULTS.md)</a>
     <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 thesis (PDF)</a>
     <a href="https://github.com/alexmarinho/IG/blob/master/CITATION.cff" target="_blank" rel="noopener">How to cite</a>
   </nav></div>
@@ -2048,11 +2120,11 @@ function permutations(arr){
    objective code drives the Gantt. Setup 3 time / 6 cost across families. ===== */
 var DEMO1 = (function(){
   var jobs = [
-    { id:0, fam:0, release:0, p:6, due:16, w:2, rej:0 },
-    { id:1, fam:1, release:2, p:4, due:12, w:3, rej:0 },
-    { id:2, fam:0, release:0, p:5, due:22, w:1, rej:0 },
-    { id:3, fam:2, release:4, p:7, due:26, w:2, rej:0 },
-    { id:4, fam:1, release:1, p:3, due:14, w:4, rej:0 }
+    { id:0, fam:0, release:0, p:6, due:16, w:2, rej:40 },
+    { id:1, fam:1, release:2, p:4, due:12, w:3, rej:58 },
+    { id:2, fam:0, release:0, p:5, due:22, w:1, rej:54 },
+    { id:3, fam:2, release:4, p:7, due:26, w:2, rej:38 },
+    { id:4, fam:1, release:1, p:3, due:14, w:4, rej:53 }
   ];
   return { n:5, nf:3, jobs:jobs, sT:[[0,3,3],[3,0,3],[3,3,0]], sC:[[0,6,6],[6,0,6],[6,6,0]] };
 })();
@@ -2392,7 +2464,25 @@ function chipEl(job, opts){
   c.dataset.job = job.id;
   return c;
 }
-var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
+/* Family colours are read live from the theme tokens (--fam-a..--fam-d are
+   scoped to #m-arena in the stylesheet, so the read anchors there like the
+   arena's own cssVar helper does). The hardcoded ramp stays only as a fallback
+   for the instant before the stylesheet applies. */
+var FAMILY_FALLBACK = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
+var FAMILY_VARS = ['--fam-a', '--fam-b', '--fam-c', '--fam-d'];
+function FAMILY_CSS(i){
+  var anchor = document.getElementById('m-arena') || document.documentElement;
+  var v = window.__IGTHEME ? window.__IGTHEME.read(FAMILY_VARS[i], anchor)
+                           : getComputedStyle(anchor).getPropertyValue(FAMILY_VARS[i]).trim();
+  return v || FAMILY_FALLBACK[i];
+}
+/* one-shot theme-token read for figure code outside the arena/lab scripts;
+   the __IGTHEME cache is busted on every themechange before re-render */
+function cssRead(name, fallback){
+  var v = window.__IGTHEME ? window.__IGTHEME.read(name)
+                           : getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+}
 
 
 /* ============================================================
@@ -2415,9 +2505,10 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
     var tr = el('tr');
     tr.appendChild(el('td', null, 'J' + (j.id + 1)));
     var f = el('td', 'famcell', 'F' + (j.fam + 1));
-    f.style.color = FAMILY_CSS[j.fam];
+    f.setAttribute('data-fam', j.fam);
+    f.style.color = FAMILY_CSS(j.fam);
     tr.appendChild(f);
-    [j.release, j.p, j.due, j.w].forEach(function(v){ tr.appendChild(el('td', null, String(v))); });
+    [j.release, j.p, j.due, j.w, j.rej].forEach(function(v){ tr.appendChild(el('td', null, String(v))); });
     tbody.appendChild(tr);
   });
 
@@ -2468,7 +2559,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
         g.appendChild(ri2); animated.push({ node:ri2, w:t.idle * U });
       }
       /* processing segment (family colour) */
-      var rp = svgEl('rect', { x:PADL + t.start * U, y:BARY, width:job.p * U, height:BARH, fill:FAMILY_CSS[job.fam], rx:2 });
+      var rp = svgEl('rect', { x:PADL + t.start * U, y:BARY, width:job.p * U, height:BARH, fill:FAMILY_CSS(job.fam), rx:2 });
       g.appendChild(rp); animated.push({ node:rp, w:job.p * U });
       /* tardiness overlay ∝ late time — CLIPPED to this job's own bar
          [max(due,start) → end] so it never washes over a neighbour's bar.
@@ -2512,7 +2603,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
     for(var tt = 0; tt <= horizon; tt += 5){
       var tx = PADL + tt * U;
       g.appendChild(svgEl('line', { x1:tx, y1:axisY, x2:tx, y2:axisY + 3, stroke:'#d8cdb6', 'stroke-width':1 }));
-      var albl = svgEl('text', { x:tx, y:axisY + 11, 'text-anchor':'middle', 'font-size':7.5, fill:'#9a8f7a' });
+      var albl = svgEl('text', { x:tx, y:axisY + 11, 'text-anchor':'middle', 'font-size':7.5, fill:cssRead('--muted', '#9a8f7a') });
       albl.textContent = String(tt);
       g.appendChild(albl);
     }
@@ -2583,7 +2674,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
   function L(en, pt){ return window.__lang === 'pt' ? pt : en; } /* keyed bilingual picker */
 
   /* --- exact sweep over all 120 permutations, in animation slices --- */
-  var sweeping = false;
+  var sweeping = false, lastBest = null;
   function runSweep(instant){
     if(sweeping) return;
     sweeping = true;
@@ -2610,6 +2701,7 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
       var rA = 1 + totals.filter(function(c){ return c < cA; }).length;
       var rB = 1 + totals.filter(function(c){ return c < cB; }).length;
       if(bestPerm){
+        lastBest = bestPerm;
         $('#railBlockC').classList.remove('pending');
         updateRail(bestPerm, $('#ganttC'), 'C', true);
         $('#railCrank').textContent = 'Σ ' + best + ' · rank 1 / 120';
@@ -2636,11 +2728,34 @@ var FAMILY_CSS = ['#b0562f', '#7d94b0', '#7a8b6f', '#c9a148'];
   if(REDUCED){ d1Played = true; runSweep(true); }
   else onFirstView($('#d1figure'), d1Reveal);
   addEventListener('langchange', function(){ refresh(false); }); /* re-render the bilingual 'ends at t=' marker */
+  /* family fills come from theme tokens: repaint every painted rail and the
+     dataset table's family cells after a theme flip (cache already busted) */
+  addEventListener('themechange', function(){
+    refresh(false);
+    if(lastBest) updateRail(lastBest, $('#ganttC'), 'C', false);
+    $all('#d1data .famcell').forEach(function(c){ c.style.color = FAMILY_CSS(+c.getAttribute('data-fam')); });
+  });
   /* H5 — right-edge fade on small screens, removed once the user scrolls a gantt */
   $all('.gantt-wrap').forEach(function(w){
     w.classList.add('can-fade');
     w.addEventListener('scroll', function off(){ w.classList.remove('can-fade'); w.removeEventListener('scroll', off); }, { passive:true });
   });
+  /* Fig. 01a — the three rails share one time scale, so they share one scroll
+     position. The lock + rAF reset keeps programmatic scrollLeft writes from
+     re-entering the handler (scroll events fire asynchronously). */
+  (function syncRails(){
+    var wraps = $all('#railBlockA .gantt-wrap, #railBlockB .gantt-wrap, #railBlockC .gantt-wrap');
+    if(wraps.length < 2) return;
+    var lock = false;
+    wraps.forEach(function(w){
+      w.addEventListener('scroll', function(){
+        if(lock) return;
+        lock = true;
+        wraps.forEach(function(o){ if(o !== w && o.scrollLeft !== w.scrollLeft) o.scrollLeft = w.scrollLeft; });
+        requestAnimationFrame(function(){ lock = false; });
+      }, { passive:true });
+    });
+  })();
 })();
 
 /* ============================================================
@@ -2987,7 +3102,7 @@ function onWinResize(fn){
     ctx.clearRect(0, 0, W, H);
     var L = 36, R = 10, T = 10, B = 20, iw = W - L - R, ih = H - T - B;
     var all = incumbent.map(function(p){ return p.cost; }).concat(candidates.map(function(p){ return p.cost; }));
-    ctx.font = '9px ui-monospace,Menlo,monospace';
+    ctx.font = '11px ui-monospace,Menlo,monospace';
     if(!all.length){
       /* D2 — idle placeholder (canvas text, so translated inline) */
       ctx.fillStyle = '#a2967f';
@@ -3000,7 +3115,7 @@ function onWinResize(fn){
     var maxIter = Math.max(8, iter);
     function X(i){ return L + iw * i / maxIter; }
     function Y(c){ return T + ih * (1 - (c - lo) / (hi - lo)); }
-    ctx.strokeStyle = '#ece2cf'; ctx.fillStyle = '#9a8f7a'; ctx.lineWidth = 1;
+    ctx.strokeStyle = cssRead('--grid', '#ece2cf'); ctx.fillStyle = cssRead('--muted', '#9a8f7a'); ctx.lineWidth = 1;
     for(var g = 0; g <= 3; g++){
       var vv = lo + (hi - lo) * g / 3, yy = Y(vv);
       ctx.beginPath(); ctx.moveTo(L, yy); ctx.lineTo(W - R, yy); ctx.stroke();
@@ -3009,14 +3124,14 @@ function onWinResize(fn){
     ctx.fillText('it 0', X(0) - 6, H - 6);
     ctx.fillText('it ' + maxIter, X(maxIter) - 14, H - 6);
     if(incumbent.length > 1){
-      ctx.strokeStyle = '#2a2620'; ctx.lineWidth = 1.5; ctx.beginPath();
+      ctx.strokeStyle = cssRead('--ink', '#2a2620'); ctx.lineWidth = 1.5; ctx.beginPath();
       incumbent.forEach(function(p, i){
         if(i) ctx.lineTo(X(p.iter), Y(p.cost)); else ctx.moveTo(X(p.iter), Y(p.cost));
       });
       ctx.stroke();
     }
     incumbent.forEach(function(p){
-      ctx.fillStyle = '#2a2620';
+      ctx.fillStyle = cssRead('--ink', '#2a2620');
       ctx.fillRect(X(p.iter) - 2, Y(p.cost) - 2, 4, 4);
     });
     candidates.forEach(function(p){
@@ -3393,6 +3508,7 @@ function onWinResize(fn){
     startIO.observe(fig);
   }
   onWinResize(function(){ drawChart(); });
+  addEventListener('themechange', function(){ drawChart(); }); /* canvas colours are theme tokens now */
 })();
 </script>
 
@@ -3420,6 +3536,22 @@ function onWinResize(fn){
   addEventListener('resize', setOffset, { passive:true });
   addEventListener('langchange', setOffset);
 
+  /* compact header once the reader scrolls past the intro: the class is a CSS
+     variant owned by the stylesheet; JS only toggles it, then recomputes --sm
+     because the sticky offset tracks the (now smaller) header height */
+  var compactTick = false;
+  function paintCompact(){
+    compactTick = false;
+    if(!head) return;
+    var want = (window.scrollY || root.scrollTop) > 200;
+    if(head.classList.contains('compact') !== want){
+      head.classList.toggle('compact', want);
+      setOffset();
+    }
+  }
+  addEventListener('scroll', function(){ if(!compactTick){ compactTick = true; requestAnimationFrame(paintCompact); } }, { passive:true });
+  paintCompact();
+
   /* B3 — 2px terracotta reading-progress hairline (rAF-throttled passive scroll) */
   var prog = $('#readProgress'), ticking = false;
   function paintProg(){
@@ -3439,16 +3571,17 @@ function onWinResize(fn){
   var NAV_FOR = {
     'm-story':'m-story','demo-order':'m-story','demo-factorial':'m-story','demo-ig':'m-story',
     'm-compare':'m-compare','demo-race':'m-compare','demo-benchmark':'m-compare',
-    'm-arena':'m-compare','m-run':'m-run','m-future':'m-future'
+    'm-arena':'m-compare','m-run':'m-run','m-future':'m-future','m-interfaces':'m-interfaces'
   };
   var map = {}, visible = {};
   links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
   var sections = $all('main > section');
   function refresh(){
-    /* activate the first visible section in document order */
+    /* activate the first visible section in document order; a section with no
+       mapping (or one not yet hoisted into the DOM) is skipped, not fatal */
     var activeId = null;
     for(var i = 0; i < sections.length; i++){
-      if(visible[sections[i].id]){ activeId = NAV_FOR[sections[i].id]; break; }
+      if(visible[sections[i].id] && NAV_FOR[sections[i].id]){ activeId = NAV_FOR[sections[i].id]; break; }
     }
     links.forEach(function(a){ a.classList.remove('active'); });
     if(activeId && map[activeId]) map[activeId].classList.add('active');
@@ -3496,7 +3629,7 @@ function onWinResize(fn){
     "#oa-why": 'A pol\u00edtica gulosa pega todo pedido que couber e depois n\u00e3o tem espa\u00e7o para os lucrativos. A reotimizadora \u00e0s vezes <b>recusa um pedido barato para proteger capacidade</b>, e ent\u00e3o captura um valioso que chega em seguida. Esse trade \u2014 feito sob incerteza, uma vez, sem volta \u2014 \u00e9 onde um avaliador exato r\u00e1pido se paga: ele replaneja o cronograma comprometido inteiro a cada chegada, enquanto a janela de decis\u00e3o ainda est\u00e1 aberta.',
 
     "#m-arena .lede":
-      'Seis heurísticas em C++ publicadas, uma referência exata (MILP) com limite de uma hora e o Iterated Greedy escrito em Excel VBA. Selecionar um método mostra uma animação esquemática de como ele se move e a sua pontuação nas 44 instâncias do benchmark padrão <b>MaScLib</b>. O diagrama não resolve nada. Seis dos oito rodam no cenário configurado abaixo.',
+      'Seis heurísticas em C++ publicadas, uma referência exata (MILP) com limite de uma hora e o Iterated Greedy escrito em Excel VBA. Selecionar um método mostra uma animação esquemática de como ele se move e a sua pontuação no <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">conjunto de benchmark <b>MaScLib</b></a> (44 problemas de teste publicados do estudo de 2015). O diagrama não resolve nada. Seis dos oito rodam no cenário configurado abaixo.',
     "#m-story h2": 'A ordem das tarefas <em>determina o custo total.</em>',
     "#demo-order .lede":
       'O custo de uma ordem é a soma dos setups entre famílias e do atraso ponderado. A espera por uma data de liberação atrasa todas as tarefas seguintes.',
@@ -3604,6 +3737,21 @@ function onWinResize(fn){
     "Skip to the first demo": "Pular para a primeira demo",
     "Run": "Executar",
     "Future": "Futuro",
+    /* structure pass — nav, interfaces section, run CTA, cross-references */
+    "Get it": "Comece a usar",
+    "Six ways to run": "Seis formas de rodar",
+    "the same engine.": "o mesmo motor.",
+    "Results & validation (RESULTS.md)": "Resultados & validação (RESULTS.md)",
+    "Continue this exact run in the Studio →": "Continue esta execução exata no Studio →",
+    "The world, the instance file, the seed, the budget and the language carry over — the Studio re-runs this exact run in seconds.": "O mundo, o arquivo de instância, a seed, o orçamento e o idioma vão junto — o Studio reexecuta esta mesma corrida em segundos.",
+    "For the published numbers behind this page, see the": "Para os números publicados por trás desta página, veja a",
+    "recorded benchmark section": "seção de benchmark registrado",
+    "above.": "acima.",
+    "Recorded in the benchmark section above.": "Registrado na seção de benchmark acima.",
+    "These four scenarios are synthetic settings — the real shops are one section down.": "Estes quatro cenários são configurações sintéticas — as oficinas reais estão uma seção abaixo.",
+    "For researchers": "Para pesquisadores",
+    "Milestones P1–P5 — reactive operators, exact repair, multiple machines, parallel search and learned discovery, each laid out with question, change, comparator, success criterion and evidence.": "Marcos P1–P5 — operadores reativos, reparo exato, múltiplas máquinas, busca paralela e descoberta aprendida, cada um detalhado com pergunta, mudança, comparador, critério de sucesso e evidência.",
+    "One Colab notebook with two experiments that re-check their pricing against the CPU engine before reporting a timing: GPU width is nearly free until the instance grows, and the operator gain turns into a loss once the split is honest.": "Um notebook Colab com dois experimentos que reconferem a precificação contra o motor de CPU antes de reportar qualquer tempo: a largura de GPU é quase de graça até a instância crescer, e o ganho do operador vira perda quando a divisão é honesta.",
     /* added figures / captions */
     "Time runs left to right and each timeline ends at t. The bar below it shows setup plus weighted tardiness on a scale shared by all rails, and its length is the total Σ.": 'O tempo corre da esquerda para a direita e cada linha do tempo termina em t. A barra abaixo mostra setup mais atraso ponderado numa escala comum a todos os trilhos, e seu comprimento é o total Σ.' ,
     "Idle": "Parado",
@@ -3636,6 +3784,23 @@ function onWinResize(fn){
     "Story · why order matters": "História · por que a ordem importa",
     "An optimal order exists, but there are too many orders to enumerate. Iterated Greedy builds one order and improves it by iteration.":
       'Existe uma ordem ótima, mas há ordens demais para enumerar. O Iterated Greedy constrói uma ordem e a melhora por iteração.' ,
+    /* story copy pass — order-cost anatomy, enumeration, IG method */
+    "For anyone who has ever had to decide which job runs next.": 'Para quem já teve que decidir qual job roda em seguida.',
+    "The cost of an order is the sum of the setups between families and the weighted tardiness. Waiting for a release date delays every later job. Any order can also be refused entirely, paying a fixed rejection cost instead of running it.": 'O custo de uma ordem é a soma dos setups entre famílias e do atraso ponderado. Esperar uma data de liberação atrasa todos os jobs seguintes. Qualquer ordem também pode ser recusada por inteiro, pagando um custo fixo de rejeição em vez de rodar.',
+    "Rejection": 'Rejeição',
+    "Anatomy of one order's cost: a setup, the processing time, and a late tail past the due date that costs w per day": 'Anatomia do custo de uma ordem: um setup, o tempo de processamento e uma cauda de atraso após o prazo que custa w por dia',
+    "processing p": 'processamento p',
+    "due": 'prazo',
+    "w × days late": 'w × dias de atraso',
+    "One order on one machine — a setup between families, the processing time, and every day past the due date costs w per day.": 'Uma ordem em uma máquina — um setup entre famílias, o tempo de processamento, e cada dia além do prazo custa w por dia.',
+    "found by checking all 120 complete orders — every job scheduled": 'encontrada verificando as 120 ordens completas — todos os jobs sequenciados',
+    "Five jobs have 120 possible orders, and the figure above priced every one of them. From there the count multiplies with every added job — this figure puts a clock against it.": 'Cinco jobs têm 120 ordens possíveis, e a figura acima precificou cada uma delas. Daí em diante a contagem se multiplica a cada job adicionado — esta figura coloca um relógio contra ela.',
+    "Candidate plans incl. rejection — some orders refused, not just reordered —": 'Planos candidatos incl. rejeição — algumas ordens recusadas, não apenas reordenadas —',
+    "Since testing every order is impossible, we search instead — and here is the searcher.": 'Como testar todas as ordens é impossível, pesquisamos em vez disso — e eis o pesquisador.',
+    "An Iterated Greedy engine running in this page on a seeded 12-job, 4-family instance.": 'Um motor Iterated Greedy rodando nesta página sobre um problema fixo de 12 jobs e 4 famílias.',
+    "Destroy three jobs, rebuild, keep what is cheaper": 'Destrua três jobs, reconstrua, fique com o que é mais barato',
+    "Play / Pause / Step / Speed share one clock": 'Play / Pause / Step / Speed compartilham um único relógio',
+    "Seeded instance — 12 jobs · 4 families · mulberry32, seed 0xce29767d.": 'Instância com seed — 12 jobs · 4 famílias · mulberry32, seed 0xce29767d.',
     /* demo 1 */
     "Order and cost": 'Ordem e custo' ,
     "The same five jobs in two orders.":
@@ -4567,7 +4732,7 @@ function onWinResize(fn){
       const sweep = (q, nGaps, costs, bestGap) => {
         if (q <= 0) return;
         const g = gapsFor(nGaps), idx = Math.min(nGaps, Math.floor(q * (nGaps + 1)));
-        for (let k = 0; k < idx; k++) { ctx.fillStyle = '#c4b795'; ctx.fillRect(g[k] - 1, y - 4, 2, BH + 8); }
+        for (let k = 0; k < idx; k++) { ctx.fillStyle = cssVar('--rule-strong'); ctx.fillRect(g[k] - 1, y - 4, 2, BH + 8); }
         const cx = g[idx];
         ctx.strokeStyle = cssVar('--terra'); ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(cx, y - 8); ctx.lineTo(cx, y + BH + 8); ctx.stroke();
@@ -4733,6 +4898,10 @@ function onWinResize(fn){
 
   /* ---------- controles ---------- */
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { drawRes(); renderNote(); });
+  /* an explicit theme toggle fires themechange (after the token cache bust);
+     the results canvas is event-driven, so it repaints here — the mini-stage
+     redraws itself on its rAF loop */
+  addEventListener('themechange', () => { drawRes(); renderNote(); });
   if ($('btnOverview')) $('btnOverview').addEventListener('click', () => setMode('overview'));
   if ($('btnPerInst')) $('btnPerInst').addEventListener('click', () => setMode('inst'));
   function setMode(m) {
@@ -5503,7 +5672,14 @@ function onWinResize(fn){
     if (!m) return;
     const opt = [...document.querySelectorAll('#rcN option')].find(o => o.value === m[1]);
     if (opt) $('rcN').value = m[1];
-    if (TERRAINS[m[2]]) $('rcTerrain').value = m[2];
+    if (TERRAINS[m[2]]) {
+      /* a share link can name a terrain whose <option> no longer ships:
+         fall back to 'balanced' rather than leaving the select value-less */
+      const sel = $('rcTerrain');
+      const vals = [...sel.options].map(o => o.value);
+      if (vals.includes(m[2])) sel.value = m[2];
+      else if (vals.includes('balanced')) sel.value = 'balanced';
+    }
     forcedRaceSeed = parseInt(m[3], 16) >>> 0;
     addEventListener('DOMContentLoaded', () => {
       if (document.getElementById('editorialHome')?.dataset.mainView === 'compare') window.__showTab?.('race');
@@ -5551,9 +5727,13 @@ function onWinResize(fn){
       li.title = __t('click to hide / show in the charts');
       li.tabIndex = 0; li.setAttribute('role', 'button'); li.setAttribute('aria-pressed', 'true');
       li.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') { ev.preventDefault(); li.click(); } });
+      /* the swatch mirrors seriesStyle(): sixth series dashed ink, brass-ink for Greedy */
+      const dotCss = racers.indexOf(r) >= 5
+        ? 'background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 4px)'
+        : r.colorVar === '--race-greedy' ? 'background:var(--brass-ink)' : `background:var(${r.colorVar})`;
       li.innerHTML = `
         <span class="st-rank" id="st-rank-${r.id}">–</span>
-        <span class="st-dot" style="background:var(${r.colorVar})"></span>
+        <span class="st-dot" style="${dotCss}"></span>
         <span class="st-name">${r.name}<span class="st-sep" aria-hidden="true"> · </span><small id="st-status-${r.id}"></small></span>
         <span class="st-cost"><span id="st-cost-${r.id}">–</span><small id="st-evals-${r.id}"></small></span>`;
       li.addEventListener('click', () => {
@@ -5601,6 +5781,17 @@ function onWinResize(fn){
     }
   });
 
+  /* series presentation: five hues, then dash. The sixth series in draw order
+     (AMA) drops its maple hue — a luminance collision with sage — and is drawn
+     as a dashed ink line instead; brass (Greedy) takes the darker --brass-ink
+     stroke so it keeps contrast on the paper background. The standings legend
+     and the crosshair tooltip reuse these same rules, so swatch === stroke. */
+  function seriesStyle(r) {
+    if (racers.indexOf(r) >= 5) return { col: cssVar('--ink'), dash: [5, 4] };
+    if (r.colorVar === '--race-greedy') return { col: cssVar('--brass-ink'), dash: null };
+    return { col: cssVar(r.colorVar), dash: null };
+  }
+
   function drawRace() {
     const cv = $('cvRace'); const ctx = cv.getContext('2d');
     const W = sizes.race || 600, H = 290;
@@ -5629,9 +5820,10 @@ function onWinResize(fn){
     const ends = [];
     for (const r of racers) {
       if (r.off) continue;
-      const col = cssVar(r.colorVar);
+      const ss = seriesStyle(r), col = ss.col;
       ctx.globalAlpha = raceFocus && raceFocus !== r.id ? 0.28 : 1;
       ctx.strokeStyle = col; ctx.lineWidth = raceFocus === r.id ? 3 : 2; ctx.lineJoin = 'round';
+      if (ss.dash) ctx.setLineDash(ss.dash);
       ctx.beginPath();
       let prev = null;
       for (const h of r.hist) {
@@ -5640,6 +5832,7 @@ function onWinResize(fn){
         prev = h;
       }
       if (prev) { ctx.lineTo(X(r.evals), Y(prev.c)); ctx.stroke(); ends.push({ r, y: Y(prev.c), col, c: prev.c }); }
+      if (ss.dash) ctx.setLineDash([]);
       ctx.globalAlpha = 1;
     }
     // crosshair scrubber: cost of every racer at a chosen budget
@@ -5662,7 +5855,7 @@ function onWinResize(fn){
       const tipEl = document.getElementById('tip');
       if (rows.length) {
         tipEl.innerHTML = `<b>@ ${fmt.format(Math.round(eAt))} ${__t('evals')}</b><br>` + rows.map(x =>
-          `<span style="color:${cssVar(x.r.colorVar)}">\u25cf</span> ${x.r.name.split(' ')[0]} ${fmt.format(Math.round(x.c))}`).join('<br>');
+          `<span style="color:${seriesStyle(x.r).col}">\u25cf</span> ${x.r.name.split(' ')[0]} ${fmt.format(Math.round(x.c))}`).join('<br>');
         tipEl.style.display = 'block';
         tipEl.style.left = Math.min(raceHover.cx + 14, innerWidth - tipEl.offsetWidth - 10) + 'px';
         tipEl.style.top = Math.min(raceHover.cy + 16, innerHeight - tipEl.offsetHeight - 10) + 'px';
@@ -5708,6 +5901,30 @@ function onWinResize(fn){
         ? `Líder: <strong>${lead.name}</strong> com custo ${fmt.format(Math.round(lead.bestCost))}. Repare nas formas: o Descent é uma trepadeira que para; o Tabu serpenteia; o TabuDiv dá saltos; o AMA é um bosque; o IG roda o ciclo completo — destruir, reconstruir, trocar — reiniciando só do melhor nó.`
         : `Leader: <strong>${lead.name}</strong> at cost ${fmt.format(Math.round(lead.bestCost))}. Watch the shapes: Descent is a vine that stops; Tabu snakes along; TabuDiv makes dashed jumps; the AMA is a grove; the IG runs its full loop — destroy, rebuild, swap — restarting only from the best node.`)
       : '';
+    srRaceSummary(standing);
+  }
+
+  /* A11Y — polite, throttled race summary for screen readers, created in JS
+     next to the race canvas and styled visually-hidden inline (the stylesheet
+     owns no such utility class). Mirrors the #oaBeat pattern: one role=status
+     node, updated at most once per ~2s, so the 25 fps redraw never floods a
+     polite live-region queue. */
+  const srRace = document.createElement('div');
+  srRace.id = 'raceSrSummary';
+  srRace.setAttribute('role', 'status');
+  srRace.style.cssText = 'position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;';
+  if ($('cvRace') && $('cvRace').parentNode) $('cvRace').parentNode.insertBefore(srRace, $('cvRace').nextSibling);
+  let srRaceAt = 0;
+  function srRaceSummary(standing) {
+    const now = performance.now();
+    if (now - srRaceAt < 2000) return;
+    const lead = (standing || []).find(r => !r.off && isFinite(r.bestCost));
+    if (!lead) return;
+    srRaceAt = now;
+    const spent = Math.max(...racers.map(r => r.evals));
+    srRace.textContent = window.__lang === 'pt'
+      ? `Líder: ${lead.name}, melhor custo ${fmt.format(Math.round(lead.bestCost))}, ${fmt.format(spent)} avaliações gastas.`
+      : `Leader: ${lead.name}, best cost ${fmt.format(Math.round(lead.bestCost))}, ${fmt.format(spent)} evaluations spent.`;
   }
   function drawAll(t) {
     drawRace();
@@ -5812,10 +6029,11 @@ function onWinResize(fn){
     var pl=18,pr=18,ax=w-pl-pr,top=34,ly=96,lh=42;
     var px=function(v){return pl+(v/CAP)*ax;},qx=function(v){return pl+(v/MAXT)*ax;};
     ctx.fillStyle=cs("--paper");rr(pl-8,top-22,ax+16,lh+58,9);ctx.fill();
-    ctx.font="700 9.5px "+cs("--sans");ctx.fillStyle=cs("--ink-soft");ctx.textBaseline="alphabetic";
+    ctx.font="700 11px "+cs("--sans");ctx.fillStyle=cs("--ink-soft");ctx.textBaseline="alphabetic";
     ctx.fillText(T("MACHINE SCHEDULE (reoptimizing policy)"),pl,top-9);
-    ctx.strokeStyle=cs("--rule");ctx.lineWidth=1;ctx.font="10px "+cs("--mono");
-    for(var g=0;g<=CAP;g+=2){var gx=px(g);ctx.globalAlpha=.65;ctx.beginPath();ctx.moveTo(gx,top);ctx.lineTo(gx,ly+lh+6);ctx.stroke();ctx.globalAlpha=1;
+    ctx.strokeStyle=cs("--rule");ctx.lineWidth=1;ctx.font="11px "+cs("--mono");
+    /* 11px text floor; on narrow canvases thin the axis ticks (step 4, not 2) */
+    for(var g=0;g<=CAP;g+=(w<480?4:2)){var gx=px(g);ctx.globalAlpha=.65;ctx.beginPath();ctx.moveTo(gx,top);ctx.lineTo(gx,ly+lh+6);ctx.stroke();ctx.globalAlpha=1;
       ctx.fillStyle=cs("--ink-soft");ctx.fillText(g,gx-3,ly+lh+19);}
     PLAN.forEach(function(b){ if(b.o.t>n) return; var ap=Math.min(1,(n-b.o.t)/0.5);
       var x0=px(b.st),x1=px(b.fi);
@@ -5826,11 +6044,11 @@ function onWinResize(fn){
         ctx.restore();}
       ctx.save();ctx.globalAlpha=ap;ctx.fillStyle=fc(b.o.fam);rr(x0+1,ly,Math.max(2,x1-x0-2),lh,5);ctx.fill();
       if(x1-x0>26){ctx.fillStyle="#fff";ctx.textBaseline="middle";ctx.font="700 11px "+cs("--sans");
-        ctx.fillText("#"+b.o.id,x0+6,ly+lh/2-6);ctx.font="10px "+cs("--mono");ctx.globalAlpha=.92*ap;
+        ctx.fillText("#"+b.o.id,x0+6,ly+lh/2-6);ctx.font="11px "+cs("--mono");ctx.globalAlpha=.92*ap;
         ctx.fillText("$"+b.o.v,x0+6,ly+lh/2+8);}
       ctx.restore();});
     var qy=ly+lh+46;
-    ctx.font="700 9.5px "+cs("--sans");ctx.fillStyle=cs("--ink-soft");ctx.textBaseline="alphabetic";
+    ctx.font="700 11px "+cs("--sans");ctx.fillStyle=cs("--ink-soft");ctx.textBaseline="alphabetic";
     ctx.fillText(T("ARRIVALS (time runs →)"),pl,qy-13);
     ctx.strokeStyle=cs("--rule");ctx.beginPath();ctx.moveTo(pl,qy+18);ctx.lineTo(pl+ax,qy+18);ctx.stroke();
     O.forEach(function(o){var ox=qx(o.t),ar=o.t<=n,cur=ar&&Math.abs(o.t-n)<0.28,rj=o.dec==="R"&&ar;
@@ -5838,7 +6056,7 @@ function onWinResize(fn){
       ctx.beginPath();ctx.arc(ox,qy+18,cur?8:5.5,0,7);ctx.fill();
       if(rj){ctx.strokeStyle=cs("--paper");ctx.lineWidth=1.8;ctx.beginPath();
         ctx.moveTo(ox-3.5,qy+14.5);ctx.lineTo(ox+3.5,qy+21.5);ctx.moveTo(ox+3.5,qy+14.5);ctx.lineTo(ox-3.5,qy+21.5);ctx.stroke();}
-      ctx.fillStyle=ar?cs("--ink"):cs("--ink-soft");ctx.font=(cur?"700 ":"")+"10px "+cs("--mono");
+      ctx.fillStyle=ar?cs("--ink"):cs("--ink-soft");ctx.font=(cur?"700 ":"")+"11px "+cs("--mono");
       ctx.textAlign="center";ctx.fillText("$"+o.v,ox,qy+5);ctx.textAlign="left";ctx.globalAlpha=1;});
     var nx=qx(Math.min(MAXT,n));ctx.strokeStyle=cs("--terra");ctx.lineWidth=2;
     ctx.beginPath();ctx.moveTo(nx,qy-5);ctx.lineTo(nx,qy+28);ctx.stroke();
@@ -6041,6 +6259,15 @@ function onWinResize(fn){
     ["ig", "Iterated Greedy", "--race-ig"]
   ];
   var IG = 5;
+  /* series presentation shared by the Fig. 07 traces and every method swatch:
+     the sixth series (engine order) drops its hue for a dashed ink style —
+     terra collided with tabudiv in luminance — and brass takes the darker
+     --brass-ink for contrast on paper. Mirrors seriesStyle() in the race lab. */
+  function methodDot(m) {
+    if (m >= 5) return "background:repeating-linear-gradient(45deg,var(--ink) 0 2px,transparent 2px 4px)";
+    if (METHODS[m][2] === "--race-greedy") return "background:var(--brass-ink)";
+    return "background:var(" + METHODS[m][2] + ")";
+  }
   /* the four terms of the objective, in the order each world lens names them */
   var TERMC = ["--maple", "--steel", "--red", "--brass"];
   var BUDGETS = [50000, 200000, 800000];
@@ -6956,12 +7183,12 @@ function onWinResize(fn){
      ============================================================ */
   function buildBoard() {
     var ol = el("runStandings");
-    ol.innerHTML = METHODS.map(function (m) {
+    ol.innerHTML = METHODS.map(function (m, mi) {
         var on = m[0] === S.method;
         return '<li data-m="' + m[0] + '" tabindex="0" role="button" aria-pressed="' + on + '"' +
           (on ? ' class="leader"' : "") +
-          '><span class="st-rank">–</span><span class="st-dot" style="background:var(' + m[2] +
-          ')"></span><span class="st-name">' + esc(m[1]) +
+          '><span class="st-rank">–</span><span class="st-dot" style="' + methodDot(mi) +
+          '"></span><span class="st-name">' + esc(m[1]) +
           '<span class="st-sep" aria-hidden="true"> · </span><small>' + esc(L("not run")) +
           '</small></span><span class="run-bar" aria-hidden="true"><i style="background:var(' +
           m[2] + ')"></i></span><span class="st-cost">' + DASH +
@@ -7179,7 +7406,7 @@ function onWinResize(fn){
     el("runClockRows").innerHTML = head + METHODS.map(function (mm, m) {
       var ev = R.evals ? R.evals[m] : null, took = R.ms ? R.ms[m] : null;
       return '<li' + (mm[0] === S.method ? ' class="sel"' : "") +
-        '><span class="st-dot" style="background:var(' + mm[2] + ')"></span><span class="key">' +
+        '><span class="st-dot" style="' + methodDot(m) + '"></span><span class="key">' +
         esc(mm[1]) + '</span><span class="num">' +
         (ev === null ? DASH : esc(fmt(Math.round(ev)))) + '</span><span class="num">' +
         esc(fmtSpan(took)) + '</span><span class="num drop">' +
@@ -7535,9 +7762,14 @@ function onWinResize(fn){
         }
         var last = t2[t2.length - 1];
         pts += " " + X(R.evals[m]).toFixed(1) + "," + Y(last[1]).toFixed(1);
-        body += '<polyline points="' + pts + '" fill="none" stroke="var(' + METHODS[m][2] +
-          ')" stroke-width="' + (on ? 2 : 1.2) + '" opacity="' + (on ? 1 : 0.72) +
-          '" stroke-linejoin="round"/>';
+        /* same series rules as Fig. 04: the sixth series drops its hue for a
+           dashed ink line (its terra collided with tabudiv in luminance), and
+           brass takes the darker --brass-ink for contrast on paper */
+        var traceCss = m >= 5 ? "var(--ink)"
+          : METHODS[m][2] === "--race-greedy" ? "var(--brass-ink)" : "var(" + METHODS[m][2] + ")";
+        body += '<polyline points="' + pts + '" fill="none" stroke="' + traceCss +
+          '" stroke-width="' + (on ? 2 : 1.2) + '" opacity="' + (on ? 1 : 0.72) +
+          '" stroke-linejoin="round"' + (m >= 5 ? ' stroke-dasharray="5 4"' : "") + "/>";
       }
       body += txt(LX - 6, top + 8, fmtCost(hi), { a: "end", s: 9 });
       body += txt(LX - 6, top + H, fmtCost(lo), { a: "end", s: 9 });
@@ -7913,9 +8145,11 @@ function onWinResize(fn){
      ============================================================ */
   function links() {
     var tail = "scenario=" + W().id + "&instance=" + S.inst + (pt() ? "&lang=pt-BR" : "");
-    el("runLinkStudio").href = "studio-app.html?" + tail;
-    el("runLinkProblem").href = "studio-app.html?" + tail;
-    el("runLinkSchedule").href = "studio-app.html?page=schedule&" + tail;
+    /* each link is guarded: the markup may ship without some of these ids */
+    var lStudio = el("runLinkStudio"), lProblem = el("runLinkProblem"), lSchedule = el("runLinkSchedule");
+    if (lStudio) lStudio.href = "studio-app.html?page=overview&" + tail;
+    if (lProblem) lProblem.href = "studio-app.html?page=instance&" + tail;
+    if (lSchedule) lSchedule.href = "studio-app.html?page=schedule&" + tail + "&run=1";
   }
 
   function renderAll() {
@@ -7987,6 +8221,22 @@ function onWinResize(fn){
       var sect = document.getElementById("m-run");
       if (sect) sect.scrollIntoView({ block: "start", behavior: REDUCED ? "auto" : "smooth" });
     });
+
+    /* tabs a11y, wired in JS so the markup stays lean: every tab gets a stable
+       id, points at its panel with aria-controls, and the panel points back
+       with aria-labelledby. Missing tabs or panels are skipped, never fatal. */
+    (function tabsA11y() {
+      var tablist = el("runTabs");
+      if (!tablist) return;
+      Array.prototype.forEach.call(tablist.querySelectorAll('button[role="tab"]'), function (b, i) {
+        var panId = b.getAttribute("data-pan");
+        if (!b.id) b.id = "runTab-" + (panId || i);
+        if (!panId) return;
+        b.setAttribute("aria-controls", panId);
+        var pan = el(panId);
+        if (pan) pan.setAttribute("aria-labelledby", b.id);
+      });
+    })();
 
     el("runTabs").addEventListener("click", function (ev) {
       var b = ev.target.closest("button[data-pan]");

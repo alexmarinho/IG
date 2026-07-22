@@ -3545,8 +3545,35 @@ a { color: inherit; text-decoration: none; }
   
   
   
-<script>globalThis.IG_STUDIO_CONFIG={language:(new URLSearchParams(location.search).get("lang")||"en"),pythonUrl:"https://github.com/alexmarinho/IG/tree/master/python",notebookUrl:"https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb",resultsUrl:"https://github.com/alexmarinho/IG/blob/master/RESULTS.md",originalUrl:"https://github.com/alexmarinho/IG/tree/master/legacy"};</script><style id="ig-hosted-shell">:root{--header:0px}.topbar{display:none!important}.control-rail::before{display:none!important}html,body{background-color:#f6f1e8!important;background-image:none!important}.body-grid{min-height:100vh;background:transparent}.workspace{background:transparent}.control-rail{top:0;min-height:100vh;max-height:100vh;padding-left:20px!important;background-color:transparent!important;background-image:none!important;border-right:1px solid #e2d9c8}.rail-modes{position:sticky;top:0;z-index:5;margin:0 0 18px;padding:12px 0 10px;background:#f6f1e8}@media(max-width:760px){.control-rail{min-height:0;max-height:none;padding-left:14px}.mobile-sheet.open{inset:0}}</style></head>
+<script>globalThis.IG_STUDIO_CONFIG={language:(new URLSearchParams(location.search).get("lang")||"en"),pythonUrl:"https://github.com/alexmarinho/IG/tree/master/python",notebookUrl:"https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb",resultsUrl:"https://github.com/alexmarinho/IG/blob/master/RESULTS.md",originalUrl:"https://github.com/alexmarinho/IG/tree/master/legacy"};</script><style id="ig-hosted-shell">:root{--header:0px}.topbar{display:none!important}.control-rail::before{display:none!important}html,body{background-color:#f6f1e8!important;background-image:none!important}.body-grid{min-height:100vh;background:transparent}.workspace{background:transparent}.control-rail{top:0;min-height:100vh;max-height:100vh;padding-left:20px!important;background-color:transparent!important;background-image:none!important;border-right:1px solid #e2d9c8}.rail-modes{position:sticky;top:0;z-index:5;margin:0 0 18px;padding:12px 0 10px;background:#f6f1e8}@media(max-width:760px){.control-rail{min-height:0;max-height:none;padding-left:14px}.mobile-sheet.open{inset:0}}</style><style id="ig-wayfind-shell">:root{--ig-wf-h:46px}#ig-wayfind{position:sticky;top:0;z-index:40;height:var(--ig-wf-h);display:flex;align-items:center;justify-content:space-between;gap:14px;padding:0 20px;background:var(--paper-bright);border-bottom:1px solid var(--rule);color:var(--ink);font-family:var(--font-ui)}#ig-wayfind .ig-wf-brand{font-family:var(--font-display);font-size:17px;letter-spacing:.07em;text-transform:uppercase}#ig-wayfind .ig-wf-brand em{font-style:normal;color:var(--signal)}#ig-wayfind .ig-wf-nav{display:flex;align-items:center;gap:16px}#ig-wayfind a#ig-wf-back{font-size:13.5px;color:var(--ink-soft);border-bottom:1px solid transparent;padding:2px 0}#ig-wayfind a#ig-wf-back:hover{color:var(--cobalt);border-bottom-color:var(--cobalt)}#ig-wayfind .ig-wf-lang{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--quiet)}#ig-wayfind .ig-wf-lang button{min-height:0;height:26px;padding:0 9px;border:1px solid var(--rule);background:transparent;color:var(--ink-soft);font-size:12px;letter-spacing:.05em}#ig-wayfind .ig-wf-lang button:hover{border-color:var(--cobalt);color:var(--cobalt)}#ig-wayfind .ig-wf-lang button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--paper-bright)}#ig-wayfind .ig-wf-lang button[aria-pressed="true"]:hover{color:var(--paper-bright)}.body-grid{min-height:calc(100vh - var(--ig-wf-h))}@media(min-width:761px){.control-rail{top:var(--ig-wf-h);min-height:calc(100vh - var(--ig-wf-h));max-height:calc(100vh - var(--ig-wf-h))}.rail-modes{top:var(--ig-wf-h)}}:root[data-theme="dark"] #ig-wayfind{background:#2a251e;border-bottom-color:#3a3226;color:#efe7d8}:root[data-theme="dark"] #ig-wayfind a#ig-wf-back{color:#b3a892}:root[data-theme="dark"] #ig-wayfind a#ig-wf-back:hover{color:#a7bcd8;border-bottom-color:#a7bcd8}:root[data-theme="dark"] #ig-wayfind .ig-wf-lang{color:#897761}:root[data-theme="dark"] #ig-wayfind .ig-wf-lang button{border-color:#3a3226;color:#b3a892}:root[data-theme="dark"] #ig-wayfind .ig-wf-lang button[aria-pressed="true"]{background:#efe7d8;border-color:#efe7d8;color:#211d18}@media(max-width:560px){#ig-wayfind{padding:0 12px;gap:10px}#ig-wayfind .ig-wf-brand{font-size:14.5px;letter-spacing:.05em}#ig-wayfind .ig-wf-nav{gap:12px}#ig-wayfind a#ig-wf-back{font-size:12.5px}#ig-wayfind .ig-wf-lang button{height:24px;padding:0 7px;font-size:11.5px}}</style></head>
 <body>
+  <header id="ig-wayfind" role="banner">
+    <span class="ig-wf-brand"><em>IG</em> Studio</span>
+    <nav class="ig-wf-nav" aria-label="Wayfinding">
+      <a id="ig-wf-back" href="index.html">&larr; Explanation</a>
+      <span class="ig-wf-lang" role="group" aria-label="Language / Idioma">
+        <button type="button" id="ig-wf-en" aria-pressed="true">EN</button>
+        <span aria-hidden="true">/</span>
+        <button type="button" id="ig-wf-pt" aria-pressed="false">PT</button>
+      </span>
+    </nav>
+  </header>
+  <script>
+  (function(){
+    var p=new URLSearchParams(location.search);
+    var lang=(p.get("lang")||"en").toLowerCase();
+    var pt=lang.indexOf("pt")===0;
+    var back=document.getElementById("ig-wf-back");
+    if(pt){back.textContent="\u2190 Explica\u00e7\u00e3o";}
+    if(p.get("lang")){back.href="index.html?lang="+encodeURIComponent(p.get("lang"));}
+    var en=document.getElementById("ig-wf-en"),ptb=document.getElementById("ig-wf-pt");
+    en.setAttribute("aria-pressed",String(!pt));
+    ptb.setAttribute("aria-pressed",String(pt));
+    function go(l){var q=new URLSearchParams(location.search);q.set("lang",l);location.search=q.toString();}
+    en.addEventListener("click",function(){if(pt){go("en");}});
+    ptb.addEventListener("click",function(){if(!pt){go("pt-BR");}});
+  })();
+  </script>
   <div id="ig-studio"></div>
   <noscript>Algorithm execution requires JavaScript to run the local WebAssembly engine.</noscript>
   <script data-ig-studio-config>
