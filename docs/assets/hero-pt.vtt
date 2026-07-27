@@ -1,0 +1,137 @@
+WEBVTT
+
+STYLE
+::cue {
+  background-color: rgba(23, 20, 16, 0.74);
+  color: #f0e9dd;
+  font-size: 88%;
+  line-height: 1.35;
+}
+
+1
+00:00:00.000 --> 00:00:02.478 line:84%
+Toda fábrica esconde o mesmo problema.
+
+2
+00:00:02.508 --> 00:00:08.457 line:84%
+Numa torrefação de café, mudar de torra significa esvaziar o tambor e refazer o perfil do zero.
+
+3
+00:00:08.487 --> 00:00:13.159 line:84%
+Numa cervejaria, depois de uma IPA você lava a linha inteira, ou não produz.
+
+4
+00:00:13.189 --> 00:00:17.849 line:84%
+Na impressão 3D, você troca o filamento e espera a temperatura subir.
+
+5
+00:00:17.879 --> 00:00:21.506 line:84%
+Negócios diferentes — uma pergunta só: em que ordem?
+
+6
+00:00:21.536 --> 00:00:22.922 line:84%
+Vamos ver com números.
+
+7
+00:00:22.952 --> 00:00:25.651 line:84%
+Cinco pedidos, cada um com sua ferramenta.
+
+8
+00:00:25.681 --> 00:00:32.617 line:84%
+Rodando na ordem em que chegaram, toda mudança de família para a máquina — ela troca a ferramenta e não produz nada.
+
+9
+00:00:32.647 --> 00:00:33.929 line:84%
+Quatro paradas.
+
+10
+00:00:33.959 --> 00:00:41.498 line:84%
+Agora basta reordenar, juntando os semelhantes: mesmo trabalho, duas paradas, e a oficina termina mais cedo.
+
+11
+00:00:41.528 --> 00:00:43.878 line:84%
+Mas a troca é só uma das contas.
+
+12
+00:00:43.908 --> 00:00:50.937 line:84%
+Tem o atraso em cada data prometida — e às vezes a jogada mais barata é simplesmente recusar o pedido.
+
+13
+00:00:50.967 --> 00:00:57.474 line:84%
+Contando direito, o pedido mais urgente, deixado por último, custa mais do que tudo que veio antes.
+
+14
+00:00:57.504 --> 00:00:59.018 line:84%
+A ordem muda o tempo.
+
+15
+00:00:59.048 --> 00:01:00.724 line:84%
+O tempo muda o custo.
+
+16
+00:01:00.754 --> 00:01:03.163 line:84%
+Então por que não testar todas as ordens?
+
+17
+00:01:03.193 --> 00:01:07.516 line:84%
+Com cinco pedidos são cento e vinte — dá para conferir uma por uma.
+
+18
+00:01:07.546 --> 00:01:10.291 line:84%
+E a melhor delas paga as mesmas duas trocas.
+
+19
+00:01:10.321 --> 00:01:16.444 line:84%
+Mas com vinte e oito pedidos, conferir todas levaria trinta e cinco mil vezes a idade do universo.
+
+20
+00:01:16.474 --> 00:01:18.639 line:84%
+Não é questão de computador mais rápido.
+
+21
+00:01:18.669 --> 00:01:25.953 line:84%
+É aqui que entram as metaheurísticas: parar de procurar a resposta perfeita e achar uma muito boa, rápido.
+
+22
+00:01:25.983 --> 00:01:37.749 line:84%
+Pega uma sequência, desmancha um pedaço, oferece cada pedido de volta em todas as posições livres pelo preço real, e fica com o mais barato — recusando quando nada compensa.
+
+23
+00:01:37.779 --> 00:01:39.758 line:84%
+Esse ciclo é uma aposta.
+
+24
+00:01:39.788 --> 00:01:43.252 line:84%
+Todo método deste campo começa escolhendo onde não olhar.
+
+25
+00:01:43.282 --> 00:01:47.281 line:84%
+Provar com exatidão, e a hora de máquina acaba antes.
+
+26
+00:01:47.311 --> 00:01:51.089 line:84%
+Aceite só melhoras e você empaca no primeiro beco.
+
+27
+00:01:51.119 --> 00:01:54.131 line:84%
+Proíba voltar atrás, e a busca sai dele.
+
+28
+00:01:54.161 --> 00:01:57.277 line:84%
+Umas estragam de propósito a melhor resposta que têm.
+
+29
+00:01:57.307 --> 00:02:02.049 line:84%
+Oito jeitos de gastar o tempo que você tem, e nenhum é o melhor em todo caso.
+
+30
+00:02:02.079 --> 00:02:06.611 line:84%
+Quanto mais o modelo se aproxima da fábrica real, mais ramos aparecem.
+
+31
+00:02:06.641 --> 00:02:08.121 line:84%
+E isso é boa notícia.
+
+32
+00:02:08.151 --> 00:02:13.236 line:84%
+Está tudo aqui embaixo — código, testes, cada número, e o que não deu certo.

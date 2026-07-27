@@ -1,6 +1,21 @@
 /**
- * Race-lab evaluator: the exact engine objective, re-implemented allocation-lean
- * for the in-page method race.
+ * The sampler's objective, and the closure cross-check. NOT the race objective.
+ *
+ * This file used to be the objective every racer priced against. It is not any
+ * more: all six methods run in `engine/src/race/`, behind the Rust evaluator,
+ * and nothing here is charged to the evaluation budget or consulted by any
+ * method. Three live consumers survive the port, and all three are off the race:
+ *
+ *   1. `space.js` — prices every sampled leaf of the solution-space tree
+ *      (`costOnly`) and builds the position vectors it clusters on
+ *      (`solFeatures`). A few hundred samples, once, off the budget.
+ *   2. `view.js` — `solFeatures` for the firefly positions and the best-pin.
+ *   3. `tests/race/*` — the independent second opinion. A cost the Rust engine
+ *      reports has to survive re-evaluation here, which is a stronger claim
+ *      than either implementation could make alone.
+ *
+ * Keeping it is therefore not inertia: it is the only remaining check that the
+ * number the page prints means what the page says it means.
  *
  * Currency (identical to the Rust solver and to `evaluateSchedule`):
  *   total = Σ scheduled [ setupCost(prev → family) + modeCost + w · max(0, finish − due) ]
@@ -40,9 +55,9 @@ export function createRaceEvaluator(instance) {
 
   /**
    * Objective of one (order, rejected) partition, or +∞ when some scheduled job
-   * would violate its hard deadline. One "evaluation" = one call to this
-   * function; strategies account every tested position through it, which keeps
-   * the race budget comparable across methods.
+   * would violate its hard deadline. The race's budget is counted in wasm, by
+   * `race::Ctx`, over this same objective compiled from Rust — calls to this
+   * function are never charged to it.
    */
   function costOnly(order, rejected) {
     let t = 0;
@@ -94,7 +109,9 @@ export function createRaceEvaluator(instance) {
 /**
  * Position feature vector of a solution (normalized start rank per job, with a
  * sentinel above 1 for rejected jobs). Shared by the space projection and by
- * the racer "pin" markers; identical to the home-page racelab mapping.
+ * the racer "pin" markers; identical to the home-page racelab mapping. Job ids
+ * here are 0..n-1 in the instance's own order, which is also the numbering the
+ * Rust engine uses for the sequences it hands back.
  */
 export function solFeatures(n, sol) {
   const vector = new Float32Array(n).fill(1.25);

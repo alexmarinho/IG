@@ -8,16 +8,7 @@
  */
 
 import { escapeHtml, icons, sentenceLabel } from "./shared.js";
-
-/** Roster shown before a race starts (ids/colors match race/strategies.js). */
-const RACE_ROSTER = Object.freeze([
-  { id: "ig", name: "Iterated Greedy", colorVar: "--race-ig" },
-  { id: "greedy", name: "Greedy", colorVar: "--race-greedy" },
-  { id: "descent", name: "Descent", colorVar: "--race-descent" },
-  { id: "tabu", name: "Tabu", colorVar: "--race-tabu" },
-  { id: "tabudiv", name: "TabuDiv", colorVar: "--race-tabudiv" },
-  { id: "ama", name: "AMA (memetic)", colorVar: "--race-ama" },
-]);
+import { RACE_ROSTER } from "../race/engine-race.js";
 
 export const racePageView = {
   raceStatusLabel(status) {
@@ -111,7 +102,7 @@ export const racePageView = {
         <section class="analysis-panel race-convergence-panel">
           <div class="section-title-row"><h2>${escapeHtml(this.t("race.convergenceTitle"))}</h2><span class="section-note">${escapeHtml(this.t("overview.lower"))}</span></div>
           <div class="chart-frame race-chart-frame"><canvas id="race-canvas" data-height="290" aria-label="${escapeHtml(this.t("race.convergenceTitle"))}"></canvas><div class="chart-tooltip" hidden></div></div>
-          <div class="stat-legend"><span><i class="legend-dash"></i>${escapeHtml(this.t("race.engineRef"))}</span>${reference ? `<span><i class="legend-dash amber"></i>${escapeHtml(this.t("race.referenceBest"))}</span>` : ""}<span class="axis-label">${escapeHtml(this.t("overview.evaluationsAxis"))} →</span></div>
+          <div class="stat-legend">${reference ? `<span><i class="legend-dash amber"></i>${escapeHtml(this.t("race.referenceBest"))}</span>` : ""}<span class="axis-label">${escapeHtml(this.t("overview.evaluationsAxis"))} →</span></div>
         </section>
       </div>
       <section class="analysis-panel race-space-panel">
@@ -123,8 +114,30 @@ export const racePageView = {
       ${finalGrid}`;
   },
 
+  /**
+   * Wall clock, formatted for the advisory column. Seconds below a minute,
+   * milliseconds below a second — never more precision than the number has.
+   */
+  raceWallClock(ms) {
+    if (!Number.isFinite(ms)) return "—";
+    if (ms < 1_000) return `${this.fmt(Math.round(ms))} ms`;
+    return `${this.fmt(ms / 1_000, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} s`;
+  },
+
   renderRaceFinalGrid(race, reference) {
     const sorted = race.racers.slice().sort((a, b) => a.bestCost - b.bestCost);
+    // Two suppression conditions, because a wrong time here is worse than no
+    // time. (1) The worker must have been single-tenant for the whole race:
+    // `wallClockValid` is the worker's own intrusion count, asserted rather
+    // than assumed. (2) The column only exists once the race is done, so a
+    // partial time never sits next to a partial cost.
+    //
+    // There is deliberately no third condition for a method toggled off. In
+    // this studio `off` hides a racer from the charts and nothing else — it is
+    // still stepped, because every method must spend the same budget or the
+    // headline "equal evaluation budget per method" stops being true. Its time
+    // is therefore complete, and an em dash there would be the lie.
+    const showWallClock = Boolean(race.done && race.wallClockValid);
     const rows = sorted.map((racer, index) => {
       const gap = reference && Number.isFinite(racer.bestCost) ? this.gapToReference(racer.bestCost, reference) : null;
       const isWinner = racer === race.winner;
@@ -134,12 +147,14 @@ export const racePageView = {
         <td>${escapeHtml(this.fmt(racer.bestCost))}</td>
         <td>${gap == null ? "—" : escapeHtml(this.pct(gap))}</td>
         <td>${escapeHtml(this.fmt(racer.evals))}</td>
+        ${showWallClock ? `<td class="is-advisory">${escapeHtml(this.raceWallClock(racer.ms))}</td>` : ""}
         <td>${escapeHtml(this.raceStatusLabel(racer.status))}</td>
       </tr>`;
     }).join("");
     return `<section class="analysis-panel race-final">
       <div class="section-title-row"><h2>${escapeHtml(this.t("race.finalTitle"))}</h2><span class="section-note">${escapeHtml(this.t("race.finalSub", { budget: this.fmt(race.budget) }))}</span></div>
-      <div class="data-table-wrap"><table class="data-table race-final-table"><thead><tr><th>#</th><th>${escapeHtml(this.t("race.method"))}</th><th>${escapeHtml(this.t("race.cost"))}</th><th>${escapeHtml(this.t("race.gap"))}</th><th>${escapeHtml(this.t("overview.evaluations"))}</th><th>${escapeHtml(this.t("race.statusHeader"))}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="data-table-wrap"><table class="data-table race-final-table"><thead><tr><th>#</th><th>${escapeHtml(this.t("race.method"))}</th><th>${escapeHtml(this.t("race.cost"))}</th><th>${escapeHtml(this.t("race.gap"))}</th><th>${escapeHtml(this.t("overview.evaluations"))}</th>${showWallClock ? `<th class="is-advisory">${escapeHtml(this.t("race.wallClock"))}</th>` : ""}<th>${escapeHtml(this.t("race.statusHeader"))}</th></tr></thead><tbody>${rows}</tbody></table></div>
+      ${showWallClock ? `<p class="race-advisory-note">${escapeHtml(this.t("race.wallClockNote"))}</p>` : ""}
       <div class="run-actions"><button class="outline-action" data-page="schedule">${escapeHtml(this.t("race.inspectWinner"))}${icons.chevron}</button></div>
     </section>`;
   },

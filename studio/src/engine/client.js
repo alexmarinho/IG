@@ -137,6 +137,27 @@ export class IGEngineClient {
     return this.request(ENGINE_COMMAND.STATE);
   }
 
+  /**
+   * Create the six racers over the selected instance. `d`/`accept`/`permute`
+   * configure the IG racer, which is `solver::Run` itself — the same engine the
+   * page's run controls describe, not a second implementation of it.
+   */
+  raceNew(options) {
+    return this.request(ENGINE_COMMAND.RACE_NEW, options);
+  }
+
+  /**
+   * Advance every live method by one slice and answer with the whole snapshot.
+   * Exactly one of these is ever in flight: the reply is the backpressure.
+   */
+  raceSlice(options) {
+    return this.request(ENGINE_COMMAND.RACE_SLICE, options);
+  }
+
+  raceClear() {
+    return this.request(ENGINE_COMMAND.RACE_CLEAR);
+  }
+
   async dispose() {
     if (this.disposed) return;
     try {
