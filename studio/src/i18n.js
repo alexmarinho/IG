@@ -1,6 +1,12 @@
 export const UI_LOCALES = Object.freeze(["en", "pt-BR"]);
 
-const COPY = {
+/**
+ * Exported so `scripts/check.mjs` can assert key parity across locales. A key
+ * present in one language and missing from the other renders as its own dotted
+ * path instead of prose, and nothing throws — the check is the only thing that
+ * catches it.
+ */
+export const COPY = {
   en: {
     // A run lands on `overview` (metrics, convergence, distribution) and
     // `schedule` is the job-by-job table, so the old Prepare/Results pair sent
@@ -81,7 +87,7 @@ const COPY = {
     },
     race: {
       title: "Method race",
-      sub: "Six optimization methods attack the selected problem at once, live, with the same evaluation budget. Lower cost wins.",
+      sub: "Six optimization methods attack the selected problem at once, live — same compiled engine, same objective, same evaluation budget. Lower cost wins.",
       play: "Play", newRace: "New race", speed: "Speed",
       standings: "Standings", standingsNote: "click a method to hide or show it in the charts",
       convergenceTitle: "Best cost over evaluations",
@@ -90,7 +96,6 @@ const COPY = {
       spaceSampling: "Sampling the solution space… {pct}%",
       spaceUnavailable: "The solution-space tree is sampled live and is available up to 400 jobs; this problem has {jobs} jobs. The race itself is unaffected.",
       spaceUnavailableShort: "The tree is not sampled for this instance size.",
-      engineRef: "engine reference (WASM IG)",
       referenceBest: "published reference",
       raceBest: "race best",
       aboveCanopy: "above the canopy",
@@ -99,21 +104,22 @@ const COPY = {
       evals: "evals",
       evalsPerMethod: "evaluations per method",
       waiting: "Waiting for the first improvements…",
-      leaderNote: "Leader: {method} at cost {cost}. Watch the shapes: Descent is a vine that stops; Tabu snakes along; TabuDiv makes jumps; the AMA is a grove; the IG runs its full loop — destroy, rebuild, swap — restarting only from its best node.",
+      leaderNote: "Leader: {method} at cost {cost}. Watch the shapes: Descent is a vine that stops; Tabu snakes along; TabuDiv makes jumps; the AMA is a grove; the IG runs its full loop — destroy, rebuild, swap — under the acceptance rule set on the run controls.",
       finalTitle: "Final standings",
       finalSub: "equal evaluation budget per method: {budget}",
+      wallClock: "Time (this machine)",
+      wallClockNote: "Time is measured on your machine while each method held the worker, and is informational only: the ranking is cost at an equal evaluation budget, which reproduces anywhere. This column does not reproduce and does not affect the standings.",
       method: "Method", cost: "Best cost", gap: "Gap vs reference", winner: "winner",
       statusHeader: "Final status", inspectWinner: "View the winning schedule",
       tipBest: "best", tipScheduled: "scheduled", tipRejected: "rejected", tipCost: "cost",
       pinnedLeaf: "pinned leaf",
       toggleMethod: "click to hide / show in the charts",
       variablesTitle: "Variables of this problem",
-      guideText: "All methods race live on the selected problem with the same evaluation budget: standings, convergence and the solution-space tree.",
+      guideText: "All methods race live on the selected problem with the same evaluation budget: standings, convergence and the solution-space tree. All six are the same compiled engine and the same objective, so the ranking is the algorithm, not the language.",
       status: {
         preparing: "preparing",
         constructing: "constructing",
         constructingGreedy: "constructing (Greedy)",
-        constructingEDD: "constructing (EDD)",
         descending: "descending",
         stuckLocal: "stuck in a local minimum",
         doneConstructive: "done — a constructive does not iterate",
@@ -288,7 +294,7 @@ const COPY = {
     },
     race: {
       title: "Corrida de métodos",
-      sub: "Seis métodos de otimização atacam o problema selecionado ao mesmo tempo, ao vivo, com o mesmo orçamento de avaliações. Vence o menor custo.",
+      sub: "Seis métodos de otimização atacam o problema selecionado ao mesmo tempo, ao vivo — mesmo motor compilado, mesmo objetivo, mesmo orçamento de avaliações. Vence o menor custo.",
       play: "Rodar", newRace: "Nova corrida", speed: "Velocidade",
       standings: "Classificação", standingsNote: "clique num método para ocultá-lo ou exibi-lo nos gráficos",
       convergenceTitle: "Melhor custo ao longo das avaliações",
@@ -297,7 +303,6 @@ const COPY = {
       spaceSampling: "Amostrando o espaço de soluções… {pct}%",
       spaceUnavailable: "A árvore do espaço de soluções é amostrada ao vivo e está disponível até 400 jobs; este problema tem {jobs} jobs. A corrida em si não é afetada.",
       spaceUnavailableShort: "A árvore não é amostrada para este tamanho de instância.",
-      engineRef: "referência do motor (IG em WASM)",
       referenceBest: "referência publicada",
       raceBest: "melhor da corrida",
       aboveCanopy: "acima da copa",
@@ -306,21 +311,22 @@ const COPY = {
       evals: "avaliações",
       evalsPerMethod: "avaliações por método",
       waiting: "Aguardando as primeiras melhorias…",
-      leaderNote: "Líder: {method} com custo {cost}. Repare nas formas: o Descent é uma trepadeira que para; o Tabu serpenteia; o TabuDiv dá saltos; o AMA é um bosque; o IG roda o ciclo completo — destruir, reconstruir, trocar — reiniciando só do melhor nó.",
+      leaderNote: "Líder: {method} com custo {cost}. Repare nas formas: o Descent é uma trepadeira que para; o Tabu serpenteia; o TabuDiv dá saltos; o AMA é um bosque; o IG roda o ciclo completo — destruir, reconstruir, trocar — sob a regra de aceitação escolhida nos controles da execução.",
       finalTitle: "Classificação final",
       finalSub: "orçamento de avaliações igual por método: {budget}",
+      wallClock: "Tempo (nesta máquina)",
+      wallClockNote: "O tempo é medido na sua máquina enquanto cada método ocupou o worker, e é apenas informativo: a classificação é o custo com orçamento de avaliações igual, que reproduz em qualquer lugar. Esta coluna não reproduz e não afeta a classificação.",
       method: "Método", cost: "Menor custo", gap: "Gap vs referência", winner: "vencedor",
       statusHeader: "Status final", inspectWinner: "Ver a programação vencedora",
       tipBest: "melhor", tipScheduled: "programados", tipRejected: "rejeitados", tipCost: "custo",
       pinnedLeaf: "folha fixada",
       toggleMethod: "clique para ocultar / exibir nos gráficos",
       variablesTitle: "Variáveis deste problema",
-      guideText: "Todos os métodos correm ao vivo no problema selecionado com o mesmo orçamento de avaliações: classificação, convergência e a árvore do espaço de soluções.",
+      guideText: "Todos os métodos correm ao vivo no problema selecionado com o mesmo orçamento de avaliações: classificação, convergência e a árvore do espaço de soluções. Os seis são o mesmo motor compilado e o mesmo objetivo, então a classificação é o algoritmo, não a linguagem.",
       status: {
         preparing: "preparando",
         constructing: "construindo",
         constructingGreedy: "construindo (Greedy)",
-        constructingEDD: "construindo (EDD)",
         descending: "descendo",
         stuckLocal: "preso num mínimo local",
         doneConstructive: "concluído — construtivo não itera",

@@ -3,6 +3,14 @@
  * tooltips. Owns a requestAnimationFrame loop that lives OUTSIDE the app's
  * innerHTML render cycle (race state lives in app.state.race; the DOM is only
  * patched incrementally, following updateProgressUi's pattern).
+ *
+ * The loop here DRAWS. It does not advance the race: the six methods run in the
+ * engine worker and the pump in race/engine-race.js issues the next slice when
+ * the previous reply lands. That split is deliberate — rAF does not fire in a
+ * hidden tab, so an rAF-driven race would stall when backgrounded, whereas a
+ * reply-driven one finishes and the drawing merely catches up. The picture
+ * therefore lags the state by one round trip; the fireflies already lerp toward
+ * their leaf, so it is invisible, and nothing here predicts to hide it.
  */
 import { solFeatures } from "./evaluate.js";
 import {
@@ -135,7 +143,9 @@ export function createRaceView(app) {
     if (!r) { view.running = false; return; }
     view.frame = requestAnimationFrame(tick);
     driveSpaceBuilder();
-    if (r.playing) stepRacers(r);
+    // Belt and braces: the pump is self-sustaining, so this only ever restarts
+    // a pump that was stopped by a pause and is now playing again.
+    if (r.playing && !r.done) r.pump?.kick();
     if (now - view.lastDraw > 40) {
       if (attach()) drawAll(now);
       view.lastDraw = now;
@@ -158,23 +168,6 @@ export function createRaceView(app) {
         label.textContent = t("race.spaceSampling", { pct: Math.round(builder.progress * 100) });
       }
     }
-  }
-
-  function stepRacers(r) {
-    const n = r.evaluator.n;
-    const base = n >= 400 ? 15 : n >= 200 ? 40 : 130;
-    const perRacer = base * r.speed;
-    let allDone = true;
-    for (const racer of r.racers) {
-      if (racer.done || racer.evals >= r.budget) {
-        if (!racer.done) { racer.done = true; racer.status = { key: "budgetExhausted" }; }
-        continue;
-      }
-      allDone = false;
-      racer.step(Math.min(perRacer, r.budget - racer.evals));
-    }
-    r.maxEvals = Math.max(0, ...r.racers.map((candidate) => candidate.evals));
-    if (allDone) finish();
   }
 
   function finish() {
@@ -211,7 +204,6 @@ export function createRaceView(app) {
       if (racer.bestCost < lo) lo = racer.bestCost;
       for (const h of racer.hist) hi = Math.max(hi, h.c);
     }
-    for (const point of r.engineTrace) { lo = Math.min(lo, point.c); hi = Math.max(hi, point.c); }
     const reference = app.referenceCost();
     if (Number.isFinite(reference)) { lo = Math.min(lo, reference); hi = Math.max(hi, reference); }
     if (!Number.isFinite(lo) || !hi) {
@@ -250,29 +242,9 @@ export function createRaceView(app) {
       ctx.textAlign = "left";
       ctx.fillText(t("race.referenceBest"), padL + 4, Y(reference) - 7);
     }
-    // engine reference trace (WASM IG on the same seed)
-    if (r.engineTrace.length > 1) {
-      ctx.strokeStyle = cssVar("--ink");
-      ctx.globalAlpha = 0.75;
-      ctx.setLineDash([6, 3]);
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      let prev = null;
-      for (const point of r.engineTrace) {
-        const px = X(Math.min(point.e, maxE));
-        if (!prev) ctx.moveTo(px, Y(point.c));
-        else { ctx.lineTo(px, Y(prev.c)); ctx.lineTo(px, Y(point.c)); }
-        prev = point;
-      }
-      ctx.stroke();
-      ctx.setLineDash([]);
-      ctx.globalAlpha = 1;
-      if (prev) {
-        ctx.fillStyle = cssVar("--ink");
-        ctx.textAlign = "left";
-        ctx.fillText(t("race.engineRef"), X(Math.min(prev.e, maxE)) - 4, Y(prev.c) - 8);
-      }
-    }
+    // There is no second "engine reference" line any more. It existed to draw
+    // the WASM IG onto a chart of JavaScript racers; the IG racer now IS that
+    // engine, so the dashed trace would have been the IG line drawn twice.
     // racer lines
     const ends = [];
     for (const racer of r.racers) {
@@ -578,6 +550,7 @@ export function createRaceView(app) {
     attach,
     start,
     stop,
+    finish,
     drawAll,
     renderSpaceNote,
     get running() { return view.running; },

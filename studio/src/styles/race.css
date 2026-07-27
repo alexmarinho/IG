@@ -275,6 +275,28 @@
   font-weight: 600;
 }
 
+/* The wall-clock column. Machine-dependent, so it is styled as an aside: muted,
+   right-aligned with the numbers, never bold, and never carrying the winner
+   badge. The ranking is cost at an equal evaluation budget; this is a footnote
+   about the hardware and it has to read like one. */
+.race-final-table .is-advisory {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.race-final-table tr.is-winner td.is-advisory { font-weight: 400; }
+
+.race-advisory-note {
+  margin: 8px 2px 0;
+  max-width: 76ch;
+  color: var(--muted);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
 .race-winner-badge {
   display: inline-block;
   margin-left: 8px;

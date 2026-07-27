@@ -40,7 +40,7 @@ import { chartsView } from "./views/charts.js";
 import { racePageView } from "./views/race-page.js";
 import { createRaceEvaluator } from "./race/evaluate.js";
 import { createSpaceBuilder } from "./race/space.js";
-import { createRaceStrategies } from "./race/strategies.js";
+import { createEngineRacers, createRacePump } from "./race/engine-race.js";
 import { createRaceView } from "./race/view.js";
 
 const DEFAULTS = Object.freeze({
@@ -432,10 +432,11 @@ class IGStudioApp {
     const race = this.state.race;
     if (!race) return;
     this.raceView.stop();
+    race.pump?.stop();
     this.state.race = null;
-    if (race.enginePhase === "pilot" || race.enginePhase === "main") {
-      try { await this.client?.reset(); } catch { /* engine already idle */ }
-    }
+    // The wasm race owns memory until it is told otherwise, and a live race
+    // refuses every solve command — so this has to happen even on a page leave.
+    try { await this.client?.raceClear(); } catch { /* engine already idle */ }
     if (!keepResult) this.state.raceResult = null;
   }
 
@@ -577,9 +578,13 @@ class IGStudioApp {
   }
 
   /**
-   * Start (or restart) the method race on the current instance. Purely
-   * client-side: six ported strategies share the race evaluator; the WASM
-   * engine only runs a calibrated reference trace in the background.
+   * Start (or restart) the method race on the current instance.
+   *
+   * All six methods are the compiled engine: the worker creates them with
+   * `race_new` and the page advances them a slice at a time through the pump.
+   * The JS evaluator that remains in `race.evaluator` prices the sampled
+   * solution-space backdrop and validates the winner — it is not in any
+   * method's decision path.
    */
   async startRace({ force = true } = {}) {
     if (!this.state.instance) return;
@@ -590,91 +595,55 @@ class IGStudioApp {
     const speed = this.state.race?.speed ?? 1;
     await this.teardownRace({ keepResult: false });
     const evaluator = createRaceEvaluator(this.state.instance);
-    this.state.race = {
+    const spaceBuilder = createSpaceBuilder(evaluator, this.state.seed);
+    const race = {
       evaluator,
-      racers: createRaceStrategies({ evaluator, seed: this.state.seed }),
+      racers: createEngineRacers(evaluator.n),
       seed: this.state.seed,
       budget: this.state.raceBudget,
-      spaceBuilder: createSpaceBuilder(evaluator, this.state.seed),
+      spaceBuilder,
       space: null,
       playing: true,
       speed,
       done: false,
       winner: null,
       maxEvals: 0,
-      enginePhase: "off",
-      engineTrace: [],
+      /** the incumbent-order blocks only pay for themselves when drawn */
+      wantOrders: Boolean(spaceBuilder.supported),
+      /** false as soon as the worker served anything else during the race */
+      wallClockValid: true,
+      pump: null,
       hover: null,
       focus: null,
       selLeaf: null,
     };
+    this.state.race = race;
     this.state.raceResult = null;
     this.state.status = "running";
     this.state.error = null;
     this.showRun();
     this.render();
     this.raceView.start();
-    this.startEngineReference(this.state.race);
-  }
-
-  /** Engine reference: calibrate iterations→evaluations with a pilot run,
-   * then run the WASM IG once to trace best-cost over evaluations. */
-  async startEngineReference(race) {
     try {
-      race.enginePhase = "pilot";
-      await this.client.reset();
-      if (this.state.race !== race) return;
-      await this.client.configure({
+      await this.client.raceNew({
         seed: race.seed,
-        iterationBudget: 24,
-        checkpointEvery: 4,
-        progressIntervalMs: 0,
+        budget: race.budget,
         d: this.state.d,
         accept: this.state.accept,
         permute: this.state.permute,
       });
-      if (this.state.race !== race) return;
-      await this.client.start();
-    } catch {
-      if (this.state.race === race) race.enginePhase = "off";
-    }
-  }
-
-  async onEngineRefComplete(result) {
-    const race = this.state.race;
-    if (!race || race.enginePhase === "off") return;
-    if (race.enginePhase === "pilot") {
-      try {
-        const iterations = Math.max(1, result.iterations || 1);
-        const evalsPerIteration = Math.max(1, (result.evaluations || iterations) / iterations);
-        const budgetIterations = clampInteger(Math.ceil((race.budget * 1.08) / evalsPerIteration), 30, 1_000_000_000, 2_000);
-        race.enginePhase = "main";
-        await this.client.reset();
-        if (this.state.race !== race) return;
-        await this.client.configure({
-          seed: race.seed,
-          iterationBudget: budgetIterations,
-          checkpointEvery: Math.max(1, Math.floor(budgetIterations / 170)),
-          progressIntervalMs: 150,
-          d: this.state.d,
-          accept: this.state.accept,
-          permute: this.state.permute,
-        });
-        if (this.state.race !== race) return;
-        await this.client.start();
-      } catch {
-        if (this.state.race === race) race.enginePhase = "off";
-      }
+    } catch (error) {
+      if (this.state.race === race) { this.raceView.stop(); this.onError(error); }
       return;
     }
     if (this.state.race !== race) return;
-    race.enginePhase = "done";
-    if (Array.isArray(result.checkpoints) && result.checkpoints.length > 1) {
-      race.engineTrace = result.checkpoints.map((point) => ({
-        e: point.evaluations ?? point.evals,
-        c: point.bestCost ?? point.cost,
-      }));
-    }
+    race.pump = createRacePump({
+      client: this.client,
+      race,
+      onFinished: () => this.raceView.finish(),
+      onError: (error) => { if (this.state.race === race) this.onError(error); },
+    });
+    race.pump.kick();
   }
 
   onRaceFinished() {
@@ -694,23 +663,14 @@ class IGStudioApp {
       this.assertClosure(this.state.raceResult);
     }
     this.state.status = "complete";
-    if (race.enginePhase === "pilot" || race.enginePhase === "main") {
-      this.client?.pause().catch(() => {});
-    }
+    this.client?.raceClear().catch(() => { /* the race is already gone */ });
     this.render();
   }
 
   onProgress(progress) {
-    if (this.state.mode === "race") {
-      const race = this.state.race;
-      if (race && race.enginePhase === "main" && Number.isFinite(progress.evaluations)) {
-        const last = race.engineTrace.at(-1);
-        if (!last || last.e !== progress.evaluations) {
-          race.engineTrace.push({ e: progress.evaluations, c: progress.bestCost });
-        }
-      }
-      return;
-    }
+    // The race publishes nothing through `progress`: it is request/response,
+    // one slice at a time. Anything arriving here in race mode is a solve run.
+    if (this.state.mode === "race") return;
     this.state.progress = progress;
     this.state.status = "running";
     let needsFullRender = false;
@@ -747,10 +707,9 @@ class IGStudioApp {
   }
 
   onSingleComplete(result) {
-    if (this.state.mode === "race") {
-      this.onEngineRefComplete(result);
-      return;
-    }
+    // A race never starts a solve run, so a completion here in race mode would
+    // be a stale reply from a run started before the mode switch.
+    if (this.state.mode === "race") return;
     this.state.singleResult = result;
     this.state.progress = { ...result, mode: "single", iterationBudget: this.state.iterationBudget };
     this.state.status = "complete";
@@ -825,8 +784,7 @@ class IGStudioApp {
       if (!race || race.done) return;
       race.playing = !race.playing;
       this.state.status = race.playing ? "running" : "paused";
-      if (race.playing) this.raceView.start();
-      else this.raceView.stop();
+      if (race.playing) { this.raceView.start(); race.pump?.kick(); } else this.raceView.stop();
       this.render();
       return;
     }
@@ -844,13 +802,9 @@ class IGStudioApp {
 
   async reset() {
     if (this.state.mode === "race") {
-      this.raceView.stop();
-      const hadEngine = this.state.race && this.state.race.enginePhase !== "off" && this.state.race.enginePhase !== "done";
-      this.state.race = null;
-      this.state.raceResult = null;
+      await this.teardownRace({ keepResult: false });
       this.state.status = "ready";
       this.state.error = null;
-      if (hadEngine) { try { await this.client.reset(); } catch { /* engine already idle */ } }
       this.render();
       return;
     }

@@ -1,10 +1,22 @@
 .env
+.env.*
+# …except the template, which is tracked on purpose and holds only placeholders.
+!.env.example
+*.pem
+*.key
+id_rsa
+.netrc
+.npmrc
 __pycache__/
 *.pyc
 *.egg-info/
 build/
 dist/
 .DS_Store
+# Rust build output and JS deps, anywhere in the tree — not just under
+# google-sheets/. `target/` in particular is gigabytes and was unignored.
+target/
+node_modules/
 google-sheets/node_modules
 google-sheets/previews/
 google-sheets/previews-pt/
@@ -12,3 +24,25 @@ google-sheets/**/.clasp.json
 !google-sheets/dist/
 google-sheets/dist/*
 !google-sheets/dist/*.xlsx
+
+# ── the PRIVATE development workspace ────────────────────────────────────────
+# `private/` is its OWN repository (github.com/alexmarinho/IG-private) and is
+# never published from here. It holds the BRD, the TDD, the film's source and the
+# agent briefs. Only RESULTS cross into this public repo — see
+# private/tools/publish-film.mjs, which is the single sanctioned crossing.
+private/
+
+# agent/IDE local configuration is development tooling, not project content
+.claude/
+.codex/
+.gemini/
+
+# Provider entry points. Each is a SYMLINK into the private workspace, so every
+# tool finds the same canonical brief (private/AGENTS.md) under whatever filename
+# it looks for. They are ignored here because agent configuration is development
+# tooling, not published project content. See private/docs/ONBOARDING.md.
+/AGENTS.md
+/CLAUDE.md
+/GEMINI.md
+/KIMI.md
+/.agents/

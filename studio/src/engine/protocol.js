@@ -19,7 +19,43 @@ export const ENGINE_COMMAND = Object.freeze({
   RESET: 'reset',
   STATE: 'state',
   DISPOSE: 'dispose',
+  RACE_NEW: 'race-new',
+  RACE_SLICE: 'race-slice',
+  RACE_CLEAR: 'race-clear',
 });
+
+/**
+ * The method race is request/response, not an event stream: one `RACE_SLICE`
+ * round trip advances every live method by a slice of evaluations and answers
+ * with the whole snapshot. The main thread keeps exactly one slice in flight,
+ * so the reply *is* the backpressure — there is no queue to drain and no
+ * second consumer of the worker while a race is running.
+ */
+export const RACE_METHOD_IDS = Object.freeze([
+  'greedy', 'descent', 'tabu', 'tabudiv', 'ama', 'ig',
+]);
+
+/**
+ * Status keys by index, mirroring `engine/src/race/mod.rs` (`ST_*`). This is a
+ * wire format: append, never reorder. Index 3 is reserved-and-dead — the IG
+ * racer is `solver::Run`, which constructs by shuffled greedy, so nothing
+ * emits `constructingEDD` any more.
+ */
+export const RACE_STATUS_KEYS = Object.freeze([
+  'preparing',
+  'constructing',
+  'constructingGreedy',
+  'constructingEDD',
+  'descending',
+  'stuckLocal',
+  'doneConstructive',
+  'iteration',
+  'generation',
+  'diversified',
+  'breeding',
+  'igLoop',
+  'budgetExhausted',
+]);
 
 export const ENGINE_EVENT = Object.freeze({
   STATE: 'state',
@@ -36,6 +72,7 @@ export const ENGINE_STATUS = Object.freeze({
   INSTANCE_SELECTED: 'instance-selected',
   CONFIGURED: 'configured',
   RUNNING: 'running',
+  RACING: 'racing',
   PAUSED: 'paused',
   COMPLETED: 'completed',
   ERROR: 'error',

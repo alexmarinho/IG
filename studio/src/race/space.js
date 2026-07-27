@@ -10,7 +10,7 @@
  * instances never block the frame loop.
  */
 import { solFeatures } from "./evaluate.js";
-import { createSearchOps, mulberry32 } from "./strategies.js";
+import { createSearchOps, mulberry32 } from "./sampling.js";
 
 /** Vertical px band at the top of the canvas: better than every sampled leaf. */
 export const CROWN = 46;

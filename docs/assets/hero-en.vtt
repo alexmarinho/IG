@@ -1,0 +1,137 @@
+WEBVTT
+
+STYLE
+::cue {
+  background-color: rgba(23, 20, 16, 0.74);
+  color: #f0e9dd;
+  font-size: 88%;
+  line-height: 1.35;
+}
+
+1
+00:00:00.000 --> 00:00:02.942 line:84%
+Every factory hides the same problem.
+
+2
+00:00:02.972 --> 00:00:08.677 line:84%
+In a coffee roastery, a different roast means emptying the drum and starting the profile over.
+
+3
+00:00:08.707 --> 00:00:14.122 line:84%
+In a brewery, after an IPA you wash the entire line, or you do not brew.
+
+4
+00:00:14.152 --> 00:00:18.302 line:84%
+In 3D printing, you swap the filament and wait for heat.
+
+5
+00:00:18.332 --> 00:00:22.284 line:84%
+Different businesses — one question: what order?
+
+6
+00:00:22.314 --> 00:00:23.817 line:84%
+Here it is with numbers.
+
+7
+00:00:23.847 --> 00:00:27.207 line:84%
+Five orders, each needing its own tool.
+
+8
+00:00:27.237 --> 00:00:34.173 line:84%
+Run them as they arrived, and every family change stops the machine — it swaps the tool and produces nothing.
+
+9
+00:00:34.203 --> 00:00:35.798 line:84%
+Four stops.
+
+10
+00:00:35.828 --> 00:00:42.683 line:84%
+Now just reorder, grouping the similar ones: same work, two stops, and the shop finishes earlier.
+
+11
+00:00:42.713 --> 00:00:45.330 line:84%
+But the changeover is only one of the bills.
+
+12
+00:00:45.360 --> 00:00:52.227 line:84%
+There is the lateness on every promised date — and sometimes the cheapest move is refusing the order outright.
+
+13
+00:00:52.257 --> 00:00:58.508 line:84%
+Count it properly, and the most urgent order, left for last, costs more than everything before it.
+
+14
+00:00:58.538 --> 00:01:00.354 line:84%
+Order changes time.
+
+15
+00:01:00.384 --> 00:01:02.548 line:84%
+Time changes cost.
+
+16
+00:01:02.578 --> 00:01:05.160 line:84%
+So why not test every order?
+
+17
+00:01:05.190 --> 00:01:09.549 line:84%
+With five jobs there are a hundred and twenty — checkable one by one.
+
+18
+00:01:09.579 --> 00:01:12.695 line:84%
+And the best one pays the same two changeovers.
+
+19
+00:01:12.725 --> 00:01:18.593 line:84%
+But at twenty-eight jobs, checking them all would take thirty-five thousand times the age of the universe.
+
+20
+00:01:18.623 --> 00:01:20.973 line:84%
+This is not about a faster computer.
+
+21
+00:01:21.003 --> 00:01:28.310 line:84%
+This is where metaheuristics come in: stop looking for the perfect answer, find a very good one fast.
+
+22
+00:01:28.340 --> 00:01:38.411 line:84%
+Take a sequence, tear a piece out, offer each job back into every free position at its real price, and keep the cheapest — refusing when nothing pays.
+
+23
+00:01:38.441 --> 00:01:40.396 line:84%
+That loop is one bet.
+
+24
+00:01:40.426 --> 00:01:44.483 line:84%
+Every method in this field begins by choosing where not to look.
+
+25
+00:01:44.513 --> 00:01:47.873 line:84%
+Prove it exactly, and the hours run out.
+
+26
+00:01:47.903 --> 00:01:52.157 line:84%
+Accept only improvements and you stop at the first dead end.
+
+27
+00:01:52.187 --> 00:01:56.139 line:84%
+Ban going back, and the search walks out of it.
+
+28
+00:01:56.169 --> 00:01:59.425 line:84%
+Some ruin their own best answer on purpose.
+
+29
+00:01:59.455 --> 00:02:04.452 line:84%
+Eight ways to spend the time you have, and none is best on every case.
+
+30
+00:02:04.482 --> 00:02:09.038 line:84%
+The closer the model gets to a real shop, the more branches appear.
+
+31
+00:02:09.068 --> 00:02:10.802 line:84%
+Which is the good news.
+
+32
+00:02:10.832 --> 00:02:16.487 line:84%
+It is all below — code, tests, every number, and what did not work.

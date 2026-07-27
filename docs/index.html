@@ -40,9 +40,14 @@
   else if(l==="en") document.documentElement.setAttribute("lang","en");
   if(t!=="light"&&t!=="dark"){
     if(t!==null){ try{ localStorage.removeItem("ig-theme"); }catch(e){} }
-    return;                       /* absent === follow the OS; CSS @media handles it, no JS needed */
+    t="light";                    /* no stored choice === LIGHT; the :root base paints it */
+  }else{
+    /* Stamped ONLY for an explicit stored choice, so the runtime's end-of-body
+       apply(effective(), stored()!==null) — which REMOVES data-theme when nothing
+       is stored — stays a no-op instead of flipping visibly. The meta/icon loop
+       below still runs, which keeps a dark-OS visitor off a dark address bar. */
+    document.documentElement.setAttribute("data-theme",t);
   }
-  document.documentElement.setAttribute("data-theme",t);
   var q=document.querySelectorAll('meta[name="theme-color"][data-for],link[rel="icon"][data-for]');
   for(var i=0;i<q.length;i++){
     q[i].setAttribute("media", q[i].getAttribute("data-for")===t ? "all" : "not all");
@@ -120,40 +125,11 @@
   --scene-filter:none;
 }
 
-/* ============ DARK (system preference) ============ */
-@media (prefers-color-scheme:dark){
-  :root{
-    color-scheme:dark;
-    --paper:#211d18; --card:#2a251e; --well:#161410; --raise:#362f28;
-    --stage:#2a251d; --grid:#3a3226;
-    --ink:#efe7d8; --ink-soft:#b3a892;
-    --terra:#e0895f; --maple:#d0a06a; --steel:#a7bcd8; --brass:#e0be6a; --sage:#a4bd97;
-    --red:#e0836e;
-    --setup-token:#c98f5e;
-    --terra-ink:#e59a72; --brass-ink:#e0be6a; --sage-ink:#a4bd97; --steel-ink:#a7bcd8;
-    --rule:#3a3226; --rule-strong:#4d4335; --edge:#897761;
-    --f1:#e0895f; --f2:#a7bcd8; --f3:#a4bd97; --f4:#e0be6a;
-    --f1-bg:#4a3327; --f2-bg:#2f3a47; --f3-bg:#333d2e; --f4-bg:#463c22;
-    --on-accent:#211d18;
-    --fam-ink:#211d18;
-    --on-accent-halo:rgba(239,231,216,.45);
-    --fam-ink-halo:rgba(253,248,239,.62);
-    --late-scrim:rgba(21,15,11,.50);
-    --hi-bg:#443419; --warn-bg:#43261f; --warn-edge:#a3644f; --sel:#4a3b26;
-    --inverse-bg:#403a30; --inverse-ink:#efe7d8; --inverse-dim:#b3a892;
-    --race-tabudiv:#5f9f92;
-    --wash-terra:rgba(224,137,95,.12);
-    --wash-sage:rgba(164,189,151,.14);
-    --wash-brass:rgba(224,190,106,.16);
-    --chip-sage:rgba(164,189,151,.22);
-    --chip-brass:rgba(224,190,106,.22);
-    --glow-brass:rgba(224,190,106,.34);
-    --pulse-terra:rgba(224,137,95,.45); --pulse-terra-0:rgba(224,137,95,0);
-    --ring:rgba(239,231,216,.14); --shadow:rgba(0,0,0,.55);
-    --card-fade:rgba(42,37,30,0);
-    --scene-filter:brightness(.84) saturate(.9) contrast(1.02);
-  }
-}
+/* DARK is no longer offered by the OS: light is the default for a visitor who
+   has not chosen. The `@media (prefers-color-scheme:dark)` block that sat here
+   declared the same custom properties as `:root[data-theme="dark"]` below, so
+   deleting it loses nothing — dark is reached only by the toggle, which stamps
+   data-theme and is what T0 replays before paint. */
 
 /* ============ EXPLICIT LIGHT (beats the media query) ============ */
 :root[data-theme="light"]{
@@ -294,10 +270,21 @@ body{
 .site-head-inner{max-width:1120px;margin:0 auto;padding:14px 20px 10px;transition:padding .2s ease}
 /* JS toggles .compact on scroll: the header sheds its subtitle and tightens */
 .site-head.compact .site-head-inner{padding-top:8px;padding-bottom:8px}
-.site-head.compact .subtitle{display:none}
-.brand-row{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px 16px}
-h1.brand{font:600 21px/1.25 var(--serif);letter-spacing:.2px}
-h1.brand em{font-style:normal;color:var(--terra)}
+/* The compact state used to hide `.subtitle`; that paragraph is gone and the
+   brand's second line took its job, so the scroll collapse hides that instead. */
+.site-head.compact .brand-tail{display:none}
+/* One line, name left and controls right. `align-items:center` is what makes the
+   controls look placed rather than crowded: they centre against the name's line
+   box instead of hanging off the top of a two-line block. nowrap keeps them on
+   this line at every width — they must never drop to a row of their own. */
+.brand-row{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:14px}
+h1.brand{font:600 18px/1.2 var(--serif);letter-spacing:.2px;margin:0;min-width:0}
+h1.brand em{font-style:normal;color:var(--terra);white-space:nowrap}
+/* Line two, spanning the full content width — the point of it being a sibling of
+   .brand-row rather than a child. nowrap is safe: at 320px it needs ~145px of
+   the ~288px available. */
+.brand-tail{margin:1px 0 0;font:500 11.5px/1.3 var(--sans);color:var(--ink-soft);
+  letter-spacing:.03em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .badge{
   font:600 10px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;
   color:var(--ink-soft);border:1px solid var(--rule);border-radius:999px;
@@ -434,7 +421,9 @@ h1.brand em{font-style:normal;color:var(--terra)}
   color:var(--muted);font:600 11.5px/1.6 var(--mono)}
 .ar-tip{position:fixed;z-index:60;display:none;max-width:280px;padding:8px 10px;border-radius:8px;
   background:var(--inverse-bg);color:var(--paper);font:500 12px/1.45 var(--sans);box-shadow:0 6px 20px var(--shadow);pointer-events:none}
-.head-utils{display:flex;align-items:center;gap:12px;margin-left:auto}
+/* `flex:none` so the controls never compress; the brand takes the slack. Kept
+   under this exact class name because @media print hides it by name. */
+.head-utils{display:flex;align-items:center;gap:8px;margin-left:auto;flex:none}
 .lang-toggle{display:inline-flex;border:1px solid var(--rule);border-radius:999px;overflow:hidden}
 .lang-toggle button{font:600 10.5px/1 var(--sans);letter-spacing:.08em;padding:5px 11px;border:0;background:transparent;color:var(--ink-soft);cursor:pointer;transition:background .15s,color .15s}
 .lang-toggle button.on{background:var(--terra);color:var(--on-accent)}
@@ -450,10 +439,39 @@ h1.brand em{font-style:normal;color:var(--terra)}
 .theme-toggle button:focus-visible,.lang-toggle button:focus-visible{outline-offset:-2px}
 .theme-toggle button[aria-pressed="true"]:focus-visible,
 .lang-toggle button.on:focus-visible{outline-color:var(--on-accent)}
-@media (pointer:coarse){.theme-toggle button{padding:8px 12px}}
-.gh-link{font:600 11px/1 var(--sans);letter-spacing:.04em;color:var(--ink-soft);text-decoration:none;white-space:nowrap}
+/* The mark only. A square box so the tap target is square rather than a
+   text-height sliver, and so it reads as a sibling of the two pills. */
+.gh-link{display:inline-flex;align-items:center;justify-content:center;
+  width:30px;height:26px;color:var(--ink-soft);text-decoration:none;border-radius:999px;
+  transition:color .15s,background .15s}
+.gh-link svg{display:block}
 .gh-link:hover{color:var(--terra)}
-@media(max-width:560px){.head-utils{margin-left:0;width:100%;margin-top:6px;justify-content:flex-start}}
+/* Touch sizing keys off the INPUT DEVICE, not the width — a narrow desktop window
+   still has a mouse. `(hover:none)` is the second half on purpose: a touch-first
+   tablet can report pointer:fine and used to get none of this. */
+@media (pointer:coarse),(hover:none){
+  .theme-toggle button{padding:10px 13px}
+  .gh-link{width:40px;height:40px}
+  .theme-toggle button,.lang-toggle button{min-height:40px}
+  nav.anchor-nav a{padding:13px 11px}
+  .m-links a,.data-fold summary{min-height:44px;display:inline-flex;align-items:center}
+  select,input[type=range]{min-height:44px}
+}
+/* The rule that lived here gave .head-utils width:100% under 560px — exactly the
+   full-width second row the brand row now refuses. Removing it is what keeps the
+   controls beside the brand, and it also closed a ~5px band where flex-wrap broke
+   the row before the media query fired, leaving them wrapped AND pushed right. */
+/* Small phones: the three controls are a fixed ~157px, so on a 320px screen they
+   left the name 85px and "Iterated Greedy" broke in half. */
+@media (max-width:380px){
+  h1.brand{font-size:15px}
+  .brand-tail{font-size:11px}
+  .brand-row{gap:10px}
+  .head-utils{gap:6px}
+  .theme-toggle button{padding:5px 6px}
+  .lang-toggle button{padding:5px 6px}
+  .gh-link{width:24px}
+}
 
 /* ---- Future: evidence, roadmap, ecosystem ---- */
 .f-head{font:600 clamp(19px,2vw,23px)/1.2 var(--serif);margin:26px 0 10px;letter-spacing:.2px}
@@ -583,6 +601,15 @@ figcaption.fig-cap{
 }
 figcaption.fig-cap .fig-no{color:var(--terra-ink);font-weight:700}
 figcaption.fig-cap .fig-name{color:var(--ink);letter-spacing:.06em}
+figcaption.fig-cap .fig-credit{
+  margin-left:auto;font-weight:400;font-size:10px;letter-spacing:.04em;
+  text-transform:none;opacity:.72;
+}
+/* No rule reached this link, so it rendered in browser-default blue with an
+   underline — the one loud thing in a caption meant to be quiet. */
+figcaption.fig-cap .fig-credit a{color:var(--terra-ink);text-decoration:none;
+  border-bottom:1px solid var(--rule)}
+figcaption.fig-cap .fig-credit a:hover{border-bottom-color:var(--terra)}
 .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 4px}
 button.btn,a.btn{
   font:600 14px/1 var(--sans);color:var(--ink);
@@ -669,7 +696,7 @@ svg.gantt{display:block;width:100%;min-width:520px;height:auto}
 .costcomp .cc-setup{background:var(--setup-token)}
 .costcomp .cc-delay{background:var(--red)}
 .costcomp .cc-total{position:absolute;left:100%;top:50%;transform:translate(5px,-50%);
-  font:700 9px/1 var(--mono);color:var(--terra);white-space:nowrap}
+  font:700 11px/1 var(--mono);color:var(--terra);white-space:nowrap}
 .costcomp-cap{font-size:11px;color:var(--ink-soft);font-style:italic;margin:8px 0 0}
 table.data{
   border-collapse:collapse;font-size:12px;margin:10px 0 2px;
@@ -703,6 +730,11 @@ table.data .famcell{font-weight:700;text-align:center}
 .math{text-transform:none;font-style:italic;letter-spacing:.02em}
 .fact .val{font:600 20px/1.15 var(--serif);color:var(--ink);word-break:break-word}
 .fact .val small{font-size:14px;color:var(--ink-soft)}
+/* The qualification under the headline number: its own line, quiet, and NOT
+   terracotta — `.fact.hot .val` colours the whole value, and a caveat that reads
+   as loud as the number it qualifies defeats the point of writing it. */
+.fact .val small.fact-caveat{display:block;margin-top:5px;font:400 11.5px/1.4 var(--sans);
+  color:var(--ink-soft);letter-spacing:0}
 .fact.hot .val{color:var(--terra-ink)}
 .slider-row{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:10px 0 6px;padding:13px 16px;background:var(--f4-bg);border:1px solid var(--brass);border-radius:9px}
 .slider-prompt{display:flex;align-items:center;gap:7px;font:700 12.5px/1.2 var(--sans);letter-spacing:.02em;color:var(--terra-ink);text-transform:none;white-space:nowrap}
@@ -727,7 +759,7 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
 .bar-fill-label.outside{left:calc(100% + 7px);right:auto;color:var(--brass-ink)}
 .bar-ticks{position:absolute;inset:0;pointer-events:none}
 .bar-ticks i{position:absolute;top:0;bottom:0;width:1px;background:var(--rule)}
-.bar-ticks b{position:absolute;top:2px;font:600 8.5px/1 var(--sans);color:var(--ink-soft);transform:translateX(3px)}
+.bar-ticks b{position:absolute;top:2px;font:600 10px/1 var(--sans);color:var(--ink-soft);transform:translateX(3px)}
 .mult-row{display:flex;flex-wrap:wrap;gap:2px 9px;align-items:baseline;margin-top:12px;font-size:12px;color:var(--ink-soft)}
 .mult-row>span:first-child{font-style:italic}
 .mult-chip{
@@ -790,7 +822,15 @@ input[type=range]{accent-color:var(--terra);width:min(320px,100%);height:32px;cu
 }
 .ig-phase .ph-no{color:var(--ink-soft);font-family:var(--mono);font-size:11px;margin-right:8px}
 /* objective sheet */
-.sheet-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.sheet-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;position:relative}
+/* The objective sheet clips its rightmost Total column at 375px with nothing to say
+   so. Same affordance the gantt already has, driven by the same .can-fade class. */
+@media (max-width:640px){
+  .sheet-wrap.can-fade::after{
+    content:'';position:absolute;top:0;bottom:0;right:0;width:28px;pointer-events:none;
+    background:linear-gradient(to left, var(--card), var(--card-fade));
+  }
+}
 .sheet{
   width:100%;border-collapse:collapse;font-size:12px;margin-top:2px;
 }
@@ -917,7 +957,10 @@ footer a{color:var(--terra-ink)}
 .oa-read a{display:flex;gap:12px;align-items:baseline;padding:11px 2px;text-decoration:none;color:inherit;border-bottom:1px solid var(--rule)}
 .oa-read a:hover{background:var(--wash-brass)}
 .oa-read .y{font:600 12px/1 var(--mono);color:var(--ink-soft);min-width:38px}
-.oa-read .x{flex:1}
+/* `min-width:0` is load-bearing: without it a flex item will not shrink below its
+   min-content width, and the row's nowrap badge pushed the whole page into a 35px
+   horizontal scroll at 320px. */
+.oa-read .x{flex:1 1 12ch;min-width:0}
 .oa-read .x b{font:600 15px/1.3 var(--serif);display:block}
 .oa-read .x small{color:var(--ink-soft);font-size:12.5px}
 .oa-read .g{font:700 9px/1.3 var(--sans);letter-spacing:.07em;text-transform:uppercase;padding:3px 7px;border-radius:5px;white-space:nowrap}
@@ -1126,7 +1169,11 @@ footer a{color:var(--terra-ink)}
   /* ---- The establishing figure: the shop this file describes -------------
      The render at size beside the shop's own complaint, the one line its own
      numbers force, and the four objective terms in that trade's vocabulary. */
-  .run-scene { display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  /* One column since the scenario render went. The two-column grid left the text in
+     half the width with an empty column beside it, which made this block TALLER
+     without the picture than with it. The `.run-scene-art` rules below are kept,
+     unused, because the Studio still ships the four renders. */
+  .run-scene { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; align-items: start; }
   .run-scene-art { position: relative; border: 1px solid var(--rule); border-radius: 9px; overflow: hidden; background: var(--well); }
   .run-scene-art img { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: var(--scene-pos, 50% 50%); filter: var(--scene-filter, none); }
   .run-scene .lede { margin: 0; max-width: none; font-size: 13.5px; line-height: 1.55; }
@@ -1157,6 +1204,11 @@ footer a{color:var(--terra-ink)}
   .ig-hero h2 em { font-style: normal; color: var(--terra); }
   .ig-hero .bridge { max-width: 60ch; font: italic 400 clamp(17px,1.6vw,21px)/1.5 var(--serif); color: var(--ink); margin-bottom: 6px; }
   /* H3 — one-time staggered hero entrance + scroll cue (both gated off for reduced-motion) */
+  #heroFilm::cue { background-color: rgba(23,20,16,.74); color: #f0e9dd; font-size: 88%; }
+  .hero-film { margin: 24px 0 26px; max-width: 100%; }
+  .hero-film video { display:block; width:100%; height:auto; border-radius:8px;
+    border:1px solid var(--rule); background:var(--well); box-shadow:0 2px 18px var(--shadow); }
+  .hero-film .fig-cap { margin-top: 10px; }
   .ig-hero .scroll-cue { font: 600 12px/1 var(--sans); letter-spacing: .05em; color: var(--terra-ink); margin: 14px 0 0; }
   .ig-hero .scroll-cue.hide { display: none; }
   @media (prefers-reduced-motion:no-preference){
@@ -1193,7 +1245,12 @@ footer a{color:var(--terra-ink)}
 <header class="site-head">
   <div class="site-head-inner">
     <div class="brand-row">
-      <h1 class="brand"><em>Iterated Greedy</em> — single-machine scheduling</h1>
+      <!-- The <em> stays its own element because it is deliberately NOT translated.
+           The descriptor is a SIBLING of .brand-row, not a child of the h1: inside
+           the row it only ever got the width the controls left over (~120px at
+           320px) and broke into two lines. It stays a single text node either way,
+           which is what the i18n walker keys on. -->
+      <h1 class="brand"><em>Iterated Greedy</em></h1>
       <div class="head-utils">
         <span class="theme-toggle" role="group" aria-label="Theme / Tema">
           <button type="button" data-theme-set="light" aria-label="Light / Claro" aria-pressed="true">
@@ -1207,18 +1264,27 @@ footer a{color:var(--terra-ink)}
           <button type="button" data-lang="en" class="on" aria-pressed="true">EN</button>
           <button type="button" data-lang="pt" aria-pressed="false">PT</button>
         </span>
-        <a class="gh-link" href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">GitHub&nbsp;↗</a>
+        <!-- The mark alone. "GitHub ↗" had no i18n key in either direction, so
+             nothing translatable is lost; the accessible name is on aria-label. -->
+        <a class="gh-link" href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener"
+           aria-label="GitHub" title="GitHub">
+          <svg viewBox="0 0 16 16" width="17" height="17" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.07-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+        </a>
       </div>
     </div>
-    <p class="subtitle">Interactive explanation with runnable demonstrations and benchmark results.</p>
+    <!-- Line two, full width. Replaced a longer subtitle ("Interactive explanation
+         with runnable demonstrations and benchmark results.") that was the third
+         time the top of the page said what the page is. -->
+    <p class="brand-tail">single-machine scheduling</p>
   </div>
   <nav class="anchor-nav" aria-label="Sections">
     <ul id="navList">
-      <li><a href="#m-story" class="active">Story</a></li>
+      <!-- "Get it" is gone with #m-interfaces: it pointed at a section that no
+           longer exists, and the label never said what a reader would get. -->
+      <li><a href="#m-story" class="active">Problem</a></li>
       <li><a href="#m-arena">Compare</a></li>
       <li><a href="#m-run">Run</a></li>
-      <li><a href="#m-future">Future</a></li>
-      <li><a href="#m-interfaces">Get it</a></li>
+      <li><a href="#m-future">More</a></li>
     </ul>
   </nav>
   <div class="read-progress" id="readProgress" aria-hidden="true"></div>
@@ -1230,6 +1296,40 @@ footer a{color:var(--terra-ink)}
   <h2>The order of the jobs <em>determines the total cost.</em></h2>
   <p class="bridge">An optimal order exists, but there are too many orders to test. Iterated Greedy builds one order and improves it by iteration.</p>
   <p class="bridge">For anyone who has ever had to decide which job runs next.</p>
+
+  <!-- The hero film. Rendered from the private workspace (private/video/) and
+       published by private/tools/publish-film.mjs; the source is not in this repo.
+       Deliberately NOT autoplaying: preload="none" means a visitor who scrolls
+       past pays nothing, and the poster is a real frame so the page never shows a
+       black rectangle. It HAS sound, so it must never be given autoplay: audio
+       that starts on its own is the reason browsers block autoplay at all. -->
+  <figure class="hero-film">
+    <!-- aria-label, not aria-describedby: the caption it used to point at now
+         holds only the Remotion credit, which would have described the film as
+         "Created using Remotion". The label carries what the removed visible
+         caption used to say, for anyone who cannot see the poster frame. -->
+    <video id="heroFilm" controls playsinline preload="none"
+      poster="assets/hero-poster-en.png" width="1920" height="1080"
+      aria-label="The problem, the wall, and the method — an introduction to Iterated Greedy">
+      <source id="heroFilmSrc" src="assets/hero-en.mp4" type="video/mp4">
+      <!-- Captions are generated from the same beat table as the voice-over
+           (private/tools/synth-narration.mjs), so they cannot say something the
+           narrator does not. Deliberately NOT `default`: the film already fills
+           the frame with its own type, and a forced caption bar would sit on top
+           of it. The player's CC control turns them on. -->
+      <track id="heroFilmVtt" kind="captions" srclang="en" label="English"
+        src="assets/hero-en.vtt">
+      <p>Your browser cannot play this video. <a href="assets/hero-en.mp4">Download it</a>.</p>
+    </video>
+    <!-- No figure label. The film is the first thing on the page and announces
+         itself; a "Film · title · duration" line only restated the player, and
+         the duration was one more number to keep in step with the asset. The
+         credit is all that is left, so it no longer needs margin-left:auto to
+         reach the right edge — but it keeps it, because the rule is shared. -->
+    <figcaption class="fig-cap" id="heroFilmCap">
+      <span class="fig-credit">Created using <a href="https://www.remotion.dev" target="_blank" rel="noopener">Remotion</a></span>
+    </figcaption>
+  </figure>
 
   <p class="intro">A machine runs one job at a time. Changing from one product family to another costs a setup, every order has a promised date, and finishing late costs money. The order the jobs run in decides the bill. This page builds that problem from five jobs, shows why testing every option stops working almost immediately, and then runs the algorithm that searches instead.</p>
 
@@ -1582,7 +1682,11 @@ footer a{color:var(--terra-ink)}
   cost. The current engine was scored on all of them:</p>
 
   <div class="fact-grid">
-    <div class="fact hot"><div class="lbl">Best-known values matched or beaten</div><div class="val">39 <small>/ 44 instances</small></div></div>
+    <!-- 39 is the figure WITH the adaptive destruction ramp. Under the uniform
+         45s x 3 seeds protocol it is 37, and both RESULTS.md and the README say
+         so — the page was the only place stating 39 flat. The qualification is
+         the difference between a result and a headline. -->
+    <div class="fact hot"><div class="lbl">Best-known values matched or beaten</div><div class="val">39 <small>/ 44 instances</small><small class="fact-caveat">37 under the uniform protocol; 39 with the documented adaptive runs</small></div></div>
     <div class="fact"><div class="lbl">Improved below the 2015 record</div><div class="val">2 <small>new best-knowns</small></div></div>
     <div class="fact"><div class="lbl">Independent correctness checks</div><div class="val">3 <small>verification layers</small></div></div>
   </div>
@@ -1626,7 +1730,7 @@ footer a{color:var(--terra-ink)}
         <p class="status-line" id="runWorldsNote"></p>
         <p class="lab-hint"><strong>One headline each &#8212; and it is a different measurement every
         time.</strong> Each world breaks the schedule somewhere else, so each tile reports the measure
-        that breaks it. The strip across the foot of every picture is the one measure they share: the
+        that breaks it. The strip across the top of every tile is the one measure they share: the
         mean changeover against one order's machine time, on the same scale in all four.</p>
       </div>
 
@@ -1668,10 +1772,11 @@ footer a{color:var(--terra-ink)}
           <span class="lab-inst" id="runSceneKind"></span>
         </figcaption>
         <div class="run-scene">
-          <div class="run-scene-art">
-            <img id="runSceneImg" src="assets/scenarios/factory-cnc.webp" alt=""
-                 width="960" height="540" loading="lazy" decoding="async">
-          </div>
+          <!-- The 16:9 scenario render that sat here is gone. It was decoration:
+               the two lines below — the story, and the problem line saying that
+               changing family is paid in money rather than minutes — carry what
+               the picture did, and more precisely. The four renders stay on disk;
+               the Studio is what generates them. -->
           <div class="run-scene-say">
             <p class="lede" id="runStory"></p>
             <p class="run-problem" id="runProblemLine"></p>
@@ -1846,110 +1951,139 @@ footer a{color:var(--terra-ink)}
 
 <section class="movement" id="m-future">
   <div class="movement-head">
-    <h2 class="m-title">Next research.</h2>
-    <p class="m-lede">The current engine reproduces the 2015 study. The work below extends the search and the model, one change at a time.</p>
+    <h2 class="m-title">Where this shows up.</h2>
+    <p class="m-lede">The shape repeats wherever one resource does one thing at a time and switching between kinds of work costs something you cannot get back.</p>
   </div>
   <div class="m-body">
-    <!-- A LEDGER, NOT AN ARGUMENT. Four status rows crossed by two axes
-         (Implemented/Measured × Canonical/Experimental) are inventory; the
-         section argues where the work goes next. The count and the two adverse
-         results ride in the summary, so folding this costs a reader nothing. -->
-    <details class="f-fold">
-      <summary>
-        <h3 class="f-head">What works today</h3>
-        <span class="f-fold-find">One canonical build and three measured experiments, two of which report against themselves: 16× GPU replicas cost 22% more wall clock at n=30, and the learned operators lose 1.3 pp held out.</span>
-      </summary>
-      <div class="f-fold-body">
-    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>Exact evaluator</strong><span class="f-chip ok">Implemented</span><span class="f-chip dim">Canonical</span></div><p>Fixed-point objective pricing, Rust/Python golden agreement and a built browser WASM.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Adaptive destruction</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Reached the recorded best values in two stagnation cases; aggressive ramps hurt fine-grained cases.</p></div><div class="f-ev"><div class="f-ev-top"><strong>GPU replica fleet</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Exact pricing verified on an RTX 3090: 16× the replicas cost 22% more wall clock at n=30, but 4.2× at n=200. One optimized Rust core still wins single-instance speed.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Learned removal operators</strong><span class="f-chip meas">Measured</span><span class="f-chip dim">Experimental</span></div><p>Evolved operators survive unseen seeds but not unseen instances: +0.6 pp against random removal on the training set, −1.3 pp held out, across three models. <a href="#demo-benchmark">Recorded in the benchmark section above.</a></p></div></div>
-      </div>
-    </details>
-
-    <h3 class="f-head">The next problem</h3>
-    <p class="f-lede">Exact methods now prove optimality on this benchmark, so there is nothing left for a heuristic to win. The interesting version is closer to a real shop: orders arrive during the day, the times are estimates, and each one has to be accepted or refused on the spot.</p>
-    <div class="oa">
-      <div class="oa-top"><span class="oa-t">Online order acceptance</span>
-        <div class="oa-ctl"><button id="oaPlay" type="button">Pause</button><button id="oaStep" type="button">Step</button><button id="oaReset" type="button">Restart</button></div>
-      </div>
-      <canvas id="oaCv" width="900" height="300" role="img" aria-label="Animated illustration of online order acceptance on a single machine"></canvas>
-      <div class="oa-beat" id="oaBeat" aria-live="polite"></div>
-      <div class="oa-sc">
-        <div class="oa-s hi"><div class="l">Reoptimizing policy · profit</div><div class="v" id="oaA">0</div><div class="n">replans the whole schedule at every arrival</div></div>
-        <div class="oa-s"><div class="l">Myopic greedy · profit</div><div class="v" id="oaB">0</div><div class="n">accepts every order that still fits</div></div>
-      </div>
-      <div class="oa-lg">
-        <span><i style="background:var(--f1)"></i><i style="background:var(--f2)"></i><i style="background:var(--f3)"></i> job families</span>
-        <span><i class="st"></i> sequence-dependent setup</span>
-        <span><i class="nw"></i> now</span>
-        <span><i style="background:var(--red);opacity:.55"></i> rejected order (lost forever)</span>
-      </div>
+    <div class="f-evidence">
+      <div class="f-ev"><div class="f-ev-top"><strong>Make-to-order shops</strong></div><p>A quote is an accept-or-reject decision taken the moment the order lands, against a queue that is already committed. That is this problem, answered by hand, every day.</p></div>
+      <div class="f-ev"><div class="f-ev-top"><strong>Batch process plants</strong></div><p>Roasting, brewing, coating, moulding — anywhere a changeover means cleaning, purging or reheating, and some sequences are simply not allowed.</p></div>
+      <div class="f-ev"><div class="f-ev-top"><strong>Machining and additive</strong></div><p>Tool changes on a CNC centre, filament and temperature changes on a print farm: the cost of switching is measured in the time the machine is not cutting.</p></div>
+      <div class="f-ev"><div class="f-ev-top"><strong>Serving infrastructure</strong></div><p>One accelerator, many model families, and a load of weights to swap between them. The vocabulary differs; the arithmetic does not.</p></div>
     </div>
-    <p class="f-lede" id="oa-why">The greedy policy takes every order it can fit and later has no room for the profitable ones. The reoptimizing policy sometimes <b>rejects a cheap order to protect capacity</b>, then accepts a valuable one that arrives afterward. Each decision is final and is taken without knowledge of future arrivals, which requires an exact evaluator fast enough to reprice the schedule inside the decision window.</p>
-    <!-- WHY THIS PROBLEM. Three justification cards under a heading whose prose
-         has already justified the direction; the count and the three verdicts
-         ride in the summary. The Fig 01a fold, because this hangs under an
-         existing heading rather than replacing one. -->
-    <details class="data-fold fold-find">
-      <summary>Three reasons this is the next problem — the literature has one direct paper, make-to-order shops answer accept-or-refuse every day, and exact pricing is finally fast enough to replan per arrival</summary>
-    <div class="f-evidence"><div class="f-ev"><div class="f-ev-top"><strong>One incumbent</strong><span class="f-chip meas">Open</span></div><p>Online acceptance with rejection has essentially one direct paper — theory-first, with no fast reoptimizing engine and no setups.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Make-to-order reality</strong><span class="f-chip dim">Applied</span></div><p>Quoting accept-or-reject the moment an order lands, under uncertain times, is what make-to-order shops actually do — and efficiency here is measurable day to day.</p></div><div class="f-ev"><div class="f-ev-top"><strong>Reoptimize per arrival</strong><span class="f-chip dim">Fit</span></div><p>At millions of exact evaluations per second, replanning everything before answering is no longer too slow.</p></div></div>
-    </details>
+    <p class="f-lede" style="font-size:13.5px">The domain workloads in this repository are deterministic mappings built to explain and to experiment with. They are not operational, clinical or service-level recommendations.</p>
 
-    <!-- THE BIBLIOGRAPHY. Reachable, not read: four titles with year chips and
-         abstracts are the evidence for the empty slot, and the summary states
-         what that evidence amounts to. -->
-    <details class="data-fold fold-find">
-      <summary>The four papers that bound the empty slot — the one direct paper, from 2025, is theory-first, with no reoptimizing engine and no setups</summary>
+    <!-- What is left of the old "Six ways to run" section (#m-interfaces). Four of
+         its six cards were links this page already carries — the Studio, RESULTS.md,
+         the thesis and the repo — so they are not repeated here. These five had no
+         other home, and the spreadsheet and the notebook are the two that a reader
+         cannot reconstruct on their own. A row of icons instead of six cards: the
+         cards spent a paragraph each on things a label already says.
+         The caveat line is NOT decoration — a reader who opens the Sheet without a
+         copy of their own, or with two Google accounts signed in, gets a dead panel
+         and no explanation. -->
+    <h3 class="f-head">Run it yourself</h3>
+    <!-- Carries inline <code>, so it is several text nodes and the EN2PT walker
+         cannot key it. Translated by selector in HTML_PT instead. -->
+    <p class="f-lede f-ways-lede">The same engine, in the places you already work. The spreadsheet
+    needs a copy of its own once, for Google's authorisation, and Apps Script allows one
+    signed-in account at a time; the <code>.xlsx</code> is an analytics snapshot, not a
+    runnable solver.</p>
+    <nav class="f-ways" aria-label="Other ways to run it">
+      <a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 9.5h17M3.5 15h17M9.5 3.5v17M15 3.5v17"/></svg>
+        <span>Google Sheets — runnable copy</span></a>
+      <a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 3.5v12M7.5 11l4.5 4.5 4.5-4.5M4 20h16"/></svg>
+        <span>.xlsx snapshot</span></a>
+      <a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="7" cy="12" r="3.4"/><circle cx="17" cy="12" r="3.4"/><path d="M10.4 12h3.2"/></svg>
+        <span>Colab notebook</span></a>
+      <a href="https://github.com/alexmarinho/IG/tree/master/python" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M7 10l2.5 2L7 14M12.5 14.5h4"/></svg>
+        <span>Python reference</span></a>
+      <a href="https://github.com/alexmarinho/IG/tree/master/legacy" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3.5 7.5h17v12h-17zM3.5 7.5 5.5 4h13l2 3.5M10 12h4"/></svg>
+        <span>The 2015 original</span></a>
+    </nav>
+
+    <h3 class="f-head">Read more</h3>
+    <!-- Replaced wholesale rather than appended: "newest first" only means
+         something if the four original rows sit at their own year positions
+         instead of at the top. Those four are byte-identical to what they
+         were. Every added row had its title, venue and date confirmed from
+         the arXiv API or Crossref metadata, not from a search snippet. -->
+    <p class="f-lede">Where the problem stands, and where the work has moved: language models writing the heuristic, reinforcement learning choosing the next move, and the protocols that decide whether any of it counts. Newest first.</p>
     <div class="oa-read">
-      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054825000565" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Online order acceptance and scheduling in a single machine environment</b><small>Competitive-ratio bounds and online algorithms — theory-first, without a reoptimizing engine or setups.</small></span><span class="g o">Open slot</span></a>
-      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054820301349" target="_blank" rel="noopener"><span class="y">2020</span><span class="x"><b>Distributionally robust scheduling with job selection and sequence-dependent setups</b><small>The closest marriage of robustness, acceptance and setups under uncertain processing times.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2510.24013" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Discovering Heuristics with Large Language Models (LLMs) for Mixed-Integer Programs: Single-Machine Scheduling</b><small>A language model writes the dispatching rule for single-machine total tardiness, and the gap is reported against a MIP rather than against other heuristics.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2508.13703" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Minimizing the weighted number of tardy jobs: data-driven heuristic for single-machine scheduling</b><small>A learned heuristic for weights, due dates and deadlines on one machine, measured against the exact state of the art on optimality gap.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2606.15334" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Large Language Model-Driven Cooperative Operator Ensemble Evolution for Permutation Flow Shop Scheduling</b><small>A language model evolves the destruction operators of an iterated greedy, and the ensemble beats a hand-built one at equal CPU.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0377221726003140" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>The fourth comprehensive review of scheduling problems with setup times</b><small>The standard survey of setup-time scheduling, brought forward: where families, rejection and tardiness objectives now sit, across 525 references.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2505.16952" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>FrontierCO: Real-World and Large-Scale Evaluation of Machine Learning Solvers for Combinatorial Optimization</b><small>Sixteen learned solvers on industrial-scale instances, where the gap to hand-designed algorithms widens rather than closes.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2410.14716" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>A Systematic Survey on Large Language Models for Algorithm Design</b><small>What language models are actually asked to do in algorithm design — optimiser, predictor, extractor, designer — over some 180 papers.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054825000565" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Online order acceptance and scheduling in a single machine environment</b><small>Competitive-ratio bounds for deciding on each order as it arrives, without knowing what comes next.</small></span><span class="g o">Open slot</span></a>
+      <a href="https://link.springer.com/chapter/10.1007/978-981-96-8889-0_2" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Reinforcement Learning Based Iterated Greedy for Parallel Machine Scheduling with Weighted Earliness Tardiness</b><small>Reinforcement learning picks the next destruction-and-reconstruction move, which is the obvious place to put learning inside an iterated greedy.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://doi.org/10.3390/math13162672" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>A Random Forest-Enhanced Genetic Algorithm for Order Acceptance Scheduling with Past-Sequence-Dependent Setup Times</b><small>A learned surrogate stands in for the objective inside the search: acceptance under weighted tardiness, with setups that grow along the sequence.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://link.springer.com/article/10.1007/s10696-025-09602-z" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Order acceptance and scheduling on non-identical parallel machines with dependent setup times: new mixed integer programming formulations</b><small>New mixed-integer formulations for acceptance with dependent setups, which is where the proven-optimal boundary actually moves.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2501.04253" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Integrated Offline and Online Learning to Solve a Large Class of Scheduling Problems</b><small>One network for the whole class of single-machine min-sum objectives with release dates, trained offline and then fitted to the instance in front of it.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2507.20611" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Computing an optimal single machine schedule with sequence dependent setup times using shortest path computations</b><small>The setup structure becomes a layered graph and the optimal sequence is read off a shortest path, polynomially when there are only two families.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2506.07972" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>HeuriGym: An Agentic Benchmark for LLM-Crafted Heuristics in Combinatorial Optimization</b><small>Model-written heuristics scored on solution quality rather than on whether the code runs, with the best models still short of an expert baseline.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2506.13131" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>AlphaEvolve: A coding agent for scientific and algorithmic discovery</b><small>The current reference point for letting a model edit an algorithm under an automatic evaluator, including a scheduling heuristic that went into production.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2506.00490" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>LLM-Driven Instance-Specific Heuristic Generation and Selection</b><small>Splits a problem class by instance feature and designs a heuristic per subclass, instead of one algorithm for every instance.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://link.springer.com/article/10.1007/s10462-025-11266-y" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Synergistic integration of metaheuristics and machine learning: latest advances and emerging trends</b><small>184 papers on where learning actually enters a metaheuristic — operator control, surrogates, tuning — and where the theory still lags the results.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2512.16491" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Best Practices For Empirical Meta-Algorithmic Research: Guidelines from the COSEAL Research Network</b><small>Community guidelines for the whole experimental cycle: designing the comparison, running it, and reporting it without flattering your own method.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2509.08986" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Time-Fair Benchmarking for Metaheuristics: A Restart-Fair Protocol for Fixed-Time Comparisons</b><small>Budget the wall clock rather than the evaluations, let every method restart freely, and report against a checklist.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://research.manchester.ac.uk/en/publications/a-graph-reinforcement-learning-framework-for-neural-adaptive-larg" target="_blank" rel="noopener"><span class="y">2024</span><span class="x"><b>A Graph Reinforcement Learning Framework for Neural Adaptive Large Neighbourhood Search</b><small>Learns which destroy-and-repair operator to apply next instead of scoring them by roulette wheel — the closest published attack on the choice this algorithm makes every iteration.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10794145/" target="_blank" rel="noopener"><span class="y">2024</span><span class="x"><b>Mathematical discoveries from program search with large language models</b><small>Where this line starts: a model proposes programs, an evaluator scores them, and the bin-packing heuristic that came out beat the standard rules.</small></span><span class="g p">Peer-reviewed</span></a>
       <a href="https://www.sciencedirect.com/science/article/abs/pii/S0377221721007141" target="_blank" rel="noopener"><span class="y">2022</span><span class="x"><b>A matheuristic for generalized order acceptance and scheduling</b><small>State of the art on the static problem, with exact models that push the proven-optimal boundary.</small></span><span class="g p">Peer-reviewed</span></a>
       <a href="https://www.sciencedirect.com/science/article/pii/S0377221721004707" target="_blank" rel="noopener"><span class="y">2022</span><span class="x"><b>Metaheuristics “In the Large”</b><small>Verified reference implementations and honest protocols — the bar a new result should clear.</small></span><span class="g b">Method</span></a>
+      <a href="https://www.sciencedirect.com/science/article/abs/pii/S0305054820301349" target="_blank" rel="noopener"><span class="y">2020</span><span class="x"><b>Distributionally robust scheduling with job selection and sequence-dependent setups</b><small>Acceptance and setups when the processing times are estimates rather than facts.</small></span><span class="g p">Peer-reviewed</span></a>
     </div>
-    </details>
-    <p class="f-lede" id="oa-caveat" style="font-size:13.5px">Few papers can mean the problem is open, or that nobody wants it solved. What the search shows is that the slot is empty. It does not show that anyone is asking for it, and that is the risk in this direction.</p>
 
-    <h3 class="f-head">Next milestone</h3>
-    <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P0</span><span class="f-it-title">External validation</span><span class="f-next">Next milestone</span><span class="f-sum">Freeze the canonical IG and benchmark it on OAS/Sparrow before changing the search.</span></summary><dl class="f-fields"><dt>Question</dt><dd>How does the canonical IG compare with public OAS/Sparrow references under equivalent budgets?</dd><dt>Change</dt><dd>No search change. Add adapters and freeze the solver, seeds, budgets and measurement protocol.</dd><dt>Comparator</dt><dd>Published baselines and exact solutions for small cases.</dd><dt>Success criterion</dt><dd>Paired seeds, fixed-time and fixed-evaluation budgets, anytime curves, time-to-target and tail quantiles.</dd><dt>Evidence</dt><dd>Archived configurations, raw result tables, plots and exact small-case checks.</dd></dl></details></div>
-    <details class="f-fold">
-      <summary>
-        <h3 class="f-head">For researchers</h3>
-        <span class="f-fold-find">Milestones P1–P5 — reactive operators, exact repair, multiple machines, parallel search and learned discovery, each laid out with question, change, comparator, success criterion and evidence.</span>
-      </summary>
-      <div class="f-fold-body">
-    <div class="f-roadmap"><details class="f-item"><summary><span class="f-pri">P1</span><span class="f-it-title">Reactive operators</span><span class="f-sum">Preserve random removal and test a stochastic portfolio that adapts by improvement per unit time.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can operator choice adapt without losing the exploration supplied by random removal?</dd><dt>Change</dt><dd>Add a stochastic operator portfolio with a minimum exploration probability.</dd><dt>Comparator</dt><dd>Random removal, measured adaptive destruction and tuned ALNS/tabu variants.</dd><dt>Success criterion</dt><dd>Better time-to-target and tails without degradation on held-out instances.</dd><dt>Evidence</dt><dd>Operator traces, ablations, paired seeds and distribution-shift tests.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P2</span><span class="f-it-title">Exact repair</span><span class="f-sum">Let IG define a bounded neighbourhood and solve only that repair exactly.</span></summary><dl class="f-fields"><dt>Question</dt><dd>When does exact local repair repay its solver overhead?</dd><dt>Change</dt><dd>Pass a bounded removed-job neighbourhood to an exact repair model.</dd><dt>Comparator</dt><dd>Current lowest-cost reinsertion under the same outer search budget.</dd><dt>Success criterion</dt><dd>Higher improvement per millisecond and lower time-to-target.</dd><dt>Evidence</dt><dd>Repair-size sweeps, solver overhead and exactness checks on small neighbourhoods.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P3</span><span class="f-it-title">Multiple machines</span><span class="f-sum">Add assignment, eligibility and machine-dependent setup in a separate mathematical model.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Which gains survive when jobs also choose a machine?</dd><dt>Change</dt><dd>Introduce machine-indexed chains, eligibility and machine-dependent setup as a model extension.</dd><dt>Comparator</dt><dd>Open multi-machine OAS data and exact small solutions.</dd><dt>Success criterion</dt><dd>Feasible schedules, exact agreement on small cases and competitive public-benchmark quality.</dd><dt>Evidence</dt><dd>Eligibility tests, model validation and published multi-machine instances.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P4</span><span class="f-it-title">Parallel search</span><span class="f-sum">Start with deterministic CPU multi-start; GPU work must beat one optimized Rust core on time-to-target.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Does parallel breadth improve wall-clock time rather than only evaluation count?</dd><dt>Change</dt><dd>Add deterministic CPU multi-start first, then evaluate GPU replicas.</dd><dt>Comparator</dt><dd>One optimized Rust core with serial-equivalent per-seed results.</dd><dt>Success criterion</dt><dd>Lower time-to-target with reported wall time, energy and deterministic ordering.</dd><dt>Evidence</dt><dd>Replayable seeds, hardware disclosure, anytime curves and energy measurements.</dd></dl></details><details class="f-item"><summary><span class="f-pri">P5</span><span class="f-it-title">Learned discovery</span><span class="f-sum">Use bandits or LLMs to propose stochastic operators and ablations; never let them price schedules.</span></summary><dl class="f-fields"><dt>Question</dt><dd>Can learned proposals generalize beyond the instances that suggested them?</dd><dt>Change</dt><dd>Sandbox proposed operators while keeping the exact evaluator authoritative.</dd><dt>Comparator</dt><dd>Simple hand-designed baselines under nested train/validation/test splits.</dd><dt>Success criterion</dt><dd>Registered gains on fresh seeds and held-out distributions with a stated failure criterion.</dd><dt>Evidence</dt><dd>Sandboxed code, nested splits, ablations and distribution-shift tests.</dd></dl></details></div>
-      </div>
-    </details>
+    <h3 class="f-head">Elsewhere</h3>
+    <p class="f-lede">Where the instances come from, how methods like this get compared honestly, and what to reach for when you have a real problem to solve.</p>
+    <div class="oa-read">
+      <a href="http://people.brunel.ac.uk/~mastjjb/jeb/info.html" target="_blank" rel="noopener"><span class="y">Data</span><span class="x"><b>OR-Library</b><small>Beasley's collection of benchmark instances — the tradition MaScLib belongs to.</small></span></a>
+      <a href="https://miplib.zib.de/" target="_blank" rel="noopener"><span class="y">Data</span><span class="x"><b>MIPLIB</b><small>The mixed-integer benchmark. Where you go when you need a proven optimum instead of a good schedule.</small></span></a>
+      <a href="https://iohprofiler.github.io/" target="_blank" rel="noopener"><span class="y">Method</span><span class="x"><b>IOHprofiler</b><small>Benchmarking and analysing iterative optimisation heuristics — anytime curves, fixed budgets, the honest protocol.</small></span></a>
+      <a href="https://numbbo.github.io/coco/" target="_blank" rel="noopener"><span class="y">Method</span><span class="x"><b>COCO / BBOB</b><small>The long-running platform for comparing black-box optimisers, and the arguments about how to do it.</small></span></a>
+      <a href="https://developers.google.com/optimization" target="_blank" rel="noopener"><span class="y">Tool</span><span class="x"><b>Google OR-Tools</b><small>CP-SAT and the routing solvers — the first thing to try on a scheduling problem of your own.</small></span></a>
+      <a href="https://timefold.ai/" target="_blank" rel="noopener"><span class="y">Tool</span><span class="x"><b>Timefold</b><small>Open-source planning solver, the applied end of this field: shifts, routes, maintenance windows.</small></span></a>
+      <a href="https://pymoo.org/" target="_blank" rel="noopener"><span class="y">Tool</span><span class="x"><b>pymoo</b><small>If you would rather write the metaheuristic yourself and measure it properly.</small></span></a>
+    </div>
 
-    <!-- TWO CALLS TO ACTION. The finding they exist to support is already in the
-         section above them, so what is folded here is the invitation, not the
-         result. The summary keeps both honest boundaries on screen. -->
-    <details class="f-fold">
-      <summary>
-        <h3 class="f-head">Two experiments you can run</h3>
-        <span class="f-fold-find">One Colab notebook with two experiments that re-check their pricing against the CPU engine before reporting a timing: GPU width is nearly free until the instance grows, and the operator gain turns into a loss once the split is honest.</span>
-      </summary>
-      <div class="f-fold-body">
-    <p class="f-lede">The GPU fleet and the learned operators are in a notebook rather than in a claim. It runs on whatever hardware it finds, checks its pricing against the CPU engine before reporting a single timing, and recomputes the numbers every time.</p>
-    <div class="f-eco"><div class="f-card"><span class="f-num">A · Breadth</span><h4>GPU replica fleet</h4><p>Thousands of independent searches advance in lockstep as one tensor program. While the step is bound by kernel-launch overhead, width is almost free — and stops being free as the instance grows, which is the honest boundary of the idea. Runs on CPU with identical numbers when no GPU is present.</p><span class="f-num">B · Discovery</span><h4>Learned removal operators</h4><p>An evolutionary loop proposes removal operators and re-scores the winner on fresh seeds and held-out instances. The offline backend needs no API key, and it reproduces the recorded outcome: a healthy training gain that turns into a loss against uniform random removal once the split is honest.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/future-studies.ipynb" target=_blank rel=noopener>Open in Colab</a><a href="https://github.com/alexmarinho/IG/tree/master/gpu" target=_blank rel=noopener>Read the fleet</a><a href="https://github.com/alexmarinho/IG/tree/master/factory" target=_blank rel=noopener>Read the factory</a></div></div></div>
-      </div>
-    </details>
+    <!-- Added because this subject, not the OAS canon above, is what brought
+         the author back to the problem. Every row here was fetched and its
+         title/venue/date read off the page; seven further candidates were
+         dropped for being routing classifiers or fixed dispatch rules with
+         no acceptance decision and nothing to search over. -->
+    <h3 class="f-head">LLM serving and model routing</h3>
+    <p class="f-lede">One accelerator, a queue of requests, a weight load to change model family, a latency target on each request, and traffic to shed when it does not fit. Ordered by how close the mapping actually is — the routing papers are routing, and say so.</p>
+    <!-- Badges: `g p` is the same peer-review claim as above, and the arXiv rows
+         reuse `g b` — the class the "Method" badge already uses — with the word
+         Preprint, because none of them has been refereed. A preprint must not
+         read Peer-reviewed, and inventing a fourth colour for one word was not
+         worth a new class. The word "Preprint" is deliberately left out of the
+         i18n map: it is the term Brazilian CS uses untranslated. -->
+    <div class="oa-read">
+      <a href="https://arxiv.org/abs/2506.17254" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Near-Optimal Online Deployment and Routing for Streaming LLMs</b><small>Which models to keep loaded at each maintenance window, and where to send each request under a concurrency cap and a per-query budget.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2604.07472" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Scalable Joint Resource Allocation for SLO-Constrained LLM Inference in Heterogeneous GPU Clouds</b><small>Model selection, provisioning and routing under latency and budget limits, solved by greedy construction plus local search.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2405.15130" target="_blank" rel="noopener"><span class="y">2024</span><span class="x"><b>OptLLM: Optimal Assignment of Queries to Large Language Models</b><small>Assigns queries to candidate models by destroying and rebuilding the current solution — the iterated-greedy move, on a cost-accuracy frontier.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2507.15553" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Efficient Routing of Inference Requests across LLM Instances in Cloud-Edge Computing</b><small>Routing, not sequencing: a multi-objective genetic algorithm decides which model instance answers each request.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://ennanzhai.github.io/pub/sosp25-aegaeon.pdf" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>Aegaeon: Effective GPU Pooling for Concurrent LLM Serving on the Market</b><small>Switching one GPU between model families costs a weight load; here the switch is scheduled at token granularity instead of avoided.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2505.23022" target="_blank" rel="noopener"><span class="y">2025</span><span class="x"><b>SCORPIO: Serving the Right Requests at the Right Time for Heterogeneous SLOs in LLM Inference</b><small>Orders requests by deadline and refuses the ones it cannot finish in time — acceptance and tardiness, on a GPU.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2407.00047" target="_blank" rel="noopener"><span class="y">2024</span><span class="x"><b>Queue Management for SLO-Oriented Large Language Model Serving</b><small>One queue of mixed-deadline requests, with eviction and model swapping as explicit moves rather than side effects.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://www.frontiersin.org/journals/computer-science/articles/10.3389/fcomp.2026.1873627/full" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Formal schedulability analysis for LLM inference: TTFT and TBT deadline guarantees via response-time theory</b><small>Release times and deadlines written down as such, with an admission test that refuses what a bound says cannot be served in time.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2401.14351" target="_blank" rel="noopener"><span class="y">2024</span><span class="x"><b>ServerlessLLM: Low-Latency Serverless Inference for Large Language Models</b><small>Loading the weights is the setup time — measured, then scheduled around by placing work where the checkpoint already sits.</small></span><span class="g p">Peer-reviewed</span></a>
+      <a href="https://arxiv.org/abs/2604.06970" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Scheduling the Unschedulable: Taming Black-Box LLM Inference at Scale</b><small>Allocation, ordering, and an explicit admit-defer-reject decision taken on predicted processing times rather than known ones.</small></span><span class="g b">Preprint</span></a>
+      <a href="https://arxiv.org/abs/2605.01280" target="_blank" rel="noopener"><span class="y">2026</span><span class="x"><b>Position: LLM Serving Needs Mathematical Optimization and Algorithmic Foundations, Not Just Heuristics</b><small>Serving still routes with join-shortest-queue and schedules with FIFO; the argument that an optimisation problem sits underneath, unwritten.</small></span><span class="g b">Preprint</span></a>
+    </div>
+
+    <div><nav class="m-links" aria-label="Elsewhere" style="margin-top:16px">
+      <!-- Named in full: "Open the Studio" sitting among reference links did not
+           say what the Studio is. -->
+      <a href="studio-app.html">Open the Iterated Greedy Studio</a>
+      <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
+      <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation</a>
+      <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 thesis (PDF)</a>
+    </nav></div>
   </div>
 </section>
 
-<section class="movement" id="m-interfaces">
-  <div class="movement-head">
-    <p class="m-kick">Interfaces</p>
-    <h2 class="m-title">Six ways to run <em>the same engine.</em></h2>
-  </div>
-  <div class="m-body">
-    <p class="f-lede">The same tested scheduling logic is available as an interactive experiment, a BI workbook, a scientific notebook and readable source code.</p>
-    <div class="f-eco"><div class="f-card"><span class="f-num">01 · Browser</span><h4>IG Studio</h4><p>Run one seed or compare many. Inspect convergence, objective components, complete schedules and the fixed problem behind each result.</p><div class="f-acts"><a href="studio-app.html" target=_blank rel=noopener>Open the Studio</a></div></div><div class="f-card"><span class="f-num">02 · BI workbook</span><h4>Google Sheets Lab</h4><p>The same WebAssembly solver running inside a spreadsheet dashboard. A private copy is required once for Google authorization, and Apps Script does not support multi-login — sign in with a single Google account, or the panel opens with its controls disabled. The downloadable .xlsx is an analytics-only snapshot.</p><div class="f-acts"><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/copy" target=_blank rel=noopener>Create runnable copy</a><a href="https://docs.google.com/spreadsheets/d/18i8zJqT0W6P8xcN1sn6NW0KjdEFYrAJm9zcVqb8fOXg/edit?usp=sharing" target=_blank rel=noopener>View example</a><a href="https://github.com/alexmarinho/IG/raw/refs/heads/master/google-sheets/dist/ig-scheduling-lab.xlsx" target=_blank rel=noopener>Download .xlsx</a></div></div><div class="f-card"><span class="f-num">03 · Research</span><h4>Scientific Colab</h4><p>Run the documented notebook online for multi-seed statistics, sensitivity analysis, uncertainty and reproducible evidence.</p><div class="f-acts"><a href="https://colab.research.google.com/github/alexmarinho/IG/blob/master/studio/notebooks/iterated-greedy-experiments.ipynb" target=_blank rel=noopener>Open in Colab</a></div></div><div class="f-card"><span class="f-num">04 · Source</span><h4>Python reference</h4><p>Install or read the zero-dependency implementation for command-line runs, batch experiments and extension work.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/python" target=_blank rel=noopener>Open Python guide</a></div></div><div class="f-card"><span class="f-num">05 · Archive</span><h4>Original 2015 project</h4><p>The historical Excel/VBA and thesis-era implementation that established the project before the current engine and interfaces.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/tree/master/legacy" target=_blank rel=noopener>Open original project</a></div></div><div class="f-card"><span class="f-num">06 · Evidence</span><h4>Engineering ledger</h4><p>Benchmark tables, exact checks, reproducible commands, mixed outcomes and the current boundary of each implementation.</p><div class="f-acts"><a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target=_blank rel=noopener>Results &amp; validation (RESULTS.md)</a></div></div></div>
-    <nav class="m-links" aria-label="Resources" style="margin-top:22px">
-    <a href="https://github.com/alexmarinho/IG" target="_blank" rel="noopener">Source on GitHub</a>
-    <a href="https://github.com/alexmarinho/IG/blob/master/RESULTS.md" target="_blank" rel="noopener">Results &amp; validation (RESULTS.md)</a>
-    <a href="https://github.com/alexmarinho/IG/blob/master/docs/monografia-2015.pdf" target="_blank" rel="noopener">2015 thesis (PDF)</a>
-    <a href="https://github.com/alexmarinho/IG/blob/master/CITATION.cff" target="_blank" rel="noopener">How to cite</a>
-  </nav></div>
-</section>
+<!-- #m-interfaces ("Six ways to run") removed. Four of its six cards linked to
+     things this page already carries (the Studio, RESULTS.md, the thesis, the
+     repo); the five that had no other home are now the "Run it yourself" row
+     inside #m-future. Six cards spent a paragraph each on what a label says. -->
 
 <!-- ============================================================
      6 · Live demo 5 — Technique lab: same animation, three renderers
@@ -1988,7 +2122,7 @@ window.__IGTHEME=(function(){
   function bust(){ cache=Object.create(null); }
   function resolved(){
     var a=document.documentElement.getAttribute('data-theme');
-    return (a==='dark'||a==='light')?a:(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');
+    return (a==='dark'||a==='light')?a:'light';
   }
   /* ink + halo for a label drawn ON a family fill. fam is 0-based.
      Family 0 is terracotta -> --on-accent; every other family -> --fam-ink. */
@@ -2497,7 +2631,10 @@ function cssRead(name, fallback){
   var orderA = [0, 1, 2, 3, 4];      // the intuitive order (job id order)
   var orderB = [1, 4, 3, 0, 2];      // the family-grouped order
   var rng = mulberry32(0x5eed1);     // deterministic shuffle sequence
-  var U = 13, PADL = 6, BARY = 18, BARH = 20; // px per time unit & geometry
+  /* Fig. 01a geometry. The svg scales to the column width, so the RENDERED height
+     is columnWidth x H/W — a wider viewBox flattens it as effectively as a shorter
+     one. Both levers: U 13 -> 15, and the vertical budget 90 -> 66 below. */
+  var U = 15, PADL = 6, BARY = 14, BARH = 15, GH = 66; // px per time unit & geometry
 
   /* --- fixed dataset table --- */
   var tbody = $('#d1data');
@@ -2534,7 +2671,7 @@ function cssRead(name, fallback){
   function renderGantt(svg, order, animate){
     var ev = evaluate(DEMO1, order);
     var horizon = FIXED_HZ;
-    var W = Math.ceil(horizon * U + PADL * 2), H = 90;
+    var W = Math.ceil(horizon * U + PADL * 2), H = GH;
     svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
     svg.textContent = '';
     /* per-svg hatch pattern for idle waits */
@@ -2598,12 +2735,12 @@ function cssRead(name, fallback){
       g.appendChild(elbl);
     }
     /* time axis, ticks every 5 units */
-    var axisY = BARY + BARH + 34;
+    var axisY = BARY + BARH + 23;
     g.appendChild(svgEl('line', { x1:PADL, y1:axisY, x2:W - PADL, y2:axisY, stroke:'#d8cdb6', 'stroke-width':1 }));
     for(var tt = 0; tt <= horizon; tt += 5){
       var tx = PADL + tt * U;
       g.appendChild(svgEl('line', { x1:tx, y1:axisY, x2:tx, y2:axisY + 3, stroke:'#d8cdb6', 'stroke-width':1 }));
-      var albl = svgEl('text', { x:tx, y:axisY + 11, 'text-anchor':'middle', 'font-size':7.5, fill:cssRead('--muted', '#9a8f7a') });
+      var albl = svgEl('text', { x:tx, y:axisY + 9, 'text-anchor':'middle', 'font-size':6.5, fill:cssRead('--muted', '#9a8f7a') });
       albl.textContent = String(tt);
       g.appendChild(albl);
     }
@@ -2736,7 +2873,7 @@ function cssRead(name, fallback){
     $all('#d1data .famcell').forEach(function(c){ c.style.color = FAMILY_CSS(+c.getAttribute('data-fam')); });
   });
   /* H5 — right-edge fade on small screens, removed once the user scrolls a gantt */
-  $all('.gantt-wrap').forEach(function(w){
+  $all('.gantt-wrap, .sheet-wrap').forEach(function(w){
     w.classList.add('can-fade');
     w.addEventListener('scroll', function off(){ w.classList.remove('can-fade'); w.removeEventListener('scroll', off); }, { passive:true });
   });
@@ -3570,8 +3707,12 @@ function onWinResize(fn){
   if(!links.length || !('IntersectionObserver' in window)) return;
   var NAV_FOR = {
     'm-story':'m-story','demo-order':'m-story','demo-factorial':'m-story','demo-ig':'m-story',
-    'm-compare':'m-compare','demo-race':'m-compare','demo-benchmark':'m-compare',
-    'm-arena':'m-compare','m-run':'m-run','m-future':'m-future','m-interfaces':'m-interfaces'
+    /* The VALUES have to be nav hrefs, because `map` below is keyed off them.
+       The Compare tab links to #m-arena, so the compare cluster must resolve to
+       'm-arena' — it resolved to 'm-compare', which is no link, so that tab never
+       lit up for any of its four sections. `m-interfaces` went with its section. */
+    'm-compare':'m-arena','demo-race':'m-arena','demo-benchmark':'m-arena',
+    'm-arena':'m-arena','m-run':'m-run','m-future':'m-future'
   };
   var map = {}, visible = {};
   links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
@@ -3667,7 +3808,11 @@ function onWinResize(fn){
       'a mesma seed e o mesmo número de avaliações em cada leitura, tirados da mesma corrida. Um método ' +
       'que para antes mantém seu custo final. Uma execução interrompida no orçamento deixaria alguns ' +
       'métodos terminarem uma fatia além dele; a leitura é feita na contagem exata, que é a comparação ' +
-      'mais dura. Selecione um método para marcá-lo em todas as visões.'
+      'mais dura. Selecione um método para marcá-lo em todas as visões.',
+
+    /* ── selector overrides merged in with the page work. These carry inline
+       markup (<b>, <a>, <code>), so the text-node walker cannot key them. ── */
+    ".f-ways-lede": "O mesmo motor, nos lugares onde você já trabalha. A planilha precisa de uma cópia própria uma vez, para a autorização do Google, e o Apps Script aceita uma conta logada por vez; o <code>.xlsx</code> é um snapshot analítico, não um solver executável.",
   };
 
   /* --- 2. text-node dictionary: normalized EN -> PT (static + discrete) --- */
@@ -3870,7 +4015,10 @@ function onWinResize(fn){
     "the candidate being built": "a candidata sendo construída",
     "Pending tray": "Bandeja de pendentes",
     "jobs waiting to be re-inserted": "jobs esperando para serem reinseridos",
-    "Objective sheet": 'setup+proc + atraso + rejeição = total' ,
+    /* Was mapped to the formula beside it, which is the hint's translation, not the
+       label's. Fig. 03 renders both on one line, so in PT that line printed the same
+       formula twice and the label vanished. */
+    "Objective sheet": 'Planilha do objetivo' ,
     "setup+proc + tardiness + rejection = total": "setup+proc + atraso + rejeição = total",
     "tardiness": "atraso",
     "cost by iteration; line = incumbent, dots = evaluated candidates (filled = accepted)":
@@ -3895,6 +4043,8 @@ function onWinResize(fn){
     "Results on the 44 MaScLib instances.":
       'Resultados nas 44 instâncias do benchmark MaScLib.' ,
     "Best-known values matched or beaten": "Melhores-conhecidos igualados ou superados",
+    "37 under the uniform protocol; 39 with the documented adaptive runs":
+      "37 sob o protocolo uniforme; 39 com as execuções adaptativas documentadas",
     "Improved below the 2015 record": "Melhorados abaixo do recorde de 2015",
     "Independent correctness checks": "Verificações independentes de correção",
     "Each candidate is priced two ways that must agree to the last unit: an incremental evaluator against a from-scratch oracle, and the Rust engine against an independent Python implementation. The search must reproduce the 2015 best-known values before a result is accepted. Four of the five remaining gaps are within 0.34%; the fifth is 2.44%.":
@@ -4119,7 +4269,96 @@ function onWinResize(fn){
     "By instance": "Por instância",
     "instance": "instância",
     "Tables 4.1–4.2 · Marinho, A. S. — UFSCar, 2015 ·": "Tabelas 4.1–4.2 · Marinho, A. S. — UFSCar, 2015 ·",
-    "· Thevenin, Zufferey & Widmer (2015)": "· Thevenin, Zufferey & Widmer (2015)"
+    "· Thevenin, Zufferey & Widmer (2015)": "· Thevenin, Zufferey & Widmer (2015)",
+
+    /* ── merged in with the page work: the refreshed reference blocks, the
+       "Run it yourself" row, the new header and the film credit. Only keys whose
+       English text actually occurs in this document were carried over. ── */
+    "Problem": "Problema",
+    "More": "Mais",
+    "Open the Iterated Greedy Studio": "Abrir o Iterated Greedy Studio",
+    "LLM serving and model routing": "Serving de LLM e roteamento de modelos",
+    "One accelerator, a queue of requests, a weight load to change model family, a latency target on each request, and traffic to shed when it does not fit. Ordered by how close the mapping actually is — the routing papers are routing, and say so.": "Um acelerador, uma fila de requisições, um carregamento de pesos para trocar de família de modelo, um alvo de latência em cada requisição e tráfego a descartar quando não couber. Ordenados por quão próximo o mapeamento é de fato — os de roteamento são de roteamento, e isso está dito.",
+    "Where the problem stands, and where the work has moved: language models writing the heuristic, reinforcement learning choosing the next move, and the protocols that decide whether any of it counts. Newest first.": "Onde o problema está e para onde o trabalho se moveu: modelos de linguagem escrevendo a heurística, aprendizado por reforço escolhendo o próximo movimento, e os protocolos que decidem se algo disso conta. Mais recentes primeiro.",
+    "Preprint": "Pré-publicação",
+    "Discovering Heuristics with Large Language Models (LLMs) for Mixed-Integer Programs: Single-Machine Scheduling": "Descobrindo heurísticas com modelos de linguagem de grande porte (LLMs) para programas inteiros mistos: scheduling em máquina única",
+    "A language model writes the dispatching rule for single-machine total tardiness, and the gap is reported against a MIP rather than against other heuristics.": "Um modelo de linguagem escreve a regra de despacho para o atraso total em máquina única, e a distância é reportada contra um MIP, não contra outras heurísticas.",
+    "Minimizing the weighted number of tardy jobs: data-driven heuristic for single-machine scheduling": "Minimizando o número ponderado de tarefas atrasadas: heurística orientada a dados para scheduling em máquina única",
+    "A learned heuristic for weights, due dates and deadlines on one machine, measured against the exact state of the art on optimality gap.": "Uma heurística aprendida para pesos, prazos e datas-limite em uma máquina, medida contra o estado da arte exato pela distância do ótimo.",
+    "Large Language Model-Driven Cooperative Operator Ensemble Evolution for Permutation Flow Shop Scheduling": "Evolução cooperativa de conjuntos de operadores guiada por modelo de linguagem para flow shop de permutação",
+    "A language model evolves the destruction operators of an iterated greedy, and the ensemble beats a hand-built one at equal CPU.": "Um modelo de linguagem evolui os operadores de destruição de um iterated greedy, e o conjunto resultante supera um construído à mão no mesmo tempo de CPU.",
+    "The fourth comprehensive review of scheduling problems with setup times": "A quarta revisão abrangente de problemas de scheduling com tempos de setup",
+    "The standard survey of setup-time scheduling, brought forward: where families, rejection and tardiness objectives now sit, across 525 references.": "A revisão de referência sobre scheduling com setup, atualizada: onde famílias, rejeição e objetivos de atraso estão hoje, em 525 referências.",
+    "FrontierCO: Real-World and Large-Scale Evaluation of Machine Learning Solvers for Combinatorial Optimization": "FrontierCO: avaliação em escala real e industrial de solvers de aprendizado de máquina para otimização combinatória",
+    "Sixteen learned solvers on industrial-scale instances, where the gap to hand-designed algorithms widens rather than closes.": "Dezesseis solvers aprendidos em instâncias de escala industrial, onde a distância até os algoritmos feitos à mão aumenta em vez de diminuir.",
+    "A Systematic Survey on Large Language Models for Algorithm Design": "Uma revisão sistemática de modelos de linguagem de grande porte para projeto de algoritmos",
+    "What language models are actually asked to do in algorithm design — optimiser, predictor, extractor, designer — over some 180 papers.": "O que de fato se pede a um modelo de linguagem no projeto de algoritmos — otimizador, preditor, extrator, projetista — em cerca de 180 artigos.",
+    "Reinforcement Learning Based Iterated Greedy for Parallel Machine Scheduling with Weighted Earliness Tardiness": "Iterated Greedy baseado em aprendizado por reforço para scheduling em máquinas paralelas com adiantamento e atraso ponderados",
+    "Reinforcement learning picks the next destruction-and-reconstruction move, which is the obvious place to put learning inside an iterated greedy.": "O aprendizado por reforço escolhe o próximo movimento de destruição e reconstrução — o lugar óbvio para colocar aprendizado dentro de um iterated greedy.",
+    "A Random Forest-Enhanced Genetic Algorithm for Order Acceptance Scheduling with Past-Sequence-Dependent Setup Times": "Um algoritmo genético reforçado por random forest para aceitação e sequenciamento de pedidos com setups dependentes da sequência passada",
+    "A learned surrogate stands in for the objective inside the search: acceptance under weighted tardiness, with setups that grow along the sequence.": "Um substituto aprendido ocupa o lugar da função objetivo dentro da busca: aceitação sob atraso ponderado, com setups que crescem ao longo da sequência.",
+    "Order acceptance and scheduling on non-identical parallel machines with dependent setup times: new mixed integer programming formulations": "Aceitação e sequenciamento de pedidos em máquinas paralelas não idênticas com setups dependentes: novas formulações de programação inteira mista",
+    "New mixed-integer formulations for acceptance with dependent setups, which is where the proven-optimal boundary actually moves.": "Novas formulações inteiras mistas para aceitação com setups dependentes — é ali que a fronteira do provado-ótimo de fato se move.",
+    "Integrated Offline and Online Learning to Solve a Large Class of Scheduling Problems": "Aprendizado integrado offline e online para resolver uma ampla classe de problemas de scheduling",
+    "One network for the whole class of single-machine min-sum objectives with release dates, trained offline and then fitted to the instance in front of it.": "Uma única rede para toda a classe de objetivos de soma mínima em máquina única com datas de liberação, treinada offline e depois ajustada à instância que tem diante de si.",
+    "Computing an optimal single machine schedule with sequence dependent setup times using shortest path computations": "Calculando um cronograma ótimo em máquina única com setups dependentes da sequência por meio de caminhos mínimos",
+    "The setup structure becomes a layered graph and the optimal sequence is read off a shortest path, polynomially when there are only two families.": "A estrutura de setup vira um grafo em camadas e a sequência ótima é lida de um caminho mínimo — em tempo polinomial quando há apenas duas famílias.",
+    "HeuriGym: An Agentic Benchmark for LLM-Crafted Heuristics in Combinatorial Optimization": "HeuriGym: um benchmark agêntico para heurísticas escritas por LLM em otimização combinatória",
+    "Model-written heuristics scored on solution quality rather than on whether the code runs, with the best models still short of an expert baseline.": "Heurísticas escritas por modelo pontuadas pela qualidade da solução, e não por o código rodar — e os melhores modelos ainda ficam abaixo de uma referência especialista.",
+    "AlphaEvolve: A coding agent for scientific and algorithmic discovery": "AlphaEvolve: um agente de programação para descoberta científica e algorítmica",
+    "The current reference point for letting a model edit an algorithm under an automatic evaluator, including a scheduling heuristic that went into production.": "A referência atual para deixar um modelo editar um algoritmo sob um avaliador automático, incluindo uma heurística de scheduling que entrou em produção.",
+    "LLM-Driven Instance-Specific Heuristic Generation and Selection": "Geração e seleção de heurísticas específicas por instância guiadas por LLM",
+    "Splits a problem class by instance feature and designs a heuristic per subclass, instead of one algorithm for every instance.": "Divide a classe de problemas por característica da instância e projeta uma heurística por subclasse, em vez de um algoritmo para toda instância.",
+    "Synergistic integration of metaheuristics and machine learning: latest advances and emerging trends": "Integração sinérgica de metaheurísticas e aprendizado de máquina: avanços recentes e tendências emergentes",
+    "184 papers on where learning actually enters a metaheuristic — operator control, surrogates, tuning — and where the theory still lags the results.": "184 artigos sobre onde o aprendizado realmente entra numa metaheurística — controle de operadores, substitutos, calibração — e onde a teoria ainda fica atrás dos resultados.",
+    "Best Practices For Empirical Meta-Algorithmic Research: Guidelines from the COSEAL Research Network": "Boas práticas para pesquisa meta-algorítmica empírica: diretrizes da rede COSEAL",
+    "Community guidelines for the whole experimental cycle: designing the comparison, running it, and reporting it without flattering your own method.": "Diretrizes da comunidade para todo o ciclo experimental: desenhar a comparação, executá-la e relatá-la sem favorecer o próprio método.",
+    "Time-Fair Benchmarking for Metaheuristics: A Restart-Fair Protocol for Fixed-Time Comparisons": "Benchmarking justo no tempo para metaheurísticas: um protocolo com reinícios para comparações de tempo fixo",
+    "Budget the wall clock rather than the evaluations, let every method restart freely, and report against a checklist.": "Orçar o tempo de relógio em vez das avaliações, deixar todo método reiniciar à vontade e relatar seguindo uma lista de verificação.",
+    "A Graph Reinforcement Learning Framework for Neural Adaptive Large Neighbourhood Search": "Um arcabouço de aprendizado por reforço em grafos para busca adaptativa neural em grandes vizinhanças",
+    "Learns which destroy-and-repair operator to apply next instead of scoring them by roulette wheel — the closest published attack on the choice this algorithm makes every iteration.": "Aprende qual operador de destruir-e-reparar aplicar em seguida em vez de pontuá-los por roleta — o ataque publicado mais próximo da escolha que este algoritmo faz a cada iteração.",
+    "Mathematical discoveries from program search with large language models": "Descobertas matemáticas por busca de programas com modelos de linguagem de grande porte",
+    "Where this line starts: a model proposes programs, an evaluator scores them, and the bin-packing heuristic that came out beat the standard rules.": "Onde esta linha começa: um modelo propõe programas, um avaliador os pontua, e a heurística de empacotamento que saiu dali superou as regras padrão.",
+    "Read more": "Leia mais",
+    "Elsewhere": "Em outros lugares",
+    "Run it yourself": "Rode você mesmo",
+    "Google Sheets — runnable copy": "Google Sheets — cópia executável",
+    ".xlsx snapshot": "snapshot .xlsx",
+    "Colab notebook": "notebook no Colab",
+    "The 2015 original": "o original de 2015",
+    "Near-Optimal Online Deployment and Routing for Streaming LLMs": "Implantação e roteamento online quase ótimos para LLMs em fluxo",
+    "Which models to keep loaded at each maintenance window, and where to send each request under a concurrency cap and a per-query budget.": "Quais modelos manter carregados em cada janela de manutenção, e para onde mandar cada requisição sob um teto de concorrência e um orçamento por consulta.",
+    "Scalable Joint Resource Allocation for SLO-Constrained LLM Inference in Heterogeneous GPU Clouds": "Alocação conjunta e escalável de recursos para inferência de LLM sob restrição de SLO em nuvens de GPU heterogêneas",
+    "Model selection, provisioning and routing under latency and budget limits, solved by greedy construction plus local search.": "Escolha de modelo, provisionamento e roteamento sob limites de latência e de orçamento, resolvidos por construção gulosa mais busca local.",
+    "OptLLM: Optimal Assignment of Queries to Large Language Models": "OptLLM: atribuição ótima de consultas a grandes modelos de linguagem",
+    "Assigns queries to candidate models by destroying and rebuilding the current solution — the iterated-greedy move, on a cost-accuracy frontier.": "Atribui consultas a modelos candidatos destruindo e reconstruindo a solução atual — o movimento do iterated greedy, numa fronteira de custo e acurácia.",
+    "Efficient Routing of Inference Requests across LLM Instances in Cloud-Edge Computing": "Roteamento eficiente de requisições de inferência entre instâncias de LLM em computação nuvem-borda",
+    "Routing, not sequencing: a multi-objective genetic algorithm decides which model instance answers each request.": "Roteamento, não sequenciamento: um algoritmo genético multiobjetivo decide qual instância de modelo responde cada requisição.",
+    "Aegaeon: Effective GPU Pooling for Concurrent LLM Serving on the Market": "Aegaeon: pooling eficaz de GPU para serving concorrente de LLM no mercado",
+    "Switching one GPU between model families costs a weight load; here the switch is scheduled at token granularity instead of avoided.": "Trocar a família de modelo de uma GPU custa um carregamento de pesos; aqui a troca é escalonada na granularidade do token em vez de evitada.",
+    "SCORPIO: Serving the Right Requests at the Right Time for Heterogeneous SLOs in LLM Inference": "SCORPIO: atender as requisições certas na hora certa para SLOs heterogêneos em inferência de LLM",
+    "Orders requests by deadline and refuses the ones it cannot finish in time — acceptance and tardiness, on a GPU.": "Ordena as requisições por prazo e recusa as que não consegue terminar em tempo — aceitação e atraso, numa GPU.",
+    "Queue Management for SLO-Oriented Large Language Model Serving": "Gestão de fila para serving de grandes modelos de linguagem orientado a SLO",
+    "One queue of mixed-deadline requests, with eviction and model swapping as explicit moves rather than side effects.": "Uma fila de requisições com prazos misturados, em que despejar pedido e trocar de modelo são movimentos explícitos, não efeitos colaterais.",
+    "Formal schedulability analysis for LLM inference: TTFT and TBT deadline guarantees via response-time theory": "Análise formal de escalonabilidade para inferência de LLM: garantias de prazo de TTFT e TBT via teoria de tempo de resposta",
+    "Release times and deadlines written down as such, with an admission test that refuses what a bound says cannot be served in time.": "Datas de liberação e prazos escritos como tais, com um teste de admissão que recusa o que uma cota diz não dar para atender em tempo.",
+    "ServerlessLLM: Low-Latency Serverless Inference for Large Language Models": "ServerlessLLM: inferência serverless de baixa latência para grandes modelos de linguagem",
+    "Loading the weights is the setup time — measured, then scheduled around by placing work where the checkpoint already sits.": "Carregar os pesos é o tempo de setup — medido, e depois contornado pelo escalonamento, que coloca o trabalho onde o checkpoint já está.",
+    "Scheduling the Unschedulable: Taming Black-Box LLM Inference at Scale": "Escalonando o inescalonável: domando inferência de LLM caixa-preta em escala",
+    "Allocation, ordering, and an explicit admit-defer-reject decision taken on predicted processing times rather than known ones.": "Alocação, ordenação e uma decisão explícita de admitir, adiar ou recusar, tomada sobre tempos de processamento previstos e não conhecidos.",
+    "Position: LLM Serving Needs Mathematical Optimization and Algorithmic Foundations, Not Just Heuristics": "Posição: serving de LLM precisa de otimização matemática e fundamentos algorítmicos, não só de heurísticas",
+    "Serving still routes with join-shortest-queue and schedules with FIFO; the argument that an optimisation problem sits underneath, unwritten.": "O serving ainda roteia com join-shortest-queue e escalona com FIFO; o argumento de que há um problema de otimização embaixo disso, nunca escrito.",
+    "Created using": "Criado com",
+    "single-machine scheduling": "sequenciamento em máquina única",
+    "The problem": "O problema",
+    "World": "Mundo",
+    "Instance": "Instância",
+    "Standings": "Classificação",
+    "Schedule": "Cronograma",
+    "Search": "Busca",
+    "Seeds": "Seeds",
+    "The schedule found": "O cronograma encontrado",
+    "the four terms of the objective, in this world's own words": "os quatro termos do objetivo, nas palavras deste mundo",
   };
 
   /* build the reverse map (PT -> EN) so toggling works both ways */
@@ -4958,7 +5197,8 @@ function onWinResize(fn){
   /* ---------- sizing + loop ---------- */
   function sizeCv(cv, holder, cssH, store) {
     const dpr = devicePixelRatio || 1;
-    const w = Math.max(300, holder.clientWidth - 36);
+    /* The floor was 300, wider than the ~252px available inside a 320px phone. */
+    const w = Math.max(240, holder.clientWidth - 36);
     cv.width = w * dpr; cv.height = cssH * dpr;
     cv.style.width = w + 'px'; cv.style.height = cssH + 'px';
     cv.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -6899,10 +7139,18 @@ function onWinResize(fn){
        line this file's numbers force, and what the objective charges for in
        this trade's words. The picture carries no number of its own, so art and
        engine can never disagree. */
-    var img = el("runSceneImg"), src = "assets/scenarios/" + w.img + ".webp";
-    if (img.getAttribute("src") !== src) img.setAttribute("src", src);
-    img.alt = w.alt[pt() ? "pt" : "en"];
-    img.style.setProperty("--scene-pos", w.pos);
+    /* The scene render was removed from the markup; this block is guarded rather
+       than deleted, because the Studio still ships the four files and a future
+       change may put the picture back. Unguarded, the null would throw and abort
+       the whole render — the failure mode that once left a section fully drawn
+       and completely inert. */
+    var img = el("runSceneImg");
+    if (img) {
+      var src = "assets/scenarios/" + w.img + ".webp";
+      if (img.getAttribute("src") !== src) img.setAttribute("src", src);
+      img.alt = w.alt[pt() ? "pt" : "en"];
+      img.style.setProperty("--scene-pos", w.pos);
+    }
     el("runSceneName").textContent = L(w.name);
     el("runSceneKind").textContent = L(w.kind);
     el("runStory").textContent = DESC[w.id][pt() ? "pt" : "en"];
@@ -6937,7 +7185,7 @@ function onWinResize(fn){
      different measurement in every world — the one that breaks that queue,
      classified by breaks() from the file's own fields — because four values of
      one metric would be four skins of one problem. And the BAR welded across
-     the foot of every picture is the one measure they share, the mean
+     the top of every tile is the one measure they share, the mean
      changeover against one order's machine time on a single scale, so the
      reader can always check the cherry-picked headline against a like-for-like
      comparison. The selected world shows the selected file; the other three
@@ -6957,12 +7205,16 @@ function onWinResize(fn){
       var hd = headline(r.d), name = L(r.w.name);
       var sub = L(r.w.res) + " · " + fmt(r.d[N]) + " " + L(r.w.job);
       return '<li role="radio" aria-checked="' + r.on + '" tabindex="' + (r.on ? 0 : -1) +
-        '" data-w="' + r.w.id + '"' + (r.on ? ' class="leader"' : "") +
+        /* `noimg` is always on now: the picker is text and a load bar, not four 16:9
+   renders. The class already existed as the image-failed fallback and
+   collapses .run-wband to a 5px strip, so this reuses a styled path. */
+        '" data-w="' + r.w.id + '" class="noimg' + (r.on ? " leader" : "") + '"' +
         ' aria-label="' + esc(name + " · " + sub + " · " + hd[0] + " " + hd[1]) + '">' +
+        /* The <img> that was here is gone with the four thumbnails; `.noimg` on the
+           li collapses this band to the 5px strip that carries the load bar. The
+           world's accessible name is already on the li's aria-label, so nothing
+           described only by the image alt is lost. */
         '<span class="run-wband">' +
-          '<img src="assets/scenarios/' + r.w.img + '.webp" width="960" height="540" ' +
-          'loading="lazy" decoding="async" style="--scene-pos:' + r.w.pos + '" alt="' +
-          esc(r.w.alt[lang]) + '" onerror="this.closest(\'li\').classList.add(\'noimg\')">' +
           /* the chip appears only where it is true */
           (r.d[BEST] ? '<span class="run-wtag">' + esc(L("record")) + "</span>" : "") +
           '<span class="run-wbar" aria-hidden="true"><i class="proc" style="width:' + bw.toFixed(2) +
@@ -8378,7 +8630,7 @@ function onWinResize(fn){
   function stored(){ try{ var v=localStorage.getItem("ig-theme");
                           return (v==="light"||v==="dark")?v:null; }catch(e){ return null; } }
   function effective(){ var a=root.getAttribute("data-theme");
-                        return (a==="light"||a==="dark")?a:(mq.matches?"dark":"light"); }
+                        return (a==="light"||a==="dark")?a:"light"; }
 
   function reflect(theme){
     document.querySelectorAll(".theme-toggle [data-theme-set]").forEach(function(b){
@@ -8407,13 +8659,13 @@ function onWinResize(fn){
   });
 
   /* OS flip only wins when the reader has made no explicit choice. */
-  function onOS(){ if(stored()===null) apply(mq.matches?"dark":"light", false, true); }
+  function onOS(){ if(stored()===null) apply("light", false, true); }
   if(mq.addEventListener) mq.addEventListener("change",onOS); else mq.addListener(onOS);
 
   /* a second tab of the same page follows the choice instead of drifting */
   addEventListener("storage", function(ev){
     if(ev.key!=="ig-theme") return;
-    var v=stored(); apply(v||(mq.matches?"dark":"light"), !!v, false);
+    var v=stored(); apply(v||"light", !!v, false);
   });
 
   /* canvases are bitmaps: @media print cannot repaint them. Stamp light, print, restore. */
@@ -8474,6 +8726,48 @@ function onWinResize(fn){
     else if (mq.addListener) mq.addListener(on);
   }
 })();
+</script>
+<script>
+  (function heroFilmLang() {
+    var v = document.getElementById("heroFilm");
+    var src = document.getElementById("heroFilmSrc");
+    var vtt = document.getElementById("heroFilmVtt");
+    if (!v || !src) return;
+    function apply() {
+      var on = document.querySelector(".lang-toggle [data-lang].on");
+      var lang = on && on.getAttribute("data-lang") === "pt" ? "pt" : "en";
+      var want = "assets/hero-" + lang + ".mp4";
+      /* Above the early return on purpose: the label has to follow the language
+         even when the source file does not need reloading (which is the case on
+         the very first call, in EN). The EN2PT walker cannot reach it — it keys
+         text nodes, and this is an attribute. */
+      v.setAttribute("aria-label", lang === "pt"
+        ? "O problema, a parede e o método — uma introdução ao Iterated Greedy"
+        : "The problem, the wall, and the method — an introduction to Iterated Greedy");
+      if (src.getAttribute("src") === want) return;
+      var wasPlaying = !v.paused && !v.ended;
+      /* If the viewer had turned captions on, switching language must not turn
+         them off again — load() resets every track to disabled. */
+      var wasShowing = !!(vtt && vtt.track && vtt.track.mode === "showing");
+      src.setAttribute("src", want);
+      v.setAttribute("poster", "assets/hero-poster-" + lang + ".png");
+      if (vtt) {
+        vtt.setAttribute("src", "assets/hero-" + lang + ".vtt");
+        vtt.setAttribute("srclang", lang);
+        vtt.setAttribute("label", lang === "pt" ? "Português" : "English");
+      }
+      v.load();
+      if (wasShowing && vtt) {
+        v.addEventListener("loadedmetadata", function once() {
+          v.removeEventListener("loadedmetadata", once);
+          if (vtt.track) vtt.track.mode = "showing";
+        });
+      }
+      if (wasPlaying) { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); }
+    }
+    addEventListener("langchange", apply);
+    apply();
+  })();
 </script>
 </body>
 </html>

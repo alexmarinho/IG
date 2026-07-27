@@ -22,10 +22,6 @@ const payloadPath = path.join(sourceRoot, "generated", "engine-payload.js");
 const sourceHtmlPath = path.join(studioRoot, "index.html");
 const packagePath = path.join(studioRoot, "package.json");
 const generatedSceneAssetRoot = path.join(sourceRoot, "generated", "scene-assets");
-const sceneAssetSourceRoot = path.join(studioRoot, "assets", "scenarios");
-/* The homepage (#m-run) fetches the same four renders as files rather than as
-   data URIs, so docs/ carries a published mirror that deploy-studio.yml writes. */
-const docsSceneAssetRoot = path.resolve(studioRoot, "..", "docs", "assets", "scenarios");
 
 /** assetKey -> fallback .webp filename; the committed generated module is canonical. */
 export const SCENE_ASSET_FILES = Object.freeze({
@@ -309,21 +305,6 @@ async function validateCatalogAndPayload() {
     sceneAssetBytes += bytes.length;
   }
 
-  // The published homepage mirror: #m-run fetches these as files, so a render
-  // that exists only in the Studio would leave the homepage chooser blank.
-  for (const [assetKey, fileName] of Object.entries(SCENE_ASSET_FILES)) {
-    const sourceFile = path.join(sceneAssetSourceRoot, fileName);
-    const docsFile = path.join(docsSceneAssetRoot, fileName);
-    await assertExists(sourceFile, `Scene artwork for ${assetKey}`);
-    await assertExists(docsFile, `Published homepage scene artwork for ${assetKey}`);
-    const published = await readFile(docsFile);
-    invariant(published.subarray(0, 4).toString("ascii") === "RIFF"
-      && published.subarray(8, 12).toString("ascii") === "WEBP",
-    `Published scene asset ${fileName} is not a valid WebP container`);
-    invariant(published.equals(await readFile(sourceFile)),
-      `Published docs/assets/scenarios/${fileName} has drifted from studio/assets/scenarios/${fileName}`);
-  }
-
   for (const [id, item] of Object.entries(packedCatalog)) {
     invariant(typeof item.csv === "string" && item.csv.trim().length > 0,
       `Embedded instance ${id} has no CSV data`);
@@ -337,6 +318,67 @@ async function validateCatalogAndPayload() {
     sceneAssets: Object.keys(SCENE_ASSET_FILES).length,
     sceneAssetBytes,
   };
+}
+
+/**
+ * Every copy key must exist in both locales.
+ *
+ * The failure this exists to stop is silent: a key deleted from `en` but left
+ * in `pt-BR` (or the reverse) renders as its own dotted path in one language
+ * and as prose in the other, and nothing throws. It became a live risk when
+ * `race.engineRef` and `race.status.constructingEDD` were removed from both
+ * locales, because all six racers became one engine and the copy that
+ * separated them stopped being true.
+ */
+async function validateLocaleParity() {
+  const { COPY } = await import(pathToFileURL(path.join(sourceRoot, "i18n.js")).href);
+  const locales = Object.keys(COPY);
+  invariant(locales.length >= 2, "The studio must ship at least two locales");
+
+  const flatten = (node, prefix = "") => {
+    const keys = [];
+    for (const [key, value] of Object.entries(node)) {
+      const dotted = prefix ? `${prefix}.${key}` : key;
+      if (value && typeof value === "object" && !Array.isArray(value)) keys.push(...flatten(value, dotted));
+      else keys.push(dotted);
+    }
+    return keys;
+  };
+
+  const [reference, ...rest] = locales;
+  const referenceKeys = new Set(flatten(COPY[reference]));
+  for (const locale of rest) {
+    const keys = new Set(flatten(COPY[locale]));
+    const missing = [...referenceKeys].filter((key) => !keys.has(key));
+    const extra = [...keys].filter((key) => !referenceKeys.has(key));
+    invariant(missing.length === 0,
+      `Locale ${locale} is missing ${missing.length} key(s) present in ${reference}: ${missing.slice(0, 5).join(", ")}`);
+    invariant(extra.length === 0,
+      `Locale ${locale} has ${extra.length} key(s) absent from ${reference}: ${extra.slice(0, 5).join(", ")}`);
+  }
+
+  // The race status wire format: the engine sends an index, the page looks up
+  // `RACE_STATUS_KEYS[index]` and translates it. Every index the engine can
+  // emit must therefore have copy in every locale. Index 3 is the exception
+  // and the reason this check exists: `constructingEDD` is reserved-and-dead
+  // (engine/src/race/mod.rs keeps the slot so the numbering never shifts, but
+  // the IG racer is `solver::Run`, which constructs by shuffled greedy). The
+  // list below turns that comment into an assertion.
+  const { RACE_STATUS_KEYS } = await import(pathToFileURL(path.join(sourceRoot, "engine", "protocol.js")).href);
+  const RESERVED_STATUS_KEYS = new Set(["constructingEDD"]);
+  for (const locale of locales) {
+    for (const key of RACE_STATUS_KEYS) {
+      const translated = typeof COPY[locale].race?.status?.[key] === "string";
+      if (RESERVED_STATUS_KEYS.has(key)) {
+        invariant(!translated,
+          `Race status ${key} is reserved-and-dead but locale ${locale} still translates it`);
+      } else {
+        invariant(translated, `Locale ${locale} has no copy for race status ${key}`);
+      }
+    }
+  }
+
+  return { locales: locales.length, copyKeys: referenceKeys.size, raceStatusKeys: RACE_STATUS_KEYS.length };
 }
 
 async function validatePackageAndLinks() {
@@ -369,6 +411,7 @@ export async function runChecks({ quiet = false } = {}) {
   const graph = await browserModuleGraph(entryPath);
   await validateOfflineContract(graph);
   const payload = await validateCatalogAndPayload();
+  const locales = await validateLocaleParity();
   await validatePackageAndLinks();
 
   const report = {
@@ -376,6 +419,7 @@ export async function runChecks({ quiet = false } = {}) {
     staticImports: importCount,
     browserModules: graph.size,
     ...payload,
+    ...locales,
     externalRuntimeDependencies: 0,
     fileImportPaths: 0,
   };

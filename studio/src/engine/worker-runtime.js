@@ -23,7 +23,16 @@ export function installEngineWorker(scope, injected = {}) {
     'memory', 'wasm_alloc', 'inst_load', 'inst_n', 'run_new', 'run_step',
     'run_best_cost', 'run_best_len', 'run_best_write', 'run_iters',
     'run_evals', 'runs_clear',
+    'race_new', 'race_step', 'race_snapshot', 'race_snapshot_ptr',
+    'race_orders_ptr', 'race_best_ptr', 'race_trace_write', 'race_clear',
   ];
+
+  /** Six methods, in the order `engine/src/race/mod.rs` declares them. */
+  const RACE_METHOD_COUNT = 6;
+  /** `RacerSnapshot` is `#[repr(C)]` with an f64 first: 64 bytes, stride 64. */
+  const RACE_SNAPSHOT_STRIDE = 64;
+  /** Trace points pulled per `race_trace_write` call, per method. */
+  const RACE_TRACE_CHUNK = 512;
 
   let exportsApi = null;
   let catalog = new Map();
@@ -37,6 +46,7 @@ export function installEngineWorker(scope, injected = {}) {
   let commandQueue = Promise.resolve();
   let scratchPtr = 0;
   let scratchCapacity = 0;
+  let race = null;
 
   class EngineProtocolError extends Error {
     constructor(code, message) {
@@ -84,6 +94,11 @@ export function installEngineWorker(scope, injected = {}) {
         status: active.status,
         runIndex: active.kind === 'comparison' ? active.runIndex : undefined,
         runCount: active.kind === 'comparison' ? active.seeds.length : undefined,
+      } : race ? {
+        kind: 'race',
+        status: 'running',
+        slices: race.slices,
+        intrusions: race.intrusions,
       } : null,
     };
   }
@@ -102,6 +117,15 @@ export function installEngineWorker(scope, injected = {}) {
     if (active && (active.status === 'running' || active.status === 'paused')) {
       fail('RUN_ACTIVE', 'Pause/reset the active operation before changing the instance or configuration.');
     }
+  }
+
+  /**
+   * A live race owns the worker. Solve operations are refused rather than
+   * queued, so the per-method wall clock the page prints can never include time
+   * this thread spent on somebody else's work (see `race.intrusions`).
+   */
+  function ensureNoRace() {
+    if (race) fail('RACE_ACTIVE', 'Clear the method race before starting a solve run.');
   }
 
   function decodeBase64(value) {
@@ -527,6 +551,233 @@ export function installEngineWorker(scope, injected = {}) {
     schedulePump(operation);
   }
 
+  // -------------------------------------------------------------------------
+  // The method race: one wasm instance, six methods, round-robin slices.
+  //
+  // Deliberately NOT six workers. A budget race is deterministic per method, so
+  // parallelism cannot change a result, and a fair parallel race would need a
+  // per-slice barrier — which, without SharedArrayBuffer (GitHub Pages cannot
+  // send COOP/COEP), is a postMessage round trip per method per slice. The gain
+  // from Rust here is single-thread throughput, so one thread is the design.
+  // -------------------------------------------------------------------------
+
+  /** Round `value` up to the next multiple of `alignment`. */
+  function alignUp(value, alignment) {
+    return Math.ceil(value / alignment) * alignment;
+  }
+
+  /**
+   * Views into wasm memory die when the memory grows (the ArrayBuffer detaches),
+   * so every one of them is rebuilt behind a single buffer-identity compare —
+   * the same trick `readBestOrder` uses by re-creating its view every call.
+   * The pointers themselves are stable for the life of a race: `Race::orders`
+   * and `Race::best` are allocated once in `Race::new` and never resized.
+   */
+  function bindRaceViews() {
+    const buffer = exportsApi.memory.buffer;
+    if (race.boundBuffer === buffer) return;
+    race.boundBuffer = buffer;
+    // The scalar block is read through a DataView: it is 384 bytes once per
+    // slice, and a DataView cannot be wrong about alignment.
+    race.scalars = new DataView(buffer, race.snapshotPtr, RACE_METHOD_COUNT * RACE_SNAPSHOT_STRIDE);
+    race.orders = race.ordersPtr && race.n
+      ? new Uint32Array(buffer, race.ordersPtr, RACE_METHOD_COUNT * race.n)
+      : null;
+    race.bestOrders = race.bestPtr && race.n
+      ? new Uint32Array(buffer, race.bestPtr, RACE_METHOD_COUNT * race.n)
+      : null;
+    race.traceView = new Float64Array(buffer, race.tracePtr, RACE_TRACE_CHUNK * 2);
+  }
+
+  /**
+   * One `RacerSnapshot`, at the fixed offsets `engine/src/race/mod.rs` declares:
+   *   0 best_cost f64 · 8 cur_cost f64 · 16 evals f64 · 24 status_key u32
+   *   28 status_arg u32 · 32 flags u32 · 36 trace_len u32 · 40 order_len u32
+   *   44 best_len u32 · 48 phase_arg u32 · 52..64 padding
+   * `phase_arg` (d_eff / tabu tenure / AMA population) is deliberately not read:
+   * nothing on the page shows it, and the offsets above are the record of where
+   * it lives if that ever changes.
+   */
+  function readRaceScalars(index) {
+    const at = index * RACE_SNAPSHOT_STRIDE;
+    const view = race.scalars;
+    const flags = view.getUint32(at + 32, true);
+    return {
+      bestCost: view.getFloat64(at + 0, true),
+      curCost: view.getFloat64(at + 8, true),
+      evals: view.getFloat64(at + 16, true),
+      statusKey: view.getUint32(at + 24, true),
+      statusArg: view.getUint32(at + 28, true),
+      done: (flags & 1) !== 0,
+      bestChanged: (flags & 2) !== 0,
+      curChanged: (flags & 4) !== 0,
+      traceLen: view.getUint32(at + 36, true),
+      orderLen: view.getUint32(at + 40, true),
+      bestLen: view.getUint32(at + 44, true),
+    };
+  }
+
+  /**
+   * Pull the improvement points this method gained since the last slice.
+   * `race_trace_write` writes (evaluations, cost) f64 pairs and returns pairs
+   * written, so a delta longer than the scratch is drained in several calls.
+   */
+  function pullTrace(index, from, total) {
+    if (total <= from) return null;
+    const out = new Float64Array((total - from) * 2);
+    let held = from;
+    let cursor = 0;
+    while (held < total) {
+      const pairs = exportsApi.race_trace_write(index, held, race.tracePtr, RACE_TRACE_CHUNK);
+      if (!pairs) break;
+      bindRaceViews();
+      out.set(race.traceView.subarray(0, pairs * 2), cursor);
+      cursor += pairs * 2;
+      held += pairs;
+    }
+    return cursor === out.length ? out : out.subarray(0, cursor).slice();
+  }
+
+  /**
+   * `wasm_alloc(0)` hands back an unaligned pointer and an empty incumbent has
+   * `order_len === 0`, so a zero length never becomes a view. Every block is
+   * copied out of wasm memory before it travels: the receiver must not hold a
+   * window onto a buffer the next slice will rewrite.
+   */
+  function copyOrders(source, index, length) {
+    if (!source || !length) return null;
+    const at = index * race.n;
+    return source.slice(at, at + length);
+  }
+
+  function beginRace(payload) {
+    ensureInitialized();
+    if (!selected) fail('NO_INSTANCE', 'Select a catalog instance before starting a race.');
+    ensureIdle();
+    const budget = integer(payload.budget, 'budget', 1_000, 100_000_000, 250_000);
+    const seed = integer(payload.seed, 'seed', 0, 0xffff_ffff, 1);
+    const d = integer(payload.d, 'd', 1, Math.max(1, selected.n), selected.n >= 500 ? 50 : 2);
+    const acceptRaw = payload.accept == null ? 'current' : payload.accept;
+    const accept = acceptRaw === 1 || acceptRaw === 'best' ? 1
+      : acceptRaw === 0 || acceptRaw === 'current' ? 0
+        : null;
+    if (accept == null) fail('BAD_CONFIG', 'accept must be "current" or "best".');
+    const permute = payload.permute == null ? selected.n < 500 : Boolean(payload.permute);
+
+    exportsApi.race_clear();
+    // One scratch allocation for the whole race, over-allocated by 8 bytes so
+    // the f64 view can start on an 8-byte boundary: `wasm_alloc` is a Vec<u8>
+    // and promises alignment 1.
+    const rawTrace = exportsApi.wasm_alloc(RACE_TRACE_CHUNK * 2 * Float64Array.BYTES_PER_ELEMENT + 8);
+    const created = exportsApi.race_new(
+      selected.instId,
+      seed,
+      budget >>> 0,
+      Math.floor(budget / 0x1_0000_0000) >>> 0,
+      d,
+      accept,
+      permute ? 1 : 0,
+    );
+    if (created !== RACE_METHOD_COUNT) fail('RACE_FAILED', 'The Rust engine refused to create the race.');
+    race = {
+      n: selected.n,
+      seed,
+      budget,
+      config: { d, accept: accept === 1 ? 'best' : 'current', permute },
+      snapshotPtr: exportsApi.race_snapshot_ptr(),
+      ordersPtr: exportsApi.race_orders_ptr(),
+      bestPtr: exportsApi.race_best_ptr(),
+      tracePtr: alignUp(rawTrace, 8),
+      boundBuffer: null,
+      scalars: null,
+      orders: null,
+      bestOrders: null,
+      traceView: null,
+      sentTrace: new Array(RACE_METHOD_COUNT).fill(0),
+      done: new Array(RACE_METHOD_COUNT).fill(false),
+      ms: new Array(RACE_METHOD_COUNT).fill(0),
+      slices: 0,
+      intrusions: 0,
+    };
+    bindRaceViews();
+    status = 'racing';
+    emit('state', { state: stateSnapshot() });
+    return {
+      methods: RACE_METHOD_COUNT,
+      instance: selected.name,
+      n: selected.n,
+      seed,
+      budget,
+      config: { ...race.config },
+      state: stateSnapshot(),
+    };
+  }
+
+  function stepRace(payload) {
+    ensureInitialized();
+    if (!race) fail('NO_RACE', 'Start a race before asking for a slice.');
+    const slice = integer(payload.slice, 'slice', 1, 0xffff_ffff, 4_096);
+    const wantOrders = Boolean(payload.wantOrders);
+
+    // Every method that is not finished is stepped, every slice. There is no
+    // way to sit one out: the page's method toggle hides a racer from the
+    // charts, it does not stop it, because an equal evaluation budget per
+    // method is the whole currency of the race.
+    for (let index = 0; index < RACE_METHOD_COUNT; index += 1) {
+      if (race.done[index]) continue;
+      // Wall clock is measured HERE and only here: around the step, never
+      // around the snapshot, the trace pull, the copies or the postMessage.
+      const startedAt = clock();
+      exportsApi.race_step(index, slice);
+      race.ms[index] += Math.max(0, clock() - startedAt);
+    }
+    // bit0 refreshes the incumbent-order block, bit1 the best-order block. Best
+    // orders are always refreshed inside wasm (a memcpy into a buffer that is
+    // already there) because `best_changed` is only readable after the snapshot
+    // that clears it — what costs is copying out to JS, and that stays gated.
+    exportsApi.race_snapshot(wantOrders ? 3 : 2);
+    bindRaceViews();
+
+    const methods = [];
+    const traces = [];
+    const orders = [];
+    const best = [];
+    let allDone = true;
+    for (let index = 0; index < RACE_METHOD_COUNT; index += 1) {
+      const scalars = readRaceScalars(index);
+      race.done[index] = scalars.done;
+      if (!scalars.done) allDone = false;
+      traces.push(pullTrace(index, race.sentTrace[index], scalars.traceLen));
+      race.sentTrace[index] = scalars.traceLen;
+      orders.push(wantOrders && scalars.curChanged
+        ? copyOrders(race.orders, index, scalars.orderLen)
+        : null);
+      best.push(scalars.bestChanged ? copyOrders(race.bestOrders, index, scalars.bestLen) : null);
+      methods.push({
+        evals: scalars.evals,
+        bestCost: scalars.bestCost,
+        curCost: scalars.curCost,
+        statusKey: scalars.statusKey,
+        statusArg: scalars.statusArg,
+        done: scalars.done,
+        ms: race.ms[index],
+      });
+    }
+    race.slices += 1;
+    return { methods, traces, orders, best, allDone, intrusions: race.intrusions };
+  }
+
+  function clearRace() {
+    ensureInitialized();
+    if (!race) return { cleared: false, state: stateSnapshot() };
+    const spent = { slices: race.slices, intrusions: race.intrusions, ms: race.ms.slice() };
+    race = null;
+    exportsApi.race_clear();
+    status = configured ? 'configured' : selected ? 'instance-selected' : 'ready';
+    emit('state', { state: stateSnapshot() });
+    return { cleared: true, ...spent, state: stateSnapshot() };
+  }
+
   async function initialize(payload) {
     if (exportsApi) fail('ALREADY_INITIALIZED', 'The engine is already initialized.');
     const wasmBytes = asBytes(payload.wasm);
@@ -637,12 +888,26 @@ export function installEngineWorker(scope, injected = {}) {
       fail('BAD_MESSAGE', 'Commands require an integer id and a string type.');
     }
     const payload = message.payload || {};
+    // Single-tenancy ledger for the wall-clock column. `race-slice` is the
+    // race; `race-clear`, `state` and `dispose` end or only observe it. Anything
+    // else serviced while a race is live would put foreign work on this thread
+    // between two `race_step` calls, and the page must be able to say so.
+    if (race && !['race-slice', 'race-clear', 'state', 'dispose'].includes(message.type)) {
+      race.intrusions += 1;
+    }
     switch (message.type) {
       case 'init':
         return initialize(payload);
+      case 'race-new':
+        return beginRace(payload);
+      case 'race-slice':
+        return stepRace(payload);
+      case 'race-clear':
+        return clearRace();
       case 'select-instance': {
         ensureInitialized();
         ensureIdle();
+        ensureNoRace();
         const item = loadCatalogInstance(String(payload.name || ''));
         selected = item;
         configured = null;
@@ -653,13 +918,16 @@ export function installEngineWorker(scope, injected = {}) {
       case 'configure':
         ensureInitialized();
         ensureIdle();
+        ensureNoRace();
         configured = normalizeConfig(payload);
         status = 'configured';
         emit('state', { state: stateSnapshot() });
         return { configuration: { ...configured }, state: stateSnapshot() };
       case 'start':
+        ensureNoRace();
         return beginSingle();
       case 'compare':
+        ensureNoRace();
         return beginComparison(payload);
       case 'pause':
         return pauseActive();
@@ -674,7 +942,8 @@ export function installEngineWorker(scope, injected = {}) {
         if (!disposed) {
           generation += 1;
           active = null;
-          if (exportsApi) exportsApi.runs_clear();
+          race = null;
+          if (exportsApi) { exportsApi.runs_clear(); exportsApi.race_clear(); }
           disposed = true;
           status = 'disposed';
           emit('state', { state: stateSnapshot() });
