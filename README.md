@@ -1,12 +1,21 @@
 # Iterated Greedy Scheduling
 
-Single-machine scheduling with job rejection, sequence-dependent family setups,
-release dates and weighted tardiness — the order acceptance and scheduling
-family, `1 | rⱼ, sᵢⱼ | Σ wⱼTⱼ + rejection`.
+**A metaheuristic from a 2015 thesis, rebuilt in Rust and running in your
+browser.** [Watch the two-minute film and run the solver live
+→](https://alexmarinho.github.io/IG/)
 
-A Rust core that evaluates roughly 20M candidate schedules per second per core
-and also compiles to WebAssembly, plus a single-file Python implementation with
-no runtime dependencies that mirrors it exactly and keeps it honest.
+[![Order matters: a still from the film, linking to the live page](docs/assets/hero-poster-en.png)](https://alexmarinho.github.io/IG/)
+
+One machine, a queue of orders, and a price for every choice: changeovers
+between product families, lateness against promised dates, and the option to
+turn an order away. Which orders should run, in what order, and which should
+be refused? Formally, single-machine scheduling with job rejection,
+sequence-dependent family setups, release dates and weighted tardiness — the
+order acceptance and scheduling family, `1 | rⱼ, sᵢⱼ | Σ wⱼTⱼ + rejection`.
+
+A Rust core scores candidate schedules at ~20M evaluations/s/core and also
+compiles to WebAssembly, plus a single-file Python implementation with no
+runtime dependencies that mirrors it exactly and keeps it honest.
 
 On the 44 MaScLib instances, under a uniform 45s × 3 seeds protocol, it matches
 or beats the published best-known value on 37. Documented adaptive runs raise
@@ -42,6 +51,24 @@ cd engine && cargo run --release -- solve ../masclib/NCOS_01.csv --seconds 3
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the pieces fit together
 - An interactive explanation runs the same WebAssembly engine in a browser:
   <https://alexmarinho.github.io/IG/>
+
+## Metaheuristics meet LLMs
+
+The same structure — accept or refuse work, sequence it, pay for every switch —
+shows up in serving AI models, so the repository also asks what a 2015
+metaheuristic has to say about today's AI systems:
+
+- **Can an LLM write a better operator?** [`factory/`](factory/) lets language
+  models evolve the algorithm's destroy step, FunSearch-style. Under a success
+  criterion registered before the runs, they did not beat random destruction.
+  The null result is kept as the baseline
+  ([`RESULTS.md`](RESULTS.md#the-llm-heuristic-factory)).
+- **Is model serving a scheduling problem?** [`masclib-llm/`](masclib-llm/)
+  re-reads the benchmark instances as requests queued on one GPU, where a
+  changeover is a model swap and a rejection is a request routed to a paid
+  cloud API. [`docs/gpu-serving.md`](docs/gpu-serving.md) maps that territory.
+- **Does a GPU help?** [`gpu/`](gpu/) runs thousands of searches in lockstep.
+  It is correct, and still slower than one CPU core for a single instance.
 
 ## Layout
 
