@@ -68,7 +68,7 @@
     <rect x="268" y="462" width="196" height="78" rx="8" class="box"/>
     <text x="286" y="488" class="nm">studio/</text>
     <text x="286" y="508" class="sub">browser experiment</text>
-    <text x="286" y="526" class="sub">53 fixed instances</text>
+    <text x="286" y="526" class="sub">62 fixed instances</text>
 
     <rect x="480" y="462" width="196" height="78" rx="8" class="box"/>
     <text x="498" y="488" class="nm">google-sheets/</text>

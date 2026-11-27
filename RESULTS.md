@@ -7,7 +7,7 @@ This is the delta document: what the modern engine changes relative to the origi
 | | 2015 Excel/VBA · 2017 Python | This repo (Rust `engine/`, Python `python/`) |
 |---|---|---|
 | Candidate evaluation | full O(n) schedule recomputation per candidate (plus `deepcopy` state in the 2017 Python) | **incremental**: recompute only downstream of the edit, stop at the first absorbing idle gap — an optimization first proposed as future work in the 2015 study |
-| Throughput | VBA: enough for n×30 s budgets; 2017 Python: a few hundred evals/s | **~20M evals/s/core (Rust)**, ~150–330k (Python rewrite) — roughly *a second here per two hours of the 2017 code* |
+| Throughput | VBA: enough for n×30 s budgets; 2017 Python: a few hundred evals/s | **~20M evals/s/core (Rust)**, ~1M (Python rewrite) — roughly *a second here per two hours of the 2017 code* |
 | Weights | fractional tardiness weights handled implicitly (VBA) / incorrectly (2017 Python read 0.8 as float but diverged on the 500-job set) | exact **fixed-point deci-units** (×10), no float drift |
 | Objective semantics | undocumented corner cases | recovered and documented: setup cost + mode cost + weighted tardiness (ASAP timing), rejection cost; earliness fields in the data are *not* part of the 2015 objective (tested and refuted); `benchmark.json` carried one transcription typo vs. the published 2015 results (Table 4.1) (`NCOS_32a`: 14720, not 4720 — fixed) |
 | API | GUI-driven runs | library (`Instance`/`State`/`Run`) + CLI (`solve`, `validate`) + WASM exports driving the [live demo](https://alexmarinho.github.io/IG/) |
@@ -17,7 +17,7 @@ This is the delta document: what the modern engine changes relative to the origi
 
 Three independent layers, all runnable locally and in [CI](.github/workflows/ci.yml):
 
-1. **Property test vs. a brute-force oracle** (`engine/src/solver.rs::tests`) — 500 random insert/replace/remove operations; the incremental evaluator must match a from-scratch evaluation exactly, every step.
+1. **Property test vs. a brute-force oracle** (`engine/src/eval.rs`, `incremental_matches_bruteforce`; siblings in `ops.rs`) — 500 random insert/replace/remove operations; the incremental evaluator must match a from-scratch evaluation exactly, every step.
 2. **Cross-implementation golden tests** (`engine/tests/golden.rs` ↔ `python/test_ig_scheduler.py`) — both engines price identical fixed sequences on real instances of every flavor (no-setup NCOS, timed-setup STC, cost-only-setup STC, synthetic GPU/LLM) and must agree to the deci-unit.
 3. **Benchmark validation** (`cargo run --release -- validate masclib benchmark.json`) — the search must reproduce the 2015 best-known values; CI spot-checks one instance to its exact best known, plus a best-known regression test on `NCOS_11`.
 

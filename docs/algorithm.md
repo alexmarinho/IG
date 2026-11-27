@@ -71,7 +71,7 @@ flowchart LR
     style K3 fill:#0ca30c,color:#fff
 ```
 
-With cached per-position finish times and cumulative costs, a candidate evaluation costs `O(k)` where *k* is the number of jobs until absorption — usually a handful. That single change is worth **100–1000×**, and it is why the [Rust engine](../engine/) evaluates ~20M candidates/second/core and the [modern Python rewrite](../python/) runs ~300k/s where the 2017 version managed a few hundred.
+With cached per-position finish times and cumulative costs, a candidate evaluation costs `O(k)` where *k* is the number of jobs until absorption — usually a handful. That single change is worth **100–1000×**, and it is why the [Rust engine](../engine/) evaluates ~20M candidates/second/core and the [modern Python rewrite](../python/) runs ~1M/s where the 2017 version managed a few hundred.
 
 ## Reproducing the 2015 numbers
 
