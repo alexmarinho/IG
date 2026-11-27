@@ -1,6 +1,6 @@
 # The 2026 reading: GPU/LLM inference queues
 
-*A classic Order Acceptance and Scheduling problem, re-instantiated for 2026 infrastructure. Full source surveys: [production systems](research/llm-serving-2026-producao.md) · [academic formulations](research/llm-serving-2026-academia.md) (July 2026).*
+*A classic Order Acceptance and Scheduling problem, re-instantiated for 2026 infrastructure. Based on a survey of production systems and academic formulations carried out in July 2026.*
 
 ## Proposal: GRAS
 

@@ -1297,8 +1297,7 @@ footer a{color:var(--terra-ink)}
   <p class="bridge">An optimal order exists, but there are too many orders to test. Iterated Greedy builds one order and improves it by iteration.</p>
   <p class="bridge">For anyone who has ever had to decide which job runs next.</p>
 
-  <!-- The hero film. Rendered from the private workspace (private/video/) and
-       published by private/tools/publish-film.mjs; the source is not in this repo.
+  <!-- The hero film. Rendered outside this repo; only the output is published here.
        Deliberately NOT autoplaying: preload="none" means a visitor who scrolls
        past pays nothing, and the poster is a real frame so the page never shows a
        black rectangle. It HAS sound, so it must never be given autoplay: audio
@@ -1312,9 +1311,8 @@ footer a{color:var(--terra-ink)}
       poster="assets/hero-poster-en.png" width="1920" height="1080"
       aria-label="The problem, the wall, and the method — an introduction to Iterated Greedy">
       <source id="heroFilmSrc" src="assets/hero-en.mp4" type="video/mp4">
-      <!-- Captions are generated from the same beat table as the voice-over
-           (private/tools/synth-narration.mjs), so they cannot say something the
-           narrator does not. Deliberately NOT `default`: the film already fills
+      <!-- Captions are generated from the same beat table as the voice-over,
+           so they cannot say something the narrator does not. Deliberately NOT `default`: the film already fills
            the frame with its own type, and a forced caption bar would sit on top
            of it. The player's CC control turns them on. -->
       <track id="heroFilmVtt" kind="captions" srclang="en" label="English"

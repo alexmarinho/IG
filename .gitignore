@@ -25,22 +25,11 @@ google-sheets/**/.clasp.json
 google-sheets/dist/*
 !google-sheets/dist/*.xlsx
 
-# ── the PRIVATE development workspace ────────────────────────────────────────
-# `private/` is its OWN repository (github.com/alexmarinho/IG-private) and is
-# never published from here. It holds the BRD, the TDD, the film's source and the
-# agent briefs. Only RESULTS cross into this public repo — see
-# private/tools/publish-film.mjs, which is the single sanctioned crossing.
+# Local development workspace and tool configuration: never part of this repo.
 private/
-
-# agent/IDE local configuration is development tooling, not project content
 .claude/
 .codex/
 .gemini/
-
-# Provider entry points. Each is a SYMLINK into the private workspace, so every
-# tool finds the same canonical brief (private/AGENTS.md) under whatever filename
-# it looks for. They are ignored here because agent configuration is development
-# tooling, not published project content. See private/docs/ONBOARDING.md.
 /AGENTS.md
 /CLAUDE.md
 /GEMINI.md

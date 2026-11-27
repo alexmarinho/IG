@@ -13,8 +13,8 @@ WASM build (powers the [live demo](https://alexmarinho.github.io/IG/); 116 KB, h
 ```bash
 rustup target add wasm32-unknown-unknown
 RUSTFLAGS="-C panic=abort" cargo build --release --target wasm32-unknown-unknown --no-default-features
-# NOTE: ../tools/build_demo.py does not exist in this tree. The demo's
-# embedded payload is rebuilt by the studio pipeline — see ../studio/scripts/.
+# The page's embedded engine payload is rebuilt by the Studio pipeline:
+# see ../studio/scripts/.
 ```
 
 Library surface for custom heuristics: `Instance` (parser), `solver::State` (incremental `try_insert` / `try_replace` / `insert` / `replace` / `remove_random`), `Run` (step-based search driver — what both the CLI and the WASM exports wrap). How it is verified and what it found: [`../RESULTS.md`](../RESULTS.md).
