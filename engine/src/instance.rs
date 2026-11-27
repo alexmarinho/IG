@@ -97,7 +97,7 @@ impl Instance {
                     if n_resources > 1 {
                         return Err("multi-resource (multi-machine) instances are not supported yet; \
                                     this parser would silently collapse them to a wrong single-machine \
-                                    instance (see docs/research/multi-machine-benchmark-decision.md)"
+                                    instance"
                             .into());
                     }
                     init_state = geti("INITIAL_SETUP_STATE").map(|v| v as usize);

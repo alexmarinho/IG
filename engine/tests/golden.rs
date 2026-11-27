@@ -62,8 +62,7 @@ fn reaches_best_known_on_ncos_11() {
 
 /// Multi-machine guard: the MASC dialect can carry several RESOURCE rows and
 /// several MODE rows per activity, but this engine is single-machine — such
-/// files must be REJECTED loudly, never silently collapsed (see
-/// docs/research/multi-machine-benchmark-decision.md).
+/// files must be REJECTED loudly, never silently collapsed.
 #[test]
 fn rejects_multi_resource_files() {
     let txt = "RESOURCE|NAMES,RESOURCE_ID,SETUP_MATRIX_ID,INITIAL_SETUP_STATE,CAPACITY,START_MIN\n\
